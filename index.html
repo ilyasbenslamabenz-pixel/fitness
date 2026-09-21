@@ -509,6 +509,129 @@ button{cursor:pointer}
 @media(prefers-reduced-motion:reduce){
  *,*:before,*:after{animation:none!important;transition:none!important}
 }
+</style><style id="evo-v17-complete">
+/* EVO V17 — premium mobile fitness experience */
+:root{
+ --accent:#4da3ff;--accent2:#2563eb;--ice:#b9e1ff;--bg:#050912;
+ --panel:#0b1320;--panel2:#101b2a;--line:#203149;--muted:#8fa0b4;
+}
+body{background:#050912;overflow-x:hidden}
+body:after{content:"";position:fixed;inset:auto 0 0;height:180px;pointer-events:none;background:linear-gradient(transparent,rgba(37,99,235,.035));z-index:-1}
+::selection{background:#2563eb;color:white}
+button{transition:transform .16s ease,filter .16s ease,box-shadow .16s ease}
+button:active{transform:scale(.97);filter:brightness(1.08)}
+.hero{padding-bottom:8px}
+.hero h1{font-size:clamp(40px,10vw,72px)}
+.hero .sub b{color:#dff2ff}
+.stats .stat{min-height:78px}
+.stats .stat b{color:#eef8ff}
+.notice{position:relative;overflow:hidden}
+.notice:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(#60b5ff,#2563eb)}
+/* Dashboard */
+#dashboard>.dash{gap:10px}
+#dashboard>.dash .tile{min-height:132px;padding:16px}
+#dashboard>.dash .tile small:first-child{font-weight:800;color:#a9bbce}
+#dashboard>.dash .tile strong{font-size:30px}
+#dashboard>.dash .tile.widget:first-child{
+ min-height:156px;
+ background:linear-gradient(145deg,#102f50,#0a1828);
+ border-color:#2b6ca6;
+}
+#dashboard>.dash .tile.widget:first-child strong{font-size:40px}
+#dashboard>.dash .tile:nth-child(3){
+ background:linear-gradient(145deg,#101e30,#0b1522);
+}
+#dashboard>.dash .tile:nth-child(6){
+ background:linear-gradient(145deg,#123459,#0b1c2d);
+ border-color:#2d659b;
+}
+#dashboard>.dash .tile:nth-child(7){
+ min-height:86px;
+ display:flex;flex-direction:row;align-items:center;justify-content:space-between;
+}
+#dashboard>.dash .tile:nth-child(7) strong{font-size:17px;color:#7fc3ff}
+#dashboard>.panel h3{font-size:17px}
+.quickActions{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+.quickAction{
+ border:1px solid #263a53;background:linear-gradient(145deg,#111f31,#0b1522);
+ color:#eaf6ff;border-radius:18px;padding:14px;text-align:left;font-weight:800;
+}
+.quickAction span{display:block;font-size:22px;margin-bottom:7px}.quickAction small{color:#8fa0b4;font-weight:600}
+/* section headers */
+.pageHead h2{font-size:30px;font-weight:900}
+.pageHead .small{color:#8193a8}
+/* workout */
+.workoutHero{position:relative;overflow:hidden}
+.workoutHero:after{content:"";position:absolute;width:190px;height:190px;border-radius:50%;right:-80px;top:-100px;background:rgba(77,163,255,.11)}
+.startWorkoutBtn{position:relative;z-index:1;font-size:14px;padding:14px 18px}
+.dayPicker button b{display:block;margin-bottom:2px}
+.sessionFocus{border-bottom:1px solid rgba(77,163,255,.08)}
+/* exercise cards */
+.exercise-card .meta{border-color:#1e3047}
+.exercise-card .log label{font-weight:700}
+.exercise-card .log input{
+ border-radius:12px;border-color:#263950;background:#09111c;
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.025)
+}
+.exercise-card .setQuick button{border:1px solid #243b56;background:#101d2c}
+.exercise-card .setQuick button.done{border-color:#2f78ba}
+/* library */
+.exerciseLibrary{gap:12px}
+.libCard{box-shadow:0 12px 30px rgba(0,0,0,.18)}
+.libCard img{height:190px}
+.libBody{padding:13px}
+.libBody b{font-size:14px}
+/* nutrition */
+.foodbox,.scanbox{box-shadow:0 16px 40px rgba(0,0,0,.22)}
+.total{color:#86c9ff}
+.macro div{border:1px solid #1d2c40}
+/* profile */
+.settingsGrid{gap:10px}
+.settingCard{background:linear-gradient(145deg,#101a28,#0b1320);border:1px solid #203149;border-radius:18px;padding:13px}
+.settingCard span{font-weight:700}
+.settingCard input{margin-top:3px}
+/* progress */
+.hist th{color:#9dcfff}
+/* bottom nav */
+.stickyNav{
+ height:72px;
+ border-color:#29415f;
+ background:rgba(7,13,22,.86);
+ box-shadow:0 20px 60px rgba(0,0,0,.6),0 0 0 1px rgba(77,163,255,.035) inset;
+}
+.stickyNav button{min-height:60px!important}
+.stickyNav button.active{
+ background:linear-gradient(180deg,#18395d,#102741)!important;
+ box-shadow:0 7px 20px rgba(37,99,235,.2);
+}
+.stickyNav button.active b{filter:drop-shadow(0 0 8px rgba(77,163,255,.4))}
+.toast{border-radius:16px!important}
+/* desktop */
+@media(min-width:900px){
+ #dashboard>.dash{grid-template-columns:repeat(4,1fr)}
+ #dashboard>.dash .tile:first-child{grid-column:span 2}
+ #dashboard>.dash .tile:nth-child(6){grid-column:span 2}
+ .quickActions{grid-template-columns:repeat(4,1fr)}
+}
+/* iphone */
+@media(max-width:650px){
+ .wrap{padding-left:12px;padding-right:12px}
+ .hero h1{font-size:44px}
+ .stats{grid-template-columns:repeat(3,1fr)}
+ .notice{font-size:12px}
+ #dashboard>.dash{grid-template-columns:1fr 1fr}
+ #dashboard>.dash .tile{min-height:116px;padding:13px}
+ #dashboard>.dash .tile strong{font-size:25px}
+ #dashboard>.dash .tile.widget:first-child{min-height:140px}
+ #dashboard>.dash .tile.widget:first-child strong{font-size:34px}
+ #dashboard>.dash .tile:nth-child(6){grid-column:1/-1;min-height:105px}
+ #dashboard>.dash .tile:nth-child(7){grid-column:1/-1}
+ .quickActions{grid-template-columns:1fr 1fr}
+ .quickAction{min-height:92px;padding:12px}
+ .pageHead h2{font-size:27px}
+ .stickyNav{height:72px;width:calc(100% - 10px);padding:5px}
+ .stickyNav button{min-height:62px!important}
+}
 </style></head>
 <body>
 <div class="wrap"><div class="appTopbar"><div><div class="appBrand">EVO <span>FIT</span></div><div class="appSub">Coach · Jonction</div></div><div class="topActions"><button class="iconBtn" onclick="showToast('Tes données sont enregistrées sur cet appareil.')">💾</button><button class="iconBtn" onclick="installApp()">＋</button></div></div>
@@ -529,6 +652,18 @@ button{cursor:pointer}
 <div class="tile widget"><small>🥩 Protéines</small><strong><span id="dashProtein">0</span></strong><small>/ 180 g</small></div>
 <div class="tile widget"><small>🏋️ Prochaine séance</small><strong id="dashWorkout">—</strong><small id="dashWorkoutSub">Programme 4×/semaine</small></div>
 <div class="tile widget"><small>🔔 Rappels</small><strong id="dashNotif">OFF</strong><small>notifications</small></div>
+</div>
+<div class="quickActions">
+<button class="quickAction" onclick="switchPage('training',document.querySelector('.stickyNav button[data-page=training]'));"><span>🏋️</span>Commencer une séance<small>Programme 4 jours</small></button>
+<button class="quickAction" onclick="recordWater()"><span>💧</span>Ajouter 250 ml<small>Hydratation</small></button>
+<button class="quickAction" onclick="recordProtein()"><span>🥩</span>Ajouter 25 g<small>Protéines</small></button>
+<button class="quickAction" onclick="switchPage('progress',document.querySelector('.stickyNav button[data-page=progress]'));"><span>📈</span>Voir ma progression<small>Poids & historique</small></button>
+</div>
+<div class="panel" style="margin-top:12px;background:linear-gradient(145deg,#0e2035,#09121f);border-color:#24486d">
+<h3 style="margin-top:0">🎯 Cap sur ton objectif</h3>
+<div class="small">Ton tableau de bord rassemble tes données de la journée. Les valeurs se mettent à jour automatiquement.</div>
+<div style="margin-top:12px;height:10px;background:#17283d;border-radius:20px;overflow:hidden"><i id="goalProgressBar" style="display:block;height:100%;width:0;background:linear-gradient(90deg,#2563eb,#69bdff);border-radius:20px"></i></div>
+<div class="small" style="display:flex;justify-content:space-between;margin-top:7px"><span id="goalProgressText">Progression</span><span>Objectif 85 kg</span></div>
 </div>
 <div class="panel" style="margin-top:12px">
 <h3 style="margin-top:0">📊 Widgets du jour</h3>
@@ -993,6 +1128,11 @@ function updateWidgets(){
   const dc=document.getElementById('dashCal'); if(dc)dc.textContent=cal;
   const ds=document.getElementById('dashSteps'); if(ds)ds.textContent=Number(st).toLocaleString('fr-CH');
   const dw=document.getElementById('dashWeight'); if(dw)dw.textContent=w;
+  const gp=document.getElementById('goalProgressBar'),gt=document.getElementById('goalProgressText');
+  const start=103,target=85,current=Number(w)||start;
+  const pct=Math.max(0,Math.min(100,((start-current)/(start-target))*100));
+  if(gp)gp.style.width=pct.toFixed(0)+'%';
+  if(gt)gt.textContent=pct.toFixed(0)+'% du parcours';
   const wa=document.getElementById('dashWater'); if(wa)wa.textContent=water;
   const pr=document.getElementById('dashProtein'); if(pr)pr.textContent=protein;
   const day=new Date().getDay();
