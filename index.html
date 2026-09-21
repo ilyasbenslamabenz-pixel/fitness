@@ -162,6 +162,9 @@ body{padding-bottom:92px}
 .sessionProgress .progressbar{margin-top:7px}.sessionProgress .progressbar i{transition:width .25s ease}
 .sessionFocus{position:sticky;top:59px;z-index:30;background:rgba(9,11,14,.94);backdrop-filter:blur(16px);padding:8px 0}
 .exercise-card.sessionDone{border-color:#5b7f2a;box-shadow:0 0 0 1px #5b7f2a55 inset}
+.exercise-card .log input{font-size:16px;min-height:42px}
+.exercise-card .log input::placeholder{color:#66717c}
+.exercise-card .lastValue{font-size:11px;color:var(--accent);margin-top:4px}
 .exercise-card .setQuick{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:6px}
 .exercise-card .setQuick button{border:0;border-radius:11px;padding:10px;background:#222a32;color:#fff;font-weight:900}
 .exercise-card .setQuick button.done{background:#30451d;color:var(--accent)}
@@ -743,6 +746,30 @@ function updateSessionUI(){
   const names={1:'Push · pectoraux / épaules / triceps',2:'Pull · dos / biceps',4:'Jambes + cardio',6:'Haut du corps complet'};
   if(sub)sub.textContent=workoutStarted?'Séance en cours · '+names[selectedWorkoutDay]:names[selectedWorkoutDay];
 }
+function workoutKey(card){
+  return 'evoExercise_'+(card.querySelector('h3')?.textContent.trim()||'exercise').toLowerCase().replace(/[^a-z0-9à-ÿ]+/gi,'_');
+}
+function loadExerciseMemory(card){
+  const d=JSON.parse(localStorage.getItem(workoutKey(card))||'{}');
+  const inputs=[...card.querySelectorAll('.log input')];
+  if(d.charge!==undefined && inputs[0]) inputs[0].value=d.charge;
+  if(d.reps!==undefined && inputs[1]) inputs[1].value=d.reps;
+  if(d.done) card.classList.add('sessionDone');
+  inputs.forEach((input,i)=>input.addEventListener('input',()=>{
+    const cur=JSON.parse(localStorage.getItem(workoutKey(card))||'{}');
+    if(i===0)cur.charge=input.value;if(i===1)cur.reps=input.value;
+    localStorage.setItem(workoutKey(card),JSON.stringify(cur));
+  }));
+}
+function saveExerciseMemory(card){
+  const inputs=[...card.querySelectorAll('.log input')];
+  const cur=JSON.parse(localStorage.getItem(workoutKey(card))||'{}');
+  if(inputs[0])cur.charge=inputs[0].value;
+  if(inputs[1])cur.reps=inputs[1].value;
+  cur.done=card.classList.contains('sessionDone');
+  cur.updated=new Date().toISOString();
+  localStorage.setItem(workoutKey(card),JSON.stringify(cur));
+}
 function enhanceWorkoutCards(){
   document.querySelectorAll('section.day[data-page="training"] .exercise-card').forEach((card,idx)=>{
     if(card.dataset.quickReady==='1')return;
@@ -752,11 +779,14 @@ function enhanceWorkoutCards(){
     btn.onclick=()=>{
       card.classList.toggle('sessionDone');
       if(check)check.checked=card.classList.contains('sessionDone');
-      localStorage.setItem('sessionDone_'+idx,card.classList.contains('sessionDone')?'1':'0');
+      btn.classList.toggle('done',card.classList.contains('sessionDone'));
+      saveExerciseMemory(card);
       updateSessionUI();
+      if(card.classList.contains('sessionDone')) restTimer(90);
     };
     quick.appendChild(btn);
     const log=card.querySelector('.log'); if(log)log.after(quick);
+    loadExerciseMemory(card);
     if(localStorage.getItem('sessionDone_'+idx)==='1'){card.classList.add('sessionDone');btn.classList.add('done');}
     card.dataset.quickReady='1';
   });
