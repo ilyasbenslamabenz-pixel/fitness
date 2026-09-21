@@ -699,46 +699,119 @@ button:active{transform:scale(.97);filter:brightness(1.08)}
 <h2 style="margin-top:0">📷 Scanner un produit</h2>
 <p class="small">Scanne le code-barres avec la caméra de ton iPhone. La recherche utilise une base nutritionnelle ouverte ; les produits Coop/Migros présents dans cette base peuvent être reconnus. Vérifie toujours les valeurs affichées avec l'emballage.</p>
 <button class="scanbtn" onclick="startScanner()">📷 Ouvrir le scanner</button>
-<div id="scanner"><video id="video" playsinline=""></video></div>
+<div id="scanner" style="display:none">
+  <div id="reader"></div>
+  <button class="settingBtn" type="button" onclick="stopScanner()" style="width:100%;margin-top:8px">✕ Fermer la caméra</button>
+</div>
 <div class="small" id="scanmsg"></div>
+<div style="margin-top:10px">
+  <input id="eanManual" type="text" inputmode="numeric" autocomplete="off" placeholder="EAN / code-barres" style="width:100%;padding:13px;border-radius:12px;background:#0b0f13;color:white;border:1px solid var(--line)">
+  <button class="settingBtn" type="button" onclick="lookup(document.getElementById('eanManual').value)" style="width:100%;margin-top:8px">🔎 Rechercher le code</button>
+</div>
+<label class="settingBtn" style="display:block;text-align:center;margin-top:8px;cursor:pointer">
+  📸 Scanner depuis une photo
+  <input id="barcodeFile" type="file" accept="image/*" capture="environment" style="display:none" onchange="scanBarcodeFile(this)">
+</label>
 <div class="product" id="product"></div>
 </section>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script>
-let stream=null, detector=null;
+let html5QrCode=null, scannerRunning=false;
+function scannerMessage(text,kind){
+  const msg=document.getElementById('scanmsg');
+  if(msg)msg.innerHTML=kind==='err'?'<span class="err">'+text+'</span>':kind==='ok'?'<span class="ok">'+text+'</span>':text;
+}
 async function startScanner(){
- const box=document.getElementById('scanner'), video=document.getElementById('video'), msg=document.getElementById('scanmsg');
- box.style.display='block'; msg.textContent='Autorise la caméra puis place le code-barres dans le cadre.';
- try{
-   stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}});
-   video.srcObject=stream; await video.play();
-   if('BarcodeDetector' in window){
-     detector=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e']});
-     scanLoop();
-   }else{
-     msg.innerHTML='<span class="err">Le navigateur ne fournit pas BarcodeDetector. Utilise Safari récent ou saisis le code EAN manuellement.</span><br><input id="eanManual" type="text" inputmode="numeric" placeholder="EAN 13 chiffres" style="margin-top:8px;width:100%;padding:11px;border-radius:10px;background:#0b0f13;color:white;border:1px solid var(--line)"><button class="scanbtn" onclick="lookup(document.getElementById(\'eanManual\').value)">Rechercher</button>';
-   }
- }catch(e){msg.innerHTML='<span class="err">Accès caméra refusé ou indisponible. Tu peux saisir le code EAN manuellement.</span><br><input id="eanManual" type="text" inputmode="numeric" placeholder="EAN 13 chiffres" style="margin-top:8px;width:100%;padding:11px;border-radius:10px;background:#0b0f13;color:white;border:1px solid var(--line)"><button class="scanbtn" onclick="lookup(document.getElementById(\'eanManual\').value)">Rechercher</button>';}
+  const box=document.getElementById('scanner');
+  if(!box)return;
+  box.style.display='block';
+  scannerMessage('Autorise la caméra puis place le code-barres dans le cadre.');
+  if(!window.Html5Qrcode){
+    scannerMessage('Le scanner caméra n’a pas pu être chargé. Utilise la saisie manuelle ou une photo.', 'err');
+    return;
+  }
+  try{
+    if(html5QrCode && scannerRunning)return;
+    html5QrCode=new Html5Qrcode('reader',{verbose:false});
+    const formats=[Html5QrcodeSupportedFormats.EAN_13,Html5QrcodeSupportedFormats.EAN_8,Html5QrcodeSupportedFormats.UPC_A,Html5QrcodeSupportedFormats.UPC_E];
+    await html5QrCode.start({facingMode:'environment'},{
+      fps:10,
+      qrbox:(w,h)=>({width:Math.min(Math.max(Math.round(w*.82),220),w-24),height:Math.min(150,Math.max(100,Math.round(h*.30)))}),
+      aspectRatio:1.333334,
+      formatsToSupport:formats
+    },async decodedText=>{
+      if(!scannerRunning)return;
+      scannerRunning=false;
+      await lookup(decodedText);
+      await stopScanner();
+    },()=>{});
+    scannerRunning=true;
+    scannerMessage('📷 Caméra active — place le code-barres dans la zone.');
+  }catch(e){
+    console.error(e);
+    scannerRunning=false;
+    scannerMessage('Caméra indisponible. Autorise l’accès à la caméra dans Safari ou utilise la saisie manuelle / une photo.','err');
+  }
 }
-async function scanLoop(){
- if(!detector)return;
- try{const codes=await detector.detect(document.getElementById('video')); if(codes.length){await lookup(codes[0].rawValue); stopScanner(); return;}}catch(e){}
- requestAnimationFrame(scanLoop);
+async function stopScanner(){
+  if(html5QrCode){
+    try{
+      if(scannerRunning)await html5QrCode.stop();
+      await html5QrCode.clear();
+    }catch(e){console.warn(e);}
+  }
+  scannerRunning=false;
+  html5QrCode=null;
+  const box=document.getElementById('scanner');
+  if(box)box.style.display='none';
 }
-function stopScanner(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;} document.getElementById('scanner').style.display='none';}
+async function scanBarcodeFile(input){
+  const file=input?.files?.[0];
+  if(!file||!window.Html5Qrcode){
+    if(file)scannerMessage('Le scanner photo n’a pas pu être chargé.','err');
+    return;
+  }
+  const box=document.getElementById('scanner');
+  if(box)box.style.display='block';
+  scannerMessage('🔎 Lecture de la photo…');
+  try{
+    if(html5QrCode)await stopScanner();
+    html5QrCode=new Html5Qrcode('reader',{verbose:false});
+    const decoded=await html5QrCode.scanFile(file,true);
+    await lookup(decoded);
+    await html5QrCode.clear();
+    html5QrCode=null;
+    if(box)box.style.display='none';
+  }catch(e){
+    console.error(e);
+    scannerMessage('Code-barres non détecté sur la photo. Essaie avec une photo plus nette ou saisis le code manuellement.','err');
+    try{await html5QrCode?.clear();}catch(_){}
+    html5QrCode=null;
+  }
+  input.value='';
+}
 async function lookup(ean){
- ean=(ean||'').replace(/\D/g,''); const msg=document.getElementById('scanmsg'), box=document.getElementById('product');
- if(!ean){msg.innerHTML='<span class="err">Code EAN invalide.</span>';return}
- msg.textContent='Recherche du produit…';
- try{
-   const r=await fetch('https://world.openfoodfacts.org/api/v2/product/'+ean+'.json');
-   const d=await r.json();
-   if(!d.product){msg.innerHTML='<span class="err">Produit non trouvé dans la base. Vérifie l’emballage ou ajoute-le manuellement.</span>';box.style.display='none';return}
-   const p=d.product,n=p.nutriments||{};
-   const kcal=n['energy-kcal_100g'] ?? n['energy-kcal'];
-   box.style.display='block';
-   box.innerHTML='<h3>'+esc(p.product_name||'Produit sans nom')+'</h3><div class="small">'+esc(p.brands||'')+' · EAN '+ean+'</div><div class="macro"><div><b>'+(kcal??'—')+'</b>kcal/100g</div><div><b>'+(n.proteins_100g??'—')+'</b>g prot.</div><div><b>'+(n.carbohydrates_100g??'—')+'</b>g gluc.</div><div><b>'+(n.fat_100g??'—')+'</b>g lip.</div></div><button class="scanbtn" onclick="addScanned('+JSON.stringify(p.product_name||'Produit')+','+(kcal||0)+')">+ Ajouter au journal</button>';
-   msg.innerHTML='<span class="ok">Produit trouvé. Vérifie les valeurs avec l’étiquette avant de l’ajouter.</span>';
- }catch(e){msg.innerHTML='<span class="err">Recherche impossible. Vérifie ta connexion internet et réessaie.</span>'}
+  ean=(ean||'').replace(/\D/g,'');
+  const msg=document.getElementById('scanmsg'),box=document.getElementById('product');
+  if(!ean){scannerMessage('Code-barres invalide.');return;}
+  msg.textContent='Recherche du produit…';
+  try{
+    const r=await fetch('https://world.openfoodfacts.org/api/v2/product/'+ean+'.json');
+    const d=await r.json();
+    if(!d.product){
+      scannerMessage('Produit non trouvé dans la base. Vérifie l’emballage ou essaie un autre code.','err');
+      if(box)box.style.display='none';
+      return;
+    }
+    const p=d.product,n=p.nutriments||{},kcal=n['energy-kcal_100g']??n['energy-kcal'];
+    if(box){
+      box.style.display='block';
+      box.innerHTML='<h3>'+esc(p.product_name||'Produit sans nom')+'</h3><div class="small">'+esc(p.brands||'')+' · EAN '+ean+'</div><div class="macro"><div><b>'+(kcal??'—')+'</b>kcal/100g</div><div><b>'+(n.proteins_100g??'—')+'</b>g prot.</div><div><b>'+(n.carbohydrates_100g??'—')+'</b>g gluc.</div><div><b>'+(n.fat_100g??'—')+'</b>g lip.</div></div><button class="scanbtn" onclick="addScanned('+JSON.stringify(p.product_name||'Produit')+','+(kcal||0)+')">+ Ajouter au journal</button>';
+    }
+    scannerMessage('Produit trouvé. Vérifie les valeurs avec l’étiquette avant de l’ajouter.','ok');
+  }catch(e){
+    scannerMessage('Recherche impossible. Vérifie ta connexion internet et réessaie.','err');
+  }
 }
 function esc(x){return String(x).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
 function addScanned(name,kcal){addFood(name,String(Math.round(kcal||0)));document.getElementById('foodbox')?.scrollIntoView({behavior:'smooth'});}
