@@ -805,7 +805,9 @@ async function lookup(ean){
     const p=d.product,n=p.nutriments||{},kcal=n['energy-kcal_100g']??n['energy-kcal'];
     if(box){
       box.style.display='block';
-      box.innerHTML='<h3>'+esc(p.product_name||'Produit sans nom')+'</h3><div class="small">'+esc(p.brands||'')+' · EAN '+ean+'</div><div class="macro"><div><b>'+(kcal??'—')+'</b>kcal/100g</div><div><b>'+(n.proteins_100g??'—')+'</b>g prot.</div><div><b>'+(n.carbohydrates_100g??'—')+'</b>g gluc.</div><div><b>'+(n.fat_100g??'—')+'</b>g lip.</div></div><button class="scanbtn" onclick="addScanned('+JSON.stringify(p.product_name||'Produit')+','+(kcal||0)+')">+ Ajouter au journal</button>';
+      const productName=String(p.product_name||'Produit sans nom');
+      const encodedName=btoa(unescape(encodeURIComponent(productName))).replace(/'/g,'');
+      box.innerHTML='<h3>'+esc(productName)+'</h3><div class="small">'+esc(p.brands||'')+' · EAN '+ean+'</div><div class="macro"><div><b>'+(kcal??'—')+'</b>kcal/100g</div><div><b>'+(n.proteins_100g??'—')+'</b>g prot.</div><div><b>'+(n.carbohydrates_100g??'—')+'</b>g gluc.</div><div><b>'+(n.fat_100g??'—')+'</b>g lip.</div></div><button class="scanbtn" type="button" onclick="addScanned(decodeURIComponent(escape(atob(\''+encodedName+'\'))),'+(Number(kcal)||0)+')">+ Ajouter au journal</button>';
     }
     scannerMessage('Produit trouvé. Vérifie les valeurs avec l’étiquette avant de l’ajouter.','ok');
   }catch(e){
@@ -813,7 +815,17 @@ async function lookup(ean){
   }
 }
 function esc(x){return String(x).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
-function addScanned(name,kcal){addFood(name,String(Math.round(kcal||0)));document.getElementById('foodbox')?.scrollIntoView({behavior:'smooth'});}
+function addScanned(name,kcal){
+  const foodName=String(name||'Produit');
+  const calories=String(Math.round(Number(kcal)||0));
+  addFood(foodName,calories);
+  const box=document.getElementById('foodbox');
+  if(box){
+    box.style.display='block';
+    box.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  showToast('🍽️ '+foodName+' ajouté au journal');
+}
 </script>
 <section class="foodbox appPage" data-page="foodbox" id="foodbox">
 <h2 style="margin-top:0">🍽️ Journal alimentaire &amp; calories</h2>
