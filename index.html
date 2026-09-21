@@ -150,6 +150,8 @@ body{padding-bottom:92px}
 .appPage{display:none}.appPage.activePage{display:block}.pageHead{display:flex;justify-content:space-between;align-items:end;gap:14px;margin-bottom:12px}.pageHead h2{margin:3px 0 5px}.searchBox{width:min(320px,100%);background:#0c1014;color:white;border:1px solid var(--line);border-radius:13px;padding:12px}
 .exerciseLibrary{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.libCard{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden}.libCard img{width:100%;height:170px;object-fit:contain;background:#fff}.libBody{padding:11px}.libBody b{display:block}.libBody span{font-size:11px;color:var(--muted)}.libBody button{margin-top:9px;width:100%;padding:9px;border:0;border-radius:10px;background:#222a32;color:#fff;font-weight:800}
 .settingsGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.settingCard{display:flex;flex-direction:column;gap:6px}.settingCard span{font-size:12px;color:var(--muted)}.settingCard input{width:100%;background:#0c1014;color:#fff;border:1px solid var(--line);border-radius:10px;padding:11px}.settingBtn,.dangerBtn{border:1px solid var(--line);border-radius:10px;background:#202730;color:#fff;padding:10px;font-weight:800}.dangerCard{margin-top:12px}.dangerBtn{background:#351b1d;border-color:#633136}
+.widget{min-height:112px}.widget strong{font-size:24px}
+#notifStatus{margin-top:10px;line-height:1.5}
 .toast{position:fixed;left:50%;bottom:105px;transform:translateX(-50%);z-index:200;background:#eaf8d8;color:#10150b;padding:11px 15px;border-radius:14px;font-weight:800;font-size:12px}
 @media(max-width:650px){.wrap{padding:8px 11px 45px}.pageHead{display:block}.searchBox{margin-top:10px}.exerciseLibrary{grid-template-columns:1fr}.settingsGrid{grid-template-columns:1fr}.stickyNav{width:calc(100% - 10px);bottom:max(5px,env(safe-area-inset-bottom));}.stickyNav button{font-size:9px;min-height:50px}}
 
@@ -205,10 +207,17 @@ body{padding-bottom:95px}
 <section class="panel appPage activePage" data-page="dashboard" id="dashboard">
 <h2 style="margin-top:0">🏠 Tableau de bord</h2>
 <div class="dash">
-<div class="tile"><small>Calories aujourd'hui</small><strong><span id="dashCal">0</span></strong><small>kcal enregistrées</small></div>
+<div class="tile widget"><small>🔥 Calories</small><strong><span id="dashCal">0</span></strong><small>/ <span id="dashCalGoal">2500</span> kcal</small></div>
 <div class="tile"><small>Pas aujourd'hui</small><strong><span id="dashSteps">0</span></strong><small>objectif <span id="dashStepGoal">8000</span></small></div>
 <div class="tile"><small>Poids</small><strong><span id="dashWeight">103</span> kg</strong><small>objectif 85 kg</small></div>
-<div class="tile"><small>Programme</small><strong>4×</strong><small>séances / semaine</small></div>
+<div class="tile widget"><small>💧 Eau</small><strong><span id="dashWater">0</span></strong><small>/ 2.5 L</small></div>
+<div class="tile widget"><small>🥩 Protéines</small><strong><span id="dashProtein">0</span></strong><small>/ 180 g</small></div>
+<div class="tile widget"><small>🏋️ Prochaine séance</small><strong id="dashWorkout">—</strong><small id="dashWorkoutSub">Programme 4×/semaine</small></div>
+<div class="tile widget"><small>🔔 Rappels</small><strong id="dashNotif">OFF</strong><small>notifications</small></div>
+</div>
+<div class="panel" style="margin-top:12px">
+<h3 style="margin-top:0">📊 Widgets du jour</h3>
+<div class="small">Calories, pas, poids, hydratation, protéines et prochaine séance sont mis à jour automatiquement.</div>
 </div>
 </section>
 <section class="panel appPage" data-page="training" id="training">
@@ -340,7 +349,22 @@ stepsCalc(); calc();
 <div class="rule"><b>Sommeil</b><br/>Vise une routine de sommeil régulière pour faciliter récupération et adhérence au programme.</div>
 </div>
 </section>
-<section class="panel appPage" data-page="exercises" id="exercises"><div class="pageHead"><div><span class="eyebrow">BIBLIOTHÈQUE</span><h2>Exercices &amp; machines</h2><p class="sub">Retrouve rapidement la machine, le mouvement et les points clés.</p></div><input class="searchBox" id="exerciseSearch" oninput="filterExercises()" placeholder="🔎 Rechercher un exercice..."/></div><div class="exerciseLibrary" id="exerciseLibrary"></div></section><section class="panel appPage" data-page="profile" id="profile"><div class="pageHead"><div><span class="eyebrow">MON PROFIL</span><h2>Réglages &amp; objectifs</h2><p class="sub">Personnalise l'application sans perdre tes données.</p></div></div><div class="settingsGrid">
+<section class="panel appPage" data-page="exercises" id="exercises"><div class="pageHead"><div><span class="eyebrow">BIBLIOTHÈQUE</span><h2>Exercices &amp; machines</h2><p class="sub">Retrouve rapidement la machine, le mouvement et les points clés.</p></div><input class="searchBox" id="exerciseSearch" oninput="filterExercises()" placeholder="🔎 Rechercher un exercice..."/></div><div class="exerciseLibrary" id="exerciseLibrary"></div></section><section class="panel appPage" data-page="profile" id="notifications">
+<h2 style="margin-top:0">🔔 Notifications & rappels</h2>
+<div class="settingsGrid">
+<div class="settingCard"><b>🏋️ Rappel séance</b><span>Heure de rappel</span><input id="notifWorkoutTime" type="time" value="18:30"></div>
+<div class="settingCard"><b>💧 Hydratation</b><span>Intervalle en heures</span><input id="notifWaterEvery" type="number" min="1" max="8" value="2"></div>
+</div>
+<div style="display:grid;gap:9px;margin-top:12px">
+<label><input id="notifWorkout" type="checkbox" checked> 🏋️ Rappel d'entraînement</label>
+<label><input id="notifWater" type="checkbox" checked> 💧 Rappel hydratation</label>
+<label><input id="notifMeals" type="checkbox"> 🍽️ Rappel repas</label>
+<label><input id="notifWeight" type="checkbox"> ⚖️ Rappel pesée</label>
+</div>
+<button class="scanbtn" type="button" onclick="enableNotifications()">🔔 Activer les notifications</button>
+<div id="notifStatus" class="small">Les notifications nécessitent l'autorisation du navigateur. Sur iPhone, installe d'abord l'app sur l'écran d'accueil.</div>
+</section>
+<section class="panel appPage" data-page="profile" id="profile"><div class="pageHead"><div><span class="eyebrow">MON PROFIL</span><h2>Réglages &amp; objectifs</h2><p class="sub">Personnalise l'application sans perdre tes données.</p></div></div><div class="settingsGrid">
 <div class="card settingCard"><b>🎯 Objectif calories</b><span>Ton objectif quotidien</span><input id="profileTarget" inputmode="numeric" placeholder="kcal" type="number"/></div>
 <div class="card settingCard"><b>🚶 Objectif pas</b><span>Ta cible quotidienne</span><input id="profileSteps" inputmode="numeric" placeholder="pas" type="number"/></div>
 <div class="card settingCard"><b>⚖️ Poids actuel</b><span>Utilisé dans le tableau de bord</span><input id="profileWeight" inputmode="decimal" placeholder="kg" step="0.1" type="number"/></div>
@@ -580,11 +604,75 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredIns
 async function installApp(){if(deferredInstall){deferredInstall.prompt();deferredInstall=null;return}showToast('Sur iPhone : Partager → Sur l’écran d’accueil');}
 function syncProfile(){[['profileTarget','target'],['profileSteps','stepGoal'],['profileWeight','weight']].forEach(([a,b])=>{const x=document.getElementById(a),y=document.getElementById(b);if(x&&y)x.value=y.value;});}
 function applyProfile(id){const m={profileTarget:'target',profileSteps:'stepGoal',profileWeight:'weight'},s=document.getElementById(id),d=document.getElementById(m[id]);if(s&&d){d.value=s.value;d.dispatchEvent(new Event('input',{bubbles:true}));saveState();}}
+function notificationState(){
+  return JSON.parse(localStorage.getItem('evoNotifications')||'{}');
+}
+function saveNotificationSettings(){
+  const s={
+    workout:document.getElementById('notifWorkout')?.checked??false,
+    water:document.getElementById('notifWater')?.checked??false,
+    meals:document.getElementById('notifMeals')?.checked??false,
+    weight:document.getElementById('notifWeight')?.checked??false,
+    workoutTime:document.getElementById('notifWorkoutTime')?.value||'18:30',
+    waterEvery:Number(document.getElementById('notifWaterEvery')?.value||2)
+  };
+  localStorage.setItem('evoNotifications',JSON.stringify(s));
+  updateNotificationStatus();
+}
+function loadNotificationSettings(){
+  const s=notificationState();
+  ['workout','water','meals','weight'].forEach(k=>{const el=document.getElementById('notif'+k.charAt(0).toUpperCase()+k.slice(1));if(el&&s[k]!==undefined)el.checked=s[k]});
+  if(s.workoutTime)document.getElementById('notifWorkoutTime').value=s.workoutTime;
+  if(s.waterEvery)document.getElementById('notifWaterEvery').value=s.waterEvery;
+  updateNotificationStatus();
+}
+function updateNotificationStatus(){
+  const el=document.getElementById('notifStatus'),dash=document.getElementById('dashNotif');
+  if(!el)return;
+  const granted=('Notification' in window && Notification.permission==='granted');
+  el.textContent=granted?'✅ Notifications autorisées sur cet appareil.':'⚪ Notifications non autorisées. Appuie sur « Activer les notifications ».';
+  if(dash)dash.textContent=granted?'ON':'OFF';
+}
+async function enableNotifications(){
+  if(!('Notification' in window)){showToast('Notifications non supportées par ce navigateur');return}
+  const p=await Notification.requestPermission();
+  updateNotificationStatus();
+  if(p==='granted'){
+    new Notification('EVO Fit Coach', {body:'🔔 Rappels activés. Pense à ta séance et à ton hydratation !'});
+    showToast('Notifications activées');
+    saveNotificationSettings();
+  }else showToast('Autorisation refusée');
+}
+function updateWidgets(){
+  const cal=document.getElementById('cal')?.textContent||0;
+  const st=document.getElementById('steps')?.value||0;
+  const w=document.getElementById('weight')?.value||103;
+  const water=localStorage.getItem('waterLiters')||0;
+  const protein=localStorage.getItem('proteinToday')||0;
+  const dc=document.getElementById('dashCal'); if(dc)dc.textContent=cal;
+  const ds=document.getElementById('dashSteps'); if(ds)ds.textContent=Number(st).toLocaleString('fr-CH');
+  const dw=document.getElementById('dashWeight'); if(dw)dw.textContent=w;
+  const wa=document.getElementById('dashWater'); if(wa)wa.textContent=water;
+  const pr=document.getElementById('dashProtein'); if(pr)pr.textContent=protein;
+  const day=new Date().getDay();
+  const names={1:'Push',2:'Pull',4:'Jambes',6:'Haut du corps'};
+  const wo=document.getElementById('dashWorkout');
+  if(wo)wo.textContent=names[day]||'Repos';
+  updateNotificationStatus();
+}
+function recordWater(){
+  const v=Number(localStorage.getItem('waterLiters')||0)+0.25;
+  localStorage.setItem('waterLiters',v.toFixed(2));updateWidgets();showToast('💧 +250 ml');
+}
+function recordProtein(){
+  const v=Number(localStorage.getItem('proteinToday')||0)+25;
+  localStorage.setItem('proteinToday',v);updateWidgets();showToast('🥩 +25 g');
+}
 function resetApp(){if(confirm('Réinitialiser les données enregistrées sur cet appareil ?')){localStorage.clear();location.reload();}}
 function buildExerciseLibrary(){const root=document.getElementById('exerciseLibrary');if(!root||root.dataset.ready==='1')return;const cards=[...document.querySelectorAll('section[data-page="training"] .exercise-card')],seen=new Set();cards.forEach((card,i)=>{const h=card.querySelector('h3'),img=card.querySelector('.real-machine img');if(!h||!img)return;const name=h.textContent.trim();if(seen.has(name))return;seen.add(name);const c=document.createElement('div');c.className='libCard';c.dataset.name=name.toLowerCase();c.innerHTML='<img loading="lazy" src="'+img.src+'" alt="'+name+'"><div class="libBody"><b>'+name+'</b><span>Référence équipement · séance</span><button onclick="openExercise('+i+')">Voir dans le programme</button></div>';root.appendChild(c);});root.dataset.ready='1';}
 function filterExercises(){const q=(document.getElementById('exerciseSearch')?.value||'').toLowerCase();document.querySelectorAll('.libCard').forEach(c=>c.style.display=c.dataset.name.includes(q)?'block':'none');}
 function openExercise(i){const b=document.querySelector('.stickyNav button[data-page="training"]');switchPage('training',b);const cards=[...document.querySelectorAll('section[data-page="training"] .exercise-card')];cards[i]?.scrollIntoView({behavior:'smooth',block:'start'});}
-window.addEventListener('load',()=>{const saved=localStorage.getItem('evoPage')||'dashboard';const b=document.querySelector('.stickyNav button[data-page="'+saved+'"]')||document.querySelector('.stickyNav button[data-page="dashboard"]');switchPage(b.dataset.page,b);syncProfile();['profileTarget','profileSteps','profileWeight'].forEach(id=>document.getElementById(id)?.addEventListener('input',()=>applyProfile(id)));if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});});
+window.addEventListener('load',()=>{loadNotificationSettings();updateWidgets();setInterval(updateWidgets,30000);const saved=localStorage.getItem('evoPage')||'dashboard';const b=document.querySelector('.stickyNav button[data-page="'+saved+'"]')||document.querySelector('.stickyNav button[data-page="dashboard"]');switchPage(b.dataset.page,b);syncProfile();['profileTarget','profileSteps','profileWeight'].forEach(id=>document.getElementById(id)?.addEventListener('input',()=>applyProfile(id)));if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});});
 </script>
 </body>
 </html>
