@@ -1,1 +1,590 @@
-The requested file reference is not currently visible. Use files.search or files.list to rediscover the file, then retry with a returned ref_id or file_id.
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
+<meta content="#0b0d10" name="theme-color"/>
+<title>EVO Fit Coach — App V12</title>
+<style>
+:root{--bg:#090b0e;--panel:#12161b;--panel2:#181d23;--text:#f4f6f8;--muted:#aab2bc;--line:#2a3038;--accent:#b9ff3d;--blue:#7dd3fc}
+*{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,#080a0d,#10141a 55%,#090b0e);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;line-height:1.45}
+.wrap{max-width:1050px;margin:auto;padding:18px 16px 60px} .hero{padding:26px 4px 18px} .eyebrow{color:var(--accent);font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:12px}
+h1{font-size:clamp(34px,9vw,64px);line-height:.98;margin:8px 0 14px;letter-spacing:-.045em} h2{font-size:26px;margin:28px 0 14px} h3{font-size:18px;margin:6px 0 10px}
+.sub{color:var(--muted);font-size:16px;max-width:720px} .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0} .stat{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px} .stat b{display:block;font-size:24px} .stat span{font-size:12px;color:var(--muted)}
+.notice{background:#151c12;border:1px solid #33431e;border-radius:18px;padding:16px;margin:16px 0;color:#e9f6d7}
+.day{margin-top:34px} .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px} .card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:22px;padding:14px;overflow:hidden} .visual{height:125px;border-radius:16px;background:#0b0f13;display:flex;align-items:center;justify-content:center;color:var(--accent);margin-bottom:12px} .visual svg{width:210px;height:115px;max-width:95%} .tag{display:inline-block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--blue);font-weight:800} .meta{display:flex;justify-content:space-between;gap:8px;background:#0c1014;border-radius:12px;padding:9px 10px;margin:10px 0;font-size:13px} .meta span{color:var(--muted)} .card p{font-size:13px;color:#c3cbd4;min-height:58px}
+.log{display:grid;grid-template-columns:1fr 1fr 42px;gap:7px;align-items:end} label{font-size:11px;color:var(--muted)} input[type=text]{width:100%;margin-top:4px;border:1px solid var(--line);background:#0b0f13;color:white;border-radius:9px;padding:9px;font-size:14px} input[type=checkbox]{width:22px;height:22px;accent-color:var(--accent)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:16px;margin-top:20px} .rules{display:grid;grid-template-columns:repeat(2,1fr);gap:10px} .rule{padding:12px;border-radius:14px;background:#0d1115;color:#c9d0d8;font-size:13px} .rule b{color:white}
+.footer{margin-top:35px;color:#7f8995;font-size:12px} a{color:var(--accent)}
+@media(max-width:700px){.grid{grid-template-columns:1fr} .stats{grid-template-columns:repeat(3,1fr)} .rules{grid-template-columns:1fr}}
+
+.v7grid{display:grid;gap:14px;margin-top:14px}
+.v7machine{background:#11161b;border:1px solid #27303a;border-radius:18px;overflow:hidden;box-shadow:0 8px 25px rgba(0,0,0,.16)}
+.v7machine img{width:100%;height:260px;object-fit:contain;background:#fff;display:block}
+.v7body{padding:14px}
+.v7body h3{margin:7px 0 9px}
+.v7steps{display:grid;gap:7px}
+.v7steps div{background:#0c1014;border-radius:11px;padding:10px;font-size:13px;line-height:1.4;color:#d5dbe1}
+.v7source{display:inline-block;margin-top:11px;color:#c9ff82;text-decoration:none;font-weight:800;font-size:12px}
+.v7notice,.v7legend{margin-top:12px;padding:12px 14px;border-radius:14px;background:#161b21;border:1px solid #303944;color:#cbd3db;font-size:12px;line-height:1.45}
+@media (min-width:800px){.v7grid{grid-template-columns:repeat(2,minmax(0,1fr))}.v7machine img{height:300px}}
+
+.v8gallery{margin-top:18px}
+.v8cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.v8card{background:#11161b;border:1px solid #27303a;border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.15)}
+.v8card img{display:block;width:100%;height:190px;object-fit:contain;background:#fff}
+.v8card b{display:block;padding:10px 12px 2px;font-size:14px}
+.v8card span{display:block;padding:0 12px 12px;color:#aeb8c2;font-size:12px}
+.v8note{margin-top:14px;padding:13px 14px;border-radius:14px;background:#171d23;border:1px solid #303944;color:#cbd3db;font-size:12px;line-height:1.5}
+@media(min-width:800px){.v8cards{grid-template-columns:repeat(3,minmax(0,1fr))}.v8card img{height:220px}}
+
+/* V10 — layout exercise cards: keep title, instructions and image together */
+.exercise-card, article{
+  break-inside:avoid;
+}
+@media (min-width: 900px){
+  /* Prevent the exercise content from splitting into disconnected columns */
+  .exercise-grid, .workout-grid, .exercises-grid{
+    grid-template-columns:1fr !important;
+  }
+  article{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) 430px !important;
+    grid-template-areas:
+      "head image"
+      "meta image"
+      "desc image"
+      "inputs image" !important;
+    gap:18px !important;
+    align-items:center !important;
+  }
+  article h3{grid-area:head;margin-bottom:0}
+  article .real-machine, article .machine-photo, article figure{grid-area:image}
+  article .description, article .exercise-desc{grid-area:desc}
+  article .exercise-meta, article .meta, article .sets{grid-area:meta}
+  article .inputs, article .tracking, article form{grid-area:inputs}
+}
+@media (max-width: 899px){
+  article{
+    display:flex !important;
+    flex-direction:column !important;
+    gap:10px !important;
+  }
+  article .real-machine, article .machine-photo, article figure{
+    order:4 !important;
+    width:100% !important;
+  }
+}
+.real-machine img, .machine-photo img, article figure img{
+  max-height:330px;
+  object-fit:cover;
+  border-radius:16px;
+}
+
+/* V10 — every exercise owns its image */
+section.day .grid{
+  display:grid !important;
+  grid-template-columns:1fr !important;
+  gap:18px !important;
+}
+.exercise-card{
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) 380px;
+  grid-template-areas:
+    "tag image"
+    "title image"
+    "meta image"
+    "desc image"
+    "log image"
+    "source image";
+  gap:8px 18px;
+  align-items:center;
+  padding:18px;
+  border:1px solid #252d36;
+  border-radius:20px;
+  background:linear-gradient(145deg,#11161c,#0d1116);
+  overflow:hidden;
+}
+.exercise-card .tag{grid-area:tag;align-self:end}
+.exercise-card h3{grid-area:title;margin:0}
+.exercise-card .meta{grid-area:meta}
+.exercise-card p{grid-area:desc;margin:4px 0;line-height:1.45}
+.exercise-card .log{grid-area:log}
+.exercise-card .machine-link{grid-area:source}
+.exercise-card .real-machine{grid-area:image;margin:0;width:100%}
+.exercise-card .real-machine img{
+  display:block;
+  width:100%;
+  height:280px;
+  object-fit:contain;
+  background:#fff;
+  border-radius:16px;
+}
+.exercise-card .real-machine .caption{
+  font-size:11px;
+  padding:7px 4px 0;
+  color:#9da9b5;
+}
+@media(max-width:760px){
+  .exercise-card{
+    grid-template-columns:1fr;
+    grid-template-areas:
+      "tag"
+      "title"
+      "meta"
+      "desc"
+      "log"
+      "image"
+      "source";
+    padding:14px;
+  }
+  .exercise-card .real-machine img{height:230px}
+}
+
+body{padding-bottom:92px}
+.appTopbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;padding:10px 2px 12px;background:rgba(9,11,14,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.appBrand{font-weight:900;letter-spacing:.08em;font-size:15px}.appBrand span{color:var(--accent)}.appSub{font-size:10px;color:var(--muted)}.topActions{display:flex;gap:7px}.iconBtn{width:38px;height:38px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--text);font-size:17px}
+.stickyNav{position:fixed!important;left:50%;bottom:max(10px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:100;width:min(720px,calc(100% - 16px));display:grid!important;grid-template-columns:repeat(6,1fr);gap:3px;padding:7px;border:1px solid #303741;border-radius:22px;background:rgba(13,17,22,.94);box-shadow:0 14px 45px rgba(0,0,0,.45);backdrop-filter:blur(22px)}
+.stickyNav button{border:0;background:transparent;color:#87919d;border-radius:15px;padding:7px 3px 6px;font-size:10px;font-weight:800;min-height:52px}.stickyNav button b{display:block;font-size:17px;line-height:19px}.stickyNav button.active{background:#202730;color:var(--accent)}.stickyNav button span{display:block}
+.appPage{display:none}.appPage.activePage{display:block}.pageHead{display:flex;justify-content:space-between;align-items:end;gap:14px;margin-bottom:12px}.pageHead h2{margin:3px 0 5px}.searchBox{width:min(320px,100%);background:#0c1014;color:white;border:1px solid var(--line);border-radius:13px;padding:12px}
+.exerciseLibrary{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.libCard{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden}.libCard img{width:100%;height:170px;object-fit:contain;background:#fff}.libBody{padding:11px}.libBody b{display:block}.libBody span{font-size:11px;color:var(--muted)}.libBody button{margin-top:9px;width:100%;padding:9px;border:0;border-radius:10px;background:#222a32;color:#fff;font-weight:800}
+.settingsGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.settingCard{display:flex;flex-direction:column;gap:6px}.settingCard span{font-size:12px;color:var(--muted)}.settingCard input{width:100%;background:#0c1014;color:#fff;border:1px solid var(--line);border-radius:10px;padding:11px}.settingBtn,.dangerBtn{border:1px solid var(--line);border-radius:10px;background:#202730;color:#fff;padding:10px;font-weight:800}.dangerCard{margin-top:12px}.dangerBtn{background:#351b1d;border-color:#633136}
+.toast{position:fixed;left:50%;bottom:105px;transform:translateX(-50%);z-index:200;background:#eaf8d8;color:#10150b;padding:11px 15px;border-radius:14px;font-weight:800;font-size:12px}
+@media(max-width:650px){.wrap{padding:8px 11px 45px}.pageHead{display:block}.searchBox{margin-top:10px}.exerciseLibrary{grid-template-columns:1fr}.settingsGrid{grid-template-columns:1fr}.stickyNav{width:calc(100% - 10px);bottom:max(5px,env(safe-area-inset-bottom));}.stickyNav button{font-size:9px;min-height:50px}}
+
+/* V12 — true page system: no other tab content leaks into the current view */
+section.appPage{display:none!important}
+section.appPage.activePage{display:block!important}
+</style>
+<style>
+.foodbox{background:linear-gradient(180deg,#151b12,#10150f);border:1px solid #33431e;border-radius:22px;padding:16px;margin-top:20px}
+.foodgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.foodgrid input,.foodgrid select{width:100%;margin-top:4px;border:1px solid var(--line);background:#0b0f13;color:white;border-radius:9px;padding:10px;font-size:14px}
+.foodrow{display:grid;grid-template-columns:1fr 90px 90px 42px;gap:7px;align-items:end;margin-top:10px}
+.foodrow button{height:39px;border:0;border-radius:9px;background:#303821;color:#dfffaa;font-weight:800}
+.total{font-size:28px;font-weight:900;margin:12px 0;color:var(--accent)}
+.steps{display:flex;gap:8px;align-items:center}.steps input{max-width:180px}
+.progressbar{height:10px;background:#252b31;border-radius:10px;overflow:hidden}.progressbar i{display:block;height:100%;width:0;background:var(--accent)}
+.small{font-size:12px;color:var(--muted)}
+@media(max-width:700px){.foodgrid{grid-template-columns:1fr}.foodrow{grid-template-columns:1fr 75px 75px 38px}}
+</style>
+<style>
+.scanbox{background:linear-gradient(180deg,#111820,#0d1116);border:1px solid #28313a;border-radius:22px;padding:16px;margin-top:20px}
+.scanbtn{display:block;width:100%;padding:14px;border:0;border-radius:14px;background:var(--accent);color:#0b0d10;font-weight:900;font-size:16px;margin:10px 0}
+#scanner{display:none;border-radius:18px;overflow:hidden;background:#000;margin-top:12px}
+#scanner video{width:100%;display:block}
+.product{display:none;margin-top:12px;padding:14px;border:1px solid var(--line);border-radius:16px;background:#0b0f13}
+.product h3{margin-top:0}.macro{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.macro div{background:#151a20;padding:8px;border-radius:10px;text-align:center;font-size:12px}.macro b{display:block;font-size:16px;color:var(--accent)}
+.err{color:#ffb4b4;font-size:13px}.ok{color:#dfffaa;font-size:13px}
+</style>
+<style>
+.stickyNav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom));width:min(94%,620px);z-index:999;background:rgba(16,20,26,.94);backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:20px;padding:7px;display:grid;grid-template-columns:repeat(4,1fr);box-shadow:0 15px 45px #0008}
+.stickyNav button{border:0;background:transparent;color:#9ba6b2;padding:9px 3px;border-radius:13px;font-size:11px;font-weight:800}.stickyNav button b{display:block;font-size:20px}.stickyNav button.active{background:#20272e;color:var(--accent)}
+.dash{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.tile{background:linear-gradient(180deg,#171c22,#101419);border:1px solid var(--line);border-radius:20px;padding:15px}.tile strong{font-size:26px;display:block}.tile small{color:var(--muted)}
+.timer{position:fixed;right:16px;top:calc(16px + env(safe-area-inset-top));z-index:1000;background:#11171d;border:1px solid var(--line);border-radius:16px;padding:9px 12px;box-shadow:0 8px 30px #0008}.timer b{color:var(--accent);font-size:20px}.timer button{border:0;border-radius:8px;padding:5px 8px;font-weight:800}
+.hist{width:100%;border-collapse:collapse}.hist td,.hist th{padding:8px;border-bottom:1px solid var(--line);font-size:12px;text-align:left}
+body{padding-bottom:95px}
+</style>
+<style>
+.real-machine{height:190px;border-radius:16px;overflow:hidden;background:#0b0f13;position:relative;margin-bottom:12px}
+.real-machine img{width:100%;height:100%;object-fit:cover;display:block}
+.real-machine .caption{position:absolute;left:10px;bottom:10px;background:rgba(0,0,0,.72);backdrop-filter:blur(6px);padding:7px 10px;border-radius:10px;font-size:11px;font-weight:800;color:#fff}
+.machine-link{font-size:11px;color:var(--muted);display:block;margin-top:7px}
+</style>
+<link href="manifest.json" rel="manifest"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/><meta content="EVO Fit Coach" name="apple-mobile-web-app-title"/></head>
+<body>
+<div class="wrap"><div class="appTopbar"><div><div class="appBrand">EVO <span>FIT</span></div><div class="appSub">Coach · Jonction</div></div><div class="topActions"><button class="iconBtn" onclick="showToast('Tes données sont enregistrées sur cet appareil.')">💾</button><button class="iconBtn" onclick="installApp()">＋</button></div></div>
+<header class="hero">
+<div class="eyebrow">EVO FITNESS · GENÈVE JONCTION</div>
+<h1>Ton programme<br/>12 semaines 💪</h1>
+<p class="sub">Objectif : <b>perdre du gras, construire du muscle et dessiner le haut du corps</b>. Niveau débutant · 103 kg · 4 séances/semaine.</p>
+<div class="stats"><div class="stat"><b>4×</b><span>séances / semaine</span></div><div class="stat"><b>60–75′</b><span>par séance</span></div><div class="stat"><b>7–10k</b><span>pas / jour cible</span></div></div>
+<div class="notice"><b>📍 Salle :</b> EVO Genève Jonction, Boulevard Saint-Georges 16. Le club fait 550 m², avec zones cardio, résistance, poids libres, playground et mobilité. Horaires annoncés : 06:00–23:00, 7j/7. <br/><br/><b>🎯 Règle n°1 :</b> commence léger. Les dessins ci-dessous sont des schémas pédagogiques des mouvements, pas des photos exactes des machines présentes dans ton club.</div>
+</header>
+<section class="panel appPage activePage" data-page="dashboard" id="dashboard">
+<h2 style="margin-top:0">🏠 Tableau de bord</h2>
+<div class="dash">
+<div class="tile"><small>Calories aujourd'hui</small><strong><span id="dashCal">0</span></strong><small>kcal enregistrées</small></div>
+<div class="tile"><small>Pas aujourd'hui</small><strong><span id="dashSteps">0</span></strong><small>objectif <span id="dashStepGoal">8000</span></small></div>
+<div class="tile"><small>Poids</small><strong><span id="dashWeight">103</span> kg</strong><small>objectif 85 kg</small></div>
+<div class="tile"><small>Programme</small><strong>4×</strong><small>séances / semaine</small></div>
+</div>
+</section>
+<section class="panel appPage" data-page="training" id="training">
+<h2 style="margin-top:0">📅 Organisation</h2>
+<div class="rules">
+<div class="rule"><b>Lundi</b><br/>Push · pectoraux / épaules / triceps</div>
+<div class="rule"><b>Mardi</b><br/>Pull · dos / biceps</div>
+<div class="rule"><b>Jeudi</b><br/>Jambes + cardio</div>
+<div class="rule"><b>Samedi</b><br/>Haut du corps complet</div>
+</div>
+</section>
+<section class="day appPage" data-page="training"><h2>🟥 Jour 1 — PUSH</h2><div class="grid"><div class="exercise-card"><div class="real-machine"><img alt="Machine Chest Press — Life Fitness Axiom" loading="lazy" src="https://shop.lifefitness.com/cdn/shop/files/axiom-series-chest-press1000x1000-charcoal.jpg?v=1767810869&amp;width=1000"/><div class="caption">Machine Chest Press — Life Fitness Axiom</div></div><div class="tag">Pectoraux</div><h3>Développé poitrine machine</h3><div class="meta"><b>3 × 8–12</b><span>Repos 90 s</span></div><p>Réglage du siège : poignées au milieu de la poitrine. Pousse sans verrouiller brutalement les coudes.</p><div class="log"><label>Charge <input placeholder="kg" type="text"/></label><label>Reps <input placeholder="ex. 10" type="text"/></label><label>✓ <input type="checkbox"/></label></div><span class="machine-link">📸 Photo précise de la machine de référence</span></div><div class="exercise-card"><div class="real-machine"><img alt="Banc incliné + haltères — référence visuelle" loading="lazy" src="https://energiefitness.in/cdn/shop/files/India_s_Best_Luxury_super_bench_With_Multiple_Workouts_ER-939.jpg?v=1773127622&amp;width=1500"/><div class="caption">Banc incliné + haltères — référence visuelle</div></div><div class="tag">Pectoraux</div><h3>Développé incliné haltères</h3><div class="meta"><b>3 × 8–12</b><span>Repos 90 s</span></div><p>Banc incliné modérément. Descends avec contrôle puis pousse verticalement.</p><div class="log"><label>Charge <input placeholder="kg" type="text"/></label><label>Reps <input placeholder="ex. 10" type="text"/></label><label>✓ <input type="checkbox"/></label></div><span class="machine-link">📸 Référence visuelle de l'équipement</span></div><div class="exercise-card"><div class="real-machine"><img alt="Élévations latérales avec haltères — référence visuelle" loading="lazy" src="https://cdn.shopify.com/s/files/1/1214/7132/files/mt-dumbbell-lateral-raises-900x675_138ce5d0-4894-4394-b694-2a0bdd835b71_1000x.jpg?v=1706739435"/><div class="caption">Élévations latérales avec haltères — référence visuelle</div></div><div class="tag">Épaules</div><h3>Élévations latérales</h3><div class="meta"><b>3 × 12–20</b><span>Repos 60 s</span></div><p>Petite flexion des coudes. Monte jusqu'à environ l'horizontale sans élan.</p><div class="log"><label>Charge <input placeholder="kg" type="text"/></label><label>Reps <input placeholder="ex. 10" type="text"/></label><label>✓ <input type="checkbox"/></label></div><span class="machine-link">📸 Photo précise de la machine de référence</span></div><div class="exercise-card"><div class="real-machine"><img alt="Machine Triceps Extension — Life Fitness Axiom" loading="lazy" src="https://shop.lifefitness.com/cdn/shop/files/axiom-series-triceps-extension1000x1000-charcoal.jpg?v=1767895085&amp;width=1000"/><div class="caption">Machine Triceps Extension — Life Fitness Axiom</div></div><div class="tag">Triceps</div><h3>Extension triceps à la poulie</h3><div class="meta"><b>3 × 10–15</b><span>Repos 60 s</span></div><p>Coudes proches du corps. Seul l'avant-bras bouge.</p><div class="log"><label>Charge <input placeholder="kg" type="text"/></label><label>Reps <input placeholder="ex. 10" type="text"/></label><label>✓ <input type="checkbox"/></label></div><span class="machine-link">📸 Photo précise de la machine de référence</span></div><div class="exercise-card"><div class="real-machine"><img alt="Dual Adjustable Pulley — référence pour crunch à la poulie" loading="lazy" src="https://www.f1-recreation.com.tw/images/com_hikashop/upload/life_fitness_axiom_series_dual_adjustable_pulley_front_view.jpg"/><div class="caption">Dual Adjustable Pulley — référence pour crunch à la poulie</div></div><div class="tag">Abdos</div><h3>Crunch à la poulie</h3><div class="meta"><b>3 × 12–15</b><span>Repos 60 s</span></div><p>Enroule le buste plutôt que de simplement tirer avec les bras.</p><div class="log"><label>Charge <input placeholder="kg" type="text"/></label><label>Reps <input placeholder="ex. 10" type="text"/></label><label>✓ <input type="checkbox"/></label></div><span class="machine-link">📸 Photo précise de la machine de référence</span></div><div class="exercise-card"><div class="real-machine"><img alt="Tapis incliné — référence cardio" loading="lazy" src="https://i.garagegymreviews.com/256/078/589/1/woman-walking-on-high-inlcine-treadmill.webp"/><div class="caption">Tapis incliné — référence cardio</div></div><div class="tag">Cardio</div><h3>Marche inclinée / vélo</h3><div class="meta"><b>15–25 min</b><span>Repos —</span></div><p>Intensité modérée : tu peux encore parler mais tu es essoufflé.</p><div class="log"><label>Charge <input placeholder="kg" type="text"/></label><label>Reps <input placeholder="ex. 10" type="text"/></label><label>✓ <input type="checkbox"/></label></div><span class="machine-link">📸 Référence visuelle du matériel cardio</span></div></div></section><section class="day appPage" data-page="training"><h2>🟦 Jour 2 — PULL</h2><div class="grid"><div class="exercise-card"><div class="real-machine"><img alt="Machine Lat Pulldown — Life Fitness Axiom" loading="lazy" src="https://www.lifefitness.sk/gfx/administration/js/ckeditor/kcfinder/upload/file/304-598-life-fitness-axiom-series-lat-pulldown-full-shroud-op-lp-1-.png"/><div class="caption">Machine Lat Pulldown — Life Fitness Axiom</div></div><div class="tag">Dos</div><h3>Tirage vertical</h3><div class="meta"><b>3 × 8–12</b><span>Repos 90 s</span></div><p>Poitrine haute, tire les coudes vers les côtes. Évite de tirer derrière la nuque.</p><div class="log"><label>Charge <input placeholder="kg" type="text"/></label><label>Reps <input placeholder="ex. 10" type="text"/></label><label>✓ <input type="checkbox"/></label></div><span class="machine-link">📸 Photo précise de la machine de référence</span></div><div class="exercise-card"><div class="real-machine"><img alt="Dual Adjustable Pulley — référence pour rowing à la poulie" loading="lazy" src="https://www.f1-recreation.com.tw/images/com_hikashop/upload/life_fitness_axiom_series_dual_adjustable_pulley_front_view.jpg"/><div class="caption">Dual Adjustable Pulley — référence pour rowing à la poulie</div></div><div class="tag">Dos</div><h3>Rowing assis à la poulie</h3><div class="meta"><b>3 × 8–12</b><span>Repos 90 s</span></div><p>Dos neutre, tire la poignée vers le bas du ventre et contrôle le retour.</p><div class="log"><label>Charge <input placeholder="kg" type="text"/></label><label>Reps <input placeholder="ex. 10" type="text"/></label><label>✓ <input type="checkbox"/></label></div><span class="machine-link">📸 Photo précise de la machine de référence</span></div><div class="exercise-card"><div class="real-machine"><img alt="Curl avec haltères — référence visuelle" loading="lazy" src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Dumbbell-Bicep-Curls.jpg?width=700"/><div class="caption">Curl avec haltères — référence visuelle</div></div><div class="tag">Biceps</div><h3>Curl haltères</h3><div class="meta"><b>3 × 10–15</b><span>Repos 60 s</span></div><p>Garde les coudes stables et évite de balancer le buste.</p><div class="log"><label>Charge <input placeholder="kg" type="text"/></label><label>Reps <input placeholder="ex. 10" type="text"/></label><label>✓ <input type="checkbox"/></label></div><span class="machine-link">📸 Référence visuelle de l'équipement</span></div><div class="exercise-card"><div class="real-machine"><img alt="Élévations latérales avec haltères — référence visuelle" loading="lazy" src="https://cdn.shopify.com/s/files/1/1214/7132/files/mt-dumbbell-lateral-raises-900x675_138ce5d0-4894-4394-b694-2a0bdd835b71_1000x.jpg?v=1706739435"/><div class="caption">Élévations latérales avec haltères — référence visuelle</div></div><div class="tag">Épaules</div><h3>Élévations latérales</h3><div class="meta"><b>3 × 12–20</b><span>Repos 60 s</span></div><p>Petite flexion des coudes. Monte jusqu'à environ l'horizontale sans élan.</p><div class="log"><label>Charge <input placeholder="kg" type="text"/></label><label>Reps <input placeholder="ex. 10" type="text"/></label><label>✓ <input type="checkbox"/></label></div><span class="machine-link">📸 Photo précise de la machine de référence</span></div><div class="exercise-card"><div class="real-machine"><img alt="Dual Adjustable Pulley — référence pour crunch à la poulie" loading="lazy" src="https://www.f1-recreation.com.tw/images/com_hikashop/upload/life_fitness_axiom_series_dual_adjustable_pulley_front_view.jpg"/><div class="caption">Dual Adjustable Pulley — référence pour crunch à la poulie</div></div><div class="tag">Abdos</div><h3>Crunch à la poulie</h3><div class="meta"><b>3 × 12–15</b><span>Repos 60 s</span></div><p>Enroule le buste plutôt que de simplement tirer avec les bras.</p><div class="log"><label>Charge <input placeholder="kg" type="text"/></label><label>Reps <input placeholder="ex. 10" type="text"/></label><label>✓ <input type="checkbox"/></label></div><span class="machine-link">📸 Photo précise de la machine de référence</span></div><div class="exercise-card"><div class="real-machine"><img alt="Tapis incliné — référence cardio" loading="lazy" src="https://i.garagegymreviews.com/256/078/589/1/woman-walking-on-high-inlcine-treadmill.webp"/><div class="caption">Tapis incliné — référence cardio</div></div><div class="tag">Cardio</div><h3>Marche inclinée / vélo</h3><div class="meta"><b>15–25 min</b><span>Repos —</span></div><p>Intensité modérée : tu peux encore parler mais tu es essoufflé.</p><div class="log"><label>Charge <input placeholder="kg" type="text"/></label><label>Reps <input placeholder="ex. 10" type="text"/></label><label>✓ <input type="checkbox"/></label></div><span class="machine-link">📸 Référence visuelle du matériel cardio</span></div></div></section><section class="day appPage" data-page="training"><h2>🟩 Jour 3 — JAMBES</h2><div class="grid"><div class="exercise-card"><div class="real-machine"><img alt="Machine Leg Press — Life Fitness Axiom" loading="lazy" src="https://shop.lifefitness.com/cdn/shop/files/axiom-series-leg-press-charcoal-black-1000x1000.jpg?v=1748945177&amp;width=1000"/><div class="caption">Machine Leg Press — Life Fitness Axiom</div></div><div class="tag">Jambes</div><h3>Presse à cuisses</h3><div class="meta"><b>3 × 8–12</b><span>Repos 120 s</span></div><p>Amplitude confortable et genoux dans l'axe des pieds. Ne cherche pas la charge maximale.</p><div class="log"><label>Charge <input placeholder="kg" type="text"/></label><label>Reps <input placeholder="ex. 10" type="text"/></label><label>✓ <input type="checkbox"/></label></div><span class="machine-link">📸 Photo précise de la machine de référence</span></div><div class="exercise-card"><div class="real-machine"><img alt="Machine Leg Curl — Life Fitness Axiom" loading="lazy" src="https://shop.lifefitness.com/cdn/shop/files/axiom-leg-curl-charcoal-black_1000x1000_a2eabf9b-7f98-45e3-81f5-d65a9974d475.jpg?v=1748945224&amp;width=1000"/><div class="caption">Machine Leg Curl — Life Fitness Axiom</div></div><div class="tag">Ischio-jambiers</div><h3>Leg curl</h3><div class="meta"><b>3 × 10–15</b><span>Repos 75 s</span></div><p>Mouvement contrôlé, sans à-coups.</p><div class="log"><label>Charge <input placeholder="kg" type="text"/></label><label>Reps <input placeholder="ex. 10" type="text"/></label><label>✓ <input type="checkbox"/></label></div><span class="machine-link">📸 Photo précise de la machine de référence</span></div><div class="exercise-card"><div class="real-machine"><img alt="Machine Leg Extension — Life Fitness Axiom" loading="lazy" src="https://cdn11.bigcommerce.com/s-hcb73f16u2/images/stencil/1280x1280/products/1944/11150/OP-LE-2__87404.1739234825.png?c=1"/><div class="caption">Machine Leg Extension — Life Fitness Axiom</div></div><div class="tag">Quadriceps</div><h3>Leg extension</h3><div class="meta"><b>2 × 10–15</b><span>Repos 75 s</span></div><p>Charge modérée et mouvement contrôlé.</p><div class="log"><label>Charge <input placeholder="kg" type="text"/></label><label>Reps <input placeholder="ex. 10" type="text"/></label><label>✓ <input type="checkbox"/></label></div><span class="machine-link">📸 Photo précise de la machine de référence</span></div><div class="exercise-card"><div class="real-machine"><img alt="Dual Adjustable Pulley — référence pour crunch à la poulie" loading="lazy" src="https://www.f1-recreation.com.tw/images/com_hikashop/upload/life_fitness_axiom_series_dual_adjustable_pulley_front_view.jpg"/><div class="caption">Dual Adjustable Pulley — référence pour crunch à la poulie</div></div><div class="tag">Abdos</div><h3>Crunch à la poulie</h3><div class="meta"><b>3 × 12–15</b><span>Repos 60 s</span></div><p>Enroule le buste plutôt que de simplement tirer avec les bras.</p><div class="log"><label>Charge <input placeholder="kg" type="text"/></label><label>Reps <input placeholder="ex. 10" type="text"/></label><label>✓ <input type="checkbox"/></label></div><span class="machine-link">📸 Photo précise de la machine de référence</span></div><div class="exercise-card"><div class="real-machine"><img alt="Tapis incliné — référence cardio" loading="lazy" src="https://i.garagegymreviews.com/256/078/589/1/woman-walking-on-high-inlcine-treadmill.webp"/><div class="caption">Tapis incliné — référence cardio</div></div><div class="tag">Cardio</div><h3>Marche inclinée / vélo</h3><div class="meta"><b>15–25 min</b><span>Repos —</span></div><p>Intensité modérée : tu peux encore parler mais tu es essoufflé.</p><div class="log"><label>Charge <input placeholder="kg" type="text"/></label><label>Reps <input placeholder="ex. 10" type="text"/></label><label>✓ <input type="checkbox"/></label></div><span class="machine-link">📸 Référence visuelle du matériel cardio</span></div></div></section><section class="day appPage" data-page="training"><h2>🟨 Jour 4 — HAUT DU CORPS</h2><div class="grid"><div class="exercise-card"><div class="real-machine"><img alt="Machine Chest Press — Life Fitness Axiom" loading="lazy" src="https://shop.lifefitness.com/cdn/shop/files/axiom-series-chest-press1000x1000-charcoal.jpg?v=1767810869&amp;width=1000"/><div class="caption">Machine Chest Press — Life Fitness Axiom</div></div><div class="tag">Pectoraux</div><h3>Développé poitrine machine</h3><div class="meta"><b>3 × 8–12</b><span>Repos 90 s</span></div><p>Réglage du siège : poignées au milieu de la poitrine. Pousse sans verrouiller brutalement les coudes.</p><div class="log"><label>Charge <input placeholder="kg" type="text"/></label><label>Reps <input placeholder="ex. 10" type="text"/></label><label>✓ <input type="checkbox"/></label></div><span class="machine-link">📸 Photo précise de la machine de référence</span></div><div class="exercise-card"><div class="real-machine"><img alt="Machine Lat Pulldown — Life Fitness Axiom" loading="lazy" src="https://www.lifefitness.sk/gfx/administration/js/ckeditor/kcfinder/upload/file/304-598-life-fitness-axiom-series-lat-pulldown-full-shroud-op-lp-1-.png"/><div class="caption">Machine Lat Pulldown — Life Fitness Axiom</div></div><div class="tag">Dos</div><h3>Tirage vertical</h3><div class="meta"><b>3 × 8–12</b><span>Repos 90 s</span></div><p>Poitrine haute, tire les coudes vers les côtes. Évite de tirer derrière la nuque.</p><div class="log"><label>Charge <input placeholder="kg" type="text"/></label><label>Reps <input placeholder="ex. 10" type="text"/></label><label>✓ <input type="checkbox"/></label></div><span class="machine-link">📸 Photo précise de la machine de référence</span></div><div class="exercise-card"><div class="real-machine"><img alt="Dual Adjustable Pulley — référence pour rowing à la poulie" loading="lazy" src="https://www.f1-recreation.com.tw/images/com_hikashop/upload/life_fitness_axiom_series_dual_adjustable_pulley_front_view.jpg"/><div class="caption">Dual Adjustable Pulley — référence pour rowing à la poulie</div></div><div class="tag">Dos</div><h3>Rowing assis à la poulie</h3><div class="meta"><b>3 × 8–12</b><span>Repos 90 s</span></div><p>Dos neutre, tire la poignée vers le bas du ventre et contrôle le retour.</p><div class="log"><label>Charge <input placeholder="kg" type="text"/></label><label>Reps <input placeholder="ex. 10" type="text"/></label><label>✓ <input type="checkbox"/></label></div><span class="machine-link">📸 Photo précise de la machine de référence</span></div><div class="exercise-card"><div class="real-machine"><img alt="Banc incliné + haltères — référence visuelle" loading="lazy" src="https://energiefitness.in/cdn/shop/files/India_s_Best_Luxury_super_bench_With_Multiple_Workouts_ER-939.jpg?v=1773127622&amp;width=1500"/><div class="caption">Banc incliné + haltères — référence visuelle</div></div><div class="tag">Pectoraux</div><h3>Développé incliné haltères</h3><div class="meta"><b>3 × 8–12</b><span>Repos 90 s</span></div><p>Banc incliné modérément. Descends avec contrôle puis pousse verticalement.</p><div class="log"><label>Charge <input placeholder="kg" type="text"/></label><label>Reps <input placeholder="ex. 10" type="text"/></label><label>✓ <input type="checkbox"/></label></div><span class="machine-link">📸 Référence visuelle de l'équipement</span></div><div class="exercise-card"><div class="real-machine"><img alt="Élévations latérales avec haltères — référence visuelle" loading="lazy" src="https://cdn.shopify.com/s/files/1/1214/7132/files/mt-dumbbell-lateral-raises-900x675_138ce5d0-4894-4394-b694-2a0bdd835b71_1000x.jpg?v=1706739435"/><div class="caption">Élévations latérales avec haltères — référence visuelle</div></div><div class="tag">Épaules</div><h3>Élévations latérales</h3><div class="meta"><b>3 × 12–20</b><span>Repos 60 s</span></div><p>Petite flexion des coudes. Monte jusqu'à environ l'horizontale sans élan.</p><div class="log"><label>Charge <input placeholder="kg" type="text"/></label><label>Reps <input placeholder="ex. 10" type="text"/></label><label>✓ <input type="checkbox"/></label></div><span class="machine-link">📸 Photo précise de la machine de référence</span></div><div class="exercise-card"><div class="real-machine"><img alt="Curl avec haltères — référence visuelle" loading="lazy" src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Dumbbell-Bicep-Curls.jpg?width=700"/><div class="caption">Curl avec haltères — référence visuelle</div></div><div class="tag">Biceps</div><h3>Curl haltères</h3><div class="meta"><b>3 × 10–15</b><span>Repos 60 s</span></div><p>Garde les coudes stables et évite de balancer le buste.</p><div class="log"><label>Charge <input placeholder="kg" type="text"/></label><label>Reps <input placeholder="ex. 10" type="text"/></label><label>✓ <input type="checkbox"/></label></div><span class="machine-link">📸 Référence visuelle de l'équipement</span></div><div class="exercise-card"><div class="real-machine"><img alt="Machine Triceps Extension — Life Fitness Axiom" loading="lazy" src="https://shop.lifefitness.com/cdn/shop/files/axiom-series-triceps-extension1000x1000-charcoal.jpg?v=1767895085&amp;width=1000"/><div class="caption">Machine Triceps Extension — Life Fitness Axiom</div></div><div class="tag">Triceps</div><h3>Extension triceps à la poulie</h3><div class="meta"><b>3 × 10–15</b><span>Repos 60 s</span></div><p>Coudes proches du corps. Seul l'avant-bras bouge.</p><div class="log"><label>Charge <input placeholder="kg" type="text"/></label><label>Reps <input placeholder="ex. 10" type="text"/></label><label>✓ <input type="checkbox"/></label></div><span class="machine-link">📸 Photo précise de la machine de référence</span></div><div class="exercise-card"><div class="real-machine"><img alt="Dual Adjustable Pulley — référence pour crunch à la poulie" loading="lazy" src="https://www.f1-recreation.com.tw/images/com_hikashop/upload/life_fitness_axiom_series_dual_adjustable_pulley_front_view.jpg"/><div class="caption">Dual Adjustable Pulley — référence pour crunch à la poulie</div></div><div class="tag">Abdos</div><h3>Crunch à la poulie</h3><div class="meta"><b>3 × 12–15</b><span>Repos 60 s</span></div><p>Enroule le buste plutôt que de simplement tirer avec les bras.</p><div class="log"><label>Charge <input placeholder="kg" type="text"/></label><label>Reps <input placeholder="ex. 10" type="text"/></label><label>✓ <input type="checkbox"/></label></div><span class="machine-link">📸 Photo précise de la machine de référence</span></div></div></section>
+<section class="scanbox appPage" data-page="foodbox">
+<h2 style="margin-top:0">📷 Scanner un produit</h2>
+<p class="small">Scanne le code-barres avec la caméra de ton iPhone. La recherche utilise une base nutritionnelle ouverte ; les produits Coop/Migros présents dans cette base peuvent être reconnus. Vérifie toujours les valeurs affichées avec l'emballage.</p>
+<button class="scanbtn" onclick="startScanner()">📷 Ouvrir le scanner</button>
+<div id="scanner"><video id="video" playsinline=""></video></div>
+<div class="small" id="scanmsg"></div>
+<div class="product" id="product"></div>
+</section>
+<script>
+let stream=null, detector=null;
+async function startScanner(){
+ const box=document.getElementById('scanner'), video=document.getElementById('video'), msg=document.getElementById('scanmsg');
+ box.style.display='block'; msg.textContent='Autorise la caméra puis place le code-barres dans le cadre.';
+ try{
+   stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}});
+   video.srcObject=stream; await video.play();
+   if('BarcodeDetector' in window){
+     detector=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e']});
+     scanLoop();
+   }else{
+     msg.innerHTML='<span class="err">Le navigateur ne fournit pas BarcodeDetector. Utilise Safari récent ou saisis le code EAN manuellement.</span><br><input id="eanManual" type="text" inputmode="numeric" placeholder="EAN 13 chiffres" style="margin-top:8px;width:100%;padding:11px;border-radius:10px;background:#0b0f13;color:white;border:1px solid var(--line)"><button class="scanbtn" onclick="lookup(document.getElementById(\'eanManual\').value)">Rechercher</button>';
+   }
+ }catch(e){msg.innerHTML='<span class="err">Accès caméra refusé ou indisponible. Tu peux saisir le code EAN manuellement.</span><br><input id="eanManual" type="text" inputmode="numeric" placeholder="EAN 13 chiffres" style="margin-top:8px;width:100%;padding:11px;border-radius:10px;background:#0b0f13;color:white;border:1px solid var(--line)"><button class="scanbtn" onclick="lookup(document.getElementById(\'eanManual\').value)">Rechercher</button>';}
+}
+async function scanLoop(){
+ if(!detector)return;
+ try{const codes=await detector.detect(document.getElementById('video')); if(codes.length){await lookup(codes[0].rawValue); stopScanner(); return;}}catch(e){}
+ requestAnimationFrame(scanLoop);
+}
+function stopScanner(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;} document.getElementById('scanner').style.display='none';}
+async function lookup(ean){
+ ean=(ean||'').replace(/\D/g,''); const msg=document.getElementById('scanmsg'), box=document.getElementById('product');
+ if(!ean){msg.innerHTML='<span class="err">Code EAN invalide.</span>';return}
+ msg.textContent='Recherche du produit…';
+ try{
+   const r=await fetch('https://world.openfoodfacts.org/api/v2/product/'+ean+'.json');
+   const d=await r.json();
+   if(!d.product){msg.innerHTML='<span class="err">Produit non trouvé dans la base. Vérifie l’emballage ou ajoute-le manuellement.</span>';box.style.display='none';return}
+   const p=d.product,n=p.nutriments||{};
+   const kcal=n['energy-kcal_100g'] ?? n['energy-kcal'];
+   box.style.display='block';
+   box.innerHTML='<h3>'+esc(p.product_name||'Produit sans nom')+'</h3><div class="small">'+esc(p.brands||'')+' · EAN '+ean+'</div><div class="macro"><div><b>'+(kcal??'—')+'</b>kcal/100g</div><div><b>'+(n.proteins_100g??'—')+'</b>g prot.</div><div><b>'+(n.carbohydrates_100g??'—')+'</b>g gluc.</div><div><b>'+(n.fat_100g??'—')+'</b>g lip.</div></div><button class="scanbtn" onclick="addScanned('+JSON.stringify(p.product_name||'Produit')+','+(kcal||0)+')">+ Ajouter au journal</button>';
+   msg.innerHTML='<span class="ok">Produit trouvé. Vérifie les valeurs avec l’étiquette avant de l’ajouter.</span>';
+ }catch(e){msg.innerHTML='<span class="err">Recherche impossible. Vérifie ta connexion internet et réessaie.</span>'}
+}
+function esc(x){return String(x).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+function addScanned(name,kcal){addFood(name,String(Math.round(kcal||0)));document.getElementById('foodbox')?.scrollIntoView({behavior:'smooth'});}
+</script>
+<section class="foodbox appPage" data-page="foodbox" id="foodbox">
+<h2 style="margin-top:0">🍽️ Journal alimentaire &amp; calories</h2>
+<p class="small">Entre les aliments avec leur quantité et les calories indiquées sur l'emballage ou l'application que tu utilises. Le total est calculé automatiquement dans cette page.</p>
+<div class="foodgrid">
+<label>Objectif calories / jour<input id="target" inputmode="numeric" type="number" value="2400"/></label>
+<label>Poids du jour (kg)<input id="weight" inputmode="decimal" step="0.1" type="number" value="103"/></label>
+</div>
+<div id="foods"></div>
+<button onclick="addFood()" style="margin-top:12px;padding:11px 14px;border:0;border-radius:12px;background:var(--accent);font-weight:900">+ Ajouter un aliment</button>
+<div class="total"><span id="cal">0</span> kcal</div>
+<div class="progressbar"><i id="bar"></i></div>
+<p class="small" id="remaining"></p>
+</section>
+<section class="foodbox appPage" data-page="foodbox">
+<h2 style="margin-top:0">🚶 Pas &amp; activité</h2>
+<div class="foodgrid">
+<label>Pas aujourd'hui<input id="steps" inputmode="numeric" type="number" value="0"/></label>
+<label>Objectif de pas<input id="stepGoal" inputmode="numeric" type="number" value="8000"/></label>
+</div>
+<div class="total"><span id="stepText">0 / 8 000</span></div>
+<div class="progressbar"><i id="stepBar"></i></div>
+<p class="small">Objectif de départ : 8 000 pas/jour. Tu peux modifier ce chiffre selon ta récupération.</p>
+</section>
+<script>
+const foods=document.getElementById('foods');
+function addFood(name='',cal=''){
+ const row=document.createElement('div'); row.className='foodrow';
+ row.innerHTML=`<label>Aliment<input class="fn" type="text" placeholder="ex. poulet"></label>
+ <label>kcal<input class="fc" type="number" value="${cal}" inputmode="numeric"></label>
+ <label>Qté<input class="fq" type="text" placeholder="g"></label>
+ <button onclick="this.parentElement.remove();calc()">×</button>`;
+ foods.appendChild(row); row.querySelector('.fn').value=name;
+ row.querySelectorAll('input').forEach(x=>x.addEventListener('input',calc)); calc();
+}
+function calc(){
+ let total=0; document.querySelectorAll('.fc').forEach(x=>total+=Number(x.value)||0);
+ const target=Number(document.getElementById('target').value)||0;
+ document.getElementById('cal').textContent=Math.round(total);
+ document.getElementById('remaining').textContent=target?`${Math.max(target-total,0)} kcal restantes sur ton objectif · ${total>target?'Objectif dépassé de '+(total-target)+' kcal':''}`:'';
+ document.getElementById('bar').style.width=target?Math.min(total/target*100,100)+'%':'0%';
+}
+function stepsCalc(){
+ const n=Number(document.getElementById('steps').value)||0,g=Number(document.getElementById('stepGoal').value)||1;
+ document.getElementById('stepText').textContent=`${n.toLocaleString('fr-CH')} / ${g.toLocaleString('fr-CH')}`;
+ document.getElementById('stepBar').style.width=Math.min(n/g*100,100)+'%';
+}
+document.getElementById('target').addEventListener('input',calc);
+document.getElementById('steps').addEventListener('input',stepsCalc);
+document.getElementById('stepGoal').addEventListener('input',stepsCalc);
+addFood('Petit-déjeuner',''); addFood('Déjeuner',''); addFood('Dîner',''); addFood('Snack','');
+stepsCalc(); calc();
+</script>
+<section class="panel appPage" data-page="progress">
+<h2 style="margin-top:0">📈 Progression</h2>
+<div class="rules">
+<div class="rule"><b>Semaines 1–2</b><br/>Trouve des charges faciles à maîtriser. Garde 2–3 répétitions « en réserve ».</div>
+<div class="rule"><b>Semaines 3–6</b><br/>Essaie d'ajouter 1 répétition quand la technique reste propre.</div>
+<div class="rule"><b>Semaines 7–10</b><br/>Quand tu atteins le haut de la fourchette sur toutes les séries, augmente légèrement la charge.</div>
+<div class="rule"><b>Semaines 11–12</b><br/>Conserve la technique et compare tes charges, répétitions et mensurations au départ.</div>
+</div>
+<p class="sub" style="margin-top:14px">Exemple : 3×8–12 → si tu fais 12/12/12 proprement, augmente légèrement la charge à la prochaine séance et repars vers 8–10.</p>
+</section>
+<section class="panel appPage" data-page="progress">
+<h2 style="margin-top:0">🍽️ Pour la perte de poids</h2>
+<div class="rules">
+<div class="rule"><b>Protéines</b><br/>À chaque repas : poulet, poisson, œufs, viande maigre, skyr/fromage blanc, légumineuses…</div>
+<div class="rule"><b>Déficit modéré</b><br/>La perte de graisse dépend surtout d'un déficit énergétique régulier. Évite les régimes extrêmes.</div>
+<div class="rule"><b>Boissons</b><br/>Eau en priorité. Les calories liquides sont faciles à sous-estimer.</div>
+<div class="rule"><b>Sommeil</b><br/>Vise une routine de sommeil régulière pour faciliter récupération et adhérence au programme.</div>
+</div>
+</section>
+<section class="panel appPage" data-page="exercises" id="exercises"><div class="pageHead"><div><span class="eyebrow">BIBLIOTHÈQUE</span><h2>Exercices &amp; machines</h2><p class="sub">Retrouve rapidement la machine, le mouvement et les points clés.</p></div><input class="searchBox" id="exerciseSearch" oninput="filterExercises()" placeholder="🔎 Rechercher un exercice..."/></div><div class="exerciseLibrary" id="exerciseLibrary"></div></section><section class="panel appPage" data-page="profile" id="profile"><div class="pageHead"><div><span class="eyebrow">MON PROFIL</span><h2>Réglages &amp; objectifs</h2><p class="sub">Personnalise l'application sans perdre tes données.</p></div></div><div class="settingsGrid">
+<div class="card settingCard"><b>🎯 Objectif calories</b><span>Ton objectif quotidien</span><input id="profileTarget" inputmode="numeric" placeholder="kcal" type="number"/></div>
+<div class="card settingCard"><b>🚶 Objectif pas</b><span>Ta cible quotidienne</span><input id="profileSteps" inputmode="numeric" placeholder="pas" type="number"/></div>
+<div class="card settingCard"><b>⚖️ Poids actuel</b><span>Utilisé dans le tableau de bord</span><input id="profileWeight" inputmode="decimal" placeholder="kg" step="0.1" type="number"/></div>
+<div class="card settingCard"><b>⏱️ Repos</b><span>Durée par défaut</span><button class="settingBtn" onclick="restTimer(90)">90 secondes</button></div></div>
+<div class="card dangerCard"><b>🔄 Données</b><p class="small">Les données sont stockées localement dans ce navigateur.</p><button class="dangerBtn" onclick="resetApp()">Réinitialiser les données</button></div></section><section class="panel appPage" data-page="progress" id="progress">
+<h2 style="margin-top:0">📉 Historique du poids</h2>
+<div class="foodgrid"><label>Date<input id="wdate" type="date"/></label><label>Poids (kg)<input id="wval" inputmode="decimal" placeholder="103.0" step="0.1" type="number"/></label></div>
+<button class="scanbtn" onclick="saveWeight()">Enregistrer la pesée</button>
+<table class="hist"><thead><tr><th>Date</th><th>Poids</th><th>Évolution</th></tr></thead><tbody id="weightHistory"></tbody></table>
+</section>
+<section class="panel appPage" data-page="exercises">
+<h2 style="margin-top:0">📸 Photos des équipements</h2>
+<p class="sub">J’ai remplacé les schémas par des <b>photos officielles d’EVO Fitness Genève Jonction</b>. Elles montrent les vraies zones de musculation, la station de poulies, les machines guidées, les poids libres et les rameurs du club. EVO indique également les marques d’équipement utilisées dans ses clubs, dont Technogym, Precor, Matrix et Life Fitness. Les photos ne permettent toutefois pas de confirmer le modèle exact de chaque machine individuelle.</p>
+<p class="small">Source : <a href="https://evofitness.ch/fr/clubs/geneve/jonction/" target="_blank">EVO Fitness Genève Jonction</a> · <a href="https://evofitness.ch/fr/entrainement/" target="_blank">Zones et équipements EVO</a></p>
+</section>
+<style>
+.v6guide{background:#0f1419;border:1px solid #2b333c;border-radius:24px;padding:16px;margin-top:22px}
+.v6card{background:#151b21;border:1px solid #2a323a;border-radius:20px;overflow:hidden;margin:12px 0}
+.v6img{width:100%;height:210px;object-fit:cover;display:block}
+.v6body{padding:14px} .v6body h3{margin:0 0 6px} .v6tag{display:inline-block;background:#202a17;color:#dfffaa;border-radius:9px;padding:5px 8px;font-size:11px;font-weight:800}
+.v6steps{display:grid;gap:7px;margin-top:10px} .v6steps div{background:#0d1115;border-radius:11px;padding:9px;font-size:13px;color:#cbd3db}
+.v6warn{margin-top:9px;color:#ffd7a8;font-size:12px} .v6src{font-size:11px;color:#87919c;margin-top:9px}
+</style>
+<section class="v8gallery appPage" data-page="exercises">
+<h2>📸 Références visuelles — mouvement + machine</h2>
+<p class="sub">Les exercices du programme utilisent maintenant une <b>image correspondant directement à leur équipement</b> : machine de musculation pour les exercices guidés, poulie pour les exercices à câble et haltères/banc pour les exercices libres.</p>
+<div class="v8cards">
+<div class="v8card"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Shoulder-press-machine-1.png?width=607"/><b>Chest Press</b><span>Développé poitrine machine</span></div>
+<div class="v8card"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Dumbbell-incline-bench-press-1.png?width=594"/><b>Incline Dumbbell Press</b><span>Développé incliné haltères</span></div>
+<div class="v8card"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Chest%20flies%20with%20cable%20machine%20-%20cable%20crossover%20flies.jpg?width=1280"/><b>Cable Crossover</b><span>Écarté / crossover à la poulie</span></div>
+<div class="v8card"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Lat_pulldown.png?width=900"/><b>Lat Pulldown</b><span>Tirage vertical</span></div>
+<div class="v8card"><img src="https://static.wixstatic.com/media/8fe1c2_6c87441203a14d7cbf2047a51b48bc21~mv2.webp/v1/fill/w_1000,h_525,al_c,q_85,usm_0.66_1.00_0.01/8fe1c2_6c87441203a14d7cbf2047a51b48bc21~mv2.webp"/><b>Seated Row</b><span>Rowing assis</span></div>
+<div class="v8card"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Shoulder-press-machine-1.png?width=607"/><b>Shoulder Press</b><span>Développé épaules</span></div>
+<div class="v8card"><img src="https://2.bp.blogspot.com/-O917DqVdWsM/WeH8f15jIbI/AAAAAAAAClM/b_VqBLkYOfMBR-mSLnRc5xL6On2bl3I4QCLcBGAs/s1600/Shoulder-Workout-For-Mass.png"/><b>Lateral Raise</b><span>Élévations latérales</span></div>
+<div class="v8card"><img src="https://www.academiacentralfitness.com.br/wp-content/uploads/2023/03/Cable-Tricep-Pushdowns.png"/><b>Triceps Pushdown</b><span>Extension triceps poulie</span></div>
+<div class="v8card"><img src="https://i.pinimg.com/736x/6a/7f/8b/6a7f8b7e4a0d8f1e1f3a1b3c5f1c2f4e.jpg"/><b>Dumbbell Curl</b><span>Curl haltères</span></div>
+<div class="v8card"><img src="https://sport-calculator.com/images/blog/leg-press-muscles-diagram.webp"/><b>Leg Press</b><span>Presse à cuisses</span></div>
+<div class="v8card"><img src="https://blog.kakaocdn.net/dna/spk9V/btrDcrm9xb3/AAAAAAAAAAAAAAAAAAAAAF8Y4yZkUjSZ_sywnyI6Lsiva0fB4oC4gsht6h1-1iQl/img.png"/><b>Leg Extension</b><span>Extension des jambes</span></div>
+<div class="v8card"><img src="https://www.dmoose.com/cdn/shop/articles/Main_Image_add74410-4f95-4087-827c-d36595b107ed.jpg?v=1671201777"/><b>Leg Curl</b><span>Flexion des jambes</span></div>
+<div class="v8card"><img src="https://fitnessvolt.com/wp-content/uploads/2020/02/cable-crunches.jpg.webp"/><b>Cable Crunch</b><span>Crunch à la poulie</span></div>
+<div class="v8card"><img src="https://m.media-amazon.com/images/I/61IipZcS6PL._US500_.jpg"/><b>Incline Walk</b><span>Marche inclinée</span></div>
+</div>
+<div class="v8note">
+<b>💡 Pourquoi ces images ?</b> Elles montrent le mouvement, les points d'appui et les muscles sollicités.
+    Pour identifier la machine exacte de Jonction, la référence finale reste la machine présente dans la salle.
+    EVO confirme que Jonction dispose d'une zone résistance, d'une zone poids libres et d'une zone cardio,
+    mais sa page publique ne donne pas le modèle précis de chaque machine.
+   Les références incluent notamment Wikimedia Commons, FitnessVolt, DMoose et des guides d'exercices.</div>
+</section><section class="v6guide appPage" data-page="exercises">
+<h2 style="margin-top:0">🎯 V10 — Guide précis des machines</h2>
+<p class="sub">
+J’ai remplacé les photos générales d’EVO par des <b>photos de machines réelles et clairement identifiables</b>,
+principalement issues des fiches Life Fitness. Elles servent de <b>référence visuelle</b> pour reconnaître la machine,
+mais ne prouvent pas que le modèle exact photographié est celui installé à EVO Jonction.
+</p>
+<div class="v7notice">
+<b>⚠️ Important</b><br/>
+Les fabricants utilisent plusieurs modèles pour un même exercice. Les réglages ci-dessous correspondent au type de machine montré.
+Si la machine de Jonction est différente, suis d'abord les pictogrammes présents sur la machine.
+</div>
+<div class="v7grid">
+<div class="v7machine">
+<img alt="Life Fitness Axiom Chest Press" src="https://shop.lifefitness.com/cdn/shop/files/axiom-series-chest-press1000x1000-charcoal.jpg?v=1767810869&amp;width=1000"/>
+<div class="v7body">
+<span class="v6tag">POITRINE · MACHINE</span>
+<h3>Développé poitrine machine</h3>
+<div class="v7steps">
+<div><b>① Siège :</b> règle-le pour que les poignées arrivent environ au milieu de ta poitrine.</div>
+<div><b>② Dos :</b> garde le dos et les épaules contre le dossier.</div>
+<div><b>③ Départ :</b> coudes légèrement sous la ligne des épaules.</div>
+<div><b>④ Mouvement :</b> pousse sans verrouiller brutalement les coudes, puis reviens lentement.</div>
+</div>
+<a class="v7source" href="https://shop.lifefitness.com/products/axiom-series-chest-press" target="_blank">Voir la fiche Life Fitness →</a>
+</div>
+</div>
+<div class="v7machine">
+<img alt="Life Fitness Axiom Lat Pulldown" src="https://www.lifefitness.sk/gfx/administration/js/ckeditor/kcfinder/upload/file/304-598-life-fitness-axiom-series-lat-pulldown-full-shroud-op-lp-1-.png"/>
+<div class="v7body">
+<span class="v6tag">DOS · MACHINE</span>
+<h3>Tirage vertical</h3>
+<div class="v7steps">
+<div><b>① Assise :</b> installe-toi bien au fond du siège.</div>
+<div><b>② Cuisses :</b> place-les fermement sous les rouleaux.</div>
+<div><b>③ Prise :</b> prends la barre légèrement plus large que les épaules.</div>
+<div><b>④ Tirage :</b> amène la barre vers le haut de la poitrine, sans tirer derrière la nuque.</div>
+</div>
+<a class="v7source" href="https://shop.lifefitness.com/products/axiom-series-pulldown" target="_blank">Voir la fiche Life Fitness →</a>
+</div>
+</div>
+<div class="v7machine">
+<img alt="Life Fitness Axiom Seated Row" src="https://shop.lifefitness.com/cdn/shop/files/axiom-series-seated-row1000x1000-charcoal.jpg?v=1767883986&amp;width=1000"/>
+<div class="v7body">
+<span class="v6tag">DOS · MACHINE</span>
+<h3>Rowing assis</h3>
+<div class="v7steps">
+<div><b>① Pieds :</b> pose-les sur les plateformes et stabilise-toi.</div>
+<div><b>② Dos :</b> reste droit, poitrine ouverte.</div>
+<div><b>③ Tirage :</b> ramène les poignées vers le bas du ventre.</div>
+<div><b>④ Retour :</b> laisse les bras repartir sous contrôle sans arrondir brutalement le dos.</div>
+</div>
+<a class="v7source" href="https://shop.lifefitness.com/products/axiom-series-seated-row-1" target="_blank">Voir la fiche Life Fitness →</a>
+</div>
+</div>
+<div class="v7machine">
+<img alt="Life Fitness Axiom Shoulder Press" src="https://shop.lifefitness.com/cdn/shop/files/axiom-series-shoulder-press1000x1000-charcoal.jpg?v=1767894364&amp;width=1000"/>
+<div class="v7body">
+<span class="v6tag">ÉPAULES · MACHINE</span>
+<h3>Shoulder Press</h3>
+<div class="v7steps">
+<div><b>① Siège :</b> règle-le pour que les poignées soient proches du niveau des épaules.</div>
+<div><b>② Position :</b> dos contre le dossier, pieds stables au sol.</div>
+<div><b>③ Poussée :</b> pousse vers le haut de façon contrôlée.</div>
+<div><b>④ Retour :</b> redescends sans laisser tomber la charge.</div>
+</div>
+<a class="v7source" href="https://shop.lifefitness.com/products/axiom-series-seated-row" target="_blank">Voir la fiche Life Fitness →</a>
+</div>
+</div>
+<div class="v7machine">
+<img alt="Life Fitness Axiom Leg Press" src="https://shop.lifefitness.com/cdn/shop/files/axiom-series-leg-press-charcoal-black-1000x1000.jpg?v=1748945177&amp;width=1000"/>
+<div class="v7body">
+<span class="v6tag">JAMBES · MACHINE</span>
+<h3>Presse à cuisses</h3>
+<div class="v7steps">
+<div><b>① Dossier :</b> règle-le pour être confortable et garder le bassin stable.</div>
+<div><b>② Pieds :</b> place-les sur la plateforme à une largeur confortable.</div>
+<div><b>③ Descente :</b> fléchis les jambes en gardant les pieds bien en contact avec la plateforme.</div>
+<div><b>④ Poussée :</b> remonte sans verrouiller violemment les genoux.</div>
+</div>
+<a class="v7source" href="https://shop.lifefitness.com/products/axiom-series-leg-press" target="_blank">Voir la fiche Life Fitness →</a>
+</div>
+</div>
+<div class="v7machine">
+<img alt="Life Fitness Axiom Leg Extension" src="https://cdn11.bigcommerce.com/s-hcb73f16u2/images/stencil/1280x1280/products/1944/11150/OP-LE-2__87404.1739234825.png?c=1"/>
+<div class="v7body">
+<span class="v6tag">QUADRICEPS · MACHINE</span>
+<h3>Leg Extension</h3>
+<div class="v7steps">
+<div><b>① Dos :</b> règle le dossier pour être bien calé.</div>
+<div><b>② Rouleau :</b> positionne-le au niveau du bas du tibia, selon le réglage de la machine.</div>
+<div><b>③ Départ :</b> garde les genoux alignés avec l'axe de rotation indiqué par la machine.</div>
+<div><b>④ Mouvement :</b> tends les jambes sous contrôle puis redescends lentement.</div>
+</div>
+<a class="v7source" href="https://shop.lifefitness.com/products/axiom-series-leg-extension" target="_blank">Voir la fiche Life Fitness →</a>
+</div>
+</div>
+<div class="v7machine">
+<img alt="Life Fitness Axiom Leg Curl Extension" src="https://shop.lifefitness.com/cdn/shop/files/axiom-leg-curl-charcoal-black_1000x1000_a2eabf9b-7f98-45e3-81f5-d65a9974d475.jpg?v=1748945224&amp;width=1000"/>
+<div class="v7body">
+<span class="v6tag">ISCHIOS · MACHINE</span>
+<h3>Leg Curl</h3>
+<div class="v7steps">
+<div><b>① Réglage :</b> adapte le siège/dossier et le rouleau à ta longueur de tibia.</div>
+<div><b>② Stabilité :</b> garde les mains sur les poignées prévues.</div>
+<div><b>③ Mouvement :</b> fléchis les jambes de manière fluide sans donner d'à-coups.</div>
+<div><b>④ Retour :</b> contrôle complètement la remontée de la charge.</div>
+</div>
+<a class="v7source" href="https://shop.lifefitness.com/products/axiom-series-leg-curl-extension" target="_blank">Voir la fiche Life Fitness →</a>
+</div>
+</div>
+<div class="v7machine">
+<img alt="Life Fitness Axiom Dual Adjustable Pulley" src="https://www.f1-recreation.com.tw/images/com_hikashop/upload/life_fitness_axiom_series_dual_adjustable_pulley_front_view.jpg"/>
+<div class="v7body">
+<span class="v6tag">POULIE · MACHINE</span>
+<h3>Triceps à la poulie / Crunch à la poulie</h3>
+<div class="v7steps">
+<div><b>① Hauteur :</b> règle le point d'attache selon l'exercice.</div>
+<div><b>② Charge :</b> commence léger pour apprendre le trajet du câble.</div>
+<div><b>③ Triceps :</b> garde les coudes près du corps et pousse vers le bas.</div>
+<div><b>④ Crunch :</b> à genoux, fixe la corde et ramène les côtes vers le bassin sans tirer avec les bras.</div>
+</div>
+<a class="v7source" href="https://shop.lifefitness.com/products/axiom-dual-adjustable-pulley" target="_blank">Voir la fiche Life Fitness →</a>
+</div>
+</div>
+</div>
+<div class="v7legend">
+<b>📌 Comment reconnaître ta machine à Jonction :</b>
+si la forme, le siège, les poignées ou les rouleaux ne correspondent pas à la photo, ne force pas pour reproduire exactement l'image.
+Cherche d'abord le nom de l'exercice sur la plaque/pictogramme de la machine.
+</div>
+<p class="v6src">
+Sources visuelles et fiches techniques : Life Fitness et pages de distributeurs utilisées uniquement comme références de machines.
+Life Fitness documente notamment les modèles Axiom Chest Press, Lat Pulldown, Seated Row, Shoulder Press, Leg Press et Leg Extension.
+</p>
+</section>
+<footer class="footer">Programme mobile avec <b>photos de référence précises des machines</b>. Les photos montrent des modèles Life Fitness utilisés comme repères visuels et ne garantissent pas que le modèle exact installé à EVO Jonction soit identique. En cas de différence, suis les pictogrammes et réglages présents sur la machine.</footer>
+</div>
+<div class="timer">⏱️ <b id="timerText">00:00</b> <button onclick="restTimer(90)">90s</button></div>
+<nav class="stickyNav">
+<button class="active" data-page="dashboard" onclick="switchPage('dashboard',this)"><b>⌂</b><span>Accueil</span></button>
+<button data-page="training" onclick="switchPage('training',this)"><b>🏋️</b><span>Séances</span></button>
+<button data-page="exercises" onclick="switchPage('exercises',this)"><b>◉</b><span>Exercices</span></button>
+<button data-page="foodbox" onclick="switchPage('foodbox',this)"><b>🍽️</b><span>Nutrition</span></button>
+<button data-page="progress" onclick="switchPage('progress',this)"><b>↗</b><span>Progrès</span></button>
+<button data-page="profile" onclick="switchPage('profile',this)"><b>⚙</b><span>Profil</span></button>
+</nav>
+<script>
+function go(id,b){document.getElementById(id)?.scrollIntoView({behavior:'smooth'});document.querySelectorAll('.stickyNav button').forEach(x=>x.classList.remove('active'));b.classList.add('active')}
+let timerId=null;
+function restTimer(sec){clearInterval(timerId);let n=sec;const el=document.getElementById('timerText');const paint=()=>{el.textContent=String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0')};paint();timerId=setInterval(()=>{n--;paint();if(n<=0){clearInterval(timerId);if(navigator.vibrate)navigator.vibrate([200,100,200]);}},1000)}
+function saveState(){
+ const data={steps:document.getElementById('steps')?.value,goal:document.getElementById('stepGoal')?.value,target:document.getElementById('target')?.value,weight:document.getElementById('weight')?.value};
+ localStorage.setItem('evoState',JSON.stringify(data)); updateDash();
+}
+function updateDash(){
+ const cal=document.getElementById('cal')?.textContent||0, st=document.getElementById('steps')?.value||0, sg=document.getElementById('stepGoal')?.value||8000, w=document.getElementById('weight')?.value||103;
+ document.getElementById('dashCal').textContent=cal;document.getElementById('dashSteps').textContent=Number(st).toLocaleString('fr-CH');document.getElementById('dashStepGoal').textContent=Number(sg).toLocaleString('fr-CH');document.getElementById('dashWeight').textContent=w;
+}
+function saveWeight(){
+ const d=document.getElementById('wdate').value, w=parseFloat(document.getElementById('wval').value);if(!d||!w)return;
+ let a=JSON.parse(localStorage.getItem('weightHistory')||'[]');a.push({d,w});a.sort((x,y)=>x.d.localeCompare(y.d));localStorage.setItem('weightHistory',JSON.stringify(a));renderWeights();
+}
+function renderWeights(){
+ const a=JSON.parse(localStorage.getItem('weightHistory')||'[]'), tb=document.getElementById('weightHistory');tb.innerHTML='';
+ a.slice().reverse().forEach((x,i,rev)=>{const older=rev[i+1],delta=older?(x.w-older.w):0;tb.innerHTML+=`<tr><td>${x.d}</td><td>${x.w.toFixed(1)} kg</td><td>${older?(delta>0?'+':'')+delta.toFixed(1)+' kg':'—'}</td></tr>`});
+}
+window.addEventListener('load',()=>{
+ document.getElementById('wdate').value=new Date().toISOString().slice(0,10);
+ try{const d=JSON.parse(localStorage.getItem('evoState')||'{}');if(d.steps!==undefined)steps.value=d.steps;if(d.goal)stepGoal.value=d.goal;if(d.target)target.value=d.target;if(d.weight)weight.value=d.weight;}catch(e){}
+ ['steps','stepGoal','target','weight'].forEach(id=>document.getElementById(id)?.addEventListener('input',saveState));
+ document.querySelectorAll('.log input').forEach((x,i)=>{const k='gym_'+i;if(localStorage.getItem(k)!==null){if(x.type==='checkbox')x.checked=localStorage.getItem(k)==='1';else x.value=localStorage.getItem(k)}x.addEventListener('change',()=>localStorage.setItem(k,x.type==='checkbox'?(x.checked?'1':'0'):x.value))});
+ renderWeights();updateDash();setTimeout(updateDash,200);
+});
+const oldCalc=calc; calc=function(){oldCalc();updateDash();}; const oldSteps=stepsCalc; stepsCalc=function(){oldSteps();updateDash();};
+
+
+const APP_PAGES=['dashboard','training','exercises','foodbox','progress','profile'];
+function switchPage(id,btn){
+ document.querySelectorAll('section.appPage').forEach(el=>el.classList.toggle('activePage',el.dataset.page===id || el.id===id));
+ document.querySelectorAll('.stickyNav button').forEach(b=>b.classList.toggle('active',b===btn));
+ localStorage.setItem('evoPage',id);
+ window.scrollTo({top:0,behavior:'smooth'});
+ if(id==='exercises')buildExerciseLibrary();
+}
+function showToast(msg){const o=document.querySelector('.toast');if(o)o.remove();const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2200);}
+let deferredInstall=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;});
+async function installApp(){if(deferredInstall){deferredInstall.prompt();deferredInstall=null;return}showToast('Sur iPhone : Partager → Sur l’écran d’accueil');}
+function syncProfile(){[['profileTarget','target'],['profileSteps','stepGoal'],['profileWeight','weight']].forEach(([a,b])=>{const x=document.getElementById(a),y=document.getElementById(b);if(x&&y)x.value=y.value;});}
+function applyProfile(id){const m={profileTarget:'target',profileSteps:'stepGoal',profileWeight:'weight'},s=document.getElementById(id),d=document.getElementById(m[id]);if(s&&d){d.value=s.value;d.dispatchEvent(new Event('input',{bubbles:true}));saveState();}}
+function resetApp(){if(confirm('Réinitialiser les données enregistrées sur cet appareil ?')){localStorage.clear();location.reload();}}
+function buildExerciseLibrary(){const root=document.getElementById('exerciseLibrary');if(!root||root.dataset.ready==='1')return;const cards=[...document.querySelectorAll('section[data-page="training"] .exercise-card')],seen=new Set();cards.forEach((card,i)=>{const h=card.querySelector('h3'),img=card.querySelector('.real-machine img');if(!h||!img)return;const name=h.textContent.trim();if(seen.has(name))return;seen.add(name);const c=document.createElement('div');c.className='libCard';c.dataset.name=name.toLowerCase();c.innerHTML='<img loading="lazy" src="'+img.src+'" alt="'+name+'"><div class="libBody"><b>'+name+'</b><span>Référence équipement · séance</span><button onclick="openExercise('+i+')">Voir dans le programme</button></div>';root.appendChild(c);});root.dataset.ready='1';}
+function filterExercises(){const q=(document.getElementById('exerciseSearch')?.value||'').toLowerCase();document.querySelectorAll('.libCard').forEach(c=>c.style.display=c.dataset.name.includes(q)?'block':'none');}
+function openExercise(i){const b=document.querySelector('.stickyNav button[data-page="training"]');switchPage('training',b);const cards=[...document.querySelectorAll('section[data-page="training"] .exercise-card')];cards[i]?.scrollIntoView({behavior:'smooth',block:'start'});}
+window.addEventListener('load',()=>{const saved=localStorage.getItem('evoPage')||'dashboard';const b=document.querySelector('.stickyNav button[data-page="'+saved+'"]')||document.querySelector('.stickyNav button[data-page="dashboard"]');switchPage(b.dataset.page,b);syncProfile();['profileTarget','profileSteps','profileWeight'].forEach(id=>document.getElementById(id)?.addEventListener('input',()=>applyProfile(id)));if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});});
+</script>
+</body>
+</html>
