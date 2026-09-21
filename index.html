@@ -398,7 +398,26 @@ stepsCalc(); calc();
 <button class="scanbtn" type="button" onclick="enableNotifications()">🔔 Activer les notifications</button>
 <div id="notifStatus" class="small">Les notifications nécessitent l'autorisation du navigateur. Sur iPhone, installe d'abord l'app sur l'écran d'accueil.</div>
 </section>
-<section class="panel appPage" data-page="profile" id="profile"><div class="pageHead"><div><span class="eyebrow">MON PROFIL</span><h2>Réglages &amp; objectifs</h2><p class="sub">Personnalise l'application sans perdre tes données.</p></div></div><div class="settingsGrid">
+<section class="panel appPage" data-page="profile" id="profile">
+<div class="panel cloudPanel" style="margin-top:12px">
+  <h3 style="margin-top:0">☁️ Sauvegarde cloud</h3>
+  <div class="small">Tes charges, séries, poids et réglages peuvent être synchronisés avec ton compte Supabase. Les clés publiques Supabase peuvent être utilisées dans une app web ; les règles RLS protègent les données.</div>
+  <div class="settingsGrid" style="margin-top:10px">
+    <label>URL Supabase<input id="sbUrl" type="text" placeholder="https://xxxx.supabase.co" autocomplete="off"></label>
+    <label>Clé anon / publishable<input id="sbKey" type="text" placeholder="eyJ..." autocomplete="off"></label>
+  </div>
+  <div class="settingsGrid" style="margin-top:10px">
+    <label>Email<input id="sbEmail" type="email" placeholder="toi@email.com" autocomplete="email"></label>
+    <label>Mot de passe<input id="sbPassword" type="password" placeholder="••••••••" autocomplete="current-password"></label>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px">
+    <button class="settingBtn" onclick="saveSupabaseConfig()">💾 Enregistrer</button>
+    <button class="settingBtn" onclick="supabaseSignIn()">☁️ Se connecter</button>
+    <button class="settingBtn" onclick="supabaseSignUp()">🆕 Créer un compte</button>
+    <button class="settingBtn" onclick="syncCloudNow()">🔄 Synchroniser</button>
+  </div>
+  <div id="cloudStatus" class="small" style="margin-top:10px">⚪ Cloud non configuré.</div>
+</div><div class="pageHead"><div><span class="eyebrow">MON PROFIL</span><h2>Réglages &amp; objectifs</h2><p class="sub">Personnalise l'application sans perdre tes données.</p></div></div><div class="settingsGrid">
 <div class="card settingCard"><b>🎯 Objectif calories</b><span>Ton objectif quotidien</span><input id="profileTarget" inputmode="numeric" placeholder="kcal" type="number"/></div>
 <div class="card settingCard"><b>🚶 Objectif pas</b><span>Ta cible quotidienne</span><input id="profileSteps" inputmode="numeric" placeholder="pas" type="number"/></div>
 <div class="card settingCard"><b>⚖️ Poids actuel</b><span>Utilisé dans le tableau de bord</span><input id="profileWeight" inputmode="decimal" placeholder="kg" step="0.1" type="number"/></div>
@@ -798,5 +817,73 @@ window.switchPage=function(id,btn){
 };
 window.addEventListener('load',()=>{enhanceWorkoutCards();updateSessionUI();});
 </script>
-</body>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+let sbClient=null;
+function getSBConfig(){try{return JSON.parse(localStorage.getItem('evoSupabaseConfig')||'{}')}catch(e){return {}}}
+function saveSupabaseConfig(){
+  const url=(document.getElementById('sbUrl')?.value||'').trim();
+  const key=(document.getElementById('sbKey')?.value||'').trim();
+  if(!url||!key){showToast('Renseigne l’URL et la clé Supabase');return}
+  localStorage.setItem('evoSupabaseConfig',JSON.stringify({url,key}));
+  initSupabase(); updateCloudStatus('✅ Configuration enregistrée.');
+}
+function initSupabase(){
+  const c=getSBConfig();
+  if(!c.url||!c.key||!window.supabase)return null;
+  try{sbClient=window.supabase.createClient(c.url,c.key);return sbClient}catch(e){sbClient=null;return null}
+}
+async function supabaseSignUp(){
+  const sb=initSupabase(),email=document.getElementById('sbEmail')?.value.trim(),password=document.getElementById('sbPassword')?.value;
+  if(!sb){showToast('Configure d’abord Supabase');return}
+  if(!email||!password){showToast('Renseigne email et mot de passe');return}
+  const {error}=await sb.auth.signUp({email,password});
+  if(error) updateCloudStatus('❌ '+error.message); else updateCloudStatus('📩 Compte créé. Vérifie ton email si la confirmation est activée.');
+}
+async function supabaseSignIn(){
+  const sb=initSupabase(),email=document.getElementById('sbEmail')?.value.trim(),password=document.getElementById('sbPassword')?.value;
+  if(!sb){showToast('Configure d’abord Supabase');return}
+  if(!email||!password){showToast('Renseigne email et mot de passe');return}
+  const {error}=await sb.auth.signInWithPassword({email,password});
+  if(error){updateCloudStatus('❌ '+error.message);return}
+  updateCloudStatus('✅ Connecté. Synchronisation en cours…'); await syncCloudNow();
+}
+function collectCloudData(){
+  const data={version:1,updatedAt:new Date().toISOString(),localStorage:{}};
+  for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k && k!=='evoSupabaseConfig')data.localStorage[k]=localStorage.getItem(k)}
+  return data;
+}
+async function syncCloudNow(){
+  const sb=initSupabase();
+  if(!sb){showToast('Configure d’abord Supabase');return}
+  const {data:{user},error:authErr}=await sb.auth.getUser();
+  if(authErr||!user){updateCloudStatus('⚪ Connecte-toi à ton compte cloud.');return}
+  const payload=collectCloudData();
+  const {error}=await sb.from('evo_user_data').upsert({user_id:user.id,data:payload,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+  if(error){updateCloudStatus('❌ '+error.message);return}
+  localStorage.setItem('evoLastCloudSync',payload.updatedAt);
+  updateCloudStatus('☁️ Synchronisé · '+new Date().toLocaleString('fr-CH'));
+}
+async function restoreCloud(){
+  const sb=initSupabase(); if(!sb)return;
+  const {data:{user}}=await sb.auth.getUser(); if(!user)return;
+  const {data,error}=await sb.from('evo_user_data').select('data').eq('user_id',user.id).maybeSingle();
+  if(error||!data?.data?.localStorage)return;
+  Object.entries(data.data.localStorage).forEach(([k,v])=>localStorage.setItem(k,v));
+  showToast('☁️ Données cloud restaurées'); location.reload();
+}
+function updateCloudStatus(msg){
+  const el=document.getElementById('cloudStatus');if(el)el.textContent=msg;
+}
+async function initCloudUI(){
+  const c=getSBConfig();
+  if(document.getElementById('sbUrl'))document.getElementById('sbUrl').value=c.url||'';
+  if(document.getElementById('sbKey'))document.getElementById('sbKey').value=c.key||'';
+  const sb=initSupabase();if(!sb)return;
+  const {data:{user}}=await sb.auth.getUser();
+  if(user){updateCloudStatus('☁️ Connecté : '+user.email);await restoreCloud();}
+}
+window.addEventListener('load',()=>setTimeout(initCloudUI,300));
+</script></body>
 </html>
