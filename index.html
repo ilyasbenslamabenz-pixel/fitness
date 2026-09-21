@@ -280,50 +280,50 @@ async function stopScanner(){if(!scanner)return;try{await scanner.stop();await s
 async function lookup(ean){ean=String(ean||"").replace(/\D/g,"");if(!ean)return toast("Code-barres invalide");const out=document.getElementById("scanResult");out.textContent="Recherche…";try{const r=await fetch("https://world.openfoodfacts.org/api/v2/product/"+ean+".json");const d=await r.json();if(!d.product){out.textContent="Produit non trouvé.";return}const p=d.product,n=p.nutriments||{};out.innerHTML="<b>"+esc(p.product_name||"Produit")+"</b><br>"+Math.round(n["energy-kcal_100g"]||0)+" kcal · "+Math.round(n.proteins_100g||0)+" g protéines / 100 g";document.getElementById("foodName").value=p.product_name||"Produit";document.getElementById("foodKcal").value=Math.round(n["energy-kcal_100g"]||0);document.getElementById("foodProtein").value=Math.round(n.proteins_100g||0);toast("Produit trouvé")}catch(e){out.textContent="Recherche impossible."}}
 async function scanFile(file){if(!file||!window.Html5Qrcode)return;const out=document.getElementById("scanResult");out.textContent="Lecture de la photo…";try{const q=new Html5Qrcode("scanner");const code=await q.scanFile(file,true);await lookup(code);await q.clear()}catch(e){out.textContent="Code-barres non détecté sur la photo."}}
 async function importHealth(file){
- if(!file){return}
+ if(!file)return;
  const out=document.getElementById("healthResult");
  out.textContent="Lecture de l’export Apple Health…";
  try{
   let xmlText="";
-  if(/\\.zip$/i.test(file.name)||file.type==="application/zip"){
-   if(!window.JSZip)throw new Error("JSZip indisponible");
-   const zip=await JSZip.loadAsync(file);
+  const isZip=file.name.toLowerCase().endsWith(".zip")||file.type==="application/zip";
+  if(isZip){
+   if(!window.JSZip)throw new Error("Le lecteur ZIP n’est pas chargé");
+   const zip=await window.JSZip.loadAsync(file);
    const names=Object.keys(zip.files);
-   const xmlName=names.find(n=>/(^|\\/)export\\.xml$/i.test(n))||names.find(n=>/\\.xml$/i.test(n));
-   if(!xmlName)throw new Error("export.xml introuvable");
+   const xmlName=names.find(function(n){return n.toLowerCase().endsWith("export.xml")})||names.find(function(n){return n.toLowerCase().endsWith(".xml")});
+   if(!xmlName)throw new Error("export.xml introuvable dans le ZIP");
    xmlText=await zip.files[xmlName].async("text");
   }else{
    xmlText=await file.text();
   }
   const doc=new DOMParser().parseFromString(xmlText,"application/xml");
-  if(doc.querySelector("parsererror"))throw new Error("XML invalide");
-  const records=[...doc.getElementsByTagName("Record")];
+  if(doc.getElementsByTagName("parsererror").length)throw new Error("XML invalide");
+  const records=Array.from(doc.getElementsByTagName("Record"));
   let steps=0,distanceKm=0,energy=0,sleepMs=0,latestWeight=null,latestWeightDate="",hrSum=0,hrCount=0;
-  for(const r of records){
-   const type=r.getAttribute("type")||"",value=Number(r.getAttribute("value")||0),start=r.getAttribute("startDate")||"";
-   if(type==="HKQuantityTypeIdentifierStepCount"&&Number.isFinite(value))steps+=value;
-   else if(type==="HKQuantityTypeIdentifierDistanceWalkingRunning"&&Number.isFinite(value))distanceKm+=value;
-   else if(type==="HKQuantityTypeIdentifierActiveEnergyBurned"&&Number.isFinite(value))energy+=value;
-   else if(type==="HKQuantityTypeIdentifierBodyMass"&&Number.isFinite(value)&&start>=latestWeightDate){latestWeight=value;latestWeightDate=start}
-   else if(type==="HKQuantityTypeIdentifierHeartRate"&&Number.isFinite(value)){hrSum+=value;hrCount++}
-   else if(type==="HKCategoryTypeIdentifierSleepAnalysis"){
-    const a=Date.parse(r.getAttribute("startDate")||""),b=Date.parse(r.getAttribute("endDate")||"");
+  records.forEach(function(r){
+   const type=r.getAttribute("type")||"";
+   const value=Number(r.getAttribute("value")||0);
+   const startDate=r.getAttribute("startDate")||"";
+   if(type==="HKQuantityTypeIdentifierStepCount")steps+=Number.isFinite(value)?value:0;
+   if(type==="HKQuantityTypeIdentifierDistanceWalkingRunning")distanceKm+=Number.isFinite(value)?value:0;
+   if(type==="HKQuantityTypeIdentifierActiveEnergyBurned")energy+=Number.isFinite(value)?value:0;
+   if(type==="HKQuantityTypeIdentifierBodyMass"&&Number.isFinite(value)&&startDate>=latestWeightDate){latestWeight=value;latestWeightDate=startDate}
+   if(type==="HKQuantityTypeIdentifierHeartRate"&&Number.isFinite(value)){hrSum+=value;hrCount++}
+   if(type==="HKCategoryTypeIdentifierSleepAnalysis"){
+    const a=Date.parse(startDate),b=Date.parse(r.getAttribute("endDate")||"");
     if(Number.isFinite(a)&&Number.isFinite(b)&&b>a)sleepMs+=b-a;
    }
-  }
-  const h={importedAt:new Date().toISOString(),steps:Math.round(steps),distanceKm:Number(distanceKm.toFixed(2)),activeEnergyKcal:Math.round(energy),weight:latestWeight,heartRate:hrCount?Math.round(hrSum/hrCount):null,sleepHours:Number((sleepMs/3600000).toFixed(1))};
-  state.data.health=h;
+  });
+  state.data.health={importedAt:new Date().toISOString(),steps:Math.round(steps),distanceKm:Number(distanceKm.toFixed(2)),activeEnergyKcal:Math.round(energy),weight:latestWeight,heartRate:hrCount?Math.round(hrSum/hrCount):null,sleepHours:Number((sleepMs/3600000).toFixed(1))};
   if(latestWeight!==null){
-   const d=latestWeightDate.slice(0,10)||today(),i=state.data.weightHistory.findIndex(x=>x.d===d);
-   if(i>=0)state.data.weightHistory[i].w=latestWeight;else state.data.weightHistory.push({d,w:latestWeight});
-   state.data.weightHistory.sort((a,b)=>a.d.localeCompare(b.d));
+   const d=latestWeightDate.slice(0,10)||today();
+   const i=state.data.weightHistory.findIndex(function(x){return x.d===d});
+   if(i>=0)state.data.weightHistory[i].w=latestWeight;else state.data.weightHistory.push({d:d,w:latestWeight});
+   state.data.weightHistory.sort(function(a,b){return a.d.localeCompare(b.d)});
   }
-  const todayKey=today();
-  const todaySteps=records.filter(r=>(r.getAttribute("type")||"")==="HKQuantityTypeIdentifierStepCount"&&(r.getAttribute("startDate")||"").slice(0,10)===todayKey).reduce((s,r)=>s+Number(r.getAttribute("value")||0),0);
-  if(todaySteps>0)state.data.steps={date:todayKey,value:Math.round(todaySteps)};
   save();
   render();
-  out.innerHTML="✅ <b>Import terminé</b><br>"+h.steps.toLocaleString("fr-CH")+" pas · "+h.distanceKm.toFixed(1)+" km · "+h.activeEnergyKcal+" kcal actives"+(h.weight!==null?" · "+h.weight.toFixed(1)+" kg":"")+(h.heartRate!==null?" · FC moy. "+h.heartRate+" bpm":"")+(h.sleepHours?" · "+h.sleepHours+" h sommeil":"");
+  out.innerHTML="✅ <b>Import terminé</b><br>"+state.data.health.steps.toLocaleString("fr-CH")+" pas · "+state.data.health.distanceKm.toFixed(1)+" km · "+state.data.health.activeEnergyKcal+" kcal actives"+(latestWeight!==null?" · "+latestWeight.toFixed(1)+" kg":"")+(state.data.health.heartRate!==null?" · FC moy. "+state.data.health.heartRate+" bpm":"")+(state.data.health.sleepHours?" · "+state.data.health.sleepHours+" h sommeil":"");
   toast("🍎 Apple Health importé");
  }catch(e){
   console.error("Apple Health import:",e);
