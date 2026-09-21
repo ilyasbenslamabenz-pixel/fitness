@@ -2144,5 +2144,61 @@ body.evoDashboard .hero{display:block!important}
  window.addEventListener('load',()=>setTimeout(init,700));
  const sw=window.switchPage;if(sw)window.switchPage=function(id,btn){sw(id,btn);if(id==='dashboard')buildHome();if(id==='training')buildTraining();if(id==='running')buildRun()};
 })();
+</script><style id="evo-run-strava-style">
+/* Course — expérience type tracker sportif : carte prioritaire + stats flottantes */
+#running .runningPanel{background:transparent;border:0;padding:0;margin-top:10px}
+#running .evo20Hero{margin-bottom:10px}
+#running .runHero{grid-template-columns:repeat(4,1fr);gap:7px}
+#running .runMetric{background:#0d1825;border:1px solid #263d56;border-radius:14px;padding:10px}
+#running .runMetric b{font-size:21px}
+#running .runMetric.primary{background:linear-gradient(145deg,#123b62,#0c2137)}
+#running .runMapWrap{position:relative;margin-top:10px;border:1px solid #294563;border-radius:22px;overflow:hidden;background:#07101a;box-shadow:0 16px 45px rgba(0,0,0,.28)}
+#running .runMapTitle{position:absolute;left:10px;right:10px;top:10px;z-index:500;border-radius:14px;background:rgba(7,15,24,.84);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);padding:9px 11px}
+#running .runMapTitle span{display:none}
+#running #runMap{height:430px}
+#running .runMapWrap:after{content:"";position:absolute;left:0;right:0;bottom:0;height:90px;z-index:400;pointer-events:none;background:linear-gradient(transparent,rgba(5,11,18,.58))}
+#running .runMapControls{position:absolute;right:10px;bottom:12px;z-index:600;display:flex;gap:7px}
+#running .runMapControls button{width:42px;height:42px;border:1px solid rgba(255,255,255,.16);border-radius:13px;background:rgba(7,15,24,.9);color:#fff;font-size:18px;box-shadow:0 7px 20px rgba(0,0,0,.3)}
+#running .runLiveBadge{position:absolute;left:10px;bottom:12px;z-index:600;padding:9px 11px;border-radius:13px;background:rgba(7,15,24,.9);border:1px solid rgba(255,255,255,.12);font-size:11px;font-weight:900;color:#dcecff}
+#running .runLiveBadge i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#34d399;margin-right:6px;box-shadow:0 0 10px #34d399}
+#running .runControls{grid-template-columns:1fr 1fr 1fr;margin-top:9px}
+#running .runStatus{background:#0b1622;border:1px solid #1d3147}
+#running .runSummary{grid-template-columns:repeat(3,1fr)}
+#running .runHistory{background:#0b1521;border:1px solid #22374d;border-radius:18px;padding:13px;margin-top:10px}
+.leaflet-control-zoom{margin-top:65px!important}
+.runCurrentMarker{width:18px;height:18px;border-radius:50%;background:#4da3ff;border:3px solid #fff;box-shadow:0 0 0 7px rgba(77,163,255,.22),0 4px 14px rgba(0,0,0,.45)}
+@media(max-width:650px){
+ #running .runHero{grid-template-columns:repeat(2,1fr)}
+ #running #runMap{height:410px}
+ #running .runControls{grid-template-columns:1fr 1fr}
+ #running .runControls .runStart{grid-column:1/-1}
+ #running .runSummary{grid-template-columns:repeat(3,1fr)}
+ #running .runSummary div{padding:8px 4px}
+}
+</style>
+<script id="evo-run-strava-js">
+(function(){
+ function setupRunMapUI(){
+   const wrap=document.querySelector('#running .runMapWrap');
+   if(!wrap||wrap.querySelector('.runMapControls'))return;
+   wrap.insertAdjacentHTML('beforeend','<div class="runLiveBadge"><i></i><span id="runLiveText">GPS prêt</span></div><div class="runMapControls"><button type="button" aria-label="Recentrer" onclick="recenterRunMap()">⌖</button><button type="button" aria-label="Zoom plus" onclick="runMapInstance?.zoomIn()">+</button><button type="button" aria-label="Zoom moins" onclick="runMapInstance?.zoomOut()">−</button></div>');
+ }
+ window.recenterRunMap=function(){
+   if(!window.runMapInstance)return;
+   const pts=(window.runPoints||[]).map(p=>[p.lat,p.lon]);
+   if(pts.length)runMapInstance.fitBounds(L.latLngBounds(pts),{padding:[45,45],maxZoom:17});
+   else if(navigator.geolocation)navigator.geolocation.getCurrentPosition(p=>runMapInstance.setView([p.coords.latitude,p.coords.longitude],16),()=>{});
+   setTimeout(()=>runMapInstance?.invalidateSize(),100);
+ };
+ const oldInit=window.initRunMap;
+ if(oldInit)window.initRunMap=function(){oldInit();setupRunMapUI()};
+ window.addEventListener('load',()=>setTimeout(setupRunMapUI,900));
+ const oldStart=window.startRun;
+ if(oldStart)window.startRun=function(){setupRunMapUI();oldStart();setTimeout(()=>{const x=document.getElementById('runLiveText');if(x)x.textContent='GPS en direct'},500)};
+ const oldPause=window.pauseRun;
+ if(oldPause)window.pauseRun=function(){oldPause();const x=document.getElementById('runLiveText');if(x)x.textContent='Course en pause'};
+ const oldFinish=window.finishRun;
+ if(oldFinish)window.finishRun=function(){oldFinish();const x=document.getElementById('runLiveText');if(x)x.textContent='Course terminée'};
+})();
 </script></body>
 </html>
