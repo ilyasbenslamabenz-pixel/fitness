@@ -716,7 +716,7 @@ button:active{transform:scale(.97);filter:brightness(1.08)}
 </section>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script>
-let html5QrCode=null, scannerRunning=false;
+let html5QrCode=null, scannerRunning=false, scannerProcessing=false;
 function scannerMessage(text,kind){
   const msg=document.getElementById('scanmsg');
   if(msg)msg.innerHTML=kind==='err'?'<span class="err">'+text+'</span>':kind==='ok'?'<span class="ok">'+text+'</span>':text;
@@ -731,7 +731,8 @@ async function startScanner(){
     return;
   }
   try{
-    if(html5QrCode && scannerRunning)return;
+    if(html5QrCode && (scannerRunning||scannerProcessing))return;
+    scannerProcessing=false;
     html5QrCode=new Html5Qrcode('reader',{verbose:false});
     const formats=[Html5QrcodeSupportedFormats.EAN_13,Html5QrcodeSupportedFormats.EAN_8,Html5QrcodeSupportedFormats.UPC_A,Html5QrcodeSupportedFormats.UPC_E];
     await html5QrCode.start({facingMode:'environment'},{
@@ -740,9 +741,14 @@ async function startScanner(){
       aspectRatio:1.333334,
       formatsToSupport:formats
     },async decodedText=>{
-      if(!scannerRunning)return;
-      await lookup(decodedText);
-      await stopScanner();
+      if(!scannerRunning||scannerProcessing)return;
+      scannerProcessing=true;
+      try{
+        await lookup(decodedText);
+      }finally{
+        await stopScanner();
+        scannerProcessing=false;
+      }
     },()=>{});
     scannerRunning=true;
     scannerMessage('📷 Caméra active — place le code-barres dans la zone.');
@@ -760,6 +766,7 @@ async function stopScanner(){
     }catch(e){console.warn(e);}
   }
   scannerRunning=false;
+  scannerProcessing=false;
   html5QrCode=null;
   const box=document.getElementById('scanner');
   if(box)box.style.display='none';
@@ -855,7 +862,11 @@ function addScanned(name,kcal){
 <script>
 const foods=document.getElementById('foods');
 const foodJournalKey='evoFoodJournal';
-const todayKey=()=>new Date().toISOString().slice(0,10);
+function localDateKey(d=new Date()){
+  const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+day;
+}
+const todayKey=()=>localDateKey();
 function saveFoodJournal(){
  const items=[...foods.querySelectorAll('.foodrow')].map(row=>({
    name:row.querySelector('.fn')?.value||'',
@@ -1187,7 +1198,7 @@ window.addEventListener('load',()=>{
    const initial=Number(document.getElementById('weight')?.value||103);
    if(initial>0)localStorage.setItem('evoGoalStartWeight',String(initial));
  }
- document.getElementById('wdate').value=new Date().toISOString().slice(0,10);
+ document.getElementById('wdate').value=localDateKey();
  try{const d=JSON.parse(localStorage.getItem('evoState')||'{}');if(d.steps!==undefined)steps.value=d.steps;if(d.goal)stepGoal.value=d.goal;if(d.target)target.value=d.target;if(d.weight)weight.value=d.weight;}catch(e){}
  ['steps','stepGoal','target','weight'].forEach(id=>document.getElementById(id)?.addEventListener('input',saveState));
  document.querySelectorAll('.log input').forEach((x,i)=>{const k='gym_'+i;if(localStorage.getItem(k)!==null){if(x.type==='checkbox')x.checked=localStorage.getItem(k)==='1';else x.value=localStorage.getItem(k)}x.addEventListener('change',()=>localStorage.setItem(k,x.type==='checkbox'?(x.checked?'1':'0'):x.value))});
@@ -1250,7 +1261,7 @@ async function enableNotifications(){
   }else showToast('Autorisation refusée');
 }
 function dailyMetric(key){
-  const today=new Date().toISOString().slice(0,10);
+  const today=localDateKey();
   let raw=localStorage.getItem(key);
   if(!raw)return 0;
   try{
@@ -1265,7 +1276,7 @@ function dailyMetric(key){
   }
 }
 function setDailyMetric(key,value){
-  localStorage.setItem(key,JSON.stringify({date:new Date().toISOString().slice(0,10),value}));
+  localStorage.setItem(key,JSON.stringify({date:localDateKey(),value}));
 }
 function updateWidgets(){
   const cal=document.getElementById('cal')?.textContent||0;
@@ -1353,7 +1364,7 @@ function loadExerciseMemory(card){
   const inputs=[...card.querySelectorAll('.log input')];
   if(d.charge!==undefined && inputs[0]) inputs[0].value=d.charge;
   if(d.reps!==undefined && inputs[1]) inputs[1].value=d.reps;
-  const sessionDate=new Date().toISOString().slice(0,10);
+  const sessionDate=localDateKey();
   const doneKey=workoutKey(card)+'__done__'+sessionDate;
   if(localStorage.getItem(doneKey)==='1') card.classList.add('sessionDone');
   inputs.forEach((input,i)=>input.addEventListener('input',()=>{
@@ -1480,6 +1491,13 @@ async function restoreFromCloud(){
     }
     if(!confirm('Restaurer la sauvegarde cloud ? Les données locales actuelles seront remplacées par celles du cloud.')) return;
     const cloud=snap.data().appData.localStorage;
+    const keepPrefixes=['firebase:','firebaseLocalStorage'];
+    const protectedKeys=new Set(['evoFirebaseLastSync']);
+    for(let i=localStorage.length-1;i>=0;i--){
+      const k=localStorage.key(i);
+      if(!k||protectedKeys.has(k)||keepPrefixes.some(prefix=>k.startsWith(prefix)))continue;
+      localStorage.removeItem(k);
+    }
     Object.entries(cloud).forEach(([k,v])=>localStorage.setItem(k,v));
     localStorage.setItem('evoFirebaseLastSync',snap.data().appData.updatedAt||new Date().toISOString());
     showToast('☁️ Données restaurées');
