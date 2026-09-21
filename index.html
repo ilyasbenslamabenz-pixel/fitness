@@ -852,14 +852,45 @@ function addScanned(name,kcal){
 </section>
 <script>
 const foods=document.getElementById('foods');
-function addFood(name='',cal=''){
+const foodJournalKey='evoFoodJournal';
+const todayKey=()=>new Date().toISOString().slice(0,10);
+function saveFoodJournal(){
+ const items=[...foods.querySelectorAll('.foodrow')].map(row=>({
+   name:row.querySelector('.fn')?.value||'',
+   kcal:row.querySelector('.fc')?.value||'',
+   qty:row.querySelector('.fq')?.value||''
+ }));
+ localStorage.setItem(foodJournalKey,JSON.stringify({date:todayKey(),items}));
+ if(typeof scheduleCloudBackup==='function')scheduleCloudBackup();
+}
+function bindFoodRow(row){
+ row.querySelectorAll('input').forEach(x=>x.addEventListener('input',()=>{
+   calc();
+   saveFoodJournal();
+ }));
+}
+function addFood(name='',cal='',qty='',persist=true){
  const row=document.createElement('div'); row.className='foodrow';
  row.innerHTML=`<label>Aliment<input class="fn" type="text" placeholder="ex. poulet"></label>
  <label>kcal<input class="fc" type="number" value="${cal}" inputmode="numeric"></label>
  <label>Qté<input class="fq" type="text" placeholder="g"></label>
- <button onclick="this.parentElement.remove();calc()">×</button>`;
- foods.appendChild(row); row.querySelector('.fn').value=name;
- row.querySelectorAll('input').forEach(x=>x.addEventListener('input',calc)); calc();
+ <button type="button" onclick="this.parentElement.remove();calc();saveFoodJournal()">×</button>`;
+ foods.appendChild(row);
+ row.querySelector('.fn').value=name;
+ row.querySelector('.fq').value=qty;
+ bindFoodRow(row);
+ calc();
+ if(persist)saveFoodJournal();
+}
+function loadFoodJournal(){
+ let saved=null;
+ try{saved=JSON.parse(localStorage.getItem(foodJournalKey)||'null');}catch(e){}
+ if(saved?.date===todayKey() && Array.isArray(saved.items) && saved.items.length){
+   saved.items.forEach(x=>addFood(x.name||'',x.kcal||'',x.qty||'',false));
+ }else{
+   ['Petit-déjeuner','Déjeuner','Dîner','Snack'].forEach(x=>addFood(x,'','',false));
+   saveFoodJournal();
+ }
 }
 function calc(){
  let total=0; document.querySelectorAll('.fc').forEach(x=>total+=Number(x.value)||0);
@@ -873,10 +904,10 @@ function stepsCalc(){
  document.getElementById('stepText').textContent=`${n.toLocaleString('fr-CH')} / ${g.toLocaleString('fr-CH')}`;
  document.getElementById('stepBar').style.width=Math.min(n/g*100,100)+'%';
 }
-document.getElementById('target').addEventListener('input',calc);
-document.getElementById('steps').addEventListener('input',stepsCalc);
-document.getElementById('stepGoal').addEventListener('input',stepsCalc);
-addFood('Petit-déjeuner',''); addFood('Déjeuner',''); addFood('Dîner',''); addFood('Snack','');
+document.getElementById('target').addEventListener('input',()=>{calc();saveState();});
+document.getElementById('steps').addEventListener('input',()=>{stepsCalc();saveState();});
+document.getElementById('stepGoal').addEventListener('input',()=>{stepsCalc();saveState();});
+loadFoodJournal();
 stepsCalc(); calc();
 </script>
 <section class="panel appPage" data-page="progress">
@@ -1130,7 +1161,7 @@ function saveState(){
 }
 function updateDash(){
  const cal=document.getElementById('cal')?.textContent||0, st=document.getElementById('steps')?.value||0, sg=document.getElementById('stepGoal')?.value||8000, w=document.getElementById('weight')?.value||103;
- document.getElementById('dashCal').textContent=cal;document.getElementById('dashSteps').textContent=Number(st).toLocaleString('fr-CH');document.getElementById('dashStepGoal').textContent=Number(sg).toLocaleString('fr-CH');document.getElementById('dashWeight').textContent=w;
+ document.getElementById('dashCal').textContent=cal;document.getElementById('dashCalGoal').textContent=Number(document.getElementById('target')?.value||2400).toLocaleString('fr-CH');document.getElementById('dashSteps').textContent=Number(st).toLocaleString('fr-CH');document.getElementById('dashStepGoal').textContent=Number(sg).toLocaleString('fr-CH');document.getElementById('dashWeight').textContent=w;
 }
 function saveWeight(){
  const d=document.getElementById('wdate').value, w=parseFloat(document.getElementById('wval').value);if(!d||!w)return;
@@ -1141,6 +1172,10 @@ function renderWeights(){
  a.slice().reverse().forEach((x,i,rev)=>{const older=rev[i+1],delta=older?(x.w-older.w):0;tb.innerHTML+=`<tr><td>${x.d}</td><td>${x.w.toFixed(1)} kg</td><td>${older?(delta>0?'+':'')+delta.toFixed(1)+' kg':'—'}</td></tr>`});
 }
 window.addEventListener('load',()=>{
+ if(!localStorage.getItem('evoGoalStartWeight')){
+   const initial=Number(document.getElementById('weight')?.value||103);
+   if(initial>0)localStorage.setItem('evoGoalStartWeight',String(initial));
+ }
  document.getElementById('wdate').value=new Date().toISOString().slice(0,10);
  try{const d=JSON.parse(localStorage.getItem('evoState')||'{}');if(d.steps!==undefined)steps.value=d.steps;if(d.goal)stepGoal.value=d.goal;if(d.target)target.value=d.target;if(d.weight)weight.value=d.weight;}catch(e){}
  ['steps','stepGoal','target','weight'].forEach(id=>document.getElementById(id)?.addEventListener('input',saveState));
@@ -1203,17 +1238,35 @@ async function enableNotifications(){
     saveNotificationSettings();
   }else showToast('Autorisation refusée');
 }
+function dailyMetric(key){
+  const today=new Date().toISOString().slice(0,10);
+  let raw=localStorage.getItem(key);
+  if(!raw)return 0;
+  try{
+    const obj=JSON.parse(raw);
+    if(obj && obj.date===today)return Number(obj.value)||0;
+    return 0;
+  }catch(e){
+    // Migrate old plain numeric values as today's value.
+    const value=Number(raw)||0;
+    localStorage.setItem(key,JSON.stringify({date:today,value}));
+    return value;
+  }
+}
+function setDailyMetric(key,value){
+  localStorage.setItem(key,JSON.stringify({date:new Date().toISOString().slice(0,10),value}));
+}
 function updateWidgets(){
   const cal=document.getElementById('cal')?.textContent||0;
   const st=document.getElementById('steps')?.value||0;
   const w=document.getElementById('weight')?.value||103;
-  const water=localStorage.getItem('waterLiters')||0;
-  const protein=localStorage.getItem('proteinToday')||0;
+  const water=dailyMetric('waterLiters');
+  const protein=dailyMetric('proteinToday');
   const dc=document.getElementById('dashCal'); if(dc)dc.textContent=cal;
   const ds=document.getElementById('dashSteps'); if(ds)ds.textContent=Number(st).toLocaleString('fr-CH');
   const dw=document.getElementById('dashWeight'); if(dw)dw.textContent=w;
   const gp=document.getElementById('goalProgressBar'),gt=document.getElementById('goalProgressText');
-  const start=103,target=85,current=Number(w)||start;
+  const start=Number(localStorage.getItem('evoGoalStartWeight')||w||103),target=85,current=Number(w)||start;
   const pct=Math.max(0,Math.min(100,((start-current)/(start-target))*100));
   if(gp)gp.style.width=pct.toFixed(0)+'%';
   if(gt)gt.textContent=pct.toFixed(0)+'% du parcours';
@@ -1226,12 +1279,16 @@ function updateWidgets(){
   updateNotificationStatus();
 }
 function recordWater(){
-  const v=Number(localStorage.getItem('waterLiters')||0)+0.25;
-  localStorage.setItem('waterLiters',v.toFixed(2));updateWidgets();showToast('💧 +250 ml');
+  const v=dailyMetric('waterLiters')+0.25;
+  setDailyMetric('waterLiters',Number(v.toFixed(2)));
+  updateWidgets();showToast('💧 +250 ml');
+  if(typeof scheduleCloudBackup==='function')scheduleCloudBackup();
 }
 function recordProtein(){
-  const v=Number(localStorage.getItem('proteinToday')||0)+25;
-  localStorage.setItem('proteinToday',v);updateWidgets();showToast('🥩 +25 g');
+  const v=dailyMetric('proteinToday')+25;
+  setDailyMetric('proteinToday',v);
+  updateWidgets();showToast('🥩 +25 g');
+  if(typeof scheduleCloudBackup==='function')scheduleCloudBackup();
 }
 function resetApp(){if(confirm('Réinitialiser les données enregistrées sur cet appareil ?')){localStorage.clear();location.reload();}}
 function buildExerciseLibrary(){const root=document.getElementById('exerciseLibrary');if(!root||root.dataset.ready==='1')return;const cards=[...document.querySelectorAll('section[data-page="training"] .exercise-card')],seen=new Set();cards.forEach((card,i)=>{const h=card.querySelector('h3'),img=card.querySelector('.real-machine img');if(!h||!img)return;const name=h.textContent.trim();if(seen.has(name))return;seen.add(name);const c=document.createElement('div');c.className='libCard';c.dataset.name=name.toLowerCase();c.innerHTML='<img loading="lazy" src="'+img.src+'" alt="'+name+'"><div class="libBody"><b>'+name+'</b><span>Référence équipement · séance</span><button onclick="openExercise('+i+')">Voir dans le programme</button></div>';root.appendChild(c);});root.dataset.ready='1';}
@@ -1285,7 +1342,9 @@ function loadExerciseMemory(card){
   const inputs=[...card.querySelectorAll('.log input')];
   if(d.charge!==undefined && inputs[0]) inputs[0].value=d.charge;
   if(d.reps!==undefined && inputs[1]) inputs[1].value=d.reps;
-  if(d.done) card.classList.add('sessionDone');
+  const sessionDate=new Date().toISOString().slice(0,10);
+  const doneKey=workoutKey(card)+'__done__'+sessionDate;
+  if(localStorage.getItem(doneKey)==='1') card.classList.add('sessionDone');
   inputs.forEach((input,i)=>input.addEventListener('input',()=>{
     const cur=JSON.parse(localStorage.getItem(workoutKey(card))||'{}');
     if(i===0)cur.charge=input.value;if(i===1)cur.reps=input.value;
@@ -1297,9 +1356,11 @@ function saveExerciseMemory(card){
   const cur=JSON.parse(localStorage.getItem(workoutKey(card))||'{}');
   if(inputs[0])cur.charge=inputs[0].value;
   if(inputs[1])cur.reps=inputs[1].value;
-  cur.done=card.classList.contains('sessionDone');
   cur.updated=new Date().toISOString();
   localStorage.setItem(workoutKey(card),JSON.stringify(cur));
+  const sessionDate=new Date().toISOString().slice(0,10);
+  const doneKey=workoutKey(card)+'__done__'+sessionDate;
+  localStorage.setItem(doneKey,card.classList.contains('sessionDone')?'1':'0');
 }
 function enhanceWorkoutCards(){
   document.querySelectorAll('section.day[data-page="training"] .exercise-card').forEach((card,idx)=>{
@@ -1318,7 +1379,7 @@ function enhanceWorkoutCards(){
     quick.appendChild(btn);
     const log=card.querySelector('.log'); if(log)log.after(quick);
     loadExerciseMemory(card);
-    if(localStorage.getItem('sessionDone_'+idx)==='1'){card.classList.add('sessionDone');btn.classList.add('done');}
+    if(card.classList.contains('sessionDone'))btn.classList.add('done');
     card.dataset.quickReady='1';
   });
 }
