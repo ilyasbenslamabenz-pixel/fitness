@@ -243,7 +243,49 @@ async function startScanner(){if(scanner)return;if(!window.Html5Qrcode){toast("S
 async function stopScanner(){if(!scanner)return;try{await scanner.stop();await scanner.clear()}catch(e){}scanner=null;document.getElementById("scanner").classList.remove("open")}
 async function lookup(ean){ean=String(ean||"").replace(/\D/g,"");if(!ean)return toast("Code-barres invalide");const out=document.getElementById("scanResult");out.textContent="Recherche…";try{const r=await fetch("https://world.openfoodfacts.org/api/v2/product/"+ean+".json");const d=await r.json();if(!d.product){out.textContent="Produit non trouvé.";return}const p=d.product,n=p.nutriments||{};out.innerHTML="<b>"+esc(p.product_name||"Produit")+"</b><br>"+Math.round(n["energy-kcal_100g"]||0)+" kcal · "+Math.round(n.proteins_100g||0)+" g protéines / 100 g";document.getElementById("foodName").value=p.product_name||"Produit";document.getElementById("foodKcal").value=Math.round(n["energy-kcal_100g"]||0);document.getElementById("foodProtein").value=Math.round(n.proteins_100g||0);toast("Produit trouvé")}catch(e){out.textContent="Recherche impossible."}}
 async function scanFile(file){if(!file||!window.Html5Qrcode)return;const out=document.getElementById("scanResult");out.textContent="Lecture de la photo…";try{const q=new Html5Qrcode("scanner");const code=await q.scanFile(file,true);await lookup(code);await q.clear()}catch(e){out.textContent="Code-barres non détecté sur la photo."}}
-async function importHealth(file){if(!file)return;const out=document.getElementById("healthResult");out.textContent="Lecture de l’export Apple Health…";try{let xml="";if(file.name.toLowerCase().endsWith(".zip")){if(!window.JSZip)throw new Error("JSZip");const zip=await JSZip.loadAsync(file);const key=Object.keys(zip.files).find(k=>/export\.xml$/i.test(k));if(!key)throw new Error("XML");xml=await zip.files[key].async("text")}else xml=await file.text();const doc=new DOMParser().parseFromString(xml,"text/xml"),rows=[...doc.querySelectorAll("Record")],d=today(),find=(type)=>rows.filter(x=>x.getAttribute("type")===type&&x.getAttribute("startDate")?.slice(0,10)===d),sum=(type)=>find(type).reduce((s,x)=>s+Number(x.getAttribute("value")||0),0);const steps=sum("HKQuantityTypeIdentifierStepCount");const dist=sum("HKQuantityTypeIdentifierDistanceWalkingRunning");const kcal=sum("HKQuantityTypeIdentifierActiveEnergyBurned");const weights=find("HKQuantityTypeIdentifierBodyMass");const weight=weights.length?Number(weights[weights.length-1].getAttribute("value")):null;state.data.steps.value=Math.round(steps);if(weight){const i=state.data.weightHistory.findIndex(x=>x.d===d);if(i>=0)state.data.weightHistory[i].w=weight;else state.data.weightHistory.push({d,w:weight})}save();render();out.textContent="Apple Health importé · "+Math.round(steps).toLocaleString("fr-CH")+" pas · "+dist.toFixed(2)+" km · "+Math.round(kcal)+" kcal"+(weight?" · "+weight+" kg":"");toast("🍎 Apple Health importé")}catch(e){out.textContent="Import impossible : vérifie que c’est bien un export Apple Health."}}
+async function importHealth(file){
+ if(!file)return;
+ const out=document.getElementById("healthResult");
+ out.textContent="Lecture de l’export Apple Health…";
+ try{
+   let xml="";
+   const isZip=/\\.zip$/i.test(file.name);
+   if(isZip){
+     if(!window.JSZip)throw new Error("Bibliothèque ZIP indisponible");
+     const zip=await JSZip.loadAsync(file,{checkCRC32:false});
+     const names=Object.keys(zip.files);
+     const key=names.find(k=>/(^|\\/)export\\.xml$/i.test(k))||names.find(k=>/export\\.xml$/i.test(k));
+     if(!key)throw new Error("export.xml introuvable");
+     xml=await zip.files[key].async("text");
+   }else{
+     xml=await file.text();
+   }
+   if(!xml||xml.length<100)throw new Error("Fichier vide");
+   const doc=new DOMParser().parseFromString(xml,"text/xml");
+   if(doc.querySelector("parsererror"))throw new Error("XML invalide");
+   const rows=[...doc.querySelectorAll("Record")],d=today();
+   const find=(type)=>rows.filter(x=>x.getAttribute("type")===type&&String(x.getAttribute("startDate")||"").slice(0,10)===d);
+   const sum=(type)=>find(type).reduce((s,x)=>s+Number(String(x.getAttribute("value")||"0").replace(",",".")),0);
+   const steps=sum("HKQuantityTypeIdentifierStepCount");
+   const dist=sum("HKQuantityTypeIdentifierDistanceWalkingRunning");
+   const kcal=sum("HKQuantityTypeIdentifierActiveEnergyBurned");
+   const weights=find("HKQuantityTypeIdentifierBodyMass");
+   const weight=weights.length?Number(String(weights[weights.length-1].getAttribute("value")||"").replace(",",".")):null;
+   state.data.steps.value=Math.round(steps);
+   if(Number.isFinite(weight)&&weight>0){
+     const i=state.data.weightHistory.findIndex(x=>x.d===d);
+     if(i>=0)state.data.weightHistory[i].w=weight;else state.data.weightHistory.push({d,w:weight});
+   }
+   save();
+   render();
+   out.textContent="Apple Health importé · "+Math.round(steps).toLocaleString("fr-CH")+" pas · "+dist.toFixed(2)+" km · "+Math.round(kcal)+" kcal"+(Number.isFinite(weight)&&weight>0?" · "+weight+" kg":"");
+   toast("🍎 Apple Health importé");
+ }catch(e){
+   console.warn("Apple Health import:",e);
+   out.textContent="Import impossible. Utilise l’export Apple Health (.zip) ou export.xml.";
+   toast("⚠️ Import Apple Health interrompu");
+ }
+}
 function resetAll(){if(!confirm("Réinitialiser toutes les données locales de l’app ?"))return;localStorage.clear();location.reload()}
 
 document.addEventListener("click",function(e){
