@@ -741,7 +741,6 @@ async function startScanner(){
       formatsToSupport:formats
     },async decodedText=>{
       if(!scannerRunning)return;
-      scannerRunning=false;
       await lookup(decodedText);
       await stopScanner();
     },()=>{});
