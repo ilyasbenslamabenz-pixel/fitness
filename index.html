@@ -926,30 +926,55 @@ function addScanned(name,kcal){
 }
 </script>
 <section class="foodbox appPage" data-page="foodbox" id="foodbox">
-<h2 style="margin-top:0">🍽️ Journal alimentaire &amp; calories</h2>
-<p class="small">Entre les aliments avec leur quantité et les calories indiquées sur l'emballage ou l'application que tu utilises. Le total est calculé automatiquement dans cette page.</p>
-<div class="foodgrid">
-<label>Objectif calories / jour<input id="target" inputmode="numeric" type="number" value="2400"/></label>
-<label>Poids du jour (kg)<input id="weight" inputmode="decimal" step="0.1" type="number" value="103"/></label>
+<div class="nutriHeader"><div><span class="eyebrow">AUJOURD’HUI</span><h2>🍽️ Nutrition</h2></div><div class="nutriDate" id="nutriDate"></div></div>
+<div class="nutriTargets">
+<div><span>🔥</span><b><strong id="cal">0</strong> / 2400</b><small>kcal</small><i><em id="bar"></em></i></div>
+<div><span>🥩</span><b><strong id="quickProtein">0</strong> / 180 g</b><small>protéines</small><i><em id="proteinBar"></em></i></div>
+<div><span>💧</span><b><strong id="quickWater">0</strong> / 2,5 L</b><small>eau</small><i><em id="waterBar"></em></i></div>
 </div>
-<div class="nutritionQuick">
-  <div class="nutritionQuickTitle">⚡ Ajout rapide</div>
-  <div class="nutritionQuickGrid">
-    <button type="button" onclick="addWater(250)">💧 +250 ml</button>
-    <button type="button" onclick="addWater(500)">💦 +500 ml</button>
-    <button type="button" onclick="addProtein(25)">🥩 +25 g</button>
-    <button type="button" onclick="addProtein(50)">🍗 +50 g</button>
-    <button type="button" onclick="quickMeal()">🍽️ Nouveau repas</button>
-    <button type="button" onclick="setStepsToday()">👟 Saisir mes pas</button>
-  </div>
-  <div class="nutritionQuickStats"><span>💧 <b id="quickWater">0 L</b></span><span>🥩 <b id="quickProtein">0 g</b></span><span>👟 <b id="quickSteps">0</b></span></div>
+<div class="mealList">
+<div class="mealCard"><div class="mealTop"><div><b>🌅 Petit-déjeuner</b><small id="mealCal0">0 kcal</small></div><button onclick="addMealRow(0)">＋</button></div><div id="meal0" class="mealInputs"></div></div>
+<div class="mealCard"><div class="mealTop"><div><b>☀️ Déjeuner</b><small id="mealCal1">0 kcal</small></div><button onclick="addMealRow(1)">＋</button></div><div id="meal1" class="mealInputs"></div></div>
+<div class="mealCard"><div class="mealTop"><div><b>🌙 Dîner</b><small id="mealCal2">0 kcal</small></div><button onclick="addMealRow(2)">＋</button></div><div id="meal2" class="mealInputs"></div></div>
+<div class="mealCard"><div class="mealTop"><div><b>🍎 Snack</b><small id="mealCal3">0 kcal</small></div><button onclick="addMealRow(3)">＋</button></div><div id="meal3" class="mealInputs"></div></div>
 </div>
-<div id="foods"></div>
-<button onclick="addFood()" style="margin-top:12px;padding:11px 14px;border:0;border-radius:12px;background:var(--accent);font-weight:900">+ Ajouter un aliment</button>
-<div class="total"><span id="cal">0</span> kcal</div>
-<div class="progressbar"><i id="bar"></i></div>
-<p class="small" id="remaining"></p>
+<div class="nutriActions"><button onclick="addMealRow(0)">＋ Aliment</button><button onclick="v17Open('meal')">⚡ Ajout rapide</button><button onclick="startScanner()">📷 Scanner</button></div>
+<p class="small" id="remaining" style="margin:10px 2px 0"></p>
+<div class="nutriSummary"><b>Résumé du jour</b><div><span>🔥 Calories</span><strong id="nutriCalSummary">0 kcal</strong></div><div><span>🥩 Protéines</span><strong id="nutriProtSummary">0 g</strong></div><div><span>💧 Eau</span><strong id="nutriWaterSummary">0 L</strong></div></div>
 </section>
+<script id="evo-v18-nutrition-js">
+(function(){
+const mealNames=['Petit-déjeuner','Déjeuner','Dîner','Snack'];
+function dateLabel(){const d=new Date();return d.toLocaleDateString('fr-CH',{weekday:'short',day:'2-digit',month:'short',year:'numeric'}).replace(/^./,x=>x.toUpperCase())}
+function syncNutrition(){
+ const total=[...document.querySelectorAll('#foods .fc')].reduce((s,x)=>s+(Number(x.value)||0),0);
+ const target=2400; const p=(typeof dailyMetric==='function'?dailyMetric('proteinToday'):0); const water=(typeof dailyMetric==='function'?dailyMetric('waterLiters'):0);
+ const cal=document.getElementById('cal');if(cal)cal.textContent=Math.round(total);
+ const bar=document.getElementById('bar');if(bar)bar.style.width=Math.min(total/target*100,100)+'%';
+ const pb=document.getElementById('proteinBar');if(pb)pb.style.width=Math.min(p/180*100,100)+'%';
+ const wb=document.getElementById('waterBar');if(wb)wb.style.width=Math.min(water/2.5*100,100)+'%';
+ ['nutriCalSummary','nutriProtSummary','nutriWaterSummary'].forEach((id,i)=>{const e=document.getElementById(id);if(e)e.textContent=i===0?Math.round(total)+' kcal':i===1?Math.round(p)+' g':water.toFixed(2).replace('.',',')+' L'});
+ const rem=document.getElementById('remaining');if(rem)rem.textContent=Math.max(target-total,0)+' kcal restantes';
+ [0,1,2,3].forEach((m)=>{const e=document.getElementById('meal'+m);const out=document.getElementById('mealCal'+m);if(e&&out){const rows=[...e.querySelectorAll('.nutriRow')];out.textContent=Math.round(rows.reduce((s,r)=>s+(Number(r.querySelector('.nutriKcal')?.value)||0),0))+' kcal'}});
+}
+window.addMealRow=function(meal){
+ const root=document.getElementById('meal'+meal);if(!root)return;
+ const row=document.createElement('div');row.className='nutriRow';
+ row.innerHTML='<input class="nutriFood" placeholder="Aliment / repas"><input class="nutriKcal" type="number" inputmode="decimal" placeholder="kcal"><input class="nutriQty" inputmode="decimal" placeholder="g"><button type="button">×</button>';
+ row.querySelector('button').onclick=()=>{row.remove();syncNutrition()};
+ row.querySelectorAll('input').forEach(x=>x.addEventListener('input',syncNutrition));
+ root.appendChild(row);row.querySelector('.nutriFood').focus();syncNutrition();
+};
+function distributeExisting(){
+ const rows=[...document.querySelectorAll('#foods .foodrow')]; if(!rows.length)return;
+ rows.forEach((r,i)=>{const meal=i<4?i:0;const root=document.getElementById('meal'+meal);if(!root)return;const row=document.createElement('div');row.className='nutriRow';const name=r.querySelector('.fn')?.value||mealNames[meal];const kcal=r.querySelector('.fc')?.value||'';const qty=r.querySelector('.fq')?.value||'';row.innerHTML='<input class="nutriFood" value="'+String(name).replace(/"/g,'&quot;')+'"><input class="nutriKcal" type="number" value="'+kcal+'"><input class="nutriQty" value="'+qty+'"><button type="button">×</button>';row.querySelector('button').onclick=()=>{row.remove();syncNutrition()};row.querySelectorAll('input').forEach(x=>x.addEventListener('input',syncNutrition));root.appendChild(row);r.style.display='none'});syncNutrition()
+}
+window.addEventListener('load',()=>{const d=document.getElementById('nutriDate');if(d)d.textContent=dateLabel();setTimeout(distributeExisting,120);});
+})();
+</script>
+<style id="evo-v18-nutrition-css">
+#foodbox{padding:16px}.nutriHeader{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:16px}.nutriHeader h2{margin:2px 0 0;font-size:30px}.nutriDate{background:#111d2c;border:1px solid #294563;border-radius:14px;padding:9px 11px;color:#c8d8e8;font-weight:800;font-size:12px;text-align:center}.nutriTargets{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.nutriTargets>div{background:linear-gradient(145deg,#122238,#0c1623);border:1px solid #294563;border-radius:17px;padding:11px}.nutriTargets span{font-size:18px}.nutriTargets b{display:block;font-size:13px;margin-top:3px}.nutriTargets small{color:var(--muted);font-size:10px}.nutriTargets i{display:block;height:5px;background:#1b3047;border-radius:9px;margin-top:8px;overflow:hidden}.nutriTargets em{display:block;height:100%;width:0;background:linear-gradient(90deg,#69bdff,#b9ff3d);border-radius:9px}.mealList{display:grid;gap:9px;margin-top:12px}.mealCard{background:linear-gradient(145deg,#111d2c,#0c151f);border:1px solid #294563;border-radius:19px;padding:12px}.mealTop{display:flex;justify-content:space-between;align-items:center}.mealTop b{display:block;font-size:16px}.mealTop small{display:block;color:var(--muted);margin-top:2px}.mealTop button{width:38px;height:38px;border-radius:50%;border:1px solid #294563;background:#10233a;color:#e8f4ff;font-size:24px}.mealInputs{display:grid;gap:7px;margin-top:8px}.nutriRow{display:grid;grid-template-columns:1fr 72px 58px 32px;gap:6px}.nutriRow input{min-width:0;background:#080d14;color:#fff;border:1px solid #293a4d;border-radius:10px;padding:10px;font-size:13px}.nutriRow button{border:0;border-radius:10px;background:#25331b;color:#cfff73;font-size:18px}.nutriActions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:11px}.nutriActions button{border:1px solid #294563;background:#10233a;color:#e8f4ff;border-radius:13px;padding:12px 5px;font-weight:800}.nutriSummary{margin-top:14px;background:#0e1824;border:1px solid #263b52;border-radius:18px;padding:13px}.nutriSummary>b{font-size:18px}.nutriSummary div{display:flex;justify-content:space-between;margin-top:9px;color:#cbd6e2}.nutriSummary strong{color:#fff}@media(max-width:430px){.nutriTargets{gap:5px}.nutriTargets>div{padding:9px 7px}.nutriTargets b{font-size:11px}.nutriRow{grid-template-columns:1fr 64px 50px 30px}.nutriActions button{font-size:12px}}
+</style>
 <section class="foodbox appPage" data-page="foodbox">
 <h2 style="margin-top:0">🚶 Pas &amp; activité</h2>
 <div class="foodgrid">
@@ -1895,7 +1920,7 @@ window.addEventListener('resize',()=>runMapInstance?.invalidateSize());
   function redesignNav(){
     const nav=document.querySelector('.stickyNav');if(!nav)return;
     nav.innerHTML=[
-      ['dashboard','⌂','Accueil'],['training','🏋️','Séance'],['progress','📈','Progrès'],['running','🏃','Course'],['profile','⚙️','Profil']
+      ['dashboard','⌂','Accueil'],['training','🏋️','Séance'],['progress','📈','Progrès'],['foodbox','🍽️','Nutrition'],['running','🏃','Course'],['profile','⚙️','Profil']
     ].map((x,i)=>'<button class="'+(i===0?'active ':'')+'" data-page="'+x[0]+'" onclick="switchPage(\''+x[0]+'\',this)"><b>'+x[1]+'</b><span>'+x[2]+'</span></button>').join('');
   }
   function addProfileTools(){
