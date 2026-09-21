@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <meta content="#0b1220" name="theme-color"/>
 <title>EVO Fit Coach — App V15</title>
-<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 :root{--bg:#090b0e;--panel:#12161b;--panel2:#181d23;--text:#f4f6f8;--muted:#aab2bc;--line:#2a3038;--accent:#b9ff3d;--blue:#7dd3fc}
 *{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,#080a0d,#10141a 55%,#090b0e);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;line-height:1.45}
@@ -209,7 +209,7 @@ section.appPage.activePage{display:block!important}
 .stickyNav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom));width:min(94%,620px);z-index:999;background:rgba(16,20,26,.94);backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:20px;padding:7px;display:grid;grid-template-columns:repeat(4,1fr);box-shadow:0 15px 45px #0008}
 .stickyNav button{border:0;background:transparent;color:#9ba6b2;padding:9px 3px;border-radius:13px;font-size:11px;font-weight:800}.stickyNav button b{display:block;font-size:20px}.stickyNav button.active{background:#20272e;color:var(--accent)}
 .dash{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.tile{background:linear-gradient(180deg,#171c22,#101419);border:1px solid var(--line);border-radius:20px;padding:15px}.tile strong{font-size:26px;display:block}.tile small{color:var(--muted)}
-.timer{position:fixed;right:16px;top:calc(16px + env(safe-area-inset-top));z-index:1000;background:#11171d;border:1px solid var(--line);border-radius:16px;padding:9px 12px;box-shadow:0 8px 30px #0008}.timer b{color:var(--accent);font-size:20px}.timer button{border:0;border-radius:8px;padding:5px 8px;font-weight:800}
+.timer{display:none;position:fixed;right:16px;top:calc(16px + env(safe-area-inset-top));z-index:1000;background:#11171d;border:1px solid var(--line);border-radius:16px;padding:9px 12px;box-shadow:0 8px 30px #0008}.timer b{color:var(--accent);font-size:20px}.timer button{border:0;border-radius:8px;padding:5px 8px;font-weight:800}
 .hist{width:100%;border-collapse:collapse}.hist td,.hist th{padding:8px;border-bottom:1px solid var(--line);font-size:12px;text-align:left}
 body{padding-bottom:95px}
 </style>
@@ -1324,16 +1324,16 @@ Life Fitness documente notamment les modèles Axiom Chest Press, Lat Pulldown, S
 <div class="timer">⏱️ <b id="timerText">00:00</b> <button onclick="restTimer(90)">90s</button></div>
 <nav class="stickyNav">
 <button class="active" data-page="dashboard" onclick="switchPage('dashboard',this)"><b>⌂</b><span>Accueil</span></button>
-<button data-page="training" onclick="switchPage('training',this)"><b>🏋️</b><span>Séances</span></button>
-<button data-page="exercises" onclick="switchPage('exercises',this)"><b>◉</b><span>Exercices</span></button>
-<button data-page="foodbox" onclick="switchPage('foodbox',this)"><b>🍽️</b><span>Nutrition</span></button>
+<button data-page="training" onclick="switchPage('training',this)"><b>🏋️</b><span>Séance</span></button>
 <button data-page="progress" onclick="switchPage('progress',this)"><b>↗</b><span>Progrès</span></button>
+<button data-page="foodbox" onclick="switchPage('foodbox',this)"><b>🍽️</b><span>Nutrition</span></button>
+<button data-page="running" onclick="switchPage('running',this)"><b>🏃</b><span>Course</span></button>
 <button data-page="profile" onclick="switchPage('profile',this)"><b>⚙</b><span>Profil</span></button>
-<button data-page="running" onclick="switchPage('running',this)"><b>🏃</b><span>Course</span></button></nav>
+</nav>
 <script>
 function go(id,b){document.getElementById(id)?.scrollIntoView({behavior:'smooth'});document.querySelectorAll('.stickyNav button').forEach(x=>x.classList.remove('active'));b.classList.add('active')}
 let timerId=null;
-function restTimer(sec){clearInterval(timerId);let n=sec;const el=document.getElementById('timerText');const paint=()=>{el.textContent=String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0')};paint();timerId=setInterval(()=>{n--;paint();if(n<=0){clearInterval(timerId);if(navigator.vibrate)navigator.vibrate([200,100,200]);}},1000)}
+function restTimer(sec){clearInterval(timerId);const box=document.querySelector('.timer');if(box)box.style.display='block';let n=sec;const el=document.getElementById('timerText');const paint=()=>{el.textContent=String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0')};paint();timerId=setInterval(()=>{n--;paint();if(n<=0){clearInterval(timerId);if(navigator.vibrate)navigator.vibrate([200,100,200]);setTimeout(()=>{if(box)box.style.display='none'},900);}},1000)}
 function saveState(){
  const data={steps:document.getElementById('steps')?.value,stepsDate:localDateKey(),goal:document.getElementById('stepGoal')?.value,target:document.getElementById('target')?.value,weight:document.getElementById('weight')?.value};
  localStorage.setItem('evoState',JSON.stringify(data)); updateDash();
@@ -1539,6 +1539,7 @@ function filterWorkoutSections(){
   days.forEach(s=>{const h=s.querySelector('h2');s.style.display=(h?.textContent.includes(wanted))?'block':'none';});
 }
 function startWorkout(){
+  const box=document.querySelector('.timer');if(box)box.style.display='none';
   workoutStarted=true;localStorage.setItem('evoWorkoutStarted','1');document.getElementById('training')?.classList.add('evo20WorkoutStarted');
   const b=document.querySelector('.stickyNav button[data-page="training"]'); if(b) switchPage('training',b);
   showToast('🔥 Séance démarrée');
@@ -1555,7 +1556,7 @@ function finishWorkout(){
   h.unshift({date:new Date().toISOString(),day:selectedWorkoutDay,name:names[selectedWorkoutDay]||'Séance',done,total:cards.length});
   localStorage.setItem('evoWorkoutHistory',JSON.stringify(h.slice(0,180)));
   if(typeof scheduleCloudBackup==='function')scheduleCloudBackup();
-  workoutStarted=false;localStorage.removeItem('evoWorkoutStarted');document.getElementById('training')?.classList.remove('evo20WorkoutStarted');
+  workoutStarted=false;localStorage.removeItem('evoWorkoutStarted');const box=document.querySelector('.timer');if(box)box.style.display='none';document.getElementById('training')?.classList.remove('evo20WorkoutStarted');
   showToast('✅ Séance enregistrée · '+done+'/'+cards.length); updateSessionUI();
 }
 function updateSessionUI(){
@@ -2008,12 +2009,29 @@ const old=window.switchPage;if(old)window.switchPage=function(id,btn){old(id,btn
     out.steps=Math.round(out.steps);out.distanceKm=Number(out.distanceKm.toFixed(2));out.activeKcal=Math.round(out.activeKcal);out.weightKg=out.weightKg==null?null:Number(out.weightKg.toFixed(1));out.heartAvg=heartN?Math.round(heartSum/heartN):null;out.sleepHours=Number(out.sleepHours.toFixed(1));
     return out;
   }
+  async function ensureJSZip(){
+    if(window.JSZip)return true;
+    await new Promise((resolve,reject)=>{
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+      s.onload=()=>resolve();
+      s.onerror=()=>reject(new Error('Impossible de charger le lecteur ZIP'));
+      document.head.appendChild(s);
+    });
+    return !!window.JSZip;
+  }
   async function readFile(file){
-    if(file.name.toLowerCase().endsWith('.xml'))return file.text();
-    if(!window.JSZip)throw new Error('Module ZIP indisponible');
-    const zip=await JSZip.loadAsync(file); const entry=zip.file('apple_health_export/export.xml')||zip.file('export.xml');
-    if(!entry)throw new Error('export.xml introuvable dans l’export Santé');
-    return await entry.async('text');
+    const name=(file.name||'').toLowerCase();
+    if(name.endsWith('.xml') || file.type==='text/xml' || file.type==='application/xml')return await file.text();
+    if(name.endsWith('.zip') || file.type==='application/zip' || file.type==='application/x-zip-compressed'){
+      if(!(await ensureJSZip()))throw new Error('Lecteur ZIP indisponible. Essaie avec export.xml.');
+      const zip=await window.JSZip.loadAsync(file);
+      const names=Object.keys(zip.files);
+      const path=names.find(n=>/^(?:apple_health_export\/)?export\.xml$/i.test(n)) || names.find(n=>/export\.xml$/i.test(n));
+      if(!path)throw new Error('Le ZIP ne contient pas export.xml');
+      return await zip.files[path].async('text');
+    }
+    throw new Error('Fichier non reconnu. Choisis le ZIP exporté par Santé ou le fichier export.xml.');
   }
   function save(data){localStorage.setItem(KEY,JSON.stringify(data));if(typeof scheduleCloudBackup==='function')scheduleCloudBackup();}
   function render(){
@@ -2026,6 +2044,7 @@ const old=window.switchPage;if(old)window.switchPage=function(id,btn){old(id,btn
     const p=document.createElement('div');p.id='evoHealthPanel';p.className='panel';p.style.marginTop='12px';p.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><h3 style="margin:0">🍎 Apple Santé</h3><div class="small">Import local · aucune donnée Santé n’est envoyée par cette fonction.</div></div><button class="v17Save" id="evoHealthBtn" type="button">🔄 Importer</button></div><div class="healthData" style="margin-top:12px"></div><input id="evoHealthFile" type="file" accept=".zip,.xml,application/zip,text/xml" hidden><div class="small" style="margin-top:10px">Dans Santé : Résumé → photo/profil → « Exporter toutes les données Santé ».</div>';
     d.appendChild(p);p.querySelector('#evoHealthBtn').onclick=()=>p.querySelector('#evoHealthFile').click();p.querySelector('#evoHealthFile').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const xml=await readFile(f);const data=parseXML(xml);data.importedAt=new Date().toLocaleString('fr-CH');save(data);render();if(typeof updateWidgets==='function')updateWidgets();showToast('🍎 Données Apple Santé importées');}catch(err){console.error(err);showToast('❌ '+(err.message||'Import impossible'));}e.target.value=''};render();
   }
+  window.evoHealthRefresh=inject;
   window.addEventListener('load',()=>setTimeout(inject,500));
   const oldSwitch=window.switchPage;if(oldSwitch)window.switchPage=function(id,btn){oldSwitch(id,btn);if(id==='dashboard')setTimeout(()=>{inject();render()},30)};
 })();
@@ -2089,7 +2108,7 @@ body.evoDashboard .hero{display:block!important}
   const p=document.getElementById('dashboard');if(!p)return;
   const d=todayDay(), next=[1,2,4,6].find(x=>x>=d)||1, info=dayNames[next];
   const week=Math.min(12,Math.max(1,Math.floor((new Date()-new Date('2026-09-07'))/(7*86400000))+1));
-  p.innerHTML='<div class="evo20" id="evoHomeRedesign"><div class="evo20Hero"><div><span class="eyebrow">EVO FITNESS · GENÈVE JONCTION</span><h2>Bonjour Ilyas 👋</h2><div class="evo20Date">'+date()+'</div></div></div><div class="evo20Week"><div class="evo20WeekTop"><b>Semaine '+week+'/12</b><span>'+Math.round(week/12*100)+'%</span></div><div class="evo20Bar"><i style="width:'+Math.round(week/12*100)+'%"></i></div></div><div class="evo20Stats"><div class="evo20Stat"><b>4×</b><small>séances / semaine</small></div><div class="evo20Stat"><b>60–75′</b><small>par séance</small></div><div class="evo20Stat"><b>7–10k</b><small>pas / jour</small></div></div><div class="evo20Card"><div class="evo20CardHead"><div><b>Prochaine séance</b><small>'+info[1]+'</small></div><span>🏋️</span></div><h3 style="margin:8px 0">'+info[0]+'</h3><button class="evo20Primary" onclick="switchPage(\'training\',document.querySelector(\'.stickyNav button[data-page=training]\'));startWorkout()">Commencer</button></div><div class="evo20Card"><b>Rappel du jour</b><p class="evo20Reminder">“La discipline aujourd’hui, les résultats demain.” 💪</p></div></div>';
+  p.innerHTML='<div class="evo20" id="evoHomeRedesign"><div class="evo20Hero"><div><span class="eyebrow">EVO FITNESS · GENÈVE JONCTION</span><h2>Bonjour Ilyas 👋</h2><div class="evo20Date">'+date()+'</div></div></div><div class="evo20Week"><div class="evo20WeekTop"><b>Semaine '+week+'/12</b><span>'+Math.round(week/12*100)+'%</span></div><div class="evo20Bar"><i style="width:'+Math.round(week/12*100)+'%"></i></div></div><div class="evo20Stats"><div class="evo20Stat"><b>4×</b><small>séances / semaine</small></div><div class="evo20Stat"><b>60–75′</b><small>par séance</small></div><div class="evo20Stat"><b>7–10k</b><small>pas / jour</small></div></div><div class="evo20Card"><div class="evo20CardHead"><div><b>Prochaine séance</b><small>'+info[1]+'</small></div><span>🏋️</span></div><h3 style="margin:8px 0">'+info[0]+'</h3><button class="evo20Primary" onclick="selectedWorkoutDay=${next};switchPage(\'training\',document.querySelector(\'.stickyNav button[data-page=training]\'));startWorkout()">Commencer</button></div><div class="evo20Card"><b>Rappel du jour</b><p class="evo20Reminder">“La discipline aujourd’hui, les résultats demain.” 💪</p></div></div>';
  }
  function buildTraining(){
   const p=document.getElementById('training');if(!p)return;
