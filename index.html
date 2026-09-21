@@ -632,6 +632,23 @@ button:active{transform:scale(.97);filter:brightness(1.08)}
  .stickyNav{height:72px;width:calc(100% - 10px);padding:5px}
  .stickyNav button{min-height:62px!important}
 }
+</style><style id="evo-running-v1">
+.runningPanel{background:linear-gradient(145deg,#0d1c2c,#09121d);border:1px solid #294866;border-radius:22px;padding:15px;margin-top:14px}
+.runHero{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.runMetric{background:#0a1420;border:1px solid #20354c;border-radius:16px;padding:12px}
+.runMetric small{display:block;color:#8fa0b4;font-size:11px}.runMetric b{display:block;font-size:28px;color:#eaf6ff;margin-top:3px;letter-spacing:-.04em}
+.runMetric.primary{background:linear-gradient(145deg,#12365a,#0b1b2b);border-color:#2d6ea8}
+.runMetric.primary b{color:#8dcbff}
+.runControls{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:11px}
+.runControls button{min-height:46px;border:1px solid #294866;border-radius:13px;background:#122235;color:#eaf6ff;font-weight:900}
+.runControls .runStart{background:linear-gradient(135deg,#60b5ff,#2563eb);color:#fff;border:0}
+.runControls .runStop{background:#351b22;border-color:#633136}
+.runStatus{margin-top:10px;padding:10px 12px;border-radius:13px;background:#0a1420;color:#9eb0c2;font-size:12px}
+#runMap{width:100%;height:220px;margin-top:12px;border-radius:16px;background:#07101a;border:1px solid #20354c;display:block}
+.runSummary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.runSummary div{background:#0a1420;border-radius:13px;padding:10px;text-align:center;font-size:11px;color:#8fa0b4}.runSummary b{display:block;color:#eaf6ff;font-size:15px;margin-top:2px}
+.runHistory{margin-top:12px}.runHistoryRow{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px 0;border-bottom:1px solid #203149;font-size:12px}.runHistoryRow b{color:#eaf6ff}.runHistoryRow span{color:#8fa0b4}
+@media(max-width:650px){.runMetric b{font-size:24px}.runControls{grid-template-columns:1fr 1fr}.runControls .runStart{grid-column:1/-1}.runSummary{grid-template-columns:repeat(2,1fr)}}
 </style></head>
 <body>
 <div class="wrap"><div class="appTopbar"><div><div class="appBrand">EVO <span>FIT</span></div><div class="appSub">Coach · Jonction</div></div><div class="topActions"><button class="iconBtn" onclick="showToast('Tes données sont enregistrées sur cet appareil.')">💾</button><button class="iconBtn" onclick="installApp()">＋</button></div></div>
@@ -1153,7 +1170,30 @@ Sources visuelles et fiches techniques : Life Fitness et pages de distributeurs 
 Life Fitness documente notamment les modèles Axiom Chest Press, Lat Pulldown, Seated Row, Shoulder Press, Leg Press et Leg Extension.
 </p>
 </section>
-<footer class="footer">Programme mobile avec <b>photos de référence précises des machines</b>. Les photos montrent des modèles Life Fitness utilisés comme repères visuels et ne garantissent pas que le modèle exact installé à EVO Jonction soit identique. En cas de différence, suis les pictogrammes et réglages présents sur la machine.</footer>
+<section class="panel appPage" data-page="running" id="running">
+<div class="pageHead"><div><span class="eyebrow">GPS · COURSE À PIED</span><h2>🏃 Ma course</h2><p class="sub">Suis ta distance, ton allure et ton parcours en temps réel.</p></div></div>
+<div class="runningPanel">
+  <div class="runHero">
+    <div class="runMetric primary"><small>Distance</small><b id="runDistance">0,00 km</b></div>
+    <div class="runMetric"><small>Allure</small><b id="runPace">--:-- /km</b></div>
+    <div class="runMetric"><small>Temps</small><b id="runTime">00:00:00</b></div>
+    <div class="runMetric"><small>Vitesse</small><b id="runSpeed">0,0 km/h</b></div>
+  </div>
+  <div class="runControls">
+    <button class="runStart" id="runStartBtn" onclick="startRun()">▶ Démarrer</button>
+    <button id="runPauseBtn" onclick="pauseRun()" disabled>⏸ Pause</button>
+    <button class="runStop" onclick="finishRun()">■ Terminer</button>
+  </div>
+  <div class="runStatus" id="runStatus">📍 Prêt. Autorise la localisation quand tu démarres une course.</div>
+  <svg id="runMap" viewBox="0 0 1000 500" preserveAspectRatio="none" aria-label="Parcours GPS"><polyline id="runPath" points="" fill="none" stroke="#60b5ff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div class="runSummary">
+    <div>📍 Points GPS<b id="runPoints">0</b></div>
+    <div>🔥 Calories estimées<b id="runCalories">0 kcal</b></div>
+    <div>🛰️ Précision<b id="runAccuracy">-- m</b></div>
+  </div>
+  <div class="runHistory"><h3>📋 Mes dernières courses</h3><div id="runHistoryList" class="small">Aucune course enregistrée.</div></div>
+</div>
+</section><footer class="footer">Programme mobile avec <b>photos de référence précises des machines</b>. Les photos montrent des modèles Life Fitness utilisés comme repères visuels et ne garantissent pas que le modèle exact installé à EVO Jonction soit identique. En cas de différence, suis les pictogrammes et réglages présents sur la machine.</footer>
 </div>
 <div class="timer">⏱️ <b id="timerText">00:00</b> <button onclick="restTimer(90)">90s</button></div>
 <nav class="stickyNav">
@@ -1163,7 +1203,7 @@ Life Fitness documente notamment les modèles Axiom Chest Press, Lat Pulldown, S
 <button data-page="foodbox" onclick="switchPage('foodbox',this)"><b>🍽️</b><span>Nutrition</span></button>
 <button data-page="progress" onclick="switchPage('progress',this)"><b>↗</b><span>Progrès</span></button>
 <button data-page="profile" onclick="switchPage('profile',this)"><b>⚙</b><span>Profil</span></button>
-</nav>
+<button data-page="running" onclick="switchPage('running',this)"><b>🏃</b><span>Course</span></button></nav>
 <script>
 function go(id,b){document.getElementById(id)?.scrollIntoView({behavior:'smooth'});document.querySelectorAll('.stickyNav button').forEach(x=>x.classList.remove('active'));b.classList.add('active')}
 let timerId=null;
@@ -1627,5 +1667,21 @@ const _saveExerciseMemory=window.saveExerciseMemory;
 if(typeof _saveExerciseMemory==='function'){
   window.saveExerciseMemory=function(card){_saveExerciseMemory(card);scheduleCloudBackup();};
 }
+</script><script>
+let runWatchId=null,runTimerId=null,runStartedAt=0,runPausedAt=0,runPausedMs=0,runRunning=false,runPaused=false,runDistanceM=0,runPoints=[],runLastPoint=null,runElapsedSec=0,runAccuracy=0;
+function fmtRunTime(sec){sec=Math.max(0,Math.floor(sec));return String(Math.floor(sec/3600)).padStart(2,'0')+':'+String(Math.floor(sec%3600/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0')}
+function fmtPace(secPerKm){if(!Number.isFinite(secPerKm)||secPerKm<=0||secPerKm>3600)return'--:-- /km';const s=Math.round(secPerKm);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')+' /km'}
+function haversine(a,b){const R=6371000,rad=Math.PI/180,dLat=(b.lat-a.lat)*rad,dLon=(b.lon-a.lon)*rad;const x=Math.sin(dLat/2)**2+Math.cos(a.lat*rad)*Math.cos(b.lat*rad)*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(x))}
+function resetRunUI(){runDistanceM=0;runPoints=[];runLastPoint=null;runElapsedSec=0;runPausedMs=0;runPausedAt=0;runAccuracy=0;document.getElementById('runDistance').textContent='0,00 km';document.getElementById('runPace').textContent='--:-- /km';document.getElementById('runTime').textContent='00:00:00';document.getElementById('runSpeed').textContent='0,0 km/h';document.getElementById('runPoints').textContent='0';document.getElementById('runCalories').textContent='0 kcal';document.getElementById('runAccuracy').textContent='-- m';document.getElementById('runPath').setAttribute('points','')}
+function updateRunUI(){const km=runDistanceM/1000;const elapsed=runElapsedSec;document.getElementById('runDistance').textContent=km.toFixed(2).replace('.',',')+' km';document.getElementById('runTime').textContent=fmtRunTime(elapsed);document.getElementById('runPace').textContent=fmtPace(elapsed/km);document.getElementById('runSpeed').textContent=(km/(elapsed/3600||1)).toFixed(1).replace('.',',')+' km/h';document.getElementById('runPoints').textContent=runPoints.length;document.getElementById('runCalories').textContent=Math.round(km*(Number(document.getElementById('weight')?.value)||103))+' kcal';document.getElementById('runAccuracy').textContent=runAccuracy?Math.round(runAccuracy)+' m':'-- m';}
+function updateRunTimer(){if(!runRunning||runPaused)return;runElapsedSec=(Date.now()-runStartedAt-runPausedMs)/1000;updateRunUI()}
+function plotRun(){const svg=document.getElementById('runPath');if(!svg||runPoints.length<2)return;const lats=runPoints.map(p=>p.lat),lons=runPoints.map(p=>p.lon),minLat=Math.min(...lats),maxLat=Math.max(...lats),minLon=Math.min(...lons),maxLon=Math.max(...lons),dLat=Math.max(maxLat-minLat,0.00001),dLon=Math.max(maxLon-minLon,0.00001);const pts=runPoints.map(p=>{const x=50+900*(p.lon-minLon)/dLon,y=450-400*(p.lat-minLat)/dLat;return x.toFixed(1)+','+y.toFixed(1)}).join(' ');svg.setAttribute('points',pts)}
+function handleRunPosition(pos){if(!runRunning||runPaused)return;const p={lat:pos.coords.latitude,lon:pos.coords.longitude,t:Date.now()};runAccuracy=pos.coords.accuracy||0;if(runLastPoint){const d=haversine(runLastPoint,p);if(d>=2&&d<100)runDistanceM+=d;else if(d>=100){document.getElementById('runStatus').textContent='⚠️ Point GPS écarté (signal imprécis).';return}}runLastPoint=p;runPoints.push(p);plotRun();updateRunUI();document.getElementById('runStatus').textContent='🟢 GPS actif · précision '+Math.round(runAccuracy)+' m'}
+function handleRunError(err){document.getElementById('runStatus').textContent='❌ GPS : '+(err.message||'localisation indisponible')}
+function startRun(){if(runRunning&&!runPaused)return;if(!navigator.geolocation){document.getElementById('runStatus').textContent='❌ La géolocalisation n’est pas disponible sur cet appareil.';return}if(!runRunning){resetRunUI();runStartedAt=Date.now();runRunning=true;runPaused=false;document.getElementById('runStartBtn').textContent='🟢 Course en cours';document.getElementById('runPauseBtn').disabled=false;document.getElementById('runStatus').textContent='📍 Recherche du signal GPS…';runWatchId=navigator.geolocation.watchPosition(handleRunPosition,handleRunError,{enableHighAccuracy:true,maximumAge:1000,timeout:15000});runTimerId=setInterval(updateRunTimer,1000)}else{runPausedMs+=Date.now()-runPausedAt;runPaused=false;document.getElementById('runStatus').textContent='🟢 Course reprise.'}}
+function pauseRun(){if(!runRunning)return;if(!runPaused){runPaused=true;runPausedAt=Date.now();document.getElementById('runPauseBtn').textContent='▶ Reprendre';document.getElementById('runStatus').textContent='⏸ Course en pause.'}else{runPausedMs+=Date.now()-runPausedAt;runPaused=false;document.getElementById('runPauseBtn').textContent='⏸ Pause';document.getElementById('runStatus').textContent='🟢 Course reprise.'}}
+function finishRun(){if(!runRunning){showToast('Aucune course en cours');return}if(runWatchId!==null)navigator.geolocation.clearWatch(runWatchId);runWatchId=null;runRunning=false;runPaused=false;clearInterval(runTimerId);runTimerId=null;if(runPausedAt)runPausedMs+=Date.now()-runPausedAt;runElapsedSec=(Date.now()-runStartedAt-runPausedMs)/1000;updateRunUI();const km=runDistanceM/1000;if(km>=0.05){let h=JSON.parse(localStorage.getItem('evoRunHistory')||'[]');h.unshift({date:new Date().toISOString(),distance:+km.toFixed(3),time:Math.round(runElapsedSec),pace:fmtPace(runElapsedSec/km),speed:+(km/(runElapsedSec/3600||1)).toFixed(1),calories:Math.round(km*(Number(document.getElementById('weight')?.value)||103))});h=h.slice(0,20);localStorage.setItem('evoRunHistory',JSON.stringify(h));if(typeof scheduleCloudBackup==='function')scheduleCloudBackup();showToast('🏁 Course enregistrée · '+km.toFixed(2)+' km')}else showToast('Course trop courte pour être enregistrée');document.getElementById('runStartBtn').textContent='▶ Démarrer';document.getElementById('runPauseBtn').disabled=true;document.getElementById('runPauseBtn').textContent='⏸ Pause';document.getElementById('runStatus').textContent='🏁 Course terminée. Appuie sur Démarrer pour une nouvelle course.';renderRunHistory()}
+function renderRunHistory(){const root=document.getElementById('runHistoryList');if(!root)return;const h=JSON.parse(localStorage.getItem('evoRunHistory')||'[]');root.innerHTML=h.length?h.map(x=>'<div class="runHistoryRow"><div><b>'+new Date(x.date).toLocaleDateString('fr-CH')+'</b><br><span>'+x.distance.toFixed(2)+' km · '+fmtRunTime(x.time)+' · '+x.pace+'</span></div><div><b>'+x.speed.toFixed(1)+' km/h</b><br><span>🔥 '+x.calories+' kcal</span></div></div>').join(''):'Aucune course enregistrée.'}
+window.addEventListener('load',()=>{renderRunHistory();});
 </script></body>
 </html>
