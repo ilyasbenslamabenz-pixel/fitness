@@ -705,6 +705,17 @@ button:active{transform:scale(.97);filter:brightness(1.08)}
 .v16SessionDock{position:sticky;bottom:calc(72px + env(safe-area-inset-bottom));z-index:35;background:rgba(10,16,25,.95);border:1px solid #29415d;border-radius:16px;padding:10px;margin:10px 0;box-shadow:0 12px 35px #0008}
 .v16SessionDockTop{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:900}.v16SessionDock small{color:var(--muted)}
 @media(max-width:520px){.v16HeroTop{align-items:flex-start}.v16Primary{padding:10px 11px}.v16Title{font-size:25px}.v16Action{padding:11px 9px}.v16Metric{padding:11px}}
+</style><style id="evo-v17-quicklog">
+.v17Quick{margin-top:12px;background:linear-gradient(145deg,#101b2a,#0c1420);border:1px solid #29435f;border-radius:22px;padding:14px}
+.v17QuickHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.v17QuickHead b{font-size:16px}.v17QuickHead span{font-size:10px;color:#8499ad}
+.v17QuickGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.v17Q{border:1px solid #2b3e54;background:#142235;color:#eaf5ff;border-radius:15px;padding:11px;text-align:left;font-weight:900;min-height:58px}
+.v17Q strong{display:block;font-size:17px}.v17Q small{display:block;color:#91a8bd;font-size:10px;margin-top:2px}
+.v17Modal{position:fixed;inset:0;z-index:3000;background:rgba(3,7,12,.76);backdrop-filter:blur(12px);display:none;align-items:flex-end;padding:12px}
+.v17Modal.show{display:flex}.v17Sheet{width:100%;max-width:620px;margin:auto;background:#101923;border:1px solid #2a4058;border-radius:24px;padding:17px;box-shadow:0 20px 70px #000b}
+.v17Sheet h3{font-size:20px;margin:0 0 12px}.v17Sheet label{display:block;margin:9px 0 4px}.v17Sheet input,.v17Sheet select{width:100%;background:#0a111a;color:#fff;border:1px solid #2a3c51;border-radius:12px;padding:12px;font-size:16px}
+.v17Btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:13px}.v17Btns button{border:0;border-radius:13px;padding:12px;font-weight:900}.v17Save{background:var(--accent);color:#06101a}.v17Cancel{background:#202b38;color:#fff}
+.v17Recent{margin-top:12px;font-size:11px;color:#91a4b8}.v17Recent b{color:#dcecff}
 </style></head>
 <body>
 <div class="wrap"><div class="appTopbar"><div><div class="appBrand">EVO <span>FIT</span></div><div class="appSub">Coach · Jonction</div></div><div class="topActions"><button class="iconBtn" onclick="showToast('Tes données sont enregistrées sur cet appareil.')">💾</button><button class="iconBtn" onclick="installApp()">＋</button></div></div>
@@ -1893,6 +1904,31 @@ window.addEventListener('resize',()=>runMapInstance?.invalidateSize());
     if(id==='dashboard')renderHome();
     if(id==='training'){compactExercises();addSessionDock()}
   };
+})();
+</script><script id="evo-v17-quicklog-js">
+(function(){
+function closeV17(){document.querySelectorAll('.v17Modal').forEach(x=>x.classList.remove('show'))}
+function modal(type){closeV17();let m=document.getElementById('v17Modal');if(!m){m=document.createElement('div');m.id='v17Modal';m.className='v17Modal';document.body.appendChild(m)}m.classList.add('show');
+let html='';
+if(type==='steps')html='<div class="v17Sheet"><h3>👟 Ajouter des pas</h3><label>Nombre de pas</label><input id="v17Steps" type="number" min="0" inputmode="numeric" placeholder="Ex. 8500"><div class="v17Btns"><button class="v17Cancel" onclick="closeV17()">Annuler</button><button class="v17Save" onclick="v17SaveSteps()">Enregistrer</button></div></div>';
+if(type==='water')html='<div class="v17Sheet"><h3>💧 Ajouter de l’eau</h3><div class="v17QuickGrid"><button class="v17Q" onclick="v17AddWater(250)"><strong>+250 ml</strong></button><button class="v17Q" onclick="v17AddWater(500)"><strong>+500 ml</strong></button><button class="v17Q" onclick="v17AddWater(750)"><strong>+750 ml</strong></button><button class="v17Q" onclick="v17AddWater(1000)"><strong>+1 L</strong></button></div><label>Ou quantité personnalisée (ml)</label><input id="v17Water" type="number" min="0" inputmode="numeric" placeholder="Ex. 330"><div class="v17Btns"><button class="v17Cancel" onclick="closeV17()">Fermer</button><button class="v17Save" onclick="v17SaveWater()">Ajouter</button></div></div>';
+if(type==='protein')html='<div class="v17Sheet"><h3>🥩 Ajouter des protéines</h3><div class="v17QuickGrid"><button class="v17Q" onclick="v17AddProtein(25)"><strong>+25 g</strong></button><button class="v17Q" onclick="v17AddProtein(50)"><strong>+50 g</strong></button><button class="v17Q" onclick="v17AddProtein(75)"><strong>+75 g</strong></button><button class="v17Q" onclick="v17AddProtein(100)"><strong>+100 g</strong></button></div><label>Ou quantité personnalisée (g)</label><input id="v17Protein" type="number" min="0" inputmode="decimal" placeholder="Ex. 32"><div class="v17Btns"><button class="v17Cancel" onclick="closeV17()">Fermer</button><button class="v17Save" onclick="v17SaveProtein()">Ajouter</button></div></div>';
+if(type==='meal')html='<div class="v17Sheet"><h3>🍽️ Ajouter un repas</h3><label>Repas</label><select id="v17MealType"><option>Petit-déjeuner</option><option>Déjeuner</option><option>Dîner</option><option>Collation</option></select><label>Aliment / repas</label><input id="v17Food" placeholder="Ex. Poulet + riz"><label>Calories</label><input id="v17Cal" type="number" min="0" inputmode="decimal" placeholder="Ex. 650"><label>Protéines (g)</label><input id="v17MealProtein" type="number" min="0" inputmode="decimal" placeholder="Ex. 45"><div class="v17Btns"><button class="v17Cancel" onclick="closeV17()">Annuler</button><button class="v17Save" onclick="v17SaveMeal()">Ajouter le repas</button></div></div>';
+m.innerHTML=html;m.onclick=e=>{if(e.target===m)closeV17()}}
+window.closeV17=closeV17;window.v17Open=modal;
+window.v17SaveSteps=function(){let n=Math.max(0,Math.round(Number(document.getElementById('v17Steps')?.value)||0));if(!n)return;localStorage.setItem('steps',String(n));localStorage.setItem('stepsDate',localDateKey());if(typeof saveState==='function')saveState();if(typeof updateWidgets==='function')updateWidgets();closeV17();showToast('👟 '+n.toLocaleString('fr-CH')+' pas enregistrés')};
+window.v17AddWater=function(n){if(typeof addWater==='function')addWater(n);closeV17()};
+window.v17SaveWater=function(){let n=Math.max(0,Number(document.getElementById('v17Water')?.value)||0);if(n)v17AddWater(n)};
+window.v17AddProtein=function(n){if(typeof addProtein==='function')addProtein(n);closeV17()};
+window.v17SaveProtein=function(){let n=Math.max(0,Number(document.getElementById('v17Protein')?.value)||0);if(n)v17AddProtein(n)};
+window.v17SaveMeal=function(){let name=(document.getElementById('v17Food')?.value||'Repas').trim(),cal=Math.max(0,Number(document.getElementById('v17Cal')?.value)||0),p=Math.max(0,Number(document.getElementById('v17MealProtein')?.value)||0),type=document.getElementById('v17MealType')?.value||'Repas';if(!name)return showToast('Ajoute le nom du repas');if(typeof addFood==='function')addFood(name,cal,1,true);if(p){let cur=JSON.parse(localStorage.getItem('evoProteinToday')||'{"date":"","value":0}');if(cur.date!==localDateKey())cur={date:localDateKey(),value:0};cur.value+=p;localStorage.setItem('evoProteinToday',JSON.stringify(cur))}if(typeof updateWidgets==='function')updateWidgets();closeV17();showToast('🍽️ '+type+' ajouté')};
+function inject(){
+ const d=document.getElementById('dashboard');if(!d||d.querySelector('.v17Quick'))return;
+ const q=document.createElement('div');q.className='v17Quick';q.innerHTML='<div class="v17QuickHead"><b>⚡ Ajouter rapidement</b><span>1 tap</span></div><div class="v17QuickGrid"><button class="v17Q" onclick="v17Open(\'steps\')"><strong>👟 Pas</strong><small>+500 / saisir</small></button><button class="v17Q" onclick="v17Open(\'water\')"><strong>💧 Eau</strong><small>+250 / +500 / saisir</small></button><button class="v17Q" onclick="v17Open(\'protein\')"><strong>🥩 Protéines</strong><small>+25 / +50 / saisir</small></button><button class="v17Q" onclick="v17Open(\'meal\')"><strong>🍽️ Repas</strong><small>Ajouter calories & protéines</small></button></div><div class="v17Recent">Aujourd’hui · <b>Pas, eau, protéines et repas</b> sont accessibles depuis cet écran.</div>';
+ d.appendChild(q);
+}
+window.addEventListener('load',()=>setTimeout(inject,350));
+const old=window.switchPage;if(old)window.switchPage=function(id,btn){old(id,btn);if(id==='dashboard')setTimeout(inject,30)};
 })();
 </script></body>
 </html>
