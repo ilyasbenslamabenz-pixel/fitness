@@ -2060,5 +2060,18 @@ window.addEventListener('load',()=>setTimeout(inject,450));const sw=window.switc
 <style id="evo-v18-progress-css">
 .evoLegacyProgress{display:none!important}.progHero{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}.progHero h2{margin:4px 0}.progGoal{background:linear-gradient(145deg,#1c3047,#101a28);border:1px solid #2b4c70;border-radius:18px;padding:12px 14px;text-align:right;min-width:100px}.progGoal b{display:block;font-size:22px}.progGoal small,.progCard small,.progStats span{display:block;color:var(--muted);font-size:11px}.progStats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0}.progStats>div{background:#111820;border:1px solid var(--line);border-radius:16px;padding:12px}.progStats b{font-size:19px;display:block}.progCard{background:linear-gradient(145deg,#121b26,#0e141c);border:1px solid #273443;border-radius:20px;padding:15px;margin-top:10px}.progCardHead{display:flex;justify-content:space-between;align-items:center;gap:10px}.progCardHead b{font-size:16px}.progCardHead button{border:0;background:#193b5c;color:#dff2ff;padding:8px 11px;border-radius:10px;font-weight:800}.progBar{height:9px;background:#18212c;border-radius:20px;overflow:hidden;margin:14px 0 5px}.progBar i{display:block;height:100%;background:linear-gradient(90deg,#b9ff3d,#69bdff);border-radius:20px}.progBetween{display:flex;justify-content:space-between;color:var(--muted);font-size:11px}.progBetween b{color:#fff}.progChart{height:130px;margin-top:8px}.progSvg{width:100%;height:100%}.progSvg text{fill:#7f8b98;font-size:7px}.progLine{stroke:#b9ff3d}.weekDots{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:15px 0}.weekDots>div{text-align:center}.weekDots i{display:block;width:100%;height:34px;border-radius:10px;background:#18212c;border:1px solid #263443}.weekDots i.on{background:linear-gradient(145deg,#2d5a38,#183b2a);border-color:#4d7c4b}.weekDots small{margin-top:4px}.progMini{display:grid;gap:7px}.progMini>div{display:flex;justify-content:space-between;background:#0b1118;border-radius:10px;padding:9px 10px;font-size:12px}.progRunGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.progRunGrid>b{font-size:18px;background:#0b1118;border-radius:12px;padding:10px}.progEmpty{color:var(--muted);padding:30px 10px;text-align:center}@media(max-width:650px){.progStats{grid-template-columns:repeat(2,1fr)}.progHero{align-items:center}.progGoal{min-width:88px}.progStats b{font-size:16px}}
 </style>
+
+<style id="evo-v18-page-hero-fix">
+/* Le grand hero appartient uniquement à l'accueil. */
+body:not(.evoDashboard) .hero{display:none!important}
+body.evoDashboard .hero{display:block!important}
+</style>
+<script id="evo-v18-page-hero-fix-js">
+(function(){
+ function syncHero(page){document.body.classList.toggle('evoDashboard',page==='dashboard')}
+ window.addEventListener('load',()=>{syncHero(localStorage.getItem('evoPage')||'dashboard')});
+ const sw=window.switchPage;if(sw)window.switchPage=function(id,btn){sw(id,btn);syncHero(id)};
+})();
+</script>
 </body>
 </html>
