@@ -1380,7 +1380,7 @@ function saveExerciseMemory(card){
   if(inputs[1])cur.reps=inputs[1].value;
   cur.updated=new Date().toISOString();
   localStorage.setItem(workoutKey(card),JSON.stringify(cur));
-  const sessionDate=new Date().toISOString().slice(0,10);
+  const sessionDate=localDateKey();
   const doneKey=workoutKey(card)+'__done__'+sessionDate;
   localStorage.setItem(doneKey,card.classList.contains('sessionDone')?'1':'0');
 }
