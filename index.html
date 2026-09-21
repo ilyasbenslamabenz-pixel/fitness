@@ -645,7 +645,7 @@ button:active{transform:scale(.97);filter:brightness(1.08)}
 <section class="panel appPage activePage" data-page="dashboard" id="dashboard">
 <h2 style="margin-top:0">🏠 Tableau de bord</h2>
 <div class="dash">
-<div class="tile widget"><small>🔥 Calories</small><strong><span id="dashCal">0</span></strong><small>/ <span id="dashCalGoal">2500</span> kcal</small></div>
+<div class="tile widget"><small>🔥 Calories</small><strong><span id="dashCal">0</span></strong><small>/ <span id="dashCalGoal">2400</span> kcal</small></div>
 <div class="tile"><small>Pas aujourd'hui</small><strong><span id="dashSteps">0</span></strong><small>objectif <span id="dashStepGoal">8000</span></small></div>
 <div class="tile"><small>Poids</small><strong><span id="dashWeight">103</span> kg</strong><small>objectif 85 kg</small></div>
 <div class="tile widget"><small>💧 Eau</small><strong><span id="dashWater">0</span></strong><small>/ 2.5 L</small></div>
@@ -806,8 +806,10 @@ async function lookup(ean){
     if(box){
       box.style.display='block';
       const productName=String(p.product_name||'Produit sans nom');
-      const encodedName=btoa(unescape(encodeURIComponent(productName))).replace(/'/g,'');
-      box.innerHTML='<h3>'+esc(productName)+'</h3><div class="small">'+esc(p.brands||'')+' · EAN '+ean+'</div><div class="macro"><div><b>'+(kcal??'—')+'</b>kcal/100g</div><div><b>'+(n.proteins_100g??'—')+'</b>g prot.</div><div><b>'+(n.carbohydrates_100g??'—')+'</b>g gluc.</div><div><b>'+(n.fat_100g??'—')+'</b>g lip.</div></div><button class="scanbtn" type="button" onclick="addScanned(decodeURIComponent(escape(atob(\''+encodedName+'\'))),'+(Number(kcal)||0)+')">+ Ajouter au journal</button>';
+      const productKcal=Number(kcal)||0;
+      box.innerHTML='<h3>'+esc(productName)+'</h3><div class="small">'+esc(p.brands||'')+' · EAN '+ean+'</div><div class="macro"><div><b>'+(kcal??'—')+'</b>kcal/100g</div><div><b>'+(n.proteins_100g??'—')+'</b>g prot.</div><div><b>'+(n.carbohydrates_100g??'—')+'</b>g gluc.</div><div><b>'+(n.fat_100g??'—')+'</b>g lip.</div></div><button class="scanbtn" id="addScannedBtn" type="button">+ Ajouter au journal</button>';
+      const addBtn=document.getElementById('addScannedBtn');
+      if(addBtn)addBtn.addEventListener('click',()=>addScanned(productName,productKcal));
     }
     scannerMessage('Produit trouvé. Vérifie les valeurs avec l’étiquette avant de l’ajouter.','ok');
   }catch(e){
@@ -1164,8 +1166,17 @@ function updateDash(){
  document.getElementById('dashCal').textContent=cal;document.getElementById('dashCalGoal').textContent=Number(document.getElementById('target')?.value||2400).toLocaleString('fr-CH');document.getElementById('dashSteps').textContent=Number(st).toLocaleString('fr-CH');document.getElementById('dashStepGoal').textContent=Number(sg).toLocaleString('fr-CH');document.getElementById('dashWeight').textContent=w;
 }
 function saveWeight(){
- const d=document.getElementById('wdate').value, w=parseFloat(document.getElementById('wval').value);if(!d||!w)return;
- let a=JSON.parse(localStorage.getItem('weightHistory')||'[]');a.push({d,w});a.sort((x,y)=>x.d.localeCompare(y.d));localStorage.setItem('weightHistory',JSON.stringify(a));renderWeights();
+ const d=document.getElementById('wdate').value, w=parseFloat(document.getElementById('wval').value);
+ if(!d||!Number.isFinite(w)||w<=0)return;
+ let a=JSON.parse(localStorage.getItem('weightHistory')||'[]');
+ const existing=a.find(x=>x.d===d);
+ if(existing)existing.w=w;else a.push({d,w});
+ a.sort((x,y)=>x.d.localeCompare(y.d));
+ localStorage.setItem('weightHistory',JSON.stringify(a));
+ const current=document.getElementById('weight');
+ if(current){current.value=w;current.dispatchEvent(new Event('input',{bubbles:true}));}
+ renderWeights();updateWidgets();showToast('⚖️ Pesée enregistrée');
+ if(typeof scheduleCloudBackup==='function')scheduleCloudBackup();
 }
 function renderWeights(){
  const a=JSON.parse(localStorage.getItem('weightHistory')||'[]'), tb=document.getElementById('weightHistory');tb.innerHTML='';
