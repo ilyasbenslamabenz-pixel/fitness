@@ -661,7 +661,51 @@ button:active{transform:scale(.97);filter:brightness(1.08)}
 .runSummary div{background:#0a1420;border-radius:13px;padding:10px;text-align:center;font-size:11px;color:#8fa0b4}.runSummary b{display:block;color:#eaf6ff;font-size:15px;margin-top:2px}
 .runHistory{margin-top:12px}.runHistoryRow{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px 0;border-bottom:1px solid #203149;font-size:12px}.runHistoryRow b{color:#eaf6ff}.runHistoryRow span{color:#8fa0b4}
 @media(max-width:650px){.runMetric b{font-size:24px}.runControls{grid-template-columns:1fr 1fr}.runControls .runStart{grid-column:1/-1}.runSummary{grid-template-columns:repeat(2,1fr)}}
-</style><style id="evo-running-nav-fix">.stickyNav{grid-template-columns:repeat(7,1fr)!important}.stickyNav button{min-width:0}@media(max-width:650px){.stickyNav{grid-template-columns:repeat(7,1fr)!important}.stickyNav button span{font-size:7px}}</style></head>
+</style><style id="evo-running-nav-fix">.stickyNav{grid-template-columns:repeat(7,1fr)!important}.stickyNav button{min-width:0}@media(max-width:650px){.stickyNav{grid-template-columns:repeat(7,1fr)!important}.stickyNav button span{font-size:7px}}</style><style id="evo-v16-practical">
+/* EVO V16 — mobile-first practical redesign */
+:root{--v16-card:rgba(16,23,34,.96);--v16-border:#26364c;--v16-soft:#172235}
+.wrap{max-width:760px!important;padding:8px 12px calc(88px + env(safe-area-inset-bottom))!important}
+.appTopbar{padding:9px 4px 10px!important}
+.hero{padding:18px 2px 10px!important}
+.hero h1{font-size:38px!important;margin:4px 0 8px!important}
+.hero .sub{font-size:14px!important;line-height:1.45!important}
+.v16HomeHead{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin:8px 0 14px}
+.v16Greeting{font-size:12px;color:var(--muted);font-weight:800}
+.v16Title{font-size:28px;font-weight:950;letter-spacing:-.04em;margin-top:2px}
+.v16Date{font-size:11px;color:#7890a8;text-align:right}
+.v16HeroCard{background:linear-gradient(145deg,#12233a,#0c1624);border:1px solid #294866;border-radius:22px;padding:16px;margin-bottom:12px;box-shadow:0 14px 38px rgba(0,0,0,.2)}
+.v16HeroTop{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.v16Kicker{font-size:11px;color:#8db9df;font-weight:900;text-transform:uppercase;letter-spacing:.08em}
+.v16WorkoutName{font-size:24px;font-weight:950;margin:4px 0}
+.v16WorkoutSub{font-size:12px;color:#aebed0}
+.v16Primary{border:0;background:var(--accent);color:#06101a;border-radius:14px;padding:12px 14px;font-weight:950;white-space:nowrap}
+.v16Grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin:10px 0}
+.v16Metric{background:var(--v16-card);border:1px solid var(--v16-border);border-radius:17px;padding:13px}
+.v16Metric b{display:block;font-size:22px;letter-spacing:-.03em}.v16Metric span{font-size:11px;color:var(--muted)}
+.v16SectionTitle{font-size:17px;font-weight:950;margin:18px 2px 9px}
+.v16Actions{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.v16Action{display:flex;align-items:center;gap:10px;text-align:left;border:1px solid var(--v16-border);background:var(--v16-card);color:#fff;border-radius:16px;padding:12px;font-weight:900}
+.v16Action i{font-style:normal;font-size:22px}.v16Action small{display:block;color:var(--muted);font-size:10px;font-weight:600;margin-top:2px}
+.v16Goal{background:var(--v16-card);border:1px solid var(--v16-border);border-radius:18px;padding:14px;margin-top:12px}
+.v16GoalLine{display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px}.v16GoalLine span:last-child{color:#9ec7eb}
+.v16Bar{height:8px;background:#182333;border-radius:99px;overflow:hidden}.v16Bar i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.v16Tools{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.v16Tool{border:1px solid var(--v16-border);background:var(--v16-card);color:#dcecff;border-radius:15px;padding:12px;text-align:left;font-weight:850}
+.v16Tool span{font-size:20px;margin-right:7px}
+.stickyNav{grid-template-columns:repeat(5,1fr)!important;width:min(100% - 12px,620px)!important;padding:6px!important;border-radius:22px!important}
+.stickyNav button{min-height:49px!important;padding:6px 2px!important;font-size:9px!important}
+.stickyNav button b{font-size:18px!important}
+#training .exercise-card{display:block!important;padding:13px!important;border-radius:18px!important}
+#training .exercise-card .real-machine{height:0!important;margin:0!important;overflow:hidden!important;opacity:0;transition:.2s}
+#training .exercise-card.v16ShowImage .real-machine{height:210px!important;margin:10px 0 0!important;opacity:1}
+#training .exercise-card .v16ImageBtn{width:100%;margin-top:8px;border:1px solid #2b4058;background:#142238;color:#cce7ff;border-radius:11px;padding:9px;font-weight:850}
+#training .exercise-card .log{grid-template-columns:1fr 1fr 42px!important}
+#training .exercise-card .log input{min-height:44px!important}
+#training .dayPicker{position:sticky;top:58px;z-index:28;background:rgba(7,11,18,.92);backdrop-filter:blur(15px);padding:7px 0!important}
+.v16SessionDock{position:sticky;bottom:calc(72px + env(safe-area-inset-bottom));z-index:35;background:rgba(10,16,25,.95);border:1px solid #29415d;border-radius:16px;padding:10px;margin:10px 0;box-shadow:0 12px 35px #0008}
+.v16SessionDockTop{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:900}.v16SessionDock small{color:var(--muted)}
+@media(max-width:520px){.v16HeroTop{align-items:flex-start}.v16Primary{padding:10px 11px}.v16Title{font-size:25px}.v16Action{padding:11px 9px}.v16Metric{padding:11px}}
+</style></head>
 <body>
 <div class="wrap"><div class="appTopbar"><div><div class="appBrand">EVO <span>FIT</span></div><div class="appSub">Coach · Jonction</div></div><div class="topActions"><button class="iconBtn" onclick="showToast('Tes données sont enregistrées sur cet appareil.')">💾</button><button class="iconBtn" onclick="installApp()">＋</button></div></div>
 <header class="hero">
@@ -1765,5 +1809,90 @@ function showRunOnMap(index){const h=JSON.parse(localStorage.getItem('evoRunHist
 window.addEventListener('load',()=>{initRunMap();renderRunHistory();setTimeout(()=>runMapInstance?.invalidateSize(),400);});
 window.addEventListener('resize',()=>runMapInstance?.invalidateSize());
 </script><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-</body>
+<script id="evo-v16-practical-js">
+(function(){
+  function go(page){
+    const b=document.querySelector('.stickyNav button[data-page="'+page+'"]');
+    if(typeof window.switchPage==='function') window.switchPage(page,b);
+  }
+  function metric(id,fallback){const e=document.getElementById(id);return e?e.textContent:fallback}
+  function renderHome(){
+    const d=document.getElementById('dashboard'); if(!d)return;
+    d.innerHTML=`
+      <div class="v16HomeHead">
+        <div><div class="v16Greeting">EVO FIT COACH</div><div class="v16Title">Aujourd’hui 👋</div></div>
+        <div class="v16Date">${new Date().toLocaleDateString('fr-CH',{weekday:'short',day:'numeric',month:'short'})}</div>
+      </div>
+      <div class="v16HeroCard">
+        <div class="v16HeroTop">
+          <div><div class="v16Kicker">Prochaine séance</div><div class="v16WorkoutName" id="dashWorkout">—</div><div class="v16WorkoutSub" id="dashWorkoutSub">Programme 4×/semaine</div></div>
+          <button class="v16Primary" onclick="(function(){const b=document.querySelector('.stickyNav button[data-page=training]');switchPage('training',b)})()">▶ Démarrer</button>
+        </div>
+      </div>
+      <div class="v16Grid">
+        <div class="v16Metric"><span>🔥 Calories</span><b><span id="dashCal">0</span></b><span>/ <span id="dashCalGoal">2400</span> kcal</span></div>
+        <div class="v16Metric"><span>👟 Pas</span><b><span id="dashSteps">0</span></b><span>objectif <span id="dashStepGoal">8000</span></span></div>
+        <div class="v16Metric"><span>💧 Eau</span><b><span id="dashWater">0</span></b><span>/ 2.5 L</span></div>
+        <div class="v16Metric"><span>🥩 Protéines</span><b><span id="dashProtein">0</span></b><span>/ 180 g</span></div>
+      </div>
+      <div class="v16SectionTitle">Actions rapides</div>
+      <div class="v16Actions">
+        <button class="v16Action" onclick="(function(){const b=document.querySelector('.stickyNav button[data-page=training]');switchPage('training',b)})()"><i>🏋️</i><div>Séance<small>Commencer maintenant</small></div></button>
+        <button class="v16Action" onclick="addSteps(500)"><i>👟</i><div>+500 pas<small>En 1 tap</small></div></button>
+        <button class="v16Action" onclick="addWater(500)"><i>💧</i><div>+500 ml<small>Hydratation</small></div></button>
+        <button class="v16Action" onclick="addProtein(25)"><i>🥩</i><div>+25 g<small>Protéines</small></div></button>
+        <button class="v16Action" onclick="(function(){const b=document.querySelector('.stickyNav button[data-page=foodbox]');switchPage('foodbox',b)})()"><i>🍽️</i><div>Repas<small>Ajouter ce que tu manges</small></div></button>
+        <button class="v16Action" onclick="(function(){const b=document.querySelector('.stickyNav button[data-page=running]');switchPage('running',b)})()"><i>🏃</i><div>Course<small>GPS & parcours</small></div></button>
+      </div>
+      <div class="v16Goal">
+        <div class="v16GoalLine"><span>🎯 Objectif poids</span><span><span id="dashWeight">103</span> → 85 kg</span></div>
+        <div class="v16Bar"><i id="goalProgressBar" style="width:0"></i></div>
+        <div class="v16GoalLine" style="margin:7px 0 0"><span>Progression</span><span id="goalProgressText">—</span></div>
+      </div>
+      <div class="v16SectionTitle">Plus</div>
+      <div class="v16Tools">
+        <button class="v16Tool" onclick="(function(){const b=document.querySelector('.stickyNav button[data-page=progress]');switchPage('progress',b)})()">📈 Progression</button>
+        <button class="v16Tool" onclick="(function(){const b=document.querySelector('.stickyNav button[data-page=exercises]');switchPage('exercises',b)})()">◉ Exercices</button>
+      </div>`;
+    if(typeof updateWidgets==='function') updateWidgets();
+  }
+  function compactExercises(){
+    document.querySelectorAll('#training .exercise-card').forEach(card=>{
+      if(card.dataset.v16==='1')return;
+      const img=card.querySelector('.real-machine'); if(!img)return;
+      const btn=document.createElement('button');btn.type='button';btn.className='v16ImageBtn';btn.textContent='👁️ Voir la machine';
+      btn.onclick=()=>{card.classList.toggle('v16ShowImage');btn.textContent=card.classList.contains('v16ShowImage')?'🙈 Masquer la machine':'👁️ Voir la machine'};
+      img.after(btn);card.dataset.v16='1';
+    });
+  }
+  function addSessionDock(){
+    const t=document.getElementById('training'); if(!t||t.querySelector('.v16SessionDock'))return;
+    const dock=document.createElement('div');dock.className='v16SessionDock';
+    dock.innerHTML='<div class="v16SessionDockTop"><span>🏋️ Séance en cours</span><small id="v16SessionText">Choisis ton jour</small></div>';
+    const picker=t.querySelector('.dayPicker'); if(picker)picker.after(dock); else t.prepend(dock);
+  }
+  function redesignNav(){
+    const nav=document.querySelector('.stickyNav');if(!nav)return;
+    nav.innerHTML=[
+      ['dashboard','⌂','Accueil'],['training','🏋️','Séance'],['foodbox','🍽️','Nutrition'],['running','🏃','Course'],['profile','⚙️','Profil']
+    ].map((x,i)=>'<button class="'+(i===0?'active ':'')+'" data-page="'+x[0]+'" onclick="switchPage(\''+x[0]+'\',this)"><b>'+x[1]+'</b><span>'+x[2]+'</span></button>').join('');
+  }
+  function addProfileTools(){
+    const p=document.getElementById('profile');if(!p||p.querySelector('.v16Tools'))return;
+    const box=document.createElement('div');box.className='v16Tools';box.style.marginTop='14px';
+    box.innerHTML='<button class="v16Tool" onclick="(function(){const b=document.querySelector(\'.stickyNav button[data-page=progress]\');switchPage(\'progress\',b)})()">📈 Mes progrès</button><button class="v16Tool" onclick="(function(){const b=document.querySelector(\'.stickyNav button[data-page=exercises]\');switchPage(\'exercises\',b)})()">◉ Bibliothèque exercices</button><button class="v16Tool" onclick="(function(){const b=document.querySelector(\'.stickyNav button[data-page=notifications]\');switchPage(\'notifications\',b)})()">🔔 Notifications</button><button class="v16Tool" onclick="window.scrollTo({top:0,behavior:\'smooth\'})">⬆️ Haut de page</button>';
+    p.appendChild(box);
+  }
+  window.addEventListener('load',()=>{
+    redesignNav();renderHome();compactExercises();addSessionDock();addProfileTools();
+    setTimeout(()=>{compactExercises();if(typeof updateWidgets==='function')updateWidgets()},300);
+  });
+  const oldSwitch=window.switchPage;
+  if(oldSwitch)window.switchPage=function(id,btn){
+    oldSwitch(id,btn);
+    if(id==='dashboard')renderHome();
+    if(id==='training'){compactExercises();addSessionDock()}
+  };
+})();
+</script></body>
 </html>
