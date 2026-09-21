@@ -6,6 +6,7 @@
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <meta content="#0b1220" name="theme-color"/>
 <title>EVO Fit Coach — App V15</title>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <style>
 :root{--bg:#090b0e;--panel:#12161b;--panel2:#181d23;--text:#f4f6f8;--muted:#aab2bc;--line:#2a3038;--accent:#b9ff3d;--blue:#7dd3fc}
 *{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,#080a0d,#10141a 55%,#090b0e);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;line-height:1.45}
@@ -1930,5 +1931,65 @@ function inject(){
 window.addEventListener('load',()=>setTimeout(inject,350));
 const old=window.switchPage;if(old)window.switchPage=function(id,btn){old(id,btn);if(id==='dashboard')setTimeout(inject,30)};
 })();
-</script></body>
+</script>
+<script id="evo-v18-health-js">
+(function(){
+  const KEY='evoHealthImport';
+  const TYPES={
+    steps:'HKQuantityTypeIdentifierStepCount',
+    distance:'HKQuantityTypeIdentifierDistanceWalkingRunning',
+    activeEnergy:'HKQuantityTypeIdentifierActiveEnergyBurned',
+    weight:'HKQuantityTypeIdentifierBodyMass',
+    heart:'HKQuantityTypeIdentifierHeartRate',
+    sleep:'HKCategoryTypeIdentifierSleepAnalysis'
+  };
+  function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+  function num(v){return Number(String(v||'').replace(',','.'))||0}
+  function parseXML(xml){
+    const doc=new DOMParser().parseFromString(xml,'application/xml');
+    if(doc.querySelector('parsererror'))throw new Error('XML Santé invalide');
+    const rows=[...doc.getElementsByTagName('Record')];
+    const out={date:localDateKey(),steps:0,distanceKm:0,activeKcal:0,weightKg:null,heartAvg:null,sleepHours:0,records:rows.length,source:'Apple Santé'};
+    let heartSum=0,heartN=0,latestWeightDate='';
+    const today=new Date(); const day0=new Date(today.getFullYear(),today.getMonth(),today.getDate());
+    for(const r of rows){
+      const type=r.getAttribute('type')||'', start=r.getAttribute('startDate')||'', end=r.getAttribute('endDate')||'', value=num(r.getAttribute('value')), unit=(r.getAttribute('unit')||'').toLowerCase();
+      const d=new Date(start); if(Number.isNaN(d.getTime()))continue;
+      if(d<day0)continue;
+      if(type===TYPES.steps)out.steps+=value;
+      else if(type===TYPES.distance)out.distanceKm += unit.includes('mi')?value*1.609344:value/1000;
+      else if(type===TYPES.activeEnergy)out.activeKcal += unit.includes('kj')?value/4.184:value;
+      else if(type===TYPES.weight){let kg=unit.includes('lb')?value*0.45359237:value;if(!latestWeightDate||start>latestWeightDate){out.weightKg=kg;latestWeightDate=start}}
+      else if(type===TYPES.heart){heartSum+=value;heartN++}
+      else if(type===TYPES.sleep){const e=new Date(end);if(!Number.isNaN(e.getTime())&&e>d){const mins=(e-d)/60000;if(mins<1440)out.sleepHours+=mins/60}}
+    }
+    out.steps=Math.round(out.steps);out.distanceKm=Number(out.distanceKm.toFixed(2));out.activeKcal=Math.round(out.activeKcal);out.weightKg=out.weightKg==null?null:Number(out.weightKg.toFixed(1));out.heartAvg=heartN?Math.round(heartSum/heartN):null;out.sleepHours=Number(out.sleepHours.toFixed(1));
+    return out;
+  }
+  async function readFile(file){
+    if(file.name.toLowerCase().endsWith('.xml'))return file.text();
+    if(!window.JSZip)throw new Error('Module ZIP indisponible');
+    const zip=await JSZip.loadAsync(file); const entry=zip.file('apple_health_export/export.xml')||zip.file('export.xml');
+    if(!entry)throw new Error('export.xml introuvable dans l’export Santé');
+    return await entry.async('text');
+  }
+  function save(data){localStorage.setItem(KEY,JSON.stringify(data));if(typeof scheduleCloudBackup==='function')scheduleCloudBackup();}
+  function render(){
+    const d=document.getElementById('evoHealthPanel');if(!d)return;const x=JSON.parse(localStorage.getItem(KEY)||'null');
+    if(!x){d.querySelector('.healthData').innerHTML='<div class="small">Aucune importation. Exporte tes données depuis Apple Santé puis importe le fichier ici.</div>';return}
+    d.querySelector('.healthData').innerHTML='<div class="healthGrid"><div><b>👟 '+x.steps.toLocaleString('fr-CH')+'</b><small>pas aujourd’hui</small></div><div><b>🏃 '+x.distanceKm+' km</b><small>marche/course</small></div><div><b>🔥 '+x.activeKcal+' kcal</b><small>énergie active</small></div><div><b>❤️ '+(x.heartAvg||'—')+' bpm</b><small>FC moyenne</small></div><div><b>⚖️ '+(x.weightKg||'—')+' kg</b><small>dernier poids</small></div><div><b>😴 '+x.sleepHours+' h</b><small>sommeil</small></div></div><div class="small" style="margin-top:10px">Dernière importation : '+esc(x.importedAt||'—')+'</div>';
+  }
+  function inject(){
+    const d=document.getElementById('dashboard');if(!d||document.getElementById('evoHealthPanel'))return;
+    const p=document.createElement('div');p.id='evoHealthPanel';p.className='panel';p.style.marginTop='12px';p.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><h3 style="margin:0">🍎 Apple Santé</h3><div class="small">Import local · aucune donnée Santé n’est envoyée par cette fonction.</div></div><button class="v17Save" id="evoHealthBtn" type="button">🔄 Importer</button></div><div class="healthData" style="margin-top:12px"></div><input id="evoHealthFile" type="file" accept=".zip,.xml,application/zip,text/xml" hidden><div class="small" style="margin-top:10px">Dans Santé : Résumé → photo/profil → « Exporter toutes les données Santé ».</div>';
+    d.appendChild(p);p.querySelector('#evoHealthBtn').onclick=()=>p.querySelector('#evoHealthFile').click();p.querySelector('#evoHealthFile').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const xml=await readFile(f);const data=parseXML(xml);data.importedAt=new Date().toLocaleString('fr-CH');save(data);render();if(typeof updateWidgets==='function')updateWidgets();showToast('🍎 Données Apple Santé importées');}catch(err){console.error(err);showToast('❌ '+(err.message||'Import impossible'));}e.target.value=''};render();
+  }
+  window.addEventListener('load',()=>setTimeout(inject,500));
+  const oldSwitch=window.switchPage;if(oldSwitch)window.switchPage=function(id,btn){oldSwitch(id,btn);if(id==='dashboard')setTimeout(()=>{inject();render()},30)};
+})();
+</script>
+<style id="evo-v18-health-css">
+.healthGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.healthGrid>div{background:#0b0f13;border:1px solid var(--line);border-radius:14px;padding:10px}.healthGrid b{display:block;font-size:16px}.healthGrid small{display:block;color:var(--muted);font-size:11px;margin-top:3px}@media(max-width:520px){.healthGrid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</body>
 </html>
