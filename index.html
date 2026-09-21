@@ -150,6 +150,22 @@ body{padding-bottom:92px}
 .appPage{display:none}.appPage.activePage{display:block}.pageHead{display:flex;justify-content:space-between;align-items:end;gap:14px;margin-bottom:12px}.pageHead h2{margin:3px 0 5px}.searchBox{width:min(320px,100%);background:#0c1014;color:white;border:1px solid var(--line);border-radius:13px;padding:12px}
 .exerciseLibrary{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.libCard{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden}.libCard img{width:100%;height:170px;object-fit:contain;background:#fff}.libBody{padding:11px}.libBody b{display:block}.libBody span{font-size:11px;color:var(--muted)}.libBody button{margin-top:9px;width:100%;padding:9px;border:0;border-radius:10px;background:#222a32;color:#fff;font-weight:800}
 .settingsGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.settingCard{display:flex;flex-direction:column;gap:6px}.settingCard span{font-size:12px;color:var(--muted)}.settingCard input{width:100%;background:#0c1014;color:#fff;border:1px solid var(--line);border-radius:10px;padding:11px}.settingBtn,.dangerBtn{border:1px solid var(--line);border-radius:10px;background:#202730;color:#fff;padding:10px;font-weight:800}.dangerCard{margin-top:12px}.dangerBtn{background:#351b1d;border-color:#633136}
+.workoutHero{display:flex;justify-content:space-between;align-items:center;gap:12px;background:linear-gradient(135deg,#182018,#10151a);border:1px solid #33431e;border-radius:20px;padding:15px;margin-bottom:10px}
+.startWorkoutBtn{border:0;background:var(--accent);color:#0b0d10;border-radius:13px;padding:12px 15px;font-weight:900;white-space:nowrap}
+.dayPicker{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:10px 0}
+.dayPicker button{border:1px solid var(--line);background:#0d1115;color:#aeb7c0;border-radius:13px;padding:9px 4px;font-size:10px;font-weight:800}
+.dayPicker button b{font-size:12px;color:#fff}.dayPicker button.active{background:#202a1a;border-color:#59752b;color:var(--accent)}
+.sessionControls{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:10px 0}
+.sessionControls button{border:1px solid var(--line);background:#171c22;color:#fff;border-radius:11px;padding:10px 5px;font-size:11px;font-weight:800}
+.sessionControls button:last-child{background:#202a1a;color:var(--accent);border-color:#4d6528}
+.sessionProgress{background:#0c1014;border-radius:13px;padding:10px;margin-top:8px;font-size:11px;color:var(--muted)}
+.sessionProgress .progressbar{margin-top:7px}.sessionProgress .progressbar i{transition:width .25s ease}
+.sessionFocus{position:sticky;top:59px;z-index:30;background:rgba(9,11,14,.94);backdrop-filter:blur(16px);padding:8px 0}
+.exercise-card.sessionDone{border-color:#5b7f2a;box-shadow:0 0 0 1px #5b7f2a55 inset}
+.exercise-card .setQuick{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:6px}
+.exercise-card .setQuick button{border:0;border-radius:11px;padding:10px;background:#222a32;color:#fff;font-weight:900}
+.exercise-card .setQuick button.done{background:#30451d;color:var(--accent)}
+@media(max-width:650px){.workoutHero{align-items:stretch}.startWorkoutBtn{padding:11px 12px}.sessionControls{grid-template-columns:repeat(2,1fr)}.dayPicker button{min-height:48px}}
 .widget{min-height:112px}.widget strong{font-size:24px}
 #notifStatus{margin-top:10px;line-height:1.5}
 .toast{position:fixed;left:50%;bottom:105px;transform:translateX(-50%);z-index:200;background:#eaf8d8;color:#10150b;padding:11px 15px;border-radius:14px;font-weight:800;font-size:12px}
@@ -221,7 +237,22 @@ body{padding-bottom:95px}
 </div>
 </section>
 <section class="panel appPage" data-page="training" id="training">
-<h2 style="margin-top:0">📅 Organisation</h2>
+<div class="workoutHero">
+  <div><span class="eyebrow">MODE SÉANCE</span><h2 style="margin:4px 0">🏋️ Aujourd'hui</h2><div class="small" id="sessionSubtitle">Choisis ta séance et commence.</div></div>
+  <button class="startWorkoutBtn" type="button" onclick="startWorkout()">▶ Démarrer</button>
+</div>
+<div class="dayPicker" id="dayPicker">
+  <button data-day="1" onclick="selectWorkoutDay(1)">LUN<br><b>Push</b></button>
+  <button data-day="2" onclick="selectWorkoutDay(2)">MAR<br><b>Pull</b></button>
+  <button data-day="4" onclick="selectWorkoutDay(4)">JEU<br><b>Jambes</b></button>
+  <button data-day="6" onclick="selectWorkoutDay(6)">SAM<br><b>Haut</b></button>
+</div>
+<div class="sessionControls">
+  <button onclick="restTimer(60)">⏱️ 60s</button><button onclick="restTimer(90)">⏱️ 90s</button><button onclick="restTimer(120)">⏱️ 2 min</button>
+  <button onclick="finishWorkout()">✓ Terminer</button>
+</div>
+<div class="sessionProgress"><div><b id="sessionCount">0/0</b> exercices</div><div class="progressbar"><i id="sessionBar"></i></div></div>
+<h2 style="margin-top:18px">📅 Organisation</h2>
 <div class="rules">
 <div class="rule"><b>Lundi</b><br/>Push · pectoraux / épaules / triceps</div>
 <div class="rule"><b>Mardi</b><br/>Pull · dos / biceps</div>
@@ -673,6 +704,69 @@ function buildExerciseLibrary(){const root=document.getElementById('exerciseLibr
 function filterExercises(){const q=(document.getElementById('exerciseSearch')?.value||'').toLowerCase();document.querySelectorAll('.libCard').forEach(c=>c.style.display=c.dataset.name.includes(q)?'block':'none');}
 function openExercise(i){const b=document.querySelector('.stickyNav button[data-page="training"]');switchPage('training',b);const cards=[...document.querySelectorAll('section[data-page="training"] .exercise-card')];cards[i]?.scrollIntoView({behavior:'smooth',block:'start'});}
 window.addEventListener('load',()=>{loadNotificationSettings();updateWidgets();setInterval(updateWidgets,30000);const saved=localStorage.getItem('evoPage')||'dashboard';const b=document.querySelector('.stickyNav button[data-page="'+saved+'"]')||document.querySelector('.stickyNav button[data-page="dashboard"]');switchPage(b.dataset.page,b);syncProfile();['profileTarget','profileSteps','profileWeight'].forEach(id=>document.getElementById(id)?.addEventListener('input',()=>applyProfile(id)));if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});});
+
+// --- Mode séance ergonomique ---
+let selectedWorkoutDay=Number(localStorage.getItem('evoWorkoutDay')||new Date().getDay());
+if(![1,2,4,6].includes(selectedWorkoutDay)) selectedWorkoutDay=1;
+let workoutStarted=localStorage.getItem('evoWorkoutStarted')==='1';
+
+function selectWorkoutDay(day){
+  selectedWorkoutDay=day; localStorage.setItem('evoWorkoutDay',day);
+  document.querySelectorAll('#dayPicker button').forEach(b=>b.classList.toggle('active',Number(b.dataset.day)===day));
+  filterWorkoutSections(); updateSessionUI();
+}
+function filterWorkoutSections(){
+  const days=[...document.querySelectorAll('section.day[data-page="training"]')];
+  const wanted={1:'Jour 1',2:'Jour 2',4:'Jour 3',6:'Jour 4'}[selectedWorkoutDay];
+  days.forEach(s=>{const h=s.querySelector('h2');s.style.display=(h?.textContent.includes(wanted))?'block':'none';});
+}
+function startWorkout(){
+  workoutStarted=true;localStorage.setItem('evoWorkoutStarted','1');
+  const b=document.querySelector('.stickyNav button[data-page="training"]'); if(b) switchPage('training',b);
+  showToast('🔥 Séance démarrée');
+  updateSessionUI();
+  setTimeout(()=>document.querySelector('section.day[data-page="training"][style*="block"] .exercise-card')?.scrollIntoView({behavior:'smooth',block:'start'}),150);
+}
+function finishWorkout(){
+  workoutStarted=false;localStorage.removeItem('evoWorkoutStarted');
+  showToast('✅ Séance terminée — bravo !'); updateSessionUI();
+}
+function updateSessionUI(){
+  document.querySelectorAll('#dayPicker button').forEach(b=>b.classList.toggle('active',Number(b.dataset.day)===selectedWorkoutDay));
+  filterWorkoutSections();
+  const active=document.querySelector('section.day[data-page="training"][style*="block"]');
+  const cards=active?[...active.querySelectorAll('.exercise-card')]:[];
+  let done=cards.filter(c=>c.classList.contains('sessionDone')).length;
+  const count=document.getElementById('sessionCount'); if(count)count.textContent=done+'/'+cards.length;
+  const bar=document.getElementById('sessionBar'); if(bar)bar.style.width=(cards.length?(done/cards.length*100):0)+'%';
+  const sub=document.getElementById('sessionSubtitle');
+  const names={1:'Push · pectoraux / épaules / triceps',2:'Pull · dos / biceps',4:'Jambes + cardio',6:'Haut du corps complet'};
+  if(sub)sub.textContent=workoutStarted?'Séance en cours · '+names[selectedWorkoutDay]:names[selectedWorkoutDay];
+}
+function enhanceWorkoutCards(){
+  document.querySelectorAll('section.day[data-page="training"] .exercise-card').forEach((card,idx)=>{
+    if(card.dataset.quickReady==='1')return;
+    const check=card.querySelector('input[type="checkbox"]');
+    const quick=document.createElement('div');quick.className='setQuick';
+    const btn=document.createElement('button');btn.type='button';btn.textContent='✓ Série terminée';
+    btn.onclick=()=>{
+      card.classList.toggle('sessionDone');
+      if(check)check.checked=card.classList.contains('sessionDone');
+      localStorage.setItem('sessionDone_'+idx,card.classList.contains('sessionDone')?'1':'0');
+      updateSessionUI();
+    };
+    quick.appendChild(btn);
+    const log=card.querySelector('.log'); if(log)log.after(quick);
+    if(localStorage.getItem('sessionDone_'+idx)==='1'){card.classList.add('sessionDone');btn.classList.add('done');}
+    card.dataset.quickReady='1';
+  });
+}
+const originalSwitchPage=window.switchPage;
+window.switchPage=function(id,btn){
+  originalSwitchPage(id,btn);
+  if(id==='training'){enhanceWorkoutCards();updateSessionUI();}
+};
+window.addEventListener('load',()=>{enhanceWorkoutCards();updateSessionUI();});
 </script>
 </body>
 </html>
