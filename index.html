@@ -940,11 +940,21 @@ async function syncAfterLogin(){
     }
     const cloudUpdated=snap.data().appData.updatedAt;
     const localUpdated=localStorage.getItem('evoFirebaseLastSync');
+
+    // Sécurité anti-écrasement : sur un nouvel appareil, on ne remplace jamais
+    // automatiquement une sauvegarde cloud existante par les données locales.
     if(!localUpdated){
       updateCloudStatus('☁️ Sauvegarde cloud disponible — choisis « Restaurer » ou « Sauvegarder maintenant ».');
       return;
     }
-    // Après la première synchronisation, les modifications locales sont sauvegardées automatiquement.
+
+    const cloudTime=Date.parse(cloudUpdated||'');
+    const localTime=Date.parse(localUpdated||'');
+    if(Number.isFinite(cloudTime) && Number.isFinite(localTime) && cloudTime>localTime){
+      updateCloudStatus('☁️ Le cloud contient une version plus récente — restaure-la ou sauvegarde volontairement cette version locale.');
+      return;
+    }
+
     await backupToCloud(true);
   }catch(e){
     console.error(e);
