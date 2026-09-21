@@ -1513,8 +1513,17 @@ function startWorkout(){
   setTimeout(()=>document.querySelector('section.day[data-page="training"][style*="block"] .exercise-card')?.scrollIntoView({behavior:'smooth',block:'start'}),150);
 }
 function finishWorkout(){
+  const active=document.querySelector('section.day[data-page="training"][style*="block"]');
+  const cards=active?[...active.querySelectorAll('.exercise-card')]:[];
+  const done=cards.filter(c=>c.classList.contains('sessionDone')).length;
+  if(done===0){showToast('Termine au moins une série avant de clôturer');return}
+  const names={1:'Push',2:'Pull',4:'Jambes + cardio',6:'Haut du corps complet'};
+  let h=JSON.parse(localStorage.getItem('evoWorkoutHistory')||'[]');
+  h.unshift({date:new Date().toISOString(),day:selectedWorkoutDay,name:names[selectedWorkoutDay]||'Séance',done,total:cards.length});
+  localStorage.setItem('evoWorkoutHistory',JSON.stringify(h.slice(0,180)));
+  if(typeof scheduleCloudBackup==='function')scheduleCloudBackup();
   workoutStarted=false;localStorage.removeItem('evoWorkoutStarted');
-  showToast('✅ Séance terminée — bravo !'); updateSessionUI();
+  showToast('✅ Séance enregistrée · '+done+'/'+cards.length); updateSessionUI();
 }
 function updateSessionUI(){
   document.querySelectorAll('#dayPicker button').forEach(b=>b.classList.toggle('active',Number(b.dataset.day)===selectedWorkoutDay));
@@ -1886,7 +1895,7 @@ window.addEventListener('resize',()=>runMapInstance?.invalidateSize());
   function redesignNav(){
     const nav=document.querySelector('.stickyNav');if(!nav)return;
     nav.innerHTML=[
-      ['dashboard','⌂','Accueil'],['training','🏋️','Séance'],['foodbox','🍽️','Nutrition'],['running','🏃','Course'],['profile','⚙️','Profil']
+      ['dashboard','⌂','Accueil'],['training','🏋️','Séance'],['progress','📈','Progrès'],['running','🏃','Course'],['profile','⚙️','Profil']
     ].map((x,i)=>'<button class="'+(i===0?'active ':'')+'" data-page="'+x[0]+'" onclick="switchPage(\''+x[0]+'\',this)"><b>'+x[1]+'</b><span>'+x[2]+'</span></button>').join('');
   }
   function addProfileTools(){
@@ -1990,6 +1999,35 @@ const old=window.switchPage;if(old)window.switchPage=function(id,btn){old(id,btn
 </script>
 <style id="evo-v18-health-css">
 .healthGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.healthGrid>div{background:#0b0f13;border:1px solid var(--line);border-radius:14px;padding:10px}.healthGrid b{display:block;font-size:16px}.healthGrid small{display:block;color:var(--muted);font-size:11px;margin-top:3px}@media(max-width:520px){.healthGrid{grid-template-columns:repeat(2,1fr)}}
+</style>
+
+<script id="evo-v18-progress-js">
+(function(){
+function getWeights(){try{return JSON.parse(localStorage.getItem('weightHistory')||'[]')}catch(e){return[]}}
+function getRuns(){try{return JSON.parse(localStorage.getItem('evoRunHistory')||'[]')}catch(e){return[]}}
+function getWorkouts(){try{return JSON.parse(localStorage.getItem('evoWorkoutHistory')||'[]')}catch(e){return[]}}
+function lineChart(data,label,colorClass){if(!data.length)return '<div class="progEmpty">Pas encore assez de données pour afficher '+label+'.</div>';const vals=data.map(x=>x.v),min=Math.min(...vals),max=Math.max(...vals),range=max-min||1;const pts=data.map((x,i)=>{const px=8+(i/(Math.max(data.length-1,1)))*184;const py=82-((x.v-min)/range)*64;return px.toFixed(1)+','+py.toFixed(1)}).join(' ');return '<svg viewBox="0 0 200 100" preserveAspectRatio="none" class="progSvg"><polyline points="'+pts+'" fill="none" class="'+colorClass+'" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><line x1="8" y1="86" x2="192" y2="86" stroke="rgba(255,255,255,.12)"/><text x="8" y="98">'+escLabel(label)+'</text></svg>'}
+function escLabel(s){return String(s).replace(/[&<>]/g,'')}
+function renderProgress(){
+ const root=document.getElementById('evoProgressHub');if(!root)return;
+ const w=getWeights().sort((a,b)=>a.d.localeCompare(b.d)),r=getRuns(),h=getWorkouts();
+ const current=Number(document.getElementById('weight')?.value||w.at(-1)?.w||103),start=Number(localStorage.getItem('evoGoalStartWeight')||w[0]?.w||current),target=85, lost=Math.max(0,start-current),remaining=Math.max(0,current-target),pct=start>target?Math.min(100,Math.max(0,(start-current)/(start-target)*100)):0;
+ const last7=[...Array(7)].map((_,i)=>{const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-i);const key=d.toISOString().slice(0,10);return {key,done:h.filter(x=>x.date?.slice(0,10)===key).length}}).reverse();
+ const totalKm=r.reduce((s,x)=>s+(Number(x.distance)||0),0),totalWork=h.length;
+ root.innerHTML='<div class="progHero"><div><span class="eyebrow">TON ÉVOLUTION</span><h2>📈 Mes progrès</h2><p class="sub">Tout ce qui compte pour voir si tu avances.</p></div><div class="progGoal"><b>'+current.toFixed(1)+' kg</b><small>objectif '+target+' kg</small></div></div>'+
+ '<div class="progStats"><div><b>'+lost.toFixed(1)+' kg</b><span>perdus depuis le départ</span></div><div><b>'+remaining.toFixed(1)+' kg</b><span>jusqu’à ton objectif</span></div><div><b>'+totalWork+'</b><span>séances enregistrées</span></div><div><b>'+totalKm.toFixed(1)+' km</b><span>courus</span></div></div>'+
+ '<div class="progCard"><div class="progCardHead"><div><b>⚖️ Poids</b><small>'+w.length+' pesée'+(w.length>1?'s':'')+'</small></div><button onclick="openProgressWeight()">+ Ajouter</button></div><div class="progBar"><i style="width:'+pct+'%"></i></div><div class="progBetween"><span>'+start.toFixed(1)+' kg</span><b>'+Math.round(pct)+'%</b><span>'+target+' kg</span></div><div class="progChart">'+lineChart(w.slice(-12).map(x=>({v:Number(x.w)})),'kg','progLine')+'</div></div>'+
+ '<div class="progCard"><div class="progCardHead"><div><b>🏋️ Régularité</b><small>7 derniers jours</small></div><b>'+totalWork+' séances</b></div><div class="weekDots">'+last7.map(x=>'<div><i class="'+(x.done?'on':'')+'"></i><small>'+new Date(x.key).toLocaleDateString('fr-CH',{weekday:'narrow'}).replace('.','')+'</small></div>').join('')+'</div><div class="progMini">'+h.slice(0,5).map(x=>'<div><span>🏋️ '+x.name+'</span><b>'+x.done+'/'+x.total+'</b></div>').join('')+'</div></div>'+
+ '<div class="progCard"><div class="progCardHead"><div><b>🏃 Course</b><small>Historique</small></div><button onclick="switchPage(\'running\',document.querySelector(\'.stickyNav button[data-page=running]\'))">Voir mes courses</button></div><div class="progRunGrid"><b>'+r.length+'<small>courses</small></b><b>'+totalKm.toFixed(1)+'<small>km total</small></b><b>'+(r.length?r[0].pace:'—')+'<small>allure récente</small></b></div></div>'+
+ '<div class="progCard"><div class="progCardHead"><div><b>🎯 Prochain cap</b><small>Objectif 85 kg</small></div></div><p class="sub" style="margin:0">Chaque pesée, séance et course nourrit cette page. Le but est de voir la tendance, pas seulement le chiffre du jour.</p></div>';
+}
+window.openProgressWeight=function(){const d=prompt('Ton poids aujourd’hui (kg)');const n=Number(String(d||'').replace(',','.'));if(!Number.isFinite(n)||n<=0)return;let a=getWeights(),key=localDateKey(),e=a.find(x=>x.d===key);if(e)e.w=n;else a.push({d:key,w:n});a.sort((x,y)=>x.d.localeCompare(y.d));localStorage.setItem('weightHistory',JSON.stringify(a));const el=document.getElementById('weight');if(el){el.value=n;el.dispatchEvent(new Event('input',{bubbles:true}))}if(typeof scheduleCloudBackup==='function')scheduleCloudBackup();renderProgress();showToast('⚖️ '+n.toFixed(1)+' kg enregistré')};
+function inject(){const old=[...document.querySelectorAll('section.appPage[data-page="progress"]')];old.forEach(x=>{if(x.id!=='evoProgressHub')x.classList.add('evoLegacyProgress')});if(document.getElementById('evoProgressHub')){renderProgress();return}const s=document.createElement('section');s.id='evoProgressHub';s.className='panel appPage';s.dataset.page='progress';const first=old[0]||document.querySelector('#profile');if(first)first.before(s);renderProgress()}
+window.addEventListener('load',()=>setTimeout(inject,450));const sw=window.switchPage;if(sw)window.switchPage=function(id,btn){sw(id,btn);if(id==='progress')setTimeout(()=>{inject();renderProgress()},40)};
+})();
+</script>
+<style id="evo-v18-progress-css">
+.evoLegacyProgress{display:none!important}.progHero{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}.progHero h2{margin:4px 0}.progGoal{background:linear-gradient(145deg,#1c3047,#101a28);border:1px solid #2b4c70;border-radius:18px;padding:12px 14px;text-align:right;min-width:100px}.progGoal b{display:block;font-size:22px}.progGoal small,.progCard small,.progStats span{display:block;color:var(--muted);font-size:11px}.progStats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0}.progStats>div{background:#111820;border:1px solid var(--line);border-radius:16px;padding:12px}.progStats b{font-size:19px;display:block}.progCard{background:linear-gradient(145deg,#121b26,#0e141c);border:1px solid #273443;border-radius:20px;padding:15px;margin-top:10px}.progCardHead{display:flex;justify-content:space-between;align-items:center;gap:10px}.progCardHead b{font-size:16px}.progCardHead button{border:0;background:#193b5c;color:#dff2ff;padding:8px 11px;border-radius:10px;font-weight:800}.progBar{height:9px;background:#18212c;border-radius:20px;overflow:hidden;margin:14px 0 5px}.progBar i{display:block;height:100%;background:linear-gradient(90deg,#b9ff3d,#69bdff);border-radius:20px}.progBetween{display:flex;justify-content:space-between;color:var(--muted);font-size:11px}.progBetween b{color:#fff}.progChart{height:130px;margin-top:8px}.progSvg{width:100%;height:100%}.progSvg text{fill:#7f8b98;font-size:7px}.progLine{stroke:#b9ff3d}.weekDots{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:15px 0}.weekDots>div{text-align:center}.weekDots i{display:block;width:100%;height:34px;border-radius:10px;background:#18212c;border:1px solid #263443}.weekDots i.on{background:linear-gradient(145deg,#2d5a38,#183b2a);border-color:#4d7c4b}.weekDots small{margin-top:4px}.progMini{display:grid;gap:7px}.progMini>div{display:flex;justify-content:space-between;background:#0b1118;border-radius:10px;padding:9px 10px;font-size:12px}.progRunGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.progRunGrid>b{font-size:18px;background:#0b1118;border-radius:12px;padding:10px}.progEmpty{color:var(--muted);padding:30px 10px;text-align:center}@media(max-width:650px){.progStats{grid-template-columns:repeat(2,1fr)}.progHero{align-items:center}.progGoal{min-width:88px}.progStats b{font-size:16px}}
 </style>
 </body>
 </html>
