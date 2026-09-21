@@ -188,7 +188,12 @@ section.appPage.activePage{display:block!important}
 .steps{display:flex;gap:8px;align-items:center}.steps input{max-width:180px}
 .progressbar{height:10px;background:#252b31;border-radius:10px;overflow:hidden}.progressbar i{display:block;height:100%;width:0;background:var(--accent)}
 .small{font-size:12px;color:var(--muted)}
-@media(max-width:700px){.foodgrid{grid-template-columns:1fr}.foodrow{grid-template-columns:1fr 75px 75px 38px}}
+.nutritionQuick{margin:12px 0;padding:13px;border:1px solid #29415f;border-radius:16px;background:linear-gradient(145deg,#102238,#0b1522)}
+.nutritionQuickTitle{font-weight:900;margin-bottom:9px}.nutritionQuickGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.nutritionQuickGrid button,.stepQuick button{border:1px solid #29415f;border-radius:11px;background:#13263b;color:#eaf6ff;padding:10px 7px;font-weight:900}
+.nutritionQuickStats{display:flex;justify-content:space-between;gap:8px;margin-top:10px;color:#9eb0c2;font-size:12px}
+.nutritionQuickStats b{color:#dff2ff}.stepQuick{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:10px}
+@media(max-width:700px){.foodgrid{grid-template-columns:1fr}.foodrow{grid-template-columns:1fr 75px 75px 38px}.nutritionQuickGrid{grid-template-columns:repeat(2,1fr)}.stepQuick{grid-template-columns:repeat(2,1fr)}}
 </style>
 <style>
 .scanbox{background:linear-gradient(180deg,#111820,#0d1116);border:1px solid #28313a;border-radius:22px;padding:16px;margin-top:20px}
@@ -672,8 +677,12 @@ button:active{transform:scale(.97);filter:brightness(1.08)}
 </div>
 <div class="quickActions">
 <button class="quickAction" onclick="switchPage('training',document.querySelector('.stickyNav button[data-page=training]'));"><span>🏋️</span>Commencer une séance<small>Programme 4 jours</small></button>
-<button class="quickAction" onclick="recordWater()"><span>💧</span>Ajouter 250 ml<small>Hydratation</small></button>
-<button class="quickAction" onclick="recordProtein()"><span>🥩</span>Ajouter 25 g<small>Protéines</small></button>
+<button class="quickAction" onclick="addSteps(500)"><span>👟</span>+500 pas<small>Ajout rapide</small></button>
+<button class="quickAction" onclick="addWater(250)"><span>💧</span>+250 ml<small>Hydratation</small></button>
+<button class="quickAction" onclick="addWater(500)"><span>💦</span>+500 ml<small>Hydratation</small></button>
+<button class="quickAction" onclick="addProtein(25)"><span>🥩</span>+25 g protéines<small>Ajout rapide</small></button>
+<button class="quickAction" onclick="quickMeal()"><span>🍽️</span>Ajouter un repas<small>Journal alimentaire</small></button>
+<button class="quickAction" onclick="switchPage('running',document.querySelector('.stickyNav button[data-page=running]'));"><span>🏃</span>Démarrer une course<small>GPS · allure</small></button>
 <button class="quickAction" onclick="switchPage('progress',document.querySelector('.stickyNav button[data-page=progress]'));"><span>📈</span>Voir ma progression<small>Poids & historique</small></button>
 </div>
 <div class="panel" style="margin-top:12px;background:linear-gradient(145deg,#0e2035,#09121f);border-color:#24486d">
@@ -860,6 +869,18 @@ function addScanned(name,kcal){
 <label>Objectif calories / jour<input id="target" inputmode="numeric" type="number" value="2400"/></label>
 <label>Poids du jour (kg)<input id="weight" inputmode="decimal" step="0.1" type="number" value="103"/></label>
 </div>
+<div class="nutritionQuick">
+  <div class="nutritionQuickTitle">⚡ Ajout rapide</div>
+  <div class="nutritionQuickGrid">
+    <button type="button" onclick="addWater(250)">💧 +250 ml</button>
+    <button type="button" onclick="addWater(500)">💦 +500 ml</button>
+    <button type="button" onclick="addProtein(25)">🥩 +25 g</button>
+    <button type="button" onclick="addProtein(50)">🍗 +50 g</button>
+    <button type="button" onclick="quickMeal()">🍽️ Nouveau repas</button>
+    <button type="button" onclick="setStepsToday()">👟 Saisir mes pas</button>
+  </div>
+  <div class="nutritionQuickStats"><span>💧 <b id="quickWater">0 L</b></span><span>🥩 <b id="quickProtein">0 g</b></span><span>👟 <b id="quickSteps">0</b></span></div>
+</div>
 <div id="foods"></div>
 <button onclick="addFood()" style="margin-top:12px;padding:11px 14px;border:0;border-radius:12px;background:var(--accent);font-weight:900">+ Ajouter un aliment</button>
 <div class="total"><span id="cal">0</span> kcal</div>
@@ -874,6 +895,12 @@ function addScanned(name,kcal){
 </div>
 <div class="total"><span id="stepText">0 / 8 000</span></div>
 <div class="progressbar"><i id="stepBar"></i></div>
+<div class="stepQuick">
+  <button type="button" onclick="addSteps(500)">+500</button>
+  <button type="button" onclick="addSteps(1000)">+1 000</button>
+  <button type="button" onclick="setStepsToday()">✏️ Saisir</button>
+  <button type="button" onclick="addSteps(-500)">−500</button>
+</div>
 <p class="small">Objectif de départ : 8 000 pas/jour. Tu peux modifier ce chiffre selon ta récupération.</p>
 </section>
 <script>
@@ -1209,12 +1236,28 @@ function go(id,b){document.getElementById(id)?.scrollIntoView({behavior:'smooth'
 let timerId=null;
 function restTimer(sec){clearInterval(timerId);let n=sec;const el=document.getElementById('timerText');const paint=()=>{el.textContent=String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0')};paint();timerId=setInterval(()=>{n--;paint();if(n<=0){clearInterval(timerId);if(navigator.vibrate)navigator.vibrate([200,100,200]);}},1000)}
 function saveState(){
- const data={steps:document.getElementById('steps')?.value,goal:document.getElementById('stepGoal')?.value,target:document.getElementById('target')?.value,weight:document.getElementById('weight')?.value};
+ const data={steps:document.getElementById('steps')?.value,stepsDate:localDateKey(),goal:document.getElementById('stepGoal')?.value,target:document.getElementById('target')?.value,weight:document.getElementById('weight')?.value};
  localStorage.setItem('evoState',JSON.stringify(data)); updateDash();
+}
+function addSteps(amount){
+ const el=document.getElementById('steps'); if(!el)return;
+ const n=Math.max(0,(Number(el.value)||0)+Number(amount||0));
+ el.value=Math.round(n); el.dispatchEvent(new Event('input',{bubbles:true}));
+ stepsCalc(); updateWidgets(); showToast('👟 '+(amount>=0?'+':'')+amount+' pas');
+}
+function setStepsToday(){
+ const el=document.getElementById('steps'); if(!el)return;
+ const v=prompt('Combien de pas as-tu aujourd’hui ?',el.value||'0');
+ if(v===null)return;
+ const n=Number(String(v).replace(',','.'));
+ if(!Number.isFinite(n)||n<0){showToast('Nombre de pas invalide');return}
+ el.value=Math.round(n); el.dispatchEvent(new Event('input',{bubbles:true}));
+ stepsCalc(); updateWidgets(); showToast('👟 Pas enregistrés');
 }
 function updateDash(){
  const cal=document.getElementById('cal')?.textContent||0, st=document.getElementById('steps')?.value||0, sg=document.getElementById('stepGoal')?.value||8000, w=document.getElementById('weight')?.value||103;
- document.getElementById('dashCal').textContent=cal;document.getElementById('dashCalGoal').textContent=Number(document.getElementById('target')?.value||2400).toLocaleString('fr-CH');document.getElementById('dashSteps').textContent=Number(st).toLocaleString('fr-CH');document.getElementById('dashStepGoal').textContent=Number(sg).toLocaleString('fr-CH');document.getElementById('dashWeight').textContent=w;
+ const dc=document.getElementById('dashCal'),dg=document.getElementById('dashCalGoal'),ds=document.getElementById('dashSteps'),dsg=document.getElementById('dashStepGoal'),dw=document.getElementById('dashWeight');
+ if(dc)dc.textContent=cal;if(dg)dg.textContent=Number(document.getElementById('target')?.value||2400).toLocaleString('fr-CH');if(ds)ds.textContent=Number(st).toLocaleString('fr-CH');if(dsg)dsg.textContent=Number(sg).toLocaleString('fr-CH');if(dw)dw.textContent=w;
 }
 function saveWeight(){
  const d=document.getElementById('wdate').value, w=parseFloat(document.getElementById('wval').value);
@@ -1239,7 +1282,11 @@ window.addEventListener('load',()=>{
    if(initial>0)localStorage.setItem('evoGoalStartWeight',String(initial));
  }
  document.getElementById('wdate').value=localDateKey();
- try{const d=JSON.parse(localStorage.getItem('evoState')||'{}');if(d.steps!==undefined)steps.value=d.steps;if(d.goal)stepGoal.value=d.goal;if(d.target)target.value=d.target;if(d.weight)weight.value=d.weight;}catch(e){}
+ try{
+ const d=JSON.parse(localStorage.getItem('evoState')||'{}');
+ if(d.stepsDate===localDateKey() && d.steps!==undefined)steps.value=d.steps; else steps.value='0';
+ if(d.goal)stepGoal.value=d.goal;if(d.target)target.value=d.target;if(d.weight)weight.value=d.weight;
+}catch(e){steps.value='0'}
  ['steps','stepGoal','target','weight'].forEach(id=>document.getElementById(id)?.addEventListener('input',saveState));
  document.querySelectorAll('.log input').forEach((x,i)=>{const k='gym_'+i;if(localStorage.getItem(k)!==null){if(x.type==='checkbox')x.checked=localStorage.getItem(k)==='1';else x.value=localStorage.getItem(k)}x.addEventListener('change',()=>localStorage.setItem(k,x.type==='checkbox'?(x.checked?'1':'0'):x.value))});
  renderWeights();updateDash();setTimeout(updateDash,200);
@@ -1247,7 +1294,7 @@ window.addEventListener('load',()=>{
 const oldCalc=calc; calc=function(){oldCalc();updateDash();}; const oldSteps=stepsCalc; stepsCalc=function(){oldSteps();updateDash();};
 
 
-const APP_PAGES=['dashboard','training','exercises','foodbox','progress','profile'];
+const APP_PAGES=['dashboard','training','exercises','foodbox','progress','profile','running'];
 function switchPage(id,btn){
  document.querySelectorAll('section.appPage').forEach(el=>el.classList.toggle('activePage',el.dataset.page===id || el.id===id));
  document.querySelectorAll('.stickyNav button').forEach(b=>b.classList.toggle('active',b===btn));
@@ -1332,25 +1379,44 @@ function updateWidgets(){
   const pct=Math.max(0,Math.min(100,((start-current)/(start-target))*100));
   if(gp)gp.style.width=pct.toFixed(0)+'%';
   if(gt)gt.textContent=pct.toFixed(0)+'% du parcours';
-  const wa=document.getElementById('dashWater'); if(wa)wa.textContent=water;
-  const pr=document.getElementById('dashProtein'); if(pr)pr.textContent=protein;
+  const wa=document.getElementById('dashWater'); if(wa)wa.textContent=water.toFixed(2).replace('.',',')+' L';
+  const pr=document.getElementById('dashProtein'); if(pr)pr.textContent=protein+' g';
+  const qw=document.getElementById('quickWater'); if(qw)qw.textContent=water.toFixed(2).replace('.',',')+' L';
+  const qp=document.getElementById('quickProtein'); if(qp)qp.textContent=protein+' g';
+  const qs=document.getElementById('quickSteps'); if(qs)qs.textContent=Number(st).toLocaleString('fr-CH');
   const day=new Date().getDay();
   const names={1:'Push',2:'Pull',4:'Jambes',6:'Haut du corps'};
   const wo=document.getElementById('dashWorkout');
   if(wo)wo.textContent=names[day]||'Repos';
   updateNotificationStatus();
 }
-function recordWater(){
-  const v=dailyMetric('waterLiters')+0.25;
+function addWater(ml){
+  const amount=Math.max(0,Number(ml)||0);
+  const v=dailyMetric('waterLiters')+amount/1000;
   setDailyMetric('waterLiters',Number(v.toFixed(2)));
-  updateWidgets();showToast('💧 +250 ml');
+  updateWidgets();showToast('💧 +'+amount+' ml');
   if(typeof scheduleCloudBackup==='function')scheduleCloudBackup();
 }
-function recordProtein(){
-  const v=dailyMetric('proteinToday')+25;
-  setDailyMetric('proteinToday',v);
-  updateWidgets();showToast('🥩 +25 g');
+function recordWater(){addWater(250)}
+function addProtein(g){
+  const amount=Math.max(0,Number(g)||0);
+  const v=dailyMetric('proteinToday')+amount;
+  setDailyMetric('proteinToday',Number(v.toFixed(0)));
+  updateWidgets();showToast('🥩 +'+amount+' g');
   if(typeof scheduleCloudBackup==='function')scheduleCloudBackup();
+}
+function recordProtein(){addProtein(25)}
+function quickMeal(){
+  const b=document.querySelector('.stickyNav button[data-page="foodbox"]');
+  switchPage('foodbox',b);
+  setTimeout(()=>{
+    const name=prompt('Nom du repas / aliment', 'Repas');
+    if(name===null)return;
+    addFood(name,'','',true);
+    const rows=document.querySelectorAll('#foods .foodrow');
+    rows[rows.length-1]?.querySelector('.fn')?.focus();
+    showToast('🍽️ Repas ajouté au journal');
+  },150);
 }
 function resetApp(){if(confirm('Réinitialiser les données enregistrées sur cet appareil ?')){localStorage.clear();location.reload();}}
 function buildExerciseLibrary(){const root=document.getElementById('exerciseLibrary');if(!root||root.dataset.ready==='1')return;const cards=[...document.querySelectorAll('section[data-page="training"] .exercise-card')],seen=new Set();cards.forEach((card,i)=>{const h=card.querySelector('h3'),img=card.querySelector('.real-machine img');if(!h||!img)return;const name=h.textContent.trim();if(seen.has(name))return;seen.add(name);const c=document.createElement('div');c.className='libCard';c.dataset.name=name.toLowerCase();c.innerHTML='<img loading="lazy" src="'+img.src+'" alt="'+name+'"><div class="libBody"><b>'+name+'</b><span>Référence équipement · séance</span><button onclick="openExercise('+i+')">Voir dans le programme</button></div>';root.appendChild(c);});root.dataset.ready='1';}
