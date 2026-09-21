@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <meta content="#0b0d10" name="theme-color"/>
-<title>EVO Fit Coach — App V13</title>
+<title>EVO Fit Coach — App V14</title>
 <style>
 :root{--bg:#090b0e;--panel:#12161b;--panel2:#181d23;--text:#f4f6f8;--muted:#aab2bc;--line:#2a3038;--accent:#b9ff3d;--blue:#7dd3fc}
 *{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,#080a0d,#10141a 55%,#090b0e);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;line-height:1.45}
@@ -400,19 +400,15 @@ stepsCalc(); calc();
 </section>
 <section class="panel appPage" data-page="profile" id="profile">
 <div class="panel cloudPanel" style="margin-top:12px">
-  <h3 style="margin-top:0">☁️ Sauvegarde cloud Firebase</h3>
-  <div class="small">Tes charges, séries, poids et réglages peuvent être sauvegardés automatiquement dans ton compte Firebase. La configuration web ci-dessous ne contient pas de clé secrète ; la sécurité repose sur Firebase Authentication + les règles Firestore.</div>
-  <div class="settingsGrid" style="margin-top:10px">
-    <label>Email<input id="fbEmail" type="email" placeholder="toi@email.com" autocomplete="email"></label>
-    <label>Mot de passe<input id="fbPassword" type="password" placeholder="••••••••" autocomplete="current-password"></label>
-  </div>
-  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px">
-    <button class="settingBtn" onclick="firebaseSignIn()">☁️ Se connecter</button>
-    <button class="settingBtn" onclick="firebaseSignUp()">🆕 Créer un compte</button>
+  <h3 style="margin-top:0">☁️ Sauvegarde cloud</h3>
+  <div class="small">Connecte-toi avec Google pour retrouver tes charges, séries, poids et réglages sur tes appareils. Aucun mot de passe à gérer dans EVO Fit.</div>
+  <div style="display:grid;gap:8px;margin-top:12px">
+    <button class="settingBtn" onclick="firebaseGoogleSignIn()" style="font-size:15px;padding:13px">🔵 Continuer avec Google</button>
     <button class="settingBtn" onclick="backupToCloud()">⬆️ Sauvegarder maintenant</button>
     <button class="settingBtn" onclick="restoreFromCloud()">⬇️ Restaurer du cloud</button>
+    <button class="dangerBtn" onclick="firebaseSignOut()">Déconnexion Google</button>
   </div>
-  <div id="cloudStatus" class="small" style="margin-top:10px">⚪ Cloud Firebase non configuré.</div>
+  <div id="cloudStatus" class="small" style="margin-top:10px">⚪ Cloud non connecté.</div>
 </div><div class="pageHead"><div><span class="eyebrow">MON PROFIL</span><h2>Réglages &amp; objectifs</h2><p class="sub">Personnalise l'application sans perdre tes données.</p></div></div><div class="settingsGrid">
 <div class="card settingCard"><b>🎯 Objectif calories</b><span>Ton objectif quotidien</span><input id="profileTarget" inputmode="numeric" placeholder="kcal" type="number"/></div>
 <div class="card settingCard"><b>🚶 Objectif pas</b><span>Ta cible quotidienne</span><input id="profileSteps" inputmode="numeric" placeholder="pas" type="number"/></div>
@@ -902,30 +898,29 @@ async function restoreFromCloud(){
   }
 }
 
-async function firebaseSignUp(){
+async function firebaseGoogleSignIn(){
   initFirebase();
-  const email=document.getElementById('fbEmail')?.value.trim();
-  const password=document.getElementById('fbPassword')?.value;
-  if(!email||!password){showToast('Renseigne ton email et un mot de passe');return;}
-  if(password.length<6){showToast('Le mot de passe doit contenir au moins 6 caractères');return;}
+  if(!firebaseAuth){showToast('Firebase n’est pas disponible');return;}
   try{
-    await firebaseAuth.createUserWithEmailAndPassword(email,password);
-    showToast('🆕 Compte Firebase créé');
+    const provider=new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({prompt:'select_account'});
+    await firebaseAuth.signInWithPopup(provider);
+    showToast('☁️ Connexion Google réussie');
   }catch(e){
-    updateCloudStatus('❌ '+e.message);
+    console.error(e);
+    if(e.code==='auth/popup-closed-by-user') updateCloudStatus('⚪ Connexion annulée.');
+    else updateCloudStatus('❌ Connexion Google : '+e.message);
   }
 }
 
-async function firebaseSignIn(){
-  initFirebase();
-  const email=document.getElementById('fbEmail')?.value.trim();
-  const password=document.getElementById('fbPassword')?.value;
-  if(!email||!password){showToast('Renseigne ton email et ton mot de passe');return;}
+async function firebaseSignOut(){
+  if(!firebaseAuth)return;
   try{
-    await firebaseAuth.signInWithEmailAndPassword(email,password);
-    showToast('☁️ Connexion réussie');
+    await firebaseAuth.signOut();
+    updateCloudStatus('⚪ Déconnecté de Google.');
+    showToast('Déconnexion effectuée');
   }catch(e){
-    updateCloudStatus('❌ '+e.message);
+    updateCloudStatus('❌ Déconnexion impossible : '+e.message);
   }
 }
 
