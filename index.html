@@ -115,7 +115,7 @@
   <div class="eyebrow">PROFIL</div><h2>Réglages</h2><div class="date">Tes objectifs et ta sauvegarde.</div>
   <div class="card">
     <div class="profile-item"><div><b>Compte Google</b><div class="date" id="authStatus">Non connecté</div></div><button class="btn" data-action="login" id="loginBtn">Se connecter</button></div>
-    <div class="profile-item"><div><b>Sauvegarde cloud</b><div class="date">Firebase · synchronisation manuelle</div></div><button class="btn" data-action="restore">Restaurer</button></div>
+    <div class="profile-item"><div><b>Sauvegarde cloud</b><div class="date">Firebase · synchronisation manuelle</div></div><div style="display:flex;gap:6px"><button class="btn" data-action="backup">Sauver</button><button class="btn" data-action="restore">Restaurer</button></div></div>
   </div>
   <div class="card">
     <div class="field"><label>Poids de départ (kg)</label><input id="startWeight" type="number" step=".1"></div>
@@ -260,7 +260,7 @@ document.addEventListener("click",function(e){
  if(act==="weight"){addWeight();return}
  if(act==="saveProfile"){saveProfile();return}
  if(act==="login"){login();return}
- if(act==="restore"){restore();return}
+ if(act==="backup"){backup();return}\n if(act==="restore"){restore();return}
  if(act==="reset"){resetAll();return}
 });
 document.addEventListener("change",function(e){const ex=e.target.closest(".exercise");if(!ex||!e.target.classList.contains("check"))return;const i=Number(e.target.dataset.ex);localStorage.setItem("done_"+state.day+"_"+i,e.target.checked?"1":"0");renderTraining()});
