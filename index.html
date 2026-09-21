@@ -901,15 +901,26 @@ async function restoreFromCloud(){
 async function firebaseGoogleSignIn(){
   initFirebase();
   if(!firebaseAuth){showToast('Firebase n’est pas disponible');return;}
+  const provider=new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({prompt:'select_account'});
   try{
-    const provider=new firebase.auth.GoogleAuthProvider();
-    provider.setCustomParameters({prompt:'select_account'});
     await firebaseAuth.signInWithPopup(provider);
     showToast('☁️ Connexion Google réussie');
   }catch(e){
     console.error(e);
-    if(e.code==='auth/popup-closed-by-user') updateCloudStatus('⚪ Connexion annulée.');
-    else updateCloudStatus('❌ Connexion Google : '+e.message);
+    // Certains navigateurs bloquent les popups OAuth : on bascule vers une redirection complète.
+    if(e.code==='auth/popup-blocked' || e.code==='auth/popup-closed-by-user' || e.code==='auth/cancelled-popup-request'){
+      try{
+        updateCloudStatus('🔄 Connexion Google…');
+        await firebaseAuth.signInWithRedirect(provider);
+        return;
+      }catch(redirectError){
+        console.error(redirectError);
+        updateCloudStatus('❌ Google : '+(redirectError.code||redirectError.message));
+        return;
+      }
+    }
+    updateCloudStatus('❌ Google : '+(e.code||e.message));
   }
 }
 
@@ -970,6 +981,11 @@ function updateCloudStatus(msg){
 
 window.addEventListener('load',()=>{
   initFirebase();
+  firebaseAuth?.getRedirectResult().then(result=>{
+    if(result?.user) showToast('☁️ Connexion Google réussie');
+  }).catch(e=>{
+    if(e && e.code) updateCloudStatus('❌ Google : '+e.code);
+  });
   setTimeout(()=>{
     const user=firebaseAuth?.currentUser;
     if(user) updateCloudStatus('☁️ Connecté : '+(user.email||'compte Firebase'));
