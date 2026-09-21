@@ -218,7 +218,7 @@ body{padding-bottom:95px}
 .real-machine .caption{position:absolute;left:10px;bottom:10px;background:rgba(0,0,0,.72);backdrop-filter:blur(6px);padding:7px 10px;border-radius:10px;font-size:11px;font-weight:800;color:#fff}
 .machine-link{font-size:11px;color:var(--muted);display:block;margin-top:7px}
 </style>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3p7mM1c0f0F7w4cQ2xQ8mYQ4kYQ=" crossorigin=""/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <link href="manifest.json" rel="manifest"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/><meta content="EVO Fit Coach" name="apple-mobile-web-app-title"/>
 <style id="evo-v15-blue-ios">
 :root{
@@ -1764,7 +1764,6 @@ function renderRunHistory(){const root=document.getElementById('runHistoryList')
 function showRunOnMap(index){const h=JSON.parse(localStorage.getItem('evoRunHistory')||'[]'),x=h[index];if(!x?.route?.length)return;initRunMap();const pts=x.route.map(p=>[p.lat,p.lon]);runPoints=x.route.map(p=>({lat:p.lat,lon:p.lon,t:0}));runMapLine?.setLatLngs(pts);if(runStartMarker)runMapInstance.removeLayer(runStartMarker);if(runEndMarker)runMapInstance.removeLayer(runEndMarker);runStartMarker=L.circleMarker(pts[0],{radius:7,color:'#fff',weight:2,fillColor:'#16a34a',fillOpacity:1}).addTo(runMapInstance).bindPopup('🏁 Départ');runEndMarker=L.circleMarker(pts[pts.length-1],{radius:7,color:'#fff',weight:2,fillColor:'#dc2626',fillOpacity:1}).addTo(runMapInstance).bindPopup('🏁 Arrivée');runMapInstance.fitBounds(L.latLngBounds(pts),{padding:[28,28],maxZoom:17});document.getElementById('runMapHint').textContent='Parcours enregistré · '+x.distance.toFixed(2)+' km';document.getElementById('runMap').scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>runMapInstance.invalidateSize(),250)}
 window.addEventListener('load',()=>{initRunMap();renderRunHistory();setTimeout(()=>runMapInstance?.invalidateSize(),400);});
 window.addEventListener('resize',()=>runMapInstance?.invalidateSize());
-window.addEventListener('load',()=>{renderRunHistory();});
 </script><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </body>
 </html>
