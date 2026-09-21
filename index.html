@@ -4,8 +4,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
-<meta content="#0b0d10" name="theme-color"/>
-<title>EVO Fit Coach — App V14</title>
+<meta content="#0b1220" name="theme-color"/>
+<title>EVO Fit Coach — App V15</title>
 <style>
 :root{--bg:#090b0e;--panel:#12161b;--panel2:#181d23;--text:#f4f6f8;--muted:#aab2bc;--line:#2a3038;--accent:#b9ff3d;--blue:#7dd3fc}
 *{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,#080a0d,#10141a 55%,#090b0e);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;line-height:1.45}
@@ -213,7 +213,201 @@ body{padding-bottom:95px}
 .real-machine .caption{position:absolute;left:10px;bottom:10px;background:rgba(0,0,0,.72);backdrop-filter:blur(6px);padding:7px 10px;border-radius:10px;font-size:11px;font-weight:800;color:#fff}
 .machine-link{font-size:11px;color:var(--muted);display:block;margin-top:7px}
 </style>
-<link href="manifest.json" rel="manifest"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/><meta content="EVO Fit Coach" name="apple-mobile-web-app-title"/></head>
+<link href="manifest.json" rel="manifest"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/><meta content="EVO Fit Coach" name="apple-mobile-web-app-title"/>
+<style id="evo-v15-blue-ios">
+:root{
+  --bg:#070b12;
+  --panel:#0f1622;
+  --panel2:#141d2b;
+  --text:#f7f9fc;
+  --muted:#9aa8ba;
+  --line:#253247;
+  --accent:#4da3ff;
+  --blue:#7dc4ff;
+  --blue2:#2563eb;
+  --glow:rgba(77,163,255,.22);
+}
+html{background:#070b12;scroll-behavior:smooth}
+body{
+  background:
+    radial-gradient(900px 500px at 50% -10%,rgba(37,99,235,.22),transparent 65%),
+    radial-gradient(700px 450px at 100% 35%,rgba(77,163,255,.08),transparent 70%),
+    linear-gradient(180deg,#070b12 0%,#0a1019 52%,#070b12 100%);
+  -webkit-tap-highlight-color:transparent;
+  padding-bottom:calc(104px + env(safe-area-inset-bottom)) !important;
+}
+.wrap{max-width:1120px;padding:10px 14px calc(70px + env(safe-area-inset-bottom));}
+.appTopbar{
+  top:0;
+  margin:0 -4px;
+  padding:10px 8px 12px;
+  background:rgba(7,11,18,.72);
+  border-bottom:1px solid rgba(77,163,255,.08);
+}
+.appBrand{font-size:16px;letter-spacing:.1em}.appBrand span{color:var(--accent)}
+.iconBtn{
+  width:42px;height:42px;border-radius:14px;
+  background:rgba(20,29,43,.82);
+  border:1px solid #2b3b54;
+  box-shadow:0 8px 25px rgba(0,0,0,.22);
+}
+.hero{padding:30px 4px 14px}
+.eyebrow{color:#70b8ff;letter-spacing:.12em}
+h1{
+  font-size:clamp(38px,10vw,70px);
+  background:linear-gradient(135deg,#fff 20%,#b9ddff 55%,#4da3ff 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 12px 40px rgba(37,99,235,.16);
+}
+.sub{font-size:16px;line-height:1.6}
+.stats{gap:9px;margin:20px 0}
+.stat{
+  background:linear-gradient(145deg,rgba(20,29,43,.92),rgba(12,18,28,.92));
+  border:1px solid #26364d;border-radius:18px;padding:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,.18);
+}
+.stat b{color:#d9edff}
+.notice{
+  background:linear-gradient(145deg,rgba(16,30,48,.9),rgba(11,19,30,.9));
+  border:1px solid #28415f;color:#dcecff;
+  box-shadow:0 12px 35px rgba(0,0,0,.18);
+}
+.panel{
+  background:linear-gradient(145deg,rgba(16,23,35,.94),rgba(10,15,23,.94));
+  border:1px solid #243249;border-radius:22px;
+  box-shadow:0 14px 40px rgba(0,0,0,.18);
+}
+.day{margin-top:26px}
+.exercise-card{
+  background:linear-gradient(145deg,#121b29,#0d141f) !important;
+  border-color:#263750 !important;
+  border-radius:22px !important;
+  box-shadow:0 12px 35px rgba(0,0,0,.16);
+}
+.exercise-card .tag,.tag{color:#70b8ff}
+.meta{background:#0a111b;border:1px solid #1d2b40}
+.exercise-card .real-machine{border:1px solid #263750;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.real-machine .caption{background:rgba(7,13,22,.78)}
+.machine-link,.v7source{color:#82c5ff}
+.startWorkoutBtn{
+  background:linear-gradient(135deg,#60b5ff,#2563eb) !important;
+  color:#fff !important;
+  box-shadow:0 10px 28px rgba(37,99,235,.28);
+}
+.workoutHero{
+  background:linear-gradient(135deg,rgba(18,38,63,.96),rgba(11,18,29,.96)) !important;
+  border-color:#28558a !important;
+}
+.dayPicker button.active{
+  background:linear-gradient(135deg,#17345a,#102642) !important;
+  border-color:#367dcc !important;
+  color:#8dcbff !important;
+  box-shadow:0 6px 18px rgba(37,99,235,.18);
+}
+.sessionControls button:last-child{
+  background:#102b49 !important;
+  color:#82c5ff !important;
+  border-color:#285b91 !important;
+}
+.exercise-card.sessionDone{
+  border-color:#3184d9 !important;
+  box-shadow:0 0 0 1px rgba(49,132,217,.45) inset,0 12px 35px rgba(0,0,0,.15) !important;
+}
+.exercise-card .setQuick button.done{
+  background:#12355b !important;color:#9bd4ff !important;
+}
+.exercise-card .lastValue{color:#70b8ff}
+.progressbar{background:#172335}
+.progressbar i{background:linear-gradient(90deg,#2563eb,#60b5ff) !important}
+input:focus,select:focus,.searchBox:focus{
+  outline:none;border-color:#4da3ff !important;
+  box-shadow:0 0 0 3px rgba(77,163,255,.14);
+}
+.stickyNav{
+  width:min(720px,calc(100% - 12px));
+  bottom:max(7px,env(safe-area-inset-bottom));
+  padding:6px;
+  border:1px solid #2b3b54;
+  border-radius:23px;
+  background:rgba(9,15,24,.88);
+  box-shadow:0 18px 55px rgba(0,0,0,.55),0 0 0 1px rgba(77,163,255,.04) inset;
+}
+.stickyNav button{
+  min-height:52px !important;
+  border-radius:17px !important;
+  color:#7f8da1;
+  font-size:10px;
+}
+.stickyNav button b{font-size:18px}
+.stickyNav button.active{
+  background:linear-gradient(180deg,#173455,#10253e) !important;
+  color:#8dcbff !important;
+  box-shadow:0 5px 18px rgba(37,99,235,.18) inset;
+}
+.dash{gap:10px}
+.tile{
+  background:linear-gradient(145deg,#141f2f,#0d151f);
+  border:1px solid #25364d;
+  border-radius:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,.16);
+}
+.tile strong{color:#eaf5ff}
+.widget strong{font-size:26px}
+.libCard{
+  background:linear-gradient(145deg,#141e2c,#0c141f);
+  border-color:#263750;
+  border-radius:20px;
+  box-shadow:0 10px 28px rgba(0,0,0,.18);
+}
+.libBody button,.settingBtn{
+  background:linear-gradient(135deg,#17375c,#102641);
+  border:1px solid #2c6096;
+  color:#dff1ff;
+}
+.toast{
+  background:#102b49 !important;color:#e5f4ff !important;
+  border:1px solid #2d6ba6;
+  box-shadow:0 12px 35px rgba(0,0,0,.35);
+}
+.scanbox,.foodbox{
+  background:linear-gradient(145deg,#102033,#0b141f) !important;
+  border-color:#294866 !important;
+}
+.scanbtn{
+  background:linear-gradient(135deg,#60b5ff,#2563eb) !important;
+  color:#fff !important;
+  box-shadow:0 10px 28px rgba(37,99,235,.25);
+}
+.timer{
+  background:rgba(12,21,33,.94);
+  border-color:#29415e;
+}
+.timer b{color:#70b8ff}
+.dangerBtn{background:#351b22 !important}
+@media(max-width:650px){
+  .wrap{padding-left:10px;padding-right:10px}
+  .hero{padding-top:22px}
+  h1{font-size:42px;line-height:.96}
+  .stats{gap:7px}
+  .stat{padding:12px 9px;border-radius:16px}
+  .stat b{font-size:21px}
+  .stat span{font-size:10px}
+  .panel{padding:13px;border-radius:20px}
+  .tile{padding:13px;border-radius:18px}
+  .dash{gap:8px}
+  .stickyNav{grid-template-columns:repeat(6,1fr) !important}
+  .stickyNav button{padding:7px 1px 5px !important;font-size:8px !important}
+  .stickyNav button b{font-size:17px}
+  .stickyNav button span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .exercise-card{padding:13px !important}
+  .exercise-card .real-machine img{height:220px !important}
+  .sessionControls button,.dayPicker button,.setQuick button,.settingBtn,.scanbtn{min-height:44px}
+}
+@supports(padding:max(0px)){
+  .stickyNav{padding-bottom:max(6px,env(safe-area-inset-bottom))}
+}
+</style>
+</head>
 <body>
 <div class="wrap"><div class="appTopbar"><div><div class="appBrand">EVO <span>FIT</span></div><div class="appSub">Coach · Jonction</div></div><div class="topActions"><button class="iconBtn" onclick="showToast('Tes données sont enregistrées sur cet appareil.')">💾</button><button class="iconBtn" onclick="installApp()">＋</button></div></div>
 <header class="hero">
