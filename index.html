@@ -1317,7 +1317,7 @@ window.EVO_V3_READY=true;
 <script>
 if("serviceWorker" in navigator){
   function registerEvoSW(){
-    navigator.serviceWorker.register("/fitness/sw.js?v=25",{updateViaCache:"none"}).catch(function(e){console.warn("SW:",e);});
+    navigator.serviceWorker.register("/fitness/sw.js?v=26",{updateViaCache:"none"}).catch(function(e){console.warn("SW:",e);});
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",registerEvoSW);
   else registerEvoSW();
