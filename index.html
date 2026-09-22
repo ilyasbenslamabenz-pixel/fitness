@@ -719,7 +719,17 @@ function lineChart(vals,color,unit){
 }
 
 /* ===== renders ===== */
-function renderAll(){renderToday();renderSession();renderProgress();renderMeals();renderProfile();$("weekTag").textContent="Semaine "+weekNo()+"/12";}
+function safeRender(fn){
+  try{fn();return true;}catch(e){console.error("EVO render error",e);return false;}
+}
+function renderAll(){
+  safeRender(renderToday);
+  safeRender(renderSession);
+  safeRender(renderProgress);
+  safeRender(renderMeals);
+  safeRender(renderProfile);
+  safeRender(function(){$("weekTag").textContent="Semaine "+weekNo()+"/12";});
+}
 
 function renderToday(){
   var w=latestBody(),start=Number(state.profile.start),target=Number(state.profile.target);
@@ -1207,7 +1217,11 @@ document.addEventListener("change",function(e){var el=e.target;
   if(el.classList&&el.classList.contains("wval")&&el.dataset.ex){setWeightExact(el.dataset.ex,el.value);}
   else if(el.id==="importFile"&&el.files&&el.files[0]){importData(el.files[0]);el.value="";}
 });
-document.querySelectorAll(".nav button").forEach(function(b){b.addEventListener("click",function(){showPage(b.dataset.page);});});
+document.querySelectorAll(".nav button").forEach(function(b){
+  function navGo(ev){if(ev)ev.preventDefault();showPage(b.dataset.page);}
+  b.addEventListener("click",navGo);
+  b.addEventListener("touchend",navGo,{passive:false});
+});
 document.addEventListener("click",function(e){ // close modal on backdrop
   if(e.target.classList&&e.target.classList.contains("modal"))e.target.classList.remove("on");
 });
@@ -1255,13 +1269,48 @@ window.EVO_V3_READY=true;
     document.querySelectorAll(".nav button").forEach(function(b){b.classList.toggle("on",b.dataset.page===page.id);});
     try{window.scrollTo(0,0);}catch(e){}
   }
+  function fallbackData(){
+    try{
+      var p=JSON.parse(localStorage.getItem("evoFitV3")||"null")||{};
+      var profile=p.profile||{start:103,target:85,cal:2400};
+      var wh=Array.isArray(p.weightHistory)?p.weightHistory:[];
+      var w=wh.length?Number(wh[wh.length-1].w):Number(profile.start||103);
+      var set=function(id,v){var x=document.getElementById(id);if(x)x.textContent=v;};
+      set("hWeight",w.toString().replace(".",","));
+      set("hFrom","Départ "+Number(profile.start||103).toString().replace(".",",")+" kg");
+      set("hTo","Objectif "+Number(profile.target||85).toString().replace(".",",")+" kg");
+      set("dashKcal","0 / "+Number(profile.cal||2400));
+      set("dashWater","0.00 / "+Number(p.waterGoal||3).toFixed(1)+" L");
+      set("dashSteps","—");set("dashForm","—");set("sLost","0");
+      set("sSessions",Array.isArray(p.sessions)?p.sessions.length:0);
+      set("sPR","—");
+    }catch(e){}
+  }
+  function installFallback(){
+    fallbackData();
+    document.querySelectorAll(".nav button[data-page]").forEach(function(b){
+      if(b.dataset.fallbackBound)return;
+      b.dataset.fallbackBound="1";
+      function go(ev){if(ev)ev.preventDefault();simpleNav(b.dataset.page);}
+      b.addEventListener("click",go);
+      b.addEventListener("touchend",go,{passive:false});
+    });
+  }
   document.addEventListener("click",function(e){
     var b=e.target.closest(".nav button[data-page]");
     if(!b)return;
     if(document.body.getAttribute("data-evo-boot")!=="ok")simpleNav(b.dataset.page);
   });
+  installFallback();
+  setTimeout(function(){
+    installFallback();
+    if(!window.EVO_BOOT_OK)document.body.setAttribute("data-evo-fallback","active");
+  },1800);
   window.addEventListener("error",function(e){
-    if(!window.EVO_BOOT_OK)console.error("EVO runtime error:",e.error||e.message);
+    if(!window.EVO_BOOT_OK){
+      console.error("EVO runtime error:",e.error||e.message);
+      installFallback();
+    }
   });
 })();
 </script>
