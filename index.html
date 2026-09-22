@@ -618,6 +618,7 @@ function merge(p){
   if(Array.isArray(p.runs))state.runs=p.runs;
   if(Array.isArray(p.steps))state.steps=p.steps;
   if(Array.isArray(p.energy))state.energy=p.energy;
+  if(p.water&&typeof p.water==="object")state.water=p.water;
   if(typeof p.suggest==="number")state.suggest=p.suggest;
   if(p.session&&typeof p.session==="object")state.session=p.session;
   if(p.lastDay)state.lastDay=p.lastDay;
@@ -968,6 +969,8 @@ async function lookupBarcode(code){
     $("foodName").value=name;
     $("foodKcal").value=kcal?Math.round(kcal):"";
     $("foodProt").value=prot?Math.round(prot*10)/10:"";
+    $("foodCarbs").value=carbs?Math.round(carbs*10)/10:"";
+    $("foodFat").value=fat?Math.round(fat*10)/10:"";
     stopBarcode();
     setTimeout(function(){closeScanner();$("mealModal").classList.add("on");},500);
   }catch(e){
@@ -1028,6 +1031,7 @@ function restore(){if(!cloudUser){toast("Connecte-toi d'abord");return;}
 function resetAll(){if(!confirm("Effacer toutes les données locales ?"))return;lsDel(KEY);location.reload();}
 
 function addWater(amount){var wt=state.water||{date:today(),ml:0};if(wt.date!==today())wt={date:today(),ml:0};wt.ml=Math.max(0,Math.min(3000,Number(wt.ml||0)+Number(amount||300)));state.water=wt;save();renderMeals();toast((amount>=0?"+":"")+amount+" ml d’eau");}
+function adjustBodyWeight(delta){var n=Math.round((latestBody()+delta)*10)/10;if(n<30||n>350)return;var d=today(),h=state.weightHistory,ix=h.findIndex(function(x){return x.d===d;});if(ix>=0)h[ix].w=n;else h.push({d:d,w:n});h.sort(function(a,b){return a.d.localeCompare(b.d);});save();renderMeals();renderToday();toast("Poids : "+num(n)+" kg");}
 function saveProfile(){
   var s=Number($("fStart").value),t=Number($("fTarget").value),c=Number($("fCal").value);
   if(!isFinite(s)||!isFinite(t)||!isFinite(c)){toast("Vérifie les valeurs");return;}
@@ -1059,8 +1063,8 @@ document.addEventListener("click",function(e){
     case "selEx": state.selEx=ex; renderProgress(); break;
     case "addMeal": openMeal(a.dataset.mealType||""); break;
     case "waterAdd": addWater(Number(a.dataset.amount||300)); break;
-    case "bodyWeightMinus": openWeigh(); break;
-    case "bodyWeightPlus": openWeigh(); break;
+    case "bodyWeightMinus": adjustBodyWeight(-0.1); break;
+    case "bodyWeightPlus": adjustBodyWeight(0.1); break;
     case "fasting": toast("Routine de jeûne : à personnaliser."); break;
     case "scanOpen": openScanner(); break;
     case "scanClose": closeScanner(); break;
