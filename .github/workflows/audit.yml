@@ -19,26 +19,3 @@ jobs:
         run: |
           npx --yes prettier@3.6.2 index.html --parser html >/dev/null
           node --check sw.js
-      - name: Structural audit report
-        shell: python
-        run: |
-          import html.parser, re
-          html=open("index.html",encoding="utf-8").read()
-          visible=re.sub(r"<script[\\s\\S]*?</script>", "", html, flags=re.I)
-          class P(html.parser.HTMLParser):
-              def __init__(self):
-                  super().__init__()
-                  self.ids=[]
-                  self.acts=[]
-              def handle_starttag(self, tag, attrs):
-                  d=dict(attrs)
-                  if "id" in d: self.ids.append(d["id"])
-                  if "data-act" in d: self.acts.append(d["data-act"])
-          p=P(); p.feed(visible)
-          dup=sorted({x for x in p.ids if p.ids.count(x)>1})
-          cases=set(re.findall(r'case\s+"([^"]+)":',html))
-          missing=sorted(set(p.acts)-cases)
-          print(f"Structural audit: {len(p.ids)} static IDs, {len(set(p.acts))} static actions, {len(cases)} JS cases")
-          print("Duplicate static IDs:", dup or "none")
-          print("Unmapped static actions:", missing or "none")
-          print("Structural audit report generated")
