@@ -137,12 +137,16 @@
 </nav>
 <script>
 function evoNav(page){
-  var pages=document.querySelectorAll('.page');
-  var tabs=document.querySelectorAll('.bottom button');
-  pages.forEach(function(p){p.classList.toggle('active',p.id===page);});
-  tabs.forEach(function(b){b.classList.toggle('active',b.getAttribute('data-page')===page);});
-  window.scrollTo(0,0);
-  try{ if(window.showPage) window.showPage(page); }catch(e){}
+  try{
+    var pages=document.querySelectorAll('.page');
+    var tabs=document.querySelectorAll('.bottom button');
+    var target=document.getElementById(page);
+    if(!target)page='home';
+    pages.forEach(function(p){p.classList.toggle('active',p.id===page);});
+    tabs.forEach(function(b){b.classList.toggle('active',b.getAttribute('data-page')===page);});
+    try{window.scrollTo(0,0)}catch(e){}
+    if(window.showPage){try{window.showPage(page)}catch(e){console.error('EVO nav render:',e)}}
+  }catch(e){console.error('EVO navigation:',e)}
 }
 </script>
 
@@ -185,11 +189,25 @@ let cloudUser=null,cloudReady=false,toastTimer=null;
 
 function today(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function fmtDate(s){return new Date(s+"T12:00:00").toLocaleDateString("fr-CH",{weekday:"long",day:"numeric",month:"long"})}
-function save(){localStorage.setItem(KEY,JSON.stringify(state));}
-function load(){try{const raw=localStorage.getItem(KEY);if(raw)state=Object.assign(state,JSON.parse(raw));}catch(e){localStorage.removeItem(KEY)}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){console.warn("EVO save:",e)}}
+function load(){try{const raw=localStorage.getItem(KEY);if(raw){const parsed=JSON.parse(raw);if(parsed&&typeof parsed==="object")state=Object.assign(state,parsed)}}catch(e){try{localStorage.removeItem(KEY)}catch(_){}console.warn("EVO load:",e)}}
 function ensureDay(){const d=today();if(state.lastDay!==d){state.lastDay=d;state.steps=0;state.water=0;state.protein=0;state.meals=[];save()}}
 function toast(msg){const el=document.getElementById("toast");el.textContent=msg;el.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.hidden=true,2200)}
-function showPage(page){if(!document.getElementById(page))page="home";state.page=page;document.querySelectorAll(".page").forEach(x=>x.classList.toggle("active",x.id===page));document.querySelectorAll(".bottom button").forEach(x=>x.classList.toggle("active",x.dataset.page===page));if(page==="training")renderTraining();if(page==="progress")renderProgress();if(page==="nutrition")renderNutrition();if(page==="profile")renderProfile();window.scrollTo({top:0,behavior:"smooth"})}
+function showPage(page){
+ if(!document.getElementById(page))page="home";
+ state.page=page;
+ document.querySelectorAll(".page").forEach(function(x){x.classList.toggle("active",x.id===page)});
+ document.querySelectorAll(".bottom button").forEach(function(x){x.classList.toggle("active",x.getAttribute("data-page")===page)});
+ try{
+  if(page==="home")renderHome();
+  else if(page==="training")renderTraining();
+  else if(page==="progress")renderProgress();
+  else if(page==="nutrition")renderNutrition();
+  else if(page==="profile")renderProfile();
+ }catch(e){console.error("EVO page error:",e);toast("Cette page a rencontré un problème. La navigation reste disponible.")}
+ try{window.scrollTo({top:0,behavior:"smooth"})}catch(e){window.scrollTo(0,0)}
+}
+window.showPage=showPage;
 function currentProgram(){return PROGRAM.find(x=>x.id===state.day)||PROGRAM[0]}
 function nextDay(){const d=new Date().getDay();const map={1:1,2:2,3:4,4:4,5:6,6:6,0:1};return map[d]||1}
 function latestWeight(){const a=state.weightHistory||[];return a.length?Number(a[a.length-1].w):Number(state.profile.start||103)}
@@ -250,9 +268,17 @@ async function login(){if(!window.firebase)return toast("Firebase indisponible")
 async function backup(){if(!cloudUser)return toast("Connecte-toi d’abord");try{await firebase.firestore().collection("users").doc(cloudUser.uid).set({appData:state,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});toast("☁️ Sauvegarde effectuée")}catch(e){toast("Sauvegarde impossible")}}
 async function restore(){if(!cloudUser)return toast("Connecte-toi d’abord");try{const s=await firebase.firestore().collection("users").doc(cloudUser.uid).get();if(!s.exists)return toast("Aucune sauvegarde");const d=s.data().appData;if(!d)return toast("Aucune sauvegarde");state=Object.assign(state,d);state.profile=Object.assign({start:103,target:85,cal:2400},d.profile||{});save();renderAll();toast("☁️ Données restaurées")}catch(e){toast("Restauration impossible")}}
 function resetAll(){if(!confirm("Réinitialiser les données locales ?"))return;localStorage.removeItem(KEY);location.reload()}
-function renderAll(){ensureDay();renderHome();renderTraining();renderProgress();renderNutrition();renderProfile();showPage(state.page||"home")}
+function renderAll(){
+ ensureDay();
+ try{renderHome()}catch(e){console.error("home",e)}
+ try{renderTraining()}catch(e){console.error("training",e)}
+ try{renderProgress()}catch(e){console.error("progress",e)}
+ try{renderNutrition()}catch(e){console.error("nutrition",e)}
+ try{renderProfile()}catch(e){console.error("profile",e)}
+ showPage(state.page||"home")
+}
 document.addEventListener("click",function(e){
- const nav=e.target.closest("[data-page]");if(nav){showPage(nav.dataset.page);return}
+ const nav=e.target.closest("[data-page]");if(nav){e.preventDefault();e.stopPropagation();evoNav(nav.getAttribute("data-page"));return}
  const a=e.target.closest("[data-action]");if(!a)return;const act=a.dataset.action;
  if(act==="next"){state.day=nextDay();showPage("training");startWorkout();return}
  if(act==="day"){state.day=Number(a.dataset.day);renderTraining();return}
