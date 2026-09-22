@@ -266,6 +266,12 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 .runrow .rp{font-family:var(--display);font-weight:600;font-size:13px;color:var(--mint)}
 .runrow .del{color:var(--faint);font-size:20px;padding:2px 6px}
 #stepsInput{width:170px;font-size:34px}
+.daily-dash{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.daily-dash .dd{background:var(--surface);border:1px solid var(--hair);border-radius:14px;padding:12px 8px;text-align:center}
+.daily-dash .dd .ico{font-size:20px}.daily-dash .dd b{display:block;font-family:var(--display);font-size:16px;margin-top:4px}.daily-dash .dd span{display:block;color:var(--muted);font-size:10.5px;margin-top:2px}
+.fast-progress{height:8px;background:var(--surface2);border-radius:99px;overflow:hidden;margin-top:12px}.fast-progress i{display:block;height:100%;background:var(--mint);width:0}
+.favorite-list{max-height:52vh;overflow:auto;margin-top:10px}.favorite-item{display:flex;align-items:center;gap:10px;padding:11px 2px;border-bottom:1px solid var(--hair)}.favorite-item:last-child{border-bottom:0}.favorite-item .fi{flex:1;min-width:0}.favorite-item b{display:block;font-size:14px}.favorite-item span{display:block;color:var(--muted);font-size:11.5px;margin-top:3px}.favorite-item button{background:var(--surface2);border:1px solid var(--hair);border-radius:9px;padding:8px 10px;font-size:12px}
+@media(max-width:390px){.daily-dash{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -288,6 +294,13 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
       </div>
       <div class="bar"><i id="hBar" style="width:0%"></i></div>
       <div class="foot"><span id="hFrom">—</span><span id="hTo">Objectif —</span></div>
+    </div>
+
+    <div class="daily-dash" id="dailyDash">
+      <div class="dd"><div class="ico">🍽️</div><b id="dashKcal">0</b><span>kcal / jour</span></div>
+      <div class="dd"><div class="ico">💧</div><b id="dashWater">0.00 L</b><span>eau / objectif</span></div>
+      <div class="dd"><div class="ico">👟</div><b id="dashSteps">—</b><span>pas aujourd'hui</span></div>
+      <div class="dd"><div class="ico">🔥</div><b id="dashForm">—</b><span>forme / 5</span></div>
     </div>
 
     <div class="card" style="margin-top:12px">
@@ -409,7 +422,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
     <div class="meal-tools">
       <button data-act="scanOpen"><span class="tool-ico">▥</span>Scanner<br>un code-barres</button>
       <button data-act="addMeal"><span class="tool-ico">⌕</span>Rechercher<br>un aliment</button>
-      <button data-act="addMeal"><span class="tool-ico">♨</span>Mes aliments</button>
+      <button data-act="openFavorites"><span class="tool-ico">⭐</span>Mes aliments</button>
     </div>
     <div class="section-title-row"><h2>Mes repas</h2></div>
     <div class="meal-groups">
@@ -420,13 +433,13 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
     </div>
     <div class="section-title-row water-title"><h2>Suivi de la consommation d'eau</h2></div>
     <div class="water-card">
-      <div class="water-head"><span class="water-drop">💧</span><div><b>Eau</b><span>Objectif : 3.00 L</span><strong id="waterTotal">0.00 L</strong></div><button data-act="waterAdd" data-amount="300" class="water-add">＋</button></div>
+      <div class="water-head"><span class="water-drop">💧</span><div><b>Eau</b><span>Objectif : <span id="waterGoalLabel">3.00 L</span></span><strong id="waterTotal">0.00 L</strong></div><button data-act="waterAdd" data-amount="300" class="water-add">＋</button></div>
       <div class="glasses" id="waterGlasses"></div><div class="water-foot">+ Eau provenant de votre alimentation : 0 ml</div>
     </div>
     <div class="section-title-row"><h2>Données corporelles</h2><span class="plus-pill">Plus</span></div>
     <div class="body-card"><b>Poids</b><span>Objectif : <span id="bodyTarget">85.0 kg</span></span><div class="body-weight"><button data-act="bodyWeightMinus">−</button><strong id="bodyWeight">— kg</strong><button data-act="bodyWeightPlus">＋</button></div></div>
     <div class="section-title-row"><h2>Jeûne</h2></div>
-    <div class="fast-card"><div class="fast-ico">⌛</div><div><b>Gérez votre routine de jeûne</b><span>Planifiez et suivez vos jeûnes</span></div><button data-act="fasting">J’y vais</button></div>
+    <div class="fast-card"><div class="fast-ico">⌛</div><div><b id="fastTitle">Routine 16:8</b><span id="fastText">Aucun jeûne en cours</span><div class="fast-progress"><i id="fastProgress"></i></div></div><button data-act="fasting" id="fastBtn">Démarrer</button></div>
     <div class="section-title-row"><h2>Activité</h2></div>
     <div class="activity-card"><div><span>👟</span><b id="mealSteps">—</b><small>pas aujourd'hui</small></div><div><span>🏃</span><b id="mealRuns">0</b><small>courses</small></div><div><span>🔥</span><b id="mealEnergy">—</b><small>forme / 5</small></div></div>
     <div class="section-title-row"><h2>Idées de la semaine</h2></div><div id="weeklyMenu"></div>
@@ -440,6 +453,10 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
       <div class="field"><label>Poids de départ (kg)</label><input id="fStart" type="number" inputmode="decimal"></div>
       <div class="row2"><div class="field"><label>Poids cible (kg)</label><input id="fTarget" type="number" inputmode="decimal"></div>
       <div class="field"><label>Objectif calories</label><input id="fCal" type="number" inputmode="numeric"></div></div>
+      <div class="row2"><div class="field"><label>Glucides (g)</label><input id="fCarbs" type="number" inputmode="decimal"></div>
+      <div class="field"><label>Protéines (g)</label><input id="fProt" type="number" inputmode="decimal"></div></div>
+      <div class="row2"><div class="field"><label>Lipides (g)</label><input id="fFat" type="number" inputmode="decimal"></div>
+      <div class="field"><label>Objectif eau (L)</label><input id="fWater" type="number" inputmode="decimal" step="0.1"></div></div>
       <button class="btn" style="margin-top:14px" data-act="saveProfile">Enregistrer les objectifs</button>
     </div>
     <div class="card">
@@ -482,11 +499,13 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
   <h3>Ajouter un repas</h3>
   <div class="sub">Estime au plus proche, la régularité prime sur la précision.</div>
   <div class="field"><label>Aliment</label><input id="foodName" placeholder="Poulet + riz"></div>
-  <div class="row2"><div class="field"><label>Calories</label><input id="foodKcal" type="number" inputmode="numeric" placeholder="500"></div>
-  <div class="field"><label>Protéines (g)</label><input id="foodProt" type="number" inputmode="numeric" placeholder="40"></div></div>
-  <div class="row2"><div class="field"><label>Glucides (g)</label><input id="foodCarbs" type="number" inputmode="decimal" placeholder="50"></div><div class="field"><label>Lipides (g)</label><input id="foodFat" type="number" inputmode="decimal" placeholder="15"></div></div>
+  <div class="row2"><div class="field"><label>Quantité (g / ml)</label><input id="foodQty" type="number" inputmode="decimal" step="1" placeholder="100"></div>
+  <div class="field"><label>Calories</label><input id="foodKcal" type="number" inputmode="numeric" placeholder="500"></div></div>
+  <div class="row2"><div class="field"><label>Protéines (g)</label><input id="foodProt" type="number" inputmode="numeric" placeholder="40"></div>
+  <div class="field"><label>Glucides (g)</label><input id="foodCarbs" type="number" inputmode="decimal" placeholder="50"></div></div>
+  <div class="row2"><div class="field"><label>Lipides (g)</label><input id="foodFat" type="number" inputmode="decimal" placeholder="15"></div><div></div></div>
   <div class="field"><label>Moment</label><select id="foodType"><option>Petit-déjeuner</option><option>Déjeuner</option><option>Dîner</option><option>Collation</option></select></div>
-  <button class="btn mint" data-act="scanOpen">📷 Scanner un code-barres</button>
+  <div class="row2"><button class="btn" data-act="saveFavorite">⭐ Enregistrer aliment</button><button class="btn mint" data-act="scanOpen">📷 Scanner</button></div>
   <div class="acts"><button class="btn ghost" data-act="mClose">Annuler</button><button class="btn primary" data-act="mSave">Ajouter</button></div>
 </div></div>
 
@@ -503,6 +522,20 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
   <button class="btn primary" data-act="scanLookup">🔎 Rechercher ce code</button>
   <div class="scan-product" id="scanProduct"></div>
   <div class="acts"><button class="btn ghost" data-act="scanClose">Fermer</button></div>
+</div></div>
+
+<div class="modal" id="favoritesModal"><div class="sheet">
+  <h3>Mes aliments ⭐</h3>
+  <div class="sub">Tes aliments enregistrés pour les ajouter rapidement.</div>
+  <div class="favorite-list" id="favoriteList"></div>
+  <div class="acts"><button class="btn ghost" data-act="favoritesClose">Fermer</button></div>
+</div></div>
+
+<div class="modal" id="fastModal"><div class="sheet">
+  <h3>Routine de jeûne</h3>
+  <div class="sub">Choisis une durée puis démarre ou arrête ton jeûne.</div>
+  <div class="field"><label>Durée</label><select id="fastHours"><option value="12">12 h</option><option value="14">14 h</option><option value="16" selected>16 h</option><option value="18">18 h</option><option value="20">20 h</option></select></div>
+  <div class="acts"><button class="btn ghost" data-act="fastClose">Fermer</button><button class="btn primary" data-act="fastStart">Démarrer</button></div>
 </div></div>
 
 <div class="modal" id="runModal"><div class="sheet">
@@ -577,8 +610,10 @@ var state={
   session:{date:today(),marks:{}},
   sessions:[],
   perf:{},
-  meals:[], lastDay:today(),
+  meals:[], mealHistory:[], foodFavorites:[], lastDay:today(),
   runs:[], steps:[], energy:[], water:{date:today(),ml:0},
+  macro:{carbs:240,protein:180,fat:80}, waterGoal:3,
+  fast:{active:false,start:null,hours:16},
   selEx:null
 };
 var cloudUser=null, toastT=null;
@@ -615,17 +650,39 @@ function merge(p){
   if(Array.isArray(p.sessions))state.sessions=p.sessions;
   if(p.perf&&typeof p.perf==="object")state.perf=p.perf;
   if(Array.isArray(p.meals))state.meals=p.meals;
+  if(Array.isArray(p.mealHistory))state.mealHistory=p.mealHistory;
+  if(Array.isArray(p.foodFavorites))state.foodFavorites=p.foodFavorites;
   if(Array.isArray(p.runs))state.runs=p.runs;
   if(Array.isArray(p.steps))state.steps=p.steps;
   if(Array.isArray(p.energy))state.energy=p.energy;
   if(p.water&&typeof p.water==="object")state.water=p.water;
+  if(p.macro&&typeof p.macro==="object")state.macro=Object.assign(state.macro,p.macro);
+  if(isFinite(Number(p.waterGoal)))state.waterGoal=Number(p.waterGoal);
+  if(p.fast&&typeof p.fast==="object")state.fast=Object.assign(state.fast,p.fast);
   if(typeof p.suggest==="number")state.suggest=p.suggest;
   if(p.session&&typeof p.session==="object")state.session=p.session;
   if(p.lastDay)state.lastDay=p.lastDay;
 }
+function normalizeState(){
+  if(!Array.isArray(state.weightHistory))state.weightHistory=[];
+  state.weightHistory=state.weightHistory.filter(function(x){return x&&x.d&&isFinite(Number(x.w));}).map(function(x){return {d:x.d,w:Number(x.w)};}).sort(function(a,b){return a.d.localeCompare(b.d);});
+  if(!state.weightHistory.length)state.weightHistory=[{d:START_DATE,w:Number(state.profile.start||103)}];
+  if(!Array.isArray(state.meals))state.meals=[];
+  if(!Array.isArray(state.mealHistory))state.mealHistory=[];
+  if(!Array.isArray(state.foodFavorites))state.foodFavorites=[];
+  if(!state.macro)state.macro={carbs:240,protein:180,fat:80};
+  state.macro={carbs:Number(state.macro.carbs||240),protein:Number(state.macro.protein||180),fat:Number(state.macro.fat||80)};
+  state.waterGoal=Number(state.waterGoal||3);if(state.waterGoal<0.5||state.waterGoal>8)state.waterGoal=3;
+  if(!state.fast)state.fast={active:false,start:null,hours:16};
+  state.fast.hours=Number(state.fast.hours||16);
+}
 function ensureDay(){
   var d=today();
-  if(state.lastDay!==d){state.lastDay=d;state.meals=[];state.session={date:d,marks:{}};save();}
+  if(state.lastDay!==d){
+    if(state.meals.length)state.mealHistory.push({date:state.lastDay,meals:state.meals.slice()});
+    state.lastDay=d;state.meals=[];state.session={date:d,marks:{}};
+    state.mealHistory=state.mealHistory.slice(-90);save();
+  }
   if(state.session.date!==d){state.session={date:d,marks:{}};}
 }
 function marksFor(id){if(!state.session.marks[id])state.session.marks[id]={};return state.session.marks[id];}
@@ -681,6 +738,13 @@ function renderToday(){
   $("sSessions").textContent=state.sessions.length;
   var prs=countPRs();
   $("sPR").textContent=prs;
+
+  var dk=state.meals.reduce(function(s,m){return s+Number(m.kcal||0);},0);
+  var wt=state.water||{date:today(),ml:0};
+  $("dashKcal").textContent=Math.round(dk)+" / "+Number(state.profile.cal||2400);
+  $("dashWater").textContent=(Number(wt.ml||0)/1000).toFixed(2)+" / "+Number(state.waterGoal||3).toFixed(1)+" L";
+  $("dashSteps").textContent=valToday(state.steps)?Number(valToday(state.steps)).toLocaleString("fr-CH"):"—";
+  $("dashForm").textContent=valToday(state.energy)||"—";
 
   var lp=latestPR();
   $("lastPR").innerHTML=lp?('<b style="color:var(--text);font-size:15px">'+esc(lp.n)+'</b> — <span style="color:var(--mint);font-weight:600">'+num(lp.w)+' kg</span><br><span style="font-size:12.5px">le '+fmtDate(lp.d)+'</span>')
@@ -874,15 +938,17 @@ function saveSteps(){var v=Math.round(Number($("stepsInput").value));if(!(v>=0)|
 
 function renderMeals(){
   var kcal=state.meals.reduce(function(s,m){return s+Number(m.kcal||0);},0),prot=state.meals.reduce(function(s,m){return s+Number(m.protein||0);},0),carbs=state.meals.reduce(function(s,m){return s+Number(m.carbs||0);},0),fat=state.meals.reduce(function(s,m){return s+Number(m.fat||0);},0);
-  var goal=Number(state.profile.cal||2400),carbGoal=240,protGoal=180,fatGoal=80;
+  var goal=Number(state.profile.cal||2400),carbGoal=Number(state.macro&&state.macro.carbs||240),protGoal=Number(state.macro&&state.macro.protein||180),fatGoal=Number(state.macro&&state.macro.fat||80);
   ring($("calRing"),Math.min(1,kcal/goal),"#FF6A3D",kcal+"\n/ "+goal+" kcal");
   $("mCarbs").textContent=Math.round(carbs*10)/10;$("mProt").textContent=Math.round(prot*10)/10;$("mFat").textContent=Math.round(fat*10)/10;
   $("mCarbsBar").style.width=Math.min(100,carbs/carbGoal*100)+"%";$("mProtBar").style.width=Math.min(100,prot/protGoal*100)+"%";$("mFatBar").style.width=Math.min(100,fat/fatGoal*100)+"%";
   var limits={"Petit-déjeuner":600,"Déjeuner":600,"Dîner":600,"Collation":600},ids={"Petit-déjeuner":"breakfastKcal","Déjeuner":"lunchKcal","Dîner":"dinnerKcal","Collation":"snackKcal"};
   Object.keys(ids).forEach(function(type){var total=state.meals.filter(function(m){return m.type===type;}).reduce(function(s,m){return s+Number(m.kcal||0);},0);$(ids[type]).textContent=Math.round(total)+" / "+limits[type]+" kcal";});
   var wt=state.water||{date:today(),ml:0};if(wt.date!==today()){wt={date:today(),ml:0};state.water=wt;save();}
+  var waterGoal=Number(state.waterGoal||3),waterStep=Math.max(100,Math.round(waterGoal*1000/10/50)*50);
   $("waterTotal").textContent=(Number(wt.ml||0)/1000).toFixed(2)+" L";
-  var glasses=Math.min(10,Math.round(Number(wt.ml||0)/300));$("waterGlasses").innerHTML=Array.from({length:10},function(_,i){return '<div class="glass"><button data-act="waterAdd" data-amount="'+(i<glasses?'-300':'300')+'">'+(i<glasses?"✓":"＋")+'</button></div>';}).join("");
+  $("waterGoalLabel").textContent=waterGoal.toFixed(2)+" L";
+  var glasses=Math.min(10,Math.round(Number(wt.ml||0)/waterStep));$("waterGlasses").innerHTML=Array.from({length:10},function(_,i){return '<div class="glass"><button data-act="waterAdd" data-amount="'+(i<glasses?(-waterStep):waterStep)+'">'+(i<glasses?"✓":"＋")+'</button></div>';}).join("");
   $("bodyWeight").textContent=num(latestBody())+" kg";$("bodyTarget").textContent=num(state.profile.target||85)+" kg";
   var tv=valToday(state.steps),ev=valToday(state.energy);$("mealSteps").textContent=tv?Number(tv).toLocaleString("fr-CH"):"—";$("mealRuns").textContent=state.runs.length;$("mealEnergy").textContent=ev||"—";
   var idx=(new Date().getDay()+6)%7;$("weeklyMenu").innerHTML=MENU.map(function(d,i){var dk=d[1].reduce(function(s,m){var x=m[2].match(/(\\d+)\\s*kcal/);return s+(x?Number(x[1]):0);},0);return '<div class="menuday '+(i===idx?"today":"")+'"><div class="mh"><b>'+d[0]+(i===idx?" · aujourd'hui":"")+'</b><span style="color:var(--muted)">'+dk+' kcal</span></div>'+d[1].map(function(m,j){return '<div class="mm"><div class="mt"><span>'+esc(m[0])+'</span><span style="color:var(--muted)">'+esc(m[2])+'</span></div><div class="md">'+esc(m[1])+'</div><button class="add" data-act="menuAdd" data-d="'+i+'" data-m="'+j+'">＋ Ajouter au journal</button></div>';}).join("")+'</div>';}).join("");
@@ -891,10 +957,44 @@ function ring(svg,frac,color,center){
   var r=42,c=2*Math.PI*r,off=c*(1-Math.max(0,Math.min(1,frac))),parts=String(center).split("\\n");
   svg.innerHTML='<circle cx="50" cy="50" r="'+r+'" fill="none" stroke="#3c4145" stroke-width="9"/><circle cx="50" cy="50" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="9" stroke-linecap="round" stroke-dasharray="'+c+'" stroke-dashoffset="'+off+'" transform="rotate(-90 50 50)"/><text x="50" y="46" text-anchor="middle" fill="#F2F3F5" font-family="Space Grotesk" font-weight="700" font-size="19">'+parts[0]+'</text>'+(parts[1]?'<text x="50" y="62" text-anchor="middle" fill="#F2F3F5" font-size="9">'+parts[1]+'</text>':'');
 }
-function addMealObj(o){state.meals.push(o);save();renderMeals();renderToday();}
+function addMealObj(o){o.date=today();o.qty=Number(o.qty||100);state.meals.push(o);save();renderMeals();renderToday();}
+function currentFoodFromForm(){return {name:$("foodName").value.trim(),kcal:Number($("foodKcal").value||0),protein:Number($("foodProt").value||0),carbs:Number($("foodCarbs").value||0),fat:Number($("foodFat").value||0),qty:Number($("foodQty").value||100),type:$("foodType").value};}
+function saveFavorite(){
+  var f=currentFoodFromForm();if(!f.name){toast("Indique l’aliment");return;}
+  var i=state.foodFavorites.findIndex(function(x){return x.name.toLowerCase()===f.name.toLowerCase();});
+  if(i>=0)state.foodFavorites[i]=f;else state.foodFavorites.push(f);
+  state.foodFavorites=state.foodFavorites.slice(-100);save();toast("Aliment enregistré ⭐");
+}
+function openFavorites(){
+  var list=$("favoriteList");
+  list.innerHTML=state.foodFavorites.length?state.foodFavorites.slice().reverse().map(function(f,i){
+    var real=state.foodFavorites.length-1-i;
+    return '<div class="favorite-item"><div class="fi"><b>'+esc(f.name)+'</b><span>'+num(f.qty||100)+' g · '+num(f.kcal||0)+' kcal · '+num(f.protein||0)+' g prot.</span></div><button data-act="favUse" data-i="'+real+'">Ajouter</button><button data-act="favDelete" data-i="'+real+'">×</button></div>';
+  }).join(""):'<div class="empty">Aucun aliment enregistré. Ajoute-en un depuis le formulaire.</div>';
+  $("favoritesModal").classList.add("on");
+}
+function closeFavorites(){$("favoritesModal").classList.remove("on");}
+function useFavorite(i){
+  var f=state.foodFavorites[i];if(!f)return;
+  addMealObj(Object.assign({},f));closeFavorites();toast("Aliment ajouté");
+}
+function deleteFavorite(i){state.foodFavorites.splice(i,1);save();openFavorites();}
+function renderFasting(){
+  var title=$("fastTitle"),txt=$("fastText"),bar=$("fastProgress"),btn=$("fastBtn");if(!title||!txt||!bar||!btn)return;
+  var hours=Number(state.fast.hours||16);title.textContent="Routine "+hours+":8";
+  if(!state.fast.active||!state.fast.start){txt.textContent="Aucun jeûne en cours";bar.style.width="0%";btn.textContent="Démarrer";return;}
+  var elapsed=Math.max(0,Date.now()-Number(state.fast.start)),total=hours*3600000,pct=Math.min(100,elapsed/total*100);
+  var left=Math.max(0,total-elapsed),lh=Math.floor(left/3600000),lm=Math.floor((left%3600000)/60000);
+  txt.textContent=left?("Encore "+lh+" h "+String(lm).padStart(2,"0")):"Jeûne terminé 🎉";
+  bar.style.width=pct+"%";btn.textContent=left?"Arrêter":"Terminé";
+}
+function openFasting(){renderFasting();$("fastModal").classList.add("on");}
+function startFasting(){var h=Number($("fastHours").value||16);state.fast={active:true,start:Date.now(),hours:h};save();$("fastModal").classList.remove("on");renderFasting();toast("Jeûne démarré · "+h+" h");}
+function stopFasting(){state.fast={active:false,start:null,hours:Number(state.fast.hours||16)};save();renderFasting();toast("Jeûne arrêté");}
 
 function renderProfile(){
   $("fStart").value=state.profile.start;$("fTarget").value=state.profile.target;$("fCal").value=state.profile.cal;
+  $("fCarbs").value=state.macro.carbs;$("fProt").value=state.macro.protein;$("fFat").value=state.macro.fat;$("fWater").value=state.waterGoal;
   $("progList").innerHTML=state.program.map(function(p){return '<div class="progline"><span class="e">'+p.icon+'</span><div class="n"><b>'+esc(p.name)+'</b><span>'+esc(p.focus)+' · '+p.ex.length+' exercices</span></div></div>';}).join("");
 }
 
@@ -925,12 +1025,11 @@ function saveWeigh(){
   h.sort(function(a,b){return a.d.localeCompare(b.d);});
   save();closeWeigh();renderToday();renderProgress();toast("Pesée enregistrée · "+num(n)+" kg");
 }
-function openMeal(type){$("foodName").value="";$("foodKcal").value="";$("foodProt").value="";$("foodCarbs").value="";$("foodFat").value="";if(type)$("foodType").value=type;$("mealModal").classList.add("on");setTimeout(function(){$("foodName").focus();},50);}
+function openMeal(type){$("foodName").value="";$("foodQty").value="100";$("foodKcal").value="";$("foodProt").value="";$("foodCarbs").value="";$("foodFat").value="";if(type)$("foodType").value=type;$("mealModal").classList.add("on");setTimeout(function(){$("foodName").focus();},50);}
 function closeMeal(){$("mealModal").classList.remove("on");}
 function saveMeal(){
-  var name=$("foodName").value.trim();if(!name){toast("Indique l'aliment");return;}
-  addMealObj({name:name,kcal:Number($("foodKcal").value||0),protein:Number($("foodProt").value||0),carbs:Number($("foodCarbs").value||0),fat:Number($("foodFat").value||0),type:$("foodType").value});
-  closeMeal();toast("Repas ajouté");
+  var f=currentFoodFromForm();if(!f.name){toast("Indique l'aliment");return;}
+  addMealObj(f);closeMeal();toast("Repas ajouté");
 }
 
 
@@ -970,6 +1069,7 @@ async function lookupBarcode(code){
     $("foodKcal").value=kcal?Math.round(kcal):"";
     $("foodProt").value=prot?Math.round(prot*10)/10:"";
     $("foodCarbs").value=carbs?Math.round(carbs*10)/10:"";
+    $("foodQty").value="100";
     $("foodFat").value=fat?Math.round(fat*10)/10:"";
     stopBarcode();
     setTimeout(function(){closeScanner();$("mealModal").classList.add("on");},500);
@@ -1034,8 +1134,9 @@ function addWater(amount){var wt=state.water||{date:today(),ml:0};if(wt.date!==t
 function adjustBodyWeight(delta){var n=Math.round((latestBody()+delta)*10)/10;if(n<30||n>350)return;var d=today(),h=state.weightHistory,ix=h.findIndex(function(x){return x.d===d;});if(ix>=0)h[ix].w=n;else h.push({d:d,w:n});h.sort(function(a,b){return a.d.localeCompare(b.d);});save();renderMeals();renderToday();toast("Poids : "+num(n)+" kg");}
 function saveProfile(){
   var s=Number($("fStart").value),t=Number($("fTarget").value),c=Number($("fCal").value);
-  if(!isFinite(s)||!isFinite(t)||!isFinite(c)){toast("Vérifie les valeurs");return;}
-  state.profile={start:s,target:t,cal:c};save();renderAll();toast("Objectifs enregistrés");
+  var ca=Number($("fCarbs").value),pr=Number($("fProt").value),fa=Number($("fFat").value),wg=Number($("fWater").value);
+  if(!isFinite(s)||!isFinite(t)||!isFinite(c)||!isFinite(ca)||!isFinite(pr)||!isFinite(fa)||!isFinite(wg)||s<30||t<30||c<500||wg<0.5||wg>8){toast("Vérifie les objectifs");return;}
+  state.profile={start:s,target:t,cal:c};state.macro={carbs:ca,protein:pr,fat:fa};state.waterGoal=wg;save();renderAll();toast("Objectifs enregistrés");
 }
 
 /* events */
@@ -1062,10 +1163,17 @@ document.addEventListener("click",function(e){
     case "finish": finishSession(); break;
     case "selEx": state.selEx=ex; renderProgress(); break;
     case "addMeal": openMeal(a.dataset.mealType||""); break;
+    case "openFavorites": openFavorites(); break;
+    case "favoritesClose": closeFavorites(); break;
+    case "favUse": useFavorite(Number(a.dataset.i)); break;
+    case "favDelete": deleteFavorite(Number(a.dataset.i)); break;
+    case "saveFavorite": saveFavorite(); break;
     case "waterAdd": addWater(Number(a.dataset.amount||300)); break;
     case "bodyWeightMinus": adjustBodyWeight(-0.1); break;
     case "bodyWeightPlus": adjustBodyWeight(0.1); break;
-    case "fasting": toast("Routine de jeûne : à personnaliser."); break;
+    case "fasting": openFasting(); break;
+    case "fastClose": $("fastModal").classList.remove("on"); break;
+    case "fastStart": startFasting(); break;
     case "scanOpen": openScanner(); break;
     case "scanClose": closeScanner(); break;
     case "scanLookup": lookupBarcode(document.getElementById("manualBarcode").value); break;
@@ -1082,7 +1190,7 @@ document.addEventListener("click",function(e){
     case "energy": setEnergy(Number(a.dataset.v)); break;
     case "menuAdd": var row=MENU[Number(a.dataset.d)][1][Number(a.dataset.m)];
       var xk=row[2].match(/(\d+)\s*kcal/),xp=row[2].match(/(\d+)\s*g prot/);
-      addMealObj({name:row[1],kcal:xk?Number(xk[1]):0,protein:xp?Number(xp[1]):0,type:row[0]}); toast("Ajouté au journal"); break;
+      addMealObj({name:row[1],kcal:xk?Number(xk[1]):0,protein:xp?Number(xp[1]):0,carbs:0,fat:0,qty:100,type:row[0]}); toast("Ajouté au journal"); break;
     case "saveProfile": saveProfile(); break;
     case "login": login(); break;
     case "backup": backup(); break;
@@ -1101,7 +1209,7 @@ document.addEventListener("click",function(e){ // close modal on backdrop
 });
 
 window.addEventListener("load",function(){
-  load();ensureDay();renderAll();showPage("today");setupFirebase();setInterval(updateRest,300);
+  load();normalizeState();ensureDay();renderAll();showPage("today");setupFirebase();setInterval(updateRest,300);setInterval(renderFasting,1000);
 });
 window.EVO_V3_READY=true;
 })();
