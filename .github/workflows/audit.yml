@@ -24,6 +24,7 @@ jobs:
         run: |
           import html.parser, re, sys
           html=open("index.html",encoding="utf-8").read()
+          html=re.sub(r"<script[\\s\\S]*?</script>", "", html, flags=re.I)
           class P(html.parser.HTMLParser):
               def __init__(self):
                   super().__init__()
