@@ -335,7 +335,6 @@ function renderAll(){
  showPage(state.page||"home")
 }
 document.addEventListener("click",function(e){
- const nav=e.target.closest("[data-page]");if(nav){e.preventDefault();e.stopPropagation();evoNav(nav.getAttribute("data-page"));return}
  const a=e.target.closest("[data-action]");if(!a)return;const act=a.dataset.action;
  if(act==="next"){state.day=nextDay();showPage("training");startWorkout();return}
  if(act==="day"){state.day=Number(a.dataset.day);renderTraining();return}
