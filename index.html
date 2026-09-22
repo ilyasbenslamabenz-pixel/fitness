@@ -1220,7 +1220,7 @@ window.EVO_V3_READY=true;
 </script>
 <script>
 if("serviceWorker" in navigator){
-  window.addEventListener("load",function(){navigator.serviceWorker.register("/fitness/sw.js").catch(function(e){console.warn("SW:",e);});});
+  window.addEventListener("load",function(){navigator.serviceWorker.register("/fitness/sw.js?v=24").catch(function(e){console.warn("SW:",e);});});
 }
 </script>
 </body>
