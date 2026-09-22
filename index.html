@@ -26,7 +26,7 @@
 .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.kpi{padding:15px;border-radius:17px;background:#0b121c;border:1px solid var(--line)}.kpi strong{display:block;font-size:28px;letter-spacing:-.04em}.kpi span{font-size:11px;color:var(--muted)}
 .chart{height:190px;margin-top:4px}.chart svg{width:100%;height:100%}.chart text{fill:#7e8da1;font-size:10px}.chart .line{fill:none;stroke:var(--blue);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}.chart .grid{stroke:#223043;stroke-width:1}
 
-.menu-plan{margin-top:12px}.menu-day{border:1px solid var(--line);background:#0b121c;border-radius:16px;padding:13px;margin-top:9px}.menu-day-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.menu-day-head b{font-size:14px}.menu-day-head span{font-size:10px;color:var(--muted)}.menu-meal{padding:10px 0;border-top:1px solid #1b2532}.menu-meal:first-of-type{margin-top:9px}.menu-meal-title{display:flex;justify-content:space-between;gap:8px;font-size:12px;font-weight:850}.menu-meal-title span{color:var(--blue);font-size:10px;white-space:nowrap}.menu-meal-desc{color:var(--muted);font-size:11px;line-height:1.4;margin-top:3px}.menu-add{margin-top:6px;font-size:10px;padding:7px 9px}.menu-today{border-color:#2d73b0;background:linear-gradient(145deg,#10243b,#0b121c)}
+.menu-switcher{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin:10px 0 8px}.menu-switcher button{border:1px solid var(--line);background:#0b121c;color:var(--muted);border-radius:10px;padding:8px 2px;font-size:9px;font-weight:900}.menu-switcher button.active{background:var(--blue2);border-color:#2d73b0;color:#9bceff}.menu-nav{display:flex;gap:7px}.menu-nav .btn{flex:1}.menu-plan{margin-top:12px}.menu-day{border:1px solid var(--line);background:#0b121c;border-radius:16px;padding:13px;margin-top:9px}.menu-day-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.menu-day-head b{font-size:14px}.menu-day-head span{font-size:10px;color:var(--muted)}.menu-meal{padding:10px 0;border-top:1px solid #1b2532}.menu-meal:first-of-type{margin-top:9px}.menu-meal-title{display:flex;justify-content:space-between;gap:8px;font-size:12px;font-weight:850}.menu-meal-title span{color:var(--blue);font-size:10px;white-space:nowrap}.menu-meal-desc{color:var(--muted);font-size:11px;line-height:1.4;margin-top:3px}.menu-add{margin-top:6px;font-size:10px;padding:7px 9px}.menu-today{border-color:#2d73b0;background:linear-gradient(145deg,#10243b,#0b121c)}
 .meal{border:1px solid var(--line);background:#0b121c;border-radius:15px;padding:12px;margin-top:8px}.meal-head{display:flex;justify-content:space-between;gap:8px}.meal b{font-size:13px}.meal small{color:var(--muted)}.food{display:flex;justify-content:space-between;padding-top:8px;margin-top:8px;border-top:1px solid #1b2532;font-size:11px}.food button{border:0;background:none;color:var(--red)}
 .field{margin-top:10px}.field label{display:block;color:var(--muted);font-size:10px;margin-bottom:5px}.field input{width:100%;height:44px;background:#080e16;color:var(--text);border:1px solid #29384a;border-radius:11px;padding:9px}.profile-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1px solid var(--line)}.profile-item:last-child{border-bottom:0}
 .bottom{position:fixed;z-index:100;left:50%;bottom:max(7px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(680px,calc(100% - 12px));padding:5px;display:grid;grid-template-columns:repeat(5,1fr);gap:4px;border:1px solid #26384d;border-radius:23px;background:rgba(9,14,22,.94);backdrop-filter:blur(22px);box-shadow:0 18px 45px #0008}.bottom button{border:0;background:transparent;color:#748296;border-radius:17px;padding:8px 2px 7px;font-size:9px;font-weight:900}.bottom button .ico{display:block;font-size:19px;line-height:20px;margin-bottom:2px}.bottom button.active{background:#153351;color:#9bcfff}
@@ -52,6 +52,16 @@
       <div class="hero-stat"><strong>60–75′</strong><span>durée cible</span></div>
       <div class="hero-stat"><strong>7–10k</strong><span>pas / jour</span></div>
       <div class="hero-stat"><strong id="homeWeight">103</strong><span>kg actuellement</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><div><h3>⚡ Suivi du jour</h3><div class="date">Note tes données directement ici</div></div></div>
+    <div class="grid2">
+      <div class="kpi"><span>👟 Pas</span><strong id="homeStepsValue">0</strong><div style="display:flex;gap:6px;margin-top:9px"><button class="btn" data-action="steps">+500</button><button class="btn" data-action="stepsCustom">✎</button></div></div>
+      <div class="kpi"><span>💧 Eau</span><strong id="homeWaterValue">0 ml</strong><div style="display:flex;gap:6px;margin-top:9px"><button class="btn" data-action="water">+250</button><button class="btn" data-action="water500">+500</button></div></div>
+      <div class="kpi"><span>🥩 Protéines</span><strong id="homeProteinValue">0 g</strong><div style="display:flex;gap:6px;margin-top:9px"><button class="btn" data-action="protein">+25</button><button class="btn" data-action="proteinCustom">✎</button></div></div>
+      <div class="kpi"><span>🍽️ Repas</span><strong id="homeMealsValue">0</strong><div style="display:flex;gap:6px;margin-top:9px"><button class="btn primary" data-action="meal">＋ Ajouter</button></div></div>
     </div>
   </div>
 
@@ -111,8 +121,14 @@
   <div class="mini-stats card" id="nutritionStats"></div>
 
   <div class="card menu-plan">
-    <div class="card-title"><div><h3>📅 Menu de la semaine</h3><div class="date">Sans viande · sans pain · sans pâtes</div></div><button class="btn" data-action="menuToday">Aujourd’hui</button></div>
+    <div class="card-title"><div><h3>📅 Menu du jour</h3><div class="date">Sans viande · sans pain · sans pâtes</div></div></div>
+    <div class="menu-switcher" id="menuSwitcher"></div>
     <div id="weeklyMenu"></div>
+    <div class="menu-nav">
+      <button class="btn" data-action="menuPrev">← Jour précédent</button>
+      <button class="btn" data-action="menuToday">Aujourd’hui</button>
+      <button class="btn" data-action="menuNext">Jour suivant →</button>
+    </div>
   </div>
   <div class="card"><div class="card-title"><h3>🍽️ Repas</h3><button class="btn" data-action="meal">＋ Ajouter</button></div><div id="meals"></div></div>
   <div class="card"><div class="card-title"><h3>💧 Hydratation</h3><b id="waterValue">0 ml</b></div><div class="progress"><i id="waterBar"></i></div><div class="grid2" style="margin-top:10px"><button class="btn" data-action="water">+250 ml</button><button class="btn" data-action="water500">+500 ml</button></div></div>
@@ -225,6 +241,10 @@ function renderHome(){
  document.getElementById("homeDay").textContent="Semaine "+weekNumber()+"/12";
  document.getElementById("topWeek").textContent="Semaine "+weekNumber()+"/12";
  document.getElementById("homeStats").innerHTML='<div class="mini"><strong>'+state.steps.toLocaleString("fr-CH")+'</strong><span>pas</span></div><div class="mini"><strong>'+state.protein+' g</strong><span>protéines</span></div><div class="mini"><strong>'+state.water+' ml</strong><span>eau</span></div>';
+ document.getElementById("homeStepsValue").textContent=state.steps.toLocaleString("fr-CH");
+ document.getElementById("homeWaterValue").textContent=state.water.toLocaleString("fr-CH")+" ml";
+ document.getElementById("homeProteinValue").textContent=state.protein+" g";
+ document.getElementById("homeMealsValue").textContent=state.meals.length;
  const p=currentProgram();document.getElementById("nextTitle").textContent=p.icon+" "+p.name;document.getElementById("nextDate").textContent="Prochaine séance · "+p.short;
  const lost=Math.max(0,start-w),total=Math.max(.1,start-target),pct=Math.max(0,Math.min(100,lost/total*100));
  document.getElementById("goalText").textContent=w.toFixed(1)+" → "+target.toFixed(1)+" kg";
@@ -302,9 +322,20 @@ function menuKcal(s){const m=s.match(/(\d+)\s*kcal/);return m?Number(m[1]):0}
 function menuProtein(s){const m=s.match(/(\d+)\s*g prot/);return m?Number(m[1]):0}
 function renderWeeklyMenu(){
  const el=document.getElementById("weeklyMenu");if(!el)return;
- const idx=(new Date().getDay()+6)%7;
- el.innerHTML=MENU_PLAN.map((d,i)=>'<div class="menu-day '+(i===idx?'menu-today':'')+'"><div class="menu-day-head"><b>'+d.day+(i===idx?' · Aujourd’hui':'')+'</b><span>'+d.meals.reduce((s,m)=>s+menuKcal(m[2]),0)+' kcal environ</span></div>'+d.meals.map((m,j)=>'<div class="menu-meal"><div class="menu-meal-title"><span style="color:var(--text)">'+m[0]+'</span><span>'+m[2]+'</span></div><div class="menu-meal-desc">'+m[1]+'</div><button class="btn menu-add" data-action="addMenuMeal" data-day="'+i+'" data-meal="'+j+'">＋ Ajouter au journal</button></div>').join('')+'</div>').join('');
+ const switcher=document.getElementById("menuSwitcher");
+ const todayIdx=(new Date().getDay()+6)%7;
+ if(typeof state.menuDay!=="number")state.menuDay=todayIdx;
+ state.menuDay=Math.max(0,Math.min(6,state.menuDay));
+ if(switcher){
+  switcher.innerHTML=MENU_PLAN.map((d,i)=>'<button class="'+(i===state.menuDay?'active':'')+'" data-action="menuDay" data-day="'+i+'">'+d.day.slice(0,3)+'</button>').join('');
+ }
+ const d=MENU_PLAN[state.menuDay];
+ const kcal=d.meals.reduce((s,m)=>s+menuKcal(m[2]),0);
+ el.innerHTML='<div class="menu-day menu-today"><div class="menu-day-head"><b>'+d.day+(state.menuDay===todayIdx?' · Aujourd’hui':'')+'</b><span>'+kcal+' kcal environ</span></div>'+
+ d.meals.map((m,j)=>'<div class="menu-meal"><div class="menu-meal-title"><span style="color:var(--text)">'+m[0]+'</span><span>'+m[2]+'</span></div><div class="menu-meal-desc">'+m[1]+'</div><button class="btn menu-add" data-action="addMenuMeal" data-day="'+state.menuDay+'" data-meal="'+j+'">＋ Ajouter au journal</button></div>').join('')+'</div>';
 }
+function selectMenuDay(i){state.menuDay=Math.max(0,Math.min(6,Number(i)||0));save();renderWeeklyMenu();}
+
 function addMenuMeal(di,mi){
  const m=MENU_PLAN[di]?.meals[mi];if(!m)return;state.meals.push({name:m[1],kcal:menuKcal(m[2]),protein:menuProtein(m[2]),type:m[0]});save();renderNutrition();renderHome();toast("🍽️ "+m[0]+" ajouté au journal");
 }
@@ -342,11 +373,16 @@ document.addEventListener("click",function(e){
  if(act==="finish"){finishWorkout();return}
  if(act==="rest"){rest(Number(a.dataset.sec));return}
  if(act==="steps"){state.steps+=500;save();renderHome();renderProgress();toast("👟 +500 pas");return}
+ if(act==="stepsCustom"){const v=prompt("Combien de pas veux-tu ajouter ?","1000");if(v!==null){const n=Number(String(v).replace(/\\s/g,""));if(Number.isFinite(n)&&n>0&&n<=50000){state.steps+=Math.round(n);save();renderHome();renderProgress();toast("👟 +"+Math.round(n)+" pas")}else toast("Nombre de pas invalide")}return}
  if(act==="water"){state.water+=250;save();renderHome();renderNutrition();toast("💧 +250 ml");return}
  if(act==="water500"){state.water+=500;save();renderHome();renderNutrition();toast("💧 +500 ml");return}
  if(act==="protein"){state.protein+=25;save();renderHome();toast("🥩 +25 g");return}
+ if(act==="proteinCustom"){const v=prompt("Combien de protéines veux-tu ajouter ?","25");if(v!==null){const n=Number(String(v).replace(",","."));if(Number.isFinite(n)&&n>0&&n<=300){state.protein+=Math.round(n);save();renderHome();toast("🥩 +"+Math.round(n)+" g")}else toast("Quantité invalide")}return}
  if(act==="meal"){openMeal();return}
- if(act==="menuToday"){const idx=(new Date().getDay()+6)%7;document.querySelectorAll(".menu-day")[idx]?.scrollIntoView({behavior:"smooth",block:"center"});return}
+ if(act==="menuToday"){selectMenuDay((new Date().getDay()+6)%7);return}
+ if(act==="menuDay"){selectMenuDay(a.dataset.day);return}
+ if(act==="menuPrev"){selectMenuDay(state.menuDay-1);return}
+ if(act==="menuNext"){selectMenuDay(state.menuDay+1);return}
  if(act==="addMenuMeal"){addMenuMeal(Number(a.dataset.day),Number(a.dataset.meal));return}
  if(act==="closeMeal"){document.getElementById("mealModal").classList.remove("open");return}
  if(act==="saveMeal"){saveMeal();return}
