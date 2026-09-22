@@ -14,18 +14,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: JavaScript syntax
+      - name: JavaScript and HTML parse
         shell: bash
         run: |
-          python - <<'PY'
-          import re
-          html=open("index.html",encoding="utf-8").read()
-          scripts=re.findall(r'<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>',html,re.S|re.I)
-          if not scripts:
-              raise SystemExit("No inline JavaScript found")
-          open("/tmp/evo-inline.js","w",encoding="utf-8").write("\n".join(scripts))
-          PY
-          node --check /tmp/evo-inline.js
+          npx --yes prettier@3.6.2 index.html --parser html >/dev/null
           node --check sw.js
       - name: HTML and event audit
         shell: python
