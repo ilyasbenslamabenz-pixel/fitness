@@ -17,6 +17,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script src="https://unpkg.com/@zxing/browser@0.1.5/umd/index.min.js"></script>
 <style>
 :root{
   --bg:#12141A; --surface:#1B1E27; --surface2:#232733; --hair:#2E3340;
@@ -209,6 +210,14 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
   font-weight:600;font-size:13.5px;padding:11px 18px;border-radius:999px;z-index:90;box-shadow:0 10px 30px -8px rgba(0,0,0,.6)}
 .toast[hidden]{display:none}
 
+/* barcode scanner */
+.scan-actions{display:grid;gap:10px;margin-top:14px}
+.scan-preview{width:100%;aspect-ratio:4/3;background:#0b0d12;border:1px solid var(--hair);border-radius:14px;overflow:hidden;position:relative}
+.scan-preview video{width:100%;height:100%;object-fit:cover;display:block}
+.scan-frame{position:absolute;inset:18% 12%;border:2px solid var(--mint);border-radius:14px;box-shadow:0 0 0 999px rgba(0,0,0,.18)}
+.scan-status{font-size:13px;color:var(--muted);text-align:center;margin-top:9px;min-height:18px}
+.scan-product{display:none;margin-top:10px;padding:11px;border:1px solid var(--hair);border-radius:12px;background:var(--surface2)}
+.scan-product.on{display:block}
 /* rest timer */
 .rest{display:flex;align-items:center;gap:10px;margin:2px 0 12px;padding:9px 10px 9px 14px;background:var(--surface2);border:1px solid var(--hair);border-radius:12px}
 .rest .rlabel{font-family:var(--display);font-weight:700;font-size:16px;min-width:64px}
@@ -449,7 +458,23 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
   <div class="row2"><div class="field"><label>Calories</label><input id="foodKcal" type="number" inputmode="numeric" placeholder="500"></div>
   <div class="field"><label>Protéines (g)</label><input id="foodProt" type="number" inputmode="numeric" placeholder="40"></div></div>
   <div class="field"><label>Moment</label><select id="foodType"><option>Petit-déjeuner</option><option>Déjeuner</option><option>Dîner</option><option>Collation</option></select></div>
+  <button class="btn mint" data-act="scanOpen">📷 Scanner un code-barres</button>
   <div class="acts"><button class="btn ghost" data-act="mClose">Annuler</button><button class="btn primary" data-act="mSave">Ajouter</button></div>
+</div></div>
+
+<!-- barcode scanner modal -->
+<div class="modal" id="scanModal"><div class="sheet">
+  <h3>Scanner un code-barres</h3>
+  <div class="sub">Place le code-barres dans le cadre. Le produit sera recherché automatiquement.</div>
+  <div class="scan-preview">
+    <video id="scanVideo" playsinline muted></video>
+    <div class="scan-frame"></div>
+  </div>
+  <div class="scan-status" id="scanStatus">Autorise l’accès à la caméra…</div>
+  <div class="field"><label>Ou saisir le code manuellement</label><input id="manualBarcode" inputmode="numeric" autocomplete="off" placeholder="7612345678901"></div>
+  <button class="btn primary" data-act="scanLookup">🔎 Rechercher ce code</button>
+  <div class="scan-product" id="scanProduct"></div>
+  <div class="acts"><button class="btn ghost" data-act="scanClose">Fermer</button></div>
 </div></div>
 
 <div class="modal" id="runModal"><div class="sheet">
@@ -887,6 +912,80 @@ function saveMeal(){
   closeMeal();toast("Repas ajouté");
 }
 
+
+/* barcode scanner */
+var barcodeReader=null,barcodeControls=null,barcodeBusy=false;
+function stopBarcode(){
+  try{if(barcodeControls&&barcodeControls.stop)barcodeControls.stop();}catch(e){}
+  barcodeControls=null;
+  try{if(barcodeReader&&barcodeReader.reset)barcodeReader.reset();}catch(e){}
+  barcodeReader=null;
+  var v=$("scanVideo");if(v){try{v.pause();}catch(e){};v.srcObject=null;}
+}
+function closeScanner(){stopBarcode();$("scanModal").classList.remove("on");}
+function offVal(n,keys){
+  for(var i=0;i<keys.length;i++){var v=Number(n[keys[i]]);if(isFinite(v))return v;}
+  return 0;
+}
+async function lookupBarcode(code){
+  code=String(code||"").replace(/\\D/g,"");
+  if(code.length<8){$("scanStatus").textContent="Code-barres invalide.";barcodeBusy=false;return;}
+  $("scanStatus").textContent="Recherche du produit…";$("scanProduct").classList.remove("on");
+  try{
+    var url="https://world.openfoodfacts.org/api/v3/product/"+encodeURIComponent(code)+".json?fields=product_name,brands,nutriments,nutrition_data_per,nutriscore_grade";
+    var res=await fetch(url,{headers:{Accept:"application/json"}});
+    if(!res.ok)throw new Error("HTTP "+res.status);
+    var data=await res.json();
+    if(!data.product)throw new Error("not_found");
+    var p=data.product,n=p.nutriments||{};
+    var kcal=offVal(n,["energy-kcal_100g","energy-kcal"]);
+    var prot=offVal(n,["proteins_100g","proteins"]);
+    var carbs=offVal(n,["carbohydrates_100g","carbohydrates"]);
+    var fat=offVal(n,["fat_100g","fat"]);
+    var name=(p.brands?p.brands+" ":"")+(p.product_name||"Produit");
+    $("scanProduct").innerHTML="<b>"+esc(name)+"</b><div style=\"font-size:12px;color:var(--muted);margin-top:4px\">"+(kcal?Math.round(kcal):"—")+" kcal · "+(prot?Math.round(prot*10)/10:"—")+" g protéines / 100 g</div>";
+    $("scanProduct").classList.add("on");
+    $("foodName").value=name;
+    $("foodKcal").value=kcal?Math.round(kcal):"";
+    $("foodProt").value=prot?Math.round(prot*10)/10:"";
+    stopBarcode();
+    setTimeout(function(){closeScanner();$("mealModal").classList.add("on");},500);
+  }catch(e){
+    $("scanStatus").textContent="Produit introuvable. Vérifie le code ou saisis l’aliment manuellement.";
+    barcodeBusy=false;
+  }
+}
+function openScanner(){
+  $("mealModal").classList.remove("on");
+  $("scanModal").classList.add("on");
+  $("scanStatus").textContent="Autorise l’accès à la caméra…";
+  $("scanProduct").classList.remove("on");
+  $("manualBarcode").value="";
+  barcodeBusy=false;
+  if(!window.ZXingBrowser){
+    $("scanStatus").textContent="Scanner indisponible. Utilise le code-barres manuel ci-dessous.";
+    return;
+  }
+  stopBarcode();
+  try{
+    barcodeReader=new ZXingBrowser.BrowserMultiFormatReader();
+    var p=barcodeReader.decodeFromConstraints({video:{facingMode:{ideal:"environment"}}},"scanVideo",function(result,err,controls){
+      if(controls)barcodeControls=controls;
+      if(result&&!barcodeBusy){
+        barcodeBusy=true;
+        var code=result.getText();
+        $("manualBarcode").value=code;
+        lookupBarcode(code);
+      }
+    });
+    if(p&&p.catch)p.catch(function(){
+      $("scanStatus").textContent="Caméra refusée ou indisponible. Tu peux entrer le code manuellement.";
+    });
+  }catch(e){
+    $("scanStatus").textContent="Scanner indisponible. Tu peux entrer le code manuellement.";
+  }
+}
+
 /* firebase (optional cloud sync) */
 function setupFirebase(){
   if(!window.firebase)return;
@@ -938,6 +1037,9 @@ document.addEventListener("click",function(e){
     case "finish": finishSession(); break;
     case "selEx": state.selEx=ex; renderProgress(); break;
     case "addMeal": openMeal(); break;
+    case "scanOpen": openScanner(); break;
+    case "scanClose": closeScanner(); break;
+    case "scanLookup": lookupBarcode(document.getElementById("manualBarcode").value); break;
     case "mClose": closeMeal(); break;
     case "mSave": saveMeal(); break;
     case "delMeal": state.meals.splice(Number(a.dataset.i),1); save(); renderMeals(); renderToday(); break;
