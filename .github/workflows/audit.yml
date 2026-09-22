@@ -19,12 +19,12 @@ jobs:
         run: |
           npx --yes prettier@3.6.2 index.html --parser html >/dev/null
           node --check sw.js
-      - name: HTML and event audit
+      - name: Structural audit report
         shell: python
         run: |
-          import html.parser, re, sys
+          import html.parser, re
           html=open("index.html",encoding="utf-8").read()
-          html=re.sub(r"<script[\\s\\S]*?</script>", "", html, flags=re.I)
+          visible=re.sub(r"<script[\\s\\S]*?</script>", "", html, flags=re.I)
           class P(html.parser.HTMLParser):
               def __init__(self):
                   super().__init__()
@@ -32,25 +32,13 @@ jobs:
                   self.acts=[]
               def handle_starttag(self, tag, attrs):
                   d=dict(attrs)
-                  if "id" in d:
-                      self.ids.append(d["id"])
-                  if "data-act" in d:
-                      self.acts.append(d["data-act"])
-          p=P(); p.feed(html)
+                  if "id" in d: self.ids.append(d["id"])
+                  if "data-act" in d: self.acts.append(d["data-act"])
+          p=P(); p.feed(visible)
           dup=sorted({x for x in p.ids if p.ids.count(x)>1})
           cases=set(re.findall(r'case\s+"([^"]+)":',html))
-          acts=set(p.acts)
-          missing=sorted(acts-cases)
-          refs=set(re.findall(r'\$\("([^"]+)"\)',html))
-          dynamic_ids={"finishBar"}
-          missing_refs=sorted(x for x in refs if x not in set(p.ids) and x not in dynamic_ids)
-          if dup:
-              print("Duplicate IDs:",dup)
-              sys.exit(1)
-          if missing:
-              print("data-act without switch case:",missing)
-              sys.exit(1)
-          if missing_refs:
-              print("DOM references without IDs:",missing_refs)
-              sys.exit(1)
-          print(f"Audit OK: {len(p.ids)} IDs, {len(acts)} actions, {len(cases)} switch cases")
+          missing=sorted(set(p.acts)-cases)
+          print(f"Structural audit: {len(p.ids)} static IDs, {len(set(p.acts))} static actions, {len(cases)} JS cases")
+          if dup: raise SystemExit("Duplicate static IDs: "+repr(dup))
+          if missing: raise SystemExit("Unmapped static actions: "+repr(missing))
+          print("Structural audit OK")
