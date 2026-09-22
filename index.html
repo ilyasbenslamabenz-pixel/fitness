@@ -355,7 +355,8 @@ document.addEventListener("click",function(e){
  if(act==="weight"){addWeight();return}
  if(act==="saveProfile"){saveProfile();return}
  if(act==="login"){login();return}
- if(act==="backup"){backup();return}\n if(act==="restore"){restore();return}
+ if(act==="backup"){backup();return}
+ if(act==="restore"){restore();return}
  if(act==="reset"){resetAll();return}
 });
 document.addEventListener("change",function(e){const ex=e.target.closest(".exercise");if(!ex||!e.target.classList.contains("check"))return;const i=Number(e.target.dataset.ex);localStorage.setItem("done_"+state.day+"_"+i,e.target.checked?"1":"0");renderTraining()});
