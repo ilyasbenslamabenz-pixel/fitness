@@ -361,6 +361,109 @@ document.addEventListener("click",function(e){
 document.addEventListener("change",function(e){const ex=e.target.closest(".exercise");if(!ex||!e.target.classList.contains("check"))return;const i=Number(e.target.dataset.ex);localStorage.setItem("done_"+state.day+"_"+i,e.target.checked?"1":"0");renderTraining()});
 setInterval(updateRest,500);
 window.addEventListener("load",function(){load();renderAll();setupFirebase()});
+window.EVO_APP_READY=true;
+})();
+</script>
+
+<script>
+/* EVO_RESCUE_NUTRITION_V1 — affichage de secours si le moteur principal rencontre une erreur */
+(function(){
+  function rescue(){
+    if(window.EVO_APP_READY) return;
+    var menu=document.getElementById("weeklyMenu");
+    if(!menu) return;
+
+    var plan=[
+      ["Lundi",[
+        ["Petit-déjeuner","Avoine 50 g + skyr 200 g + 1 banane","≈ 400 kcal · 25 g prot."],
+        ["Déjeuner","Riz 70 g cru + crevettes 180 g + poivrons 250 g + curry","≈ 550 kcal · 42 g prot."],
+        ["Dîner","Pommes de terre 300 g + 3 œufs + haricots verts 250 g","≈ 560 kcal · 28 g prot."],
+        ["Collation","Skyr 150 g + 1 pomme","≈ 160 kcal · 16 g prot."]
+      ]],
+      ["Mardi",[
+        ["Petit-déjeuner","2 œufs + pommes de terre 200 g + 1 fruit","≈ 430 kcal · 20 g prot."],
+        ["Déjeuner","Riz 70 g cru + thon 120 g + courgette + tomate","≈ 520 kcal · 38 g prot."],
+        ["Dîner","Lentilles 220 g cuites + riz 50 g cru + 2 œufs + légumes","≈ 620 kcal · 34 g prot."],
+        ["Collation","Fromage blanc 200 g + banane","≈ 180 kcal · 18 g prot."]
+      ]],
+      ["Mercredi",[
+        ["Petit-déjeuner","Avoine 50 g + lait 200 ml + skyr 150 g + pomme","≈ 430 kcal · 28 g prot."],
+        ["Déjeuner","Pommes de terre 350 g + thon 120 g + salade de carottes/concombre","≈ 500 kcal · 35 g prot."],
+        ["Dîner","Riz 70 g cru + pois chiches 180 g + poivrons + sauce tomate","≈ 600 kcal · 20 g prot."],
+        ["Collation","Skyr 200 g","≈ 130 kcal · 22 g prot."]
+      ]],
+      ["Jeudi",[
+        ["Petit-déjeuner","3 œufs + 1 banane + skyr 100 g","≈ 430 kcal · 32 g prot."],
+        ["Déjeuner","Riz 70 g cru + crevettes 180 g + courgettes + curry","≈ 540 kcal · 43 g prot."],
+        ["Dîner","Pommes de terre 300 g + lentilles 200 g + 2 œufs + légumes","≈ 610 kcal · 33 g prot."],
+        ["Collation","Fromage blanc 200 g + pomme","≈ 170 kcal · 17 g prot."]
+      ]],
+      ["Vendredi",[
+        ["Petit-déjeuner","Avoine 50 g + skyr 200 g + banane","≈ 400 kcal · 25 g prot."],
+        ["Déjeuner","Riz 70 g cru + thon 120 g + poivrons + sauce tomate","≈ 530 kcal · 38 g prot."],
+        ["Dîner","Pommes de terre 300 g + 3 œufs + brocolis 250 g","≈ 560 kcal · 30 g prot."],
+        ["Collation","Skyr 150 g + fruit","≈ 160 kcal · 16 g prot."]
+      ]],
+      ["Samedi",[
+        ["Petit-déjeuner","2 œufs + avoine 40 g + banane","≈ 410 kcal · 21 g prot."],
+        ["Déjeuner","Riz 70 g cru + crevettes 180 g + poivrons + lait de coco léger","≈ 590 kcal · 42 g prot."],
+        ["Dîner","Pois chiches 200 g + pommes de terre 250 g + 2 œufs + légumes","≈ 650 kcal · 30 g prot."],
+        ["Collation","Fromage blanc 200 g + pomme","≈ 170 kcal · 17 g prot."]
+      ]],
+      ["Dimanche",[
+        ["Petit-déjeuner","Avoine 50 g + lait 200 ml + skyr 150 g + banane","≈ 450 kcal · 28 g prot."],
+        ["Déjeuner","Pommes de terre 350 g + thon 120 g + haricots verts 250 g","≈ 500 kcal · 37 g prot."],
+        ["Dîner","Riz 70 g cru + lentilles 200 g + 2 œufs + courgettes","≈ 620 kcal · 34 g prot."],
+        ["Collation","Skyr 150 g + fruit","≈ 150 kcal · 16 g prot."]
+      ]]
+    ];
+
+    var idx=(new Date().getDay()+6)%7;
+    menu.innerHTML=plan.map(function(d,i){
+      var kcal=d[1].reduce(function(s,m){var x=m[2].match(/(\d+)\s*kcal/);return s+(x?Number(x[1]):0)},0);
+      return '<div class="menu-day '+(i===idx?'menu-today':'')+'">'+
+        '<div class="menu-day-head"><b>'+d[0]+(i===idx?' · Aujourd’hui':'')+'</b><span>'+kcal+' kcal environ</span></div>'+
+        d[1].map(function(m,j){
+          return '<div class="menu-meal"><div class="menu-meal-title"><span style="color:var(--text)">'+m[0]+'</span><span>'+m[2]+'</span></div>'+
+          '<div class="menu-meal-desc">'+m[1]+'</div>'+
+          '<button class="btn menu-add" data-rescue-meal="1" data-day="'+i+'" data-meal="'+j+'">＋ Ajouter au journal</button></div>';
+        }).join('')+'</div>';
+    }).join('');
+
+    var stats=document.getElementById("nutritionStats");
+    if(stats && !stats.innerHTML.trim()){
+      stats.innerHTML='<div class="mini"><strong>0</strong><span>/ 2400 kcal</span></div><div class="mini"><strong>0 g</strong><span>protéines</span></div><div class="mini"><strong>0 ml</strong><span>eau</span></div>';
+    }
+
+    var meals=document.getElementById("meals");
+    if(meals && !meals.innerHTML.trim()){
+      meals.innerHTML='<div class="date">Aucun repas ajouté aujourd’hui.</div>';
+    }
+  }
+
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",rescue);
+  else rescue();
+
+  document.addEventListener("click",function(e){
+    var b=e.target.closest("[data-rescue-meal]");
+    if(!b || window.EVO_APP_READY) return;
+    var days=[
+      ["Avoine 50 g + skyr 200 g + 1 banane",400,25,"Petit-déjeuner"],
+      ["Riz 70 g cru + crevettes 180 g + poivrons 250 g + curry",550,42,"Déjeuner"],
+      ["Pommes de terre 300 g + 3 œufs + haricots verts 250 g",560,28,"Dîner"],
+      ["Skyr 150 g + 1 pomme",160,16,"Collation"]
+    ];
+    var row=days[Number(b.dataset.meal)];
+    if(!row) return;
+    var raw=localStorage.getItem("evoFitCoachV2"), s;
+    try{s=raw?JSON.parse(raw):null}catch(_){s=null}
+    if(!s || typeof s!=="object") s={meals:[],steps:0,water:0,protein:0,profile:{start:103,target:85,cal:2400}};
+    s.meals=Array.isArray(s.meals)?s.meals:[];
+    s.meals.push({name:row[0],kcal:row[1],protein:row[2],type:row[3]});
+    localStorage.setItem("evoFitCoachV2",JSON.stringify(s));
+    var meals=document.getElementById("meals");
+    if(meals) meals.innerHTML='<div class="date">Repas ajouté. Recharge la page pour le voir dans le journal.</div>';
+  });
 })();
 </script>
 </body>
