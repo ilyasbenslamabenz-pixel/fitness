@@ -25,6 +25,8 @@
 .mini-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.mini{background:#0b121c;border:1px solid var(--line);border-radius:15px;padding:12px}.mini strong{display:block;font-size:20px}.mini span{font-size:10px;color:var(--muted)}
 .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.kpi{padding:15px;border-radius:17px;background:#0b121c;border:1px solid var(--line)}.kpi strong{display:block;font-size:28px;letter-spacing:-.04em}.kpi span{font-size:11px;color:var(--muted)}
 .chart{height:190px;margin-top:4px}.chart svg{width:100%;height:100%}.chart text{fill:#7e8da1;font-size:10px}.chart .line{fill:none;stroke:var(--blue);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}.chart .grid{stroke:#223043;stroke-width:1}
+
+.menu-plan{margin-top:12px}.menu-day{border:1px solid var(--line);background:#0b121c;border-radius:16px;padding:13px;margin-top:9px}.menu-day-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.menu-day-head b{font-size:14px}.menu-day-head span{font-size:10px;color:var(--muted)}.menu-meal{padding:10px 0;border-top:1px solid #1b2532}.menu-meal:first-of-type{margin-top:9px}.menu-meal-title{display:flex;justify-content:space-between;gap:8px;font-size:12px;font-weight:850}.menu-meal-title span{color:var(--blue);font-size:10px;white-space:nowrap}.menu-meal-desc{color:var(--muted);font-size:11px;line-height:1.4;margin-top:3px}.menu-add{margin-top:6px;font-size:10px;padding:7px 9px}.menu-today{border-color:#2d73b0;background:linear-gradient(145deg,#10243b,#0b121c)}
 .meal{border:1px solid var(--line);background:#0b121c;border-radius:15px;padding:12px;margin-top:8px}.meal-head{display:flex;justify-content:space-between;gap:8px}.meal b{font-size:13px}.meal small{color:var(--muted)}.food{display:flex;justify-content:space-between;padding-top:8px;margin-top:8px;border-top:1px solid #1b2532;font-size:11px}.food button{border:0;background:none;color:var(--red)}
 .field{margin-top:10px}.field label{display:block;color:var(--muted);font-size:10px;margin-bottom:5px}.field input{width:100%;height:44px;background:#080e16;color:var(--text);border:1px solid #29384a;border-radius:11px;padding:9px}.profile-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1px solid var(--line)}.profile-item:last-child{border-bottom:0}
 .bottom{position:fixed;z-index:100;left:50%;bottom:max(7px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(680px,calc(100% - 12px));padding:5px;display:grid;grid-template-columns:repeat(5,1fr);gap:4px;border:1px solid #26384d;border-radius:23px;background:rgba(9,14,22,.94);backdrop-filter:blur(22px);box-shadow:0 18px 45px #0008}.bottom button{border:0;background:transparent;color:#748296;border-radius:17px;padding:8px 2px 7px;font-size:9px;font-weight:900}.bottom button .ico{display:block;font-size:19px;line-height:20px;margin-bottom:2px}.bottom button.active{background:#153351;color:#9bcfff}
@@ -107,6 +109,11 @@
 <section id="nutrition" class="page">
   <div class="eyebrow">NUTRITION</div><h2 id="nutritionDate">Aujourd’hui</h2><div class="date">Objectif : régularité, protéines et hydratation.</div>
   <div class="mini-stats card" id="nutritionStats"></div>
+
+  <div class="card menu-plan">
+    <div class="card-title"><div><h3>📅 Menu de la semaine</h3><div class="date">Sans viande · sans pain · sans pâtes</div></div><button class="btn" data-action="menuToday">Aujourd’hui</button></div>
+    <div id="weeklyMenu"></div>
+  </div>
   <div class="card"><div class="card-title"><h3>🍽️ Repas</h3><button class="btn" data-action="meal">＋ Ajouter</button></div><div id="meals"></div></div>
   <div class="card"><div class="card-title"><h3>💧 Hydratation</h3><b id="waterValue">0 ml</b></div><div class="progress"><i id="waterBar"></i></div><div class="grid2" style="margin-top:10px"><button class="btn" data-action="water">+250 ml</button><button class="btn" data-action="water500">+500 ml</button></div></div>
 </section>
@@ -253,7 +260,57 @@ function renderChart(a){
  el.innerHTML='<svg viewBox="0 0 '+W+' '+H"><line class="grid" x1="0" y1="'+H/2+'" x2="'+W+'" y2="'+H/2+'"></line><path class="line" d="'+path+'"></path>'+pts.map(q=>'<circle cx="'+q[0]+'" cy="'+q[1]+'" r="5" fill="#55a9ff"></circle>').join("")+'</svg>';
 }
 function addWeight(){const v=prompt("Ton poids aujourd’hui (kg)",latestWeight().toFixed(1));if(v===null)return;const n=Number(String(v).replace(",","."));if(!Number.isFinite(n)||n<30||n>300)return toast("Poids invalide");const d=today(),i=state.weightHistory.findIndex(x=>x.d===d);if(i>=0)state.weightHistory[i].w=n;else state.weightHistory.push({d:d,w:n});state.weightHistory.sort((a,b)=>a.d.localeCompare(b.d));save();renderHome();renderProgress();toast("⚖️ "+n.toFixed(1)+" kg enregistré")}
+
+const MENU_PLAN=[
+ {day:"Lundi",meals:[
+  ["Petit-déjeuner","Avoine 50 g + skyr 200 g + 1 banane","≈ 400 kcal · 25 g prot."],
+  ["Déjeuner","Riz 70 g cru + crevettes 180 g + poivrons 250 g + curry","≈ 550 kcal · 42 g prot."],
+  ["Dîner","Pommes de terre 300 g + 3 œufs + haricots verts 250 g","≈ 560 kcal · 28 g prot."],
+  ["Collation","Skyr 150 g + 1 pomme","≈ 160 kcal · 16 g prot."]]},
+ {day:"Mardi",meals:[
+  ["Petit-déjeuner","2 œufs + pommes de terre 200 g + 1 fruit","≈ 430 kcal · 20 g prot."],
+  ["Déjeuner","Riz 70 g cru + thon 120 g + courgette + tomate","≈ 520 kcal · 38 g prot."],
+  ["Dîner","Lentilles 220 g cuites + riz 50 g cru + 2 œufs + légumes","≈ 620 kcal · 34 g prot."],
+  ["Collation","Fromage blanc 200 g + banane","≈ 180 kcal · 18 g prot."]]},
+ {day:"Mercredi",meals:[
+  ["Petit-déjeuner","Avoine 50 g + lait 200 ml + skyr 150 g + pomme","≈ 430 kcal · 28 g prot."],
+  ["Déjeuner","Pommes de terre 350 g + thon 120 g + salade de carottes/concombre","≈ 500 kcal · 35 g prot."],
+  ["Dîner","Riz 70 g cru + pois chiches 180 g + poivrons + sauce tomate","≈ 600 kcal · 20 g prot."],
+  ["Collation","Skyr 200 g","≈ 130 kcal · 22 g prot."]]},
+ {day:"Jeudi",meals:[
+  ["Petit-déjeuner","3 œufs + 1 banane + skyr 100 g","≈ 430 kcal · 32 g prot."],
+  ["Déjeuner","Riz 70 g cru + crevettes 180 g + courgettes + curry","≈ 540 kcal · 43 g prot."],
+  ["Dîner","Pommes de terre 300 g + lentilles 200 g + 2 œufs + légumes","≈ 610 kcal · 33 g prot."],
+  ["Collation","Fromage blanc 200 g + pomme","≈ 170 kcal · 17 g prot."]]},
+ {day:"Vendredi",meals:[
+  ["Petit-déjeuner","Avoine 50 g + skyr 200 g + banane","≈ 400 kcal · 25 g prot."],
+  ["Déjeuner","Riz 70 g cru + thon 120 g + poivrons + sauce tomate","≈ 530 kcal · 38 g prot."],
+  ["Dîner","Pommes de terre 300 g + 3 œufs + brocolis 250 g","≈ 560 kcal · 30 g prot."],
+  ["Collation","Skyr 150 g + fruit","≈ 160 kcal · 16 g prot."]]},
+ {day:"Samedi",meals:[
+  ["Petit-déjeuner","2 œufs + avoine 40 g + banane","≈ 410 kcal · 21 g prot."],
+  ["Déjeuner","Riz 70 g cru + crevettes 180 g + poivrons + lait de coco léger","≈ 590 kcal · 42 g prot."],
+  ["Dîner","Pois chiches 200 g + pommes de terre 250 g + 2 œufs + légumes","≈ 650 kcal · 30 g prot."],
+  ["Collation","Fromage blanc 200 g + pomme","≈ 170 kcal · 17 g prot."]]},
+ {day:"Dimanche",meals:[
+  ["Petit-déjeuner","Avoine 50 g + lait 200 ml + skyr 150 g + banane","≈ 450 kcal · 28 g prot."],
+  ["Déjeuner","Pommes de terre 350 g + thon 120 g + haricots verts 250 g","≈ 500 kcal · 37 g prot."],
+  ["Dîner","Riz 70 g cru + lentilles 200 g + 2 œufs + courgettes","≈ 620 kcal · 34 g prot."],
+  ["Collation","Skyr 150 g + fruit","≈ 150 kcal · 16 g prot."]]}
+];
+function menuKcal(s){const m=s.match(/(\d+)\s*kcal/);return m?Number(m[1]):0}
+function menuProtein(s){const m=s.match(/(\d+)\s*g prot/);return m?Number(m[1]):0}
+function renderWeeklyMenu(){
+ const el=document.getElementById("weeklyMenu");if(!el)return;
+ const idx=(new Date().getDay()+6)%7;
+ el.innerHTML=MENU_PLAN.map((d,i)=>'<div class="menu-day '+(i===idx?'menu-today':'')+'"><div class="menu-day-head"><b>'+d.day+(i===idx?' · Aujourd’hui':'')+'</b><span>'+d.meals.reduce((s,m)=>s+menuKcal(m[2]),0)+' kcal environ</span></div>'+d.meals.map((m,j)=>'<div class="menu-meal"><div class="menu-meal-title"><span style="color:var(--text)">'+m[0]+'</span><span>'+m[2]+'</span></div><div class="menu-meal-desc">'+m[1]+'</div><button class="btn menu-add" data-action="addMenuMeal" data-day="'+i+'" data-meal="'+j+'">＋ Ajouter au journal</button></div>').join('')+'</div>').join('');
+}
+function addMenuMeal(di,mi){
+ const m=MENU_PLAN[di]?.meals[mi];if(!m)return;state.meals.push({name:m[1],kcal:menuKcal(m[2]),protein:menuProtein(m[2]),type:m[0]});save();renderNutrition();renderHome();toast("🍽️ "+m[0]+" ajouté au journal");
+}
+
 function renderNutrition(){
+ renderWeeklyMenu();
  const kcal=state.meals.reduce((s,x)=>s+Number(x.kcal||0),0),prot=state.meals.reduce((s,x)=>s+Number(x.protein||0),0),goal=Number(state.profile.cal||2400);
  document.getElementById("nutritionDate").textContent=fmtDate(today());document.getElementById("nutritionStats").innerHTML='<div class="mini"><strong>'+kcal+'</strong><span>/ '+goal+' kcal</span></div><div class="mini"><strong>'+prot+' g</strong><span>protéines</span></div><div class="mini"><strong>'+state.water+' ml</strong><span>eau</span></div>';
  document.getElementById("meals").innerHTML=state.meals.map((m,i)=>'<div class="meal"><div class="meal-head"><div><b>'+m.type+'</b><div class="date">'+m.name+'</div></div><b>'+m.kcal+' kcal</b></div><div class="food"><span>'+m.protein+' g protéines</span><button data-action="deleteMeal" data-index="'+i+'">Supprimer</button></div></div>').join("")||'<div class="date">Aucun repas ajouté aujourd’hui.</div>';
@@ -290,6 +347,8 @@ document.addEventListener("click",function(e){
  if(act==="water500"){state.water+=500;save();renderHome();renderNutrition();toast("💧 +500 ml");return}
  if(act==="protein"){state.protein+=25;save();renderHome();toast("🥩 +25 g");return}
  if(act==="meal"){openMeal();return}
+ if(act==="menuToday"){const idx=(new Date().getDay()+6)%7;document.querySelectorAll(".menu-day")[idx]?.scrollIntoView({behavior:"smooth",block:"center"});return}
+ if(act==="addMenuMeal"){addMenuMeal(Number(a.dataset.day),Number(a.dataset.meal));return}
  if(act==="closeMeal"){document.getElementById("mealModal").classList.remove("open");return}
  if(act==="saveMeal"){saveMeal();return}
  if(act==="deleteMeal"){state.meals.splice(Number(a.dataset.index),1);save();renderNutrition();return}
