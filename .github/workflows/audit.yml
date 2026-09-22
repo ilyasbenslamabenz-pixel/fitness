@@ -41,7 +41,8 @@ jobs:
           acts=set(p.acts)
           missing=sorted(acts-cases)
           refs=set(re.findall(r'\$\("([^"]+)"\)',html))
-          missing_refs=sorted(x for x in refs if x not in set(p.ids))
+          dynamic_ids={"finishBar"}
+          missing_refs=sorted(x for x in refs if x not in set(p.ids) and x not in dynamic_ids)
           if dup:
               print("Duplicate IDs:",dup)
               sys.exit(1)
