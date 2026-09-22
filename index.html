@@ -129,12 +129,22 @@
 </div>
 
 <nav class="bottom" aria-label="Navigation">
- <button class="active" data-page="home"><span class="ico">⌂</span>Accueil</button>
- <button data-page="training"><span class="ico">🏋️</span>Séances</button>
- <button data-page="progress"><span class="ico">📈</span>Progrès</button>
- <button data-page="nutrition"><span class="ico">🍽️</span>Nutrition</button>
- <button data-page="profile"><span class="ico">⚙️</span>Profil</button>
+ <button type="button" class="active" data-page="home" onclick="evoNav('home')"><span class="ico">⌂</span>Accueil</button>
+ <button type="button" data-page="training" onclick="evoNav('training')"><span class="ico">🏋️</span>Séances</button>
+ <button type="button" data-page="progress" onclick="evoNav('progress')"><span class="ico">📈</span>Progrès</button>
+ <button type="button" data-page="nutrition" onclick="evoNav('nutrition')"><span class="ico">🍽️</span>Nutrition</button>
+ <button type="button" data-page="profile" onclick="evoNav('profile')"><span class="ico">⚙️</span>Profil</button>
 </nav>
+<script>
+function evoNav(page){
+  var pages=document.querySelectorAll('.page');
+  var tabs=document.querySelectorAll('.bottom button');
+  pages.forEach(function(p){p.classList.toggle('active',p.id===page);});
+  tabs.forEach(function(b){b.classList.toggle('active',b.getAttribute('data-page')===page);});
+  window.scrollTo(0,0);
+  try{ if(window.showPage) window.showPage(page); }catch(e){}
+}
+</script>
 
 <div class="toast" id="toast" hidden></div>
 
