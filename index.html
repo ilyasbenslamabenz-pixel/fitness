@@ -1212,15 +1212,67 @@ document.addEventListener("click",function(e){ // close modal on backdrop
   if(e.target.classList&&e.target.classList.contains("modal"))e.target.classList.remove("on");
 });
 
-window.addEventListener("load",function(){
-  load();normalizeState();ensureDay();renderAll();showPage("today");setupFirebase();setInterval(updateRest,300);setInterval(renderFasting,1000);
-});
+var EVO_BOOTED=false;
+window.EVO_BOOT_OK=false;
+
+function evoBoot(){
+  if(EVO_BOOTED)return;
+  EVO_BOOTED=true;
+  try{
+    load();
+    normalizeState();
+    ensureDay();
+    renderAll();
+    showPage("today");
+    setupFirebase();
+    setInterval(updateRest,300);
+    setInterval(renderFasting,1000);
+    window.EVO_BOOT_OK=true;
+    document.body.setAttribute("data-evo-boot","ok");
+  }catch(e){
+    window.EVO_BOOT_OK=false;
+    document.body.setAttribute("data-evo-boot","error");
+    console.error("EVO boot error",e);
+    var t=$("toast");
+    if(t){t.textContent="EVO a rencontré une erreur de démarrage.";t.hidden=false;}
+  }
+}
+
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",evoBoot);
+else evoBoot();
+window.addEventListener("load",evoBoot);
+setTimeout(evoBoot,1500);
 window.EVO_V3_READY=true;
 })();
 </script>
 <script>
+(function(){
+  /* Filet de sécurité : les onglets restent utilisables même si le moteur principal
+     rencontre une erreur avant d'avoir installé ses gestionnaires. */
+  function simpleNav(id){
+    var page=document.getElementById(id)||document.getElementById("today");
+    document.querySelectorAll(".page").forEach(function(s){s.classList.toggle("on",s===page);});
+    document.querySelectorAll(".nav button").forEach(function(b){b.classList.toggle("on",b.dataset.page===page.id);});
+    try{window.scrollTo(0,0);}catch(e){}
+  }
+  document.addEventListener("click",function(e){
+    var b=e.target.closest(".nav button[data-page]");
+    if(!b)return;
+    if(document.body.getAttribute("data-evo-boot")!=="ok")simpleNav(b.dataset.page);
+  });
+  window.addEventListener("error",function(e){
+    if(!window.EVO_BOOT_OK)console.error("EVO runtime error:",e.error||e.message);
+  });
+})();
+</script>
+<script>
 if("serviceWorker" in navigator){
-  window.addEventListener("load",function(){navigator.serviceWorker.register("/fitness/sw.js?v=24").catch(function(e){console.warn("SW:",e);});});
+  function registerEvoSW(){
+    navigator.serviceWorker.register("/fitness/sw.js?v=25",{updateViaCache:"none"}).catch(function(e){console.warn("SW:",e);});
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",registerEvoSW);
+  else registerEvoSW();
+  window.addEventListener("load",registerEvoSW);
 }
 </script>
 </body>
