@@ -14,7 +14,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/@zxing/browser@0.1.5/umd/index.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
@@ -250,19 +249,6 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 .runrow .rp{font-family:var(--display);font-weight:600;font-size:13px;color:var(--mint)}
 .runrow .del{color:var(--faint);font-size:20px;padding:2px 6px}
 #stepsInput{width:170px;font-size:34px}
-
-/* barcode scanner */
-.scan-preview{width:100%;aspect-ratio:4/3;background:#08090c;border:1px solid var(--hair);border-radius:14px;overflow:hidden;position:relative;margin-top:12px}
-.scan-preview video{width:100%;height:100%;object-fit:cover;display:block}
-.scan-frame{position:absolute;inset:18% 12%;border:2px solid var(--mint);border-radius:14px;box-shadow:0 0 0 999px rgba(0,0,0,.28);pointer-events:none}
-.scan-status{font-size:13px;color:var(--muted);text-align:center;margin-top:10px;min-height:20px}
-.product-found{display:none;margin-top:12px;padding:12px;border:1px solid var(--hair);background:var(--surface2);border-radius:12px}
-.product-found.on{display:block}
-.product-found .pname{font-family:var(--display);font-weight:700;font-size:16px}
-.product-found .brand{font-family:var(--font);font-weight:500;font-size:12px;color:var(--muted);display:block}
-.nutri-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}
-.nutri-grid div{background:var(--surface);border:1px solid var(--hair);border-radius:9px;padding:7px 5px;text-align:center;font-size:11px;color:var(--muted)}
-.nutri-grid b{display:block;color:var(--text);font-family:var(--display);font-size:13px;margin-bottom:2px}
 </style>
 </head>
 <body>
@@ -458,29 +444,12 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 <!-- meal modal -->
 <div class="modal" id="mealModal"><div class="sheet">
   <h3>Ajouter un repas</h3>
-  <div class="sub">Scanne un produit pour récupérer automatiquement ses calories et nutriments.</div>
-  <button class="btn mint" data-act="scanFood">📷 Scanner le code-barres</button>
+  <div class="sub">Estime au plus proche, la régularité prime sur la précision.</div>
   <div class="field"><label>Aliment</label><input id="foodName" placeholder="Poulet + riz"></div>
   <div class="row2"><div class="field"><label>Calories</label><input id="foodKcal" type="number" inputmode="numeric" placeholder="500"></div>
-  <div class="field"><label>Protéines (g)</label><input id="foodProt" type="number" inputmode="decimal" placeholder="40"></div></div>
-  <div class="row2"><div class="field"><label>Glucides (g)</label><input id="foodCarbs" type="number" inputmode="decimal" placeholder="50"></div>
-  <div class="field"><label>Lipides (g)</label><input id="foodFat" type="number" inputmode="decimal" placeholder="15"></div></div>
+  <div class="field"><label>Protéines (g)</label><input id="foodProt" type="number" inputmode="numeric" placeholder="40"></div></div>
   <div class="field"><label>Moment</label><select id="foodType"><option>Petit-déjeuner</option><option>Déjeuner</option><option>Dîner</option><option>Collation</option></select></div>
   <div class="acts"><button class="btn ghost" data-act="mClose">Annuler</button><button class="btn primary" data-act="mSave">Ajouter</button></div>
-</div></div>
-
-<!-- barcode scanner -->
-<div class="modal" id="scanModal"><div class="sheet">
-  <h3>Scanner un aliment</h3>
-  <div class="sub">Place le code-barres dans le cadre. La caméra est utilisée uniquement pour le scan.</div>
-  <div class="scan-preview"><video id="scanVideo" playsinline muted></video><div class="scan-frame"></div></div>
-  <div class="scan-status" id="scanStatus">Initialisation de la caméra…</div>
-  <div class="product-found" id="scanProduct"><div class="pname" id="scanProductName">—</div><span class="brand" id="scanBrand">—</span><div class="nutri-grid">
-    <div><b id="scanKcal">—</b>kcal / 100g</div><div><b id="scanProt">—</b>protéines</div><div><b id="scanCarbs">—</b>glucides</div>
-    <div><b id="scanFat">—</b>lipides</div><div><b id="scanSugar">—</b>sucres</div><div><b id="scanSalt">—</b>sel</div>
-  </div></div>
-  <div class="field"><label>Code-barres (si besoin)</label><input id="manualBarcode" inputmode="numeric" autocomplete="off" placeholder="Ex. 7612345678901"></div>
-  <div class="acts"><button class="btn ghost" data-act="scanClose">Fermer</button><button class="btn primary" data-act="manualLookup">Rechercher le code</button></div>
 </div></div>
 
 <div class="modal" id="runModal"><div class="sheet">
@@ -858,7 +827,7 @@ function renderMeals(){
   $("mProtBar").style.width=Math.min(100,prot/160*100)+"%";
   ring($("calRing"),Math.min(1,kcal/goal),"#FF6A3D",kcal);
   $("mealList").innerHTML=state.meals.length?state.meals.map(function(m,i){
-    return '<div class="meal"><div class="mi"><b>'+esc(m.type)+'</b><div class="d">'+esc(m.name)+'</div><div class="d">P '+num(m.protein||0)+'g · G '+num(m.carbs||0)+'g · L '+num(m.fat||0)+'g</div></div><div class="kc">'+Number(m.kcal||0)+' kcal</div><button class="del" data-act="delMeal" data-i="'+i+'">×</button></div>';
+    return '<div class="meal"><div class="mi"><b>'+esc(m.type)+'</b><div class="d">'+esc(m.name)+'</div></div><div class="kc">'+Number(m.kcal||0)+' kcal</div><button class="del" data-act="delMeal" data-i="'+i+'">×</button></div>';
   }).join(""):'<div class="empty">Aucun repas ajouté aujourd\'hui.</div>';
   // weekly menu
   var idx=(new Date().getDay()+6)%7;
@@ -910,51 +879,13 @@ function saveWeigh(){
   h.sort(function(a,b){return a.d.localeCompare(b.d);});
   save();closeWeigh();renderToday();renderProgress();toast("Pesée enregistrée · "+num(n)+" kg");
 }
-function openMeal(){$("foodName").value="";$("foodKcal").value="";$("foodProt").value="";$("foodCarbs").value="";$("foodFat").value="";$("mealModal").classList.add("on");setTimeout(function(){$("foodName").focus();},50);}
+function openMeal(){$("foodName").value="";$("foodKcal").value="";$("foodProt").value="";$("mealModal").classList.add("on");setTimeout(function(){$("foodName").focus();},50);}
 function closeMeal(){$("mealModal").classList.remove("on");}
 function saveMeal(){
   var name=$("foodName").value.trim();if(!name){toast("Indique l'aliment");return;}
-  addMealObj({name:name,kcal:Number($("foodKcal").value||0),protein:Number($("foodProt").value||0),carbs:Number($("foodCarbs").value||0),fat:Number($("foodFat").value||0),type:$("foodType").value});
+  addMealObj({name:name,kcal:Number($("foodKcal").value||0),protein:Number($("foodProt").value||0),type:$("foodType").value});
   closeMeal();toast("Repas ajouté");
 }
-
-/* barcode / Open Food Facts */
-var barcodeReader=null,barcodeControls=null,barcodeBusy=false;
-function stopBarcode(){
-  try{if(barcodeControls&&barcodeControls.stop)barcodeControls.stop();}catch(e){}
-  barcodeControls=null;
-  if(barcodeReader&&barcodeReader.reset)try{barcodeReader.reset();}catch(e){}
-  var v=$("scanVideo");if(v){try{v.pause();}catch(e){};v.srcObject=null;}
-}
-function openScanner(){
-  $("scanModal").classList.add("on");$("scanStatus").textContent="Autorise l’accès à la caméra…";$("scanProduct").classList.remove("on");$("manualBarcode").value="";barcodeBusy=false;
-  if(!window.ZXingBrowser){$("scanStatus").textContent="Scanner indisponible. Utilise le code-barres manuel ci-dessous.";return;}
-  stopBarcode();barcodeReader=new ZXingBrowser.BrowserMultiFormatReader();
-  barcodeReader.decodeFromConstraints({video:{facingMode:{ideal:"environment"}}},"scanVideo",function(result,err,controls){
-    if(controls)barcodeControls=controls;
-    if(result&&!barcodeBusy){barcodeBusy=true;var code=result.getText();$("manualBarcode").value=code;lookupBarcode(code);}
-  }).catch(function(){$("scanStatus").textContent="Caméra refusée ou indisponible. Tu peux entrer le code manuellement.";});
-}
-function closeScanner(){stopBarcode();$("scanModal").classList.remove("on");}
-function offNum(n){return n===undefined||n===null||n===""||!isFinite(Number(n))?0:Number(n);}
-function offVal(n,keys){for(var i=0;i<keys.length;i++){var v=n[keys[i]];if(v!==undefined&&v!==null&&isFinite(Number(v)))return Number(v);}return 0;}
-function fmtNut(v){return v?num(Math.round(v*10)/10)+" g":"—";}
-async function lookupBarcode(code){
-  code=String(code||"").replace(/\D/g,"");if(code.length<8){$("scanStatus").textContent="Code-barres invalide.";barcodeBusy=false;return;}
-  $("scanStatus").textContent="Recherche du produit…";$("scanProduct").classList.remove("on");
-  try{
-    var url="https://world.openfoodfacts.org/api/v3/product/"+encodeURIComponent(code)+".json?fields=product_name,brands,nutriments,nutrition_data_per,nutriscore_grade";
-    var res=await fetch(url,{headers:{Accept:"application/json"}});if(!res.ok)throw new Error("HTTP "+res.status);
-    var data=await res.json();if(!data.product)throw new Error("not_found");
-    var p=data.product,n=p.nutriments||{};
-    var kcal=offVal(n,["energy-kcal_100g","energy-kcal"]),prot=offVal(n,["proteins_100g","proteins"]),carbs=offVal(n,["carbohydrates_100g","carbohydrates"]),fat=offVal(n,["fat_100g","fat"]),sugar=offVal(n,["sugars_100g","sugars"]),salt=offVal(n,["salt_100g","salt"]);
-    $("scanProductName").textContent=p.product_name||"Produit sans nom";$("scanBrand").textContent=p.brands||"";$("scanKcal").textContent=kcal?Math.round(kcal):"—";$("scanProt").textContent=fmtNut(prot);$("scanCarbs").textContent=fmtNut(carbs);$("scanFat").textContent=fmtNut(fat);$("scanSugar").textContent=fmtNut(sugar);$("scanSalt").textContent=salt?num(Math.round(salt*10)/10)+" g":"—";
-    $("scanProduct").classList.add("on");$("scanStatus").textContent="Produit trouvé · valeurs pour 100 g";
-    $("foodName").value=(p.brands?p.brands+" ":"")+(p.product_name||"Produit");$("foodKcal").value=kcal?Math.round(kcal):"";$("foodProt").value=prot?Math.round(prot*10)/10:"";$("foodCarbs").value=carbs?Math.round(carbs*10)/10:"";$("foodFat").value=fat?Math.round(fat*10)/10:"";
-    stopBarcode();setTimeout(function(){closeScanner();$("mealModal").classList.add("on");},350);
-  }catch(e){$("scanStatus").textContent="Produit introuvable. Tu peux vérifier le code ou saisir l’aliment manuellement.";barcodeBusy=false;}
-}
-
 
 /* firebase (optional cloud sync) */
 function setupFirebase(){
@@ -998,3 +929,56 @@ document.addEventListener("click",function(e){
     case "selDay": state.selDay=Number(a.dataset.i); renderSession(); break;
     case "toggle": toggleEx(ex); break;
     case "w-": setWeight(ex,-2.5); break;
+    case "w+": setWeight(ex,2.5); break;
+    case "rest": startRest(Number(a.dataset.s)); break;
+    case "restStop": stopRest(); break;
+    case "snackAct": if(snackCb)snackCb(); document.getElementById("snack").classList.remove("on"); clearTimeout(snackT); snackCb=null; break;
+    case "export": exportData(); break;
+    case "import": document.getElementById("importFile").click(); break;
+    case "finish": finishSession(); break;
+    case "selEx": state.selEx=ex; renderProgress(); break;
+    case "addMeal": openMeal(); break;
+    case "mClose": closeMeal(); break;
+    case "mSave": saveMeal(); break;
+    case "delMeal": state.meals.splice(Number(a.dataset.i),1); save(); renderMeals(); renderToday(); break;
+    case "openRun": openRun(); break;
+    case "runClose": closeRun(); break;
+    case "runSave": saveRun(); break;
+    case "delRun": state.runs=state.runs.filter(function(r){return r.id!==a.dataset.id;}); save(); renderProgress(); break;
+    case "openSteps": openSteps(); break;
+    case "stepsClose": closeSteps(); break;
+    case "stepsSave": saveSteps(); break;
+    case "energy": setEnergy(Number(a.dataset.v)); break;
+    case "menuAdd": var row=MENU[Number(a.dataset.d)][1][Number(a.dataset.m)];
+      var xk=row[2].match(/(\d+)\s*kcal/),xp=row[2].match(/(\d+)\s*g prot/);
+      addMealObj({name:row[1],kcal:xk?Number(xk[1]):0,protein:xp?Number(xp[1]):0,type:row[0]}); toast("Ajouté au journal"); break;
+    case "saveProfile": saveProfile(); break;
+    case "login": login(); break;
+    case "backup": backup(); break;
+    case "restore": restore(); break;
+    case "reset": resetAll(); break;
+  }
+});
+document.addEventListener("input",function(e){if(e.target.id==="runDist"||e.target.id==="runDur")updateRunPace();});
+document.addEventListener("change",function(e){var el=e.target;
+  if(el.classList&&el.classList.contains("wval")&&el.dataset.ex){setWeightExact(el.dataset.ex,el.value);}
+  else if(el.id==="importFile"&&el.files&&el.files[0]){importData(el.files[0]);el.value="";}
+});
+document.querySelectorAll(".nav button").forEach(function(b){b.addEventListener("click",function(){showPage(b.dataset.page);});});
+document.addEventListener("click",function(e){ // close modal on backdrop
+  if(e.target.classList&&e.target.classList.contains("modal"))e.target.classList.remove("on");
+});
+
+window.addEventListener("load",function(){
+  load();ensureDay();renderAll();showPage("today");setupFirebase();setInterval(updateRest,300);
+});
+window.EVO_V3_READY=true;
+})();
+</script>
+<script>
+if("serviceWorker" in navigator){
+  window.addEventListener("load",function(){navigator.serviceWorker.register("/fitness/sw.js").catch(function(e){console.warn("SW:",e);});});
+}
+</script>
+</body>
+</html>
