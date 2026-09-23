@@ -1101,59 +1101,77 @@ function doneSetCount(mk,e){return setsArrFor(mk,e).filter(function(s){return s.
 function isExDone(mk,e){var arr=setsArrFor(mk,e),cnt=setCount(e);for(var i=0;i<cnt;i++)if(!arr[i].done)return false;return true;}
 function exSets(mk,e){return doneSetCount(mk,e);} /* conservé pour compat : nombre total de séries validées (bonus incluses) */
 function repsFor(mk,e){var rt=repTarget(e);if(!rt)return null;var st=mk[e.n]||{};return st.reps!=null?st.reps:rt.max;}
-function renderSession(){
-  var chips=$("dayChips");
-  chips.innerHTML=state.program.map(function(p,i){return '<button class="chip '+(i===state.selDay?"on":"")+'" data-act="selDay" data-i="'+i+'"><span class="e">'+p.icon+'</span>'+esc(p.short)+'</button>';}).join("");
-  var p=state.program[state.selDay];
-  $("sesIc").textContent=p.icon;$("sesName").textContent=p.name;$("sesFocus").textContent=p.focus;
-  var mk=marksFor(p.id),active=activeExercises(p),excl=excludedFor(p.id);
+function exerciseCardHTML(e,mk){
+  var cnt=setCount(e),arr=setsArrFor(mk,e),isDone=isExDone(mk,e);
+  var st=mk[e.n]||{},last=lastWeight(e.n),wv=(st.w!=null?st.w:last),up=(e.w&&last>0&&Number(wv)>last);
+  var rt=repTarget(e),rv=repsFor(mk,e);
+  var pills='<div class="sets">'+arr.map(function(s,i){
+    var label=s.done?(rt?s.reps:"✓"):(rt?rt.max:(i+1));
+    return '<button class="setpill'+(s.done?" on":"")+'" data-act="setTick" data-ex="'+esc(e.n)+'" data-i="'+i+'">'+label+'</button>';
+  }).join("")
+    +'<button class="setpill add" data-act="addSet" data-ex="'+esc(e.n)+'" title="Ajouter une série">＋</button>'
+    +(arr.length>cnt&&!arr[arr.length-1].done?'<button class="setpill rm" data-act="removeSet" data-ex="'+esc(e.n)+'" title="Retirer la série bonus">−</button>':'')
+    +'</div>';
+  var rrow=rt
+    ? '<div class="exc-wrow"><div class="exc-wlab">Reps</div>'
+      +'<div class="stepper"><button data-act="r-" data-ex="'+esc(e.n)+'">−</button><div class="wv"><input class="rval" type="number" inputmode="numeric" step="1" value="'+rv+'" data-ex="'+esc(e.n)+'"><small>reps</small></div><button data-act="r+" data-ex="'+esc(e.n)+'">＋</button></div></div>'
+    : '';
+  var wrow=e.w
+    ? '<div class="exc-wrow"><div class="exc-wlab">Charge'+(last>0?' · <span class="last">dernier '+num(last)+' kg</span>':'')+(up?' · <span class="up">▲ progrès</span>':'')+'</div>'
+      +'<div class="stepper"><button data-act="w-" data-ex="'+esc(e.n)+'">−</button><div class="wv"><input class="wval" type="number" inputmode="decimal" step="0.5" value="'+num(wv)+'" data-ex="'+esc(e.n)+'"><small>kg</small></div><button data-act="w+" data-ex="'+esc(e.n)+'">＋</button></div></div>'
+    : '';
+  var removeAct=e.extra?"removeExtraEx":"excludeEx";
+  return '<div class="exc '+(isDone?"done":"")+'" data-ex="'+esc(e.n)+'">'
+    +'<div class="exc-top"><div class="exc-name"><h3>'+esc(e.n)+'</h3><div class="t">'+esc(e.t)+'</div></div>'
+    +'<button class="exc-x" data-act="'+removeAct+'" data-ex="'+esc(e.n)+'" title="'+(e.extra?"Supprimer":"Retirer aujourd’hui")+'">✕</button>'
+    +'<button class="exc-badge" data-act="toggle" data-ex="'+esc(e.n)+'">✓</button></div>'
+    +pills+rrow+wrow+'</div>';
+}
+/* recalcule seulement les compteurs/la barre de progression — pas les cartes d'exercice */
+function updateSessionTotals(){
+  var p=state.program[state.selDay],mk=marksFor(p.id),active=activeExercises(p);
   var totalSets=0,doneSets=0,doneEx=0;
   active.forEach(function(e){var arr=setsArrFor(mk,e);totalSets+=arr.length;doneSets+=arr.filter(function(s){return s.done;}).length;if(isExDone(mk,e))doneEx++;});
   $("sesDoneN").textContent=doneEx;$("sesTotN").textContent="/"+active.length;
   $("sesProg").style.width=(totalSets?doneSets/totalSets*100:0)+"%";
   $("sesProgText").textContent=doneSets+" / "+totalSets+" séries complétées";
   $("sesToday").textContent=doneEx+" / "+active.length+" exercices";
-  $("exList").innerHTML=active.map(function(e){
-    var cnt=setCount(e),arr=setsArrFor(mk,e),isDone=isExDone(mk,e);
-    var st=mk[e.n]||{},last=lastWeight(e.n),wv=(st.w!=null?st.w:last),up=(e.w&&last>0&&Number(wv)>last);
-    var rt=repTarget(e),rv=repsFor(mk,e);
-    var pills='<div class="sets">'+arr.map(function(s,i){
-      var label=s.done?(rt?s.reps:"✓"):(rt?rt.max:(i+1));
-      return '<button class="setpill'+(s.done?" on":"")+'" data-act="setTick" data-ex="'+esc(e.n)+'" data-i="'+i+'">'+label+'</button>';
-    }).join("")
-      +'<button class="setpill add" data-act="addSet" data-ex="'+esc(e.n)+'" title="Ajouter une série">＋</button>'
-      +(arr.length>cnt&&!arr[arr.length-1].done?'<button class="setpill rm" data-act="removeSet" data-ex="'+esc(e.n)+'" title="Retirer la série bonus">−</button>':'')
-      +'</div>';
-    var rrow=rt
-      ? '<div class="exc-wrow"><div class="exc-wlab">Reps</div>'
-        +'<div class="stepper"><button data-act="r-" data-ex="'+esc(e.n)+'">−</button><div class="wv"><input class="rval" type="number" inputmode="numeric" step="1" value="'+rv+'" data-ex="'+esc(e.n)+'"><small>reps</small></div><button data-act="r+" data-ex="'+esc(e.n)+'">＋</button></div></div>'
-      : '';
-    var wrow=e.w
-      ? '<div class="exc-wrow"><div class="exc-wlab">Charge'+(last>0?' · <span class="last">dernier '+num(last)+' kg</span>':'')+(up?' · <span class="up">▲ progrès</span>':'')+'</div>'
-        +'<div class="stepper"><button data-act="w-" data-ex="'+esc(e.n)+'">−</button><div class="wv"><input class="wval" type="number" inputmode="decimal" step="0.5" value="'+num(wv)+'" data-ex="'+esc(e.n)+'"><small>kg</small></div><button data-act="w+" data-ex="'+esc(e.n)+'">＋</button></div></div>'
-      : '';
-    var removeAct=e.extra?"removeExtraEx":"excludeEx";
-    return '<div class="exc '+(isDone?"done":"")+'" data-ex="'+esc(e.n)+'">'
-      +'<div class="exc-top"><div class="exc-name"><h3>'+esc(e.n)+'</h3><div class="t">'+esc(e.t)+'</div></div>'
-      +'<button class="exc-x" data-act="'+removeAct+'" data-ex="'+esc(e.n)+'" title="'+(e.extra?"Supprimer":"Retirer aujourd’hui")+'">✕</button>'
-      +'<button class="exc-badge" data-act="toggle" data-ex="'+esc(e.n)+'">✓</button></div>'
-      +pills+rrow+wrow+'</div>';
-  }).join("")
+  var bar=$("finishBar");
+  if(bar)bar.querySelector(".inner .n").textContent=doneSets+" / "+totalSets;
+}
+/* remplace uniquement la carte de l'exercice modifié — évite de reconstruire toute la liste
+   (et de perdre le focus/défiler) à chaque tap sur une pastille ou un stepper */
+function refreshExerciseCard(exName){
+  var p=state.program[state.selDay],mk=marksFor(p.id),e=findActiveEx(p,exName);if(!e)return;
+  var cards=$("exList").querySelectorAll(".exc");
+  for(var i=0;i<cards.length;i++){
+    if(cards[i].dataset.ex===exName){cards[i].outerHTML=exerciseCardHTML(e,mk);break;}
+  }
+  updateSessionTotals();
+}
+function renderSession(){
+  var chips=$("dayChips");
+  chips.innerHTML=state.program.map(function(p,i){return '<button class="chip '+(i===state.selDay?"on":"")+'" data-act="selDay" data-i="'+i+'"><span class="e">'+p.icon+'</span>'+esc(p.short)+'</button>';}).join("");
+  var p=state.program[state.selDay];
+  $("sesIc").textContent=p.icon;$("sesName").textContent=p.name;$("sesFocus").textContent=p.focus;
+  var mk=marksFor(p.id),active=activeExercises(p),excl=excludedFor(p.id);
+  $("exList").innerHTML=active.map(function(e){return exerciseCardHTML(e,mk);}).join("")
     +'<div class="exc-foot">'
     +'<button class="btn ghost" data-act="addExOpen">＋ Ajouter un exercice</button>'
     +(excl.length?'<button class="btn ghost" data-act="restoreEx">↺ Restaurer ('+excl.length+')</button>':'')
     +'</div>';
   var bar=$("finishBar");
   if(!bar){bar=document.createElement("div");bar.className="finish";bar.id="finishBar";document.body.appendChild(bar);}
-  bar.innerHTML='<div class="inner"><div class="prog"><div class="n">'+doneSets+' / '+totalSets+'</div><div class="l">séries validées</div></div><button class="btn mint" data-act="finish">Terminer</button></div>';
+  bar.innerHTML='<div class="inner"><div class="prog"><div class="n">0 / 0</div><div class="l">séries validées</div></div><button class="btn mint" data-act="finish">Terminer</button></div>';
   bar.style.display=(state.page==="session")?"block":"none";
+  updateSessionTotals();
 }
 function findActiveEx(p,exName){return activeExercises(p).filter(function(x){return x.n===exName;})[0];}
 function setWeight(exName,delta){
   var p=state.program[state.selDay],mk=marksFor(p.id);
   var cur=(mk[exName]&&mk[exName].w!=null)?mk[exName].w:lastWeight(exName);
   cur=Math.max(0,Math.round((Number(cur)+delta)*2)/2);
-  if(!mk[exName])mk[exName]={};mk[exName].w=cur;save();renderSession();
+  if(!mk[exName])mk[exName]={};mk[exName].w=cur;save();refreshExerciseCard(exName);
 }
 /* corrige la valeur affichée d'un champ ex sans reconstruire toute la liste :
    un renderSession() ici pourrait démolir l'élément que l'utilisateur est en train
@@ -1173,7 +1191,7 @@ function setReps(exName,delta){
   var p=state.program[state.selDay],mk=marksFor(p.id),e=findActiveEx(p,exName);if(!e)return;
   var rt=repTarget(e);if(!rt)return;
   var cur=repsFor(mk,e);cur=Math.max(0,Math.min(200,cur+delta));
-  if(!mk[exName])mk[exName]={};mk[exName].reps=cur;save();renderSession();
+  if(!mk[exName])mk[exName]={};mk[exName].reps=cur;save();refreshExerciseCard(exName);
 }
 function setRepsExact(exName,val){
   var p=state.program[state.selDay],mk=marksFor(p.id),e=findActiveEx(p,exName);if(!e||!repTarget(e))return;
@@ -1186,7 +1204,7 @@ function toggleEx(exName){
   var arr=setsArrFor(mk,e),nowDone=!isExDone(mk,e),cnt=setCount(e),rv=repsFor(mk,e);
   for(var i=0;i<cnt;i++)arr[i]={done:nowDone,reps:nowDone?rv:null};
   if(nowDone&&mk[exName].w==null&&e.w){var lw=lastWeight(exName);if(lw>0)mk[exName].w=lw;}
-  save();renderSession();
+  save();refreshExerciseCard(exName);
 }
 function setTick(exName,i){
   var p=state.program[state.selDay],mk=marksFor(p.id),e=findActiveEx(p,exName);if(!e)return;
@@ -1194,19 +1212,19 @@ function setTick(exName,i){
   var nowDone=!arr[i].done;
   arr[i]={done:nowDone,reps:nowDone?repsFor(mk,e):null};
   if(nowDone&&mk[exName].w==null&&e.w){var lw=lastWeight(exName);if(lw>0)mk[exName].w=lw;}
-  save();renderSession();
+  save();refreshExerciseCard(exName);
   if(nowDone&&!isExDone(mk,e))startRest(90);
 }
 function addSet(exName){
   var p=state.program[state.selDay],mk=marksFor(p.id),e=findActiveEx(p,exName);if(!e)return;
   setsArrFor(mk,e).push({done:false,reps:null});
-  save();renderSession();toast("Série bonus ajoutée");
+  save();refreshExerciseCard(exName);toast("Série bonus ajoutée");
 }
 function removeSet(exName){
   var p=state.program[state.selDay],mk=marksFor(p.id),e=findActiveEx(p,exName);if(!e)return;
   var arr=setsArrFor(mk,e),cnt=setCount(e);
   if(arr.length>cnt&&!arr[arr.length-1].done)arr.pop();
-  save();renderSession();
+  save();refreshExerciseCard(exName);
 }
 function excludeEx(exName){
   var p=state.program[state.selDay];
