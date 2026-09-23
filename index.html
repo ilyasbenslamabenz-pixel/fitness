@@ -142,6 +142,9 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 .run-prog-s .rs-check{flex:0 0 auto;width:24px;height:24px;border-radius:8px;border:2px solid var(--faint);display:grid;place-items:center;font-size:14px;color:transparent}
 .run-prog-s.done .rs-check{background:var(--mint);border-color:var(--mint);color:#062b20}
 .run-prog-s.done{opacity:.6}
+.run-prog-suggestion{margin-top:12px;padding:12px;border-radius:12px;background:var(--surface2);border:1px solid var(--hair)}
+.run-prog-suggestion .sub{font-size:12.5px;color:var(--muted);margin-bottom:8px}
+.run-prog-suggestion .btn{width:100%}
 
 /* exercise rows */
 .ex{display:flex;align-items:center;gap:13px;padding:14px 4px;border-bottom:1px solid var(--hair)}
@@ -476,7 +479,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 
   <!-- SÉANCE -->
   <section class="page" id="session">
-    <div class="head"><h2>Séance</h2><span class="link" id="sesToday"></span></div>
+    <div class="head"><h2>Séance</h2></div>
     <div class="sess-cat" id="sessCatTabs">
       <button class="cat-tab" data-act="sessCat" data-cat="muscu">🏋️ Musculation</button>
       <button class="cat-tab" data-act="sessCat" data-cat="maison">🏠 Séance maison</button>
@@ -484,6 +487,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
     </div>
 
     <div id="sessExerciseView">
+      <div class="eyebrow" style="margin:12px 2px 6px">Jour</div>
       <div class="days" id="dayChips"></div>
       <div class="card sess-head">
         <div class="sess-top">
@@ -509,6 +513,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
           <button data-act="runProgNext">＋</button>
         </div>
         <div class="run-prog-sessions" id="runProgSessions"></div>
+        <div class="run-prog-suggestion" id="runProgSuggestion" style="display:none"></div>
       </div>
       <div class="card" style="margin-top:12px">
         <div class="eyebrow">Lancer une course</div>
@@ -972,7 +977,7 @@ var state={
   weightHistory:[{d:START_DATE,w:103}],
   bodyComp:[],
   program:JSON.parse(JSON.stringify(DEFAULT_PROGRAM.concat(HOME_PROGRAM))),
-  runProg:{week:1,done:[false,false,false]},
+  runProg:{week:1,done:[false,false,false],weekStartDate:today()},
   session:{date:today(),marks:{},excluded:{},extra:{}},
   sessions:[],
   perf:{},
@@ -1088,6 +1093,7 @@ function normalizeState(){
   if(!state.runProg||typeof state.runProg!=="object")state.runProg={week:1,done:[false,false,false]};
   state.runProg.week=Math.max(1,Math.min(RUNNING_PROGRAM.length,Math.round(Number(state.runProg.week)||1)));
   if(!Array.isArray(state.runProg.done)||state.runProg.done.length!==3)state.runProg.done=[false,false,false];
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(state.runProg.weekStartDate||""))state.runProg.weekStartDate=today();
 }
 function ensureDay(){
   var d=today();
@@ -1252,7 +1258,6 @@ function updateSessionTotals(){
   $("sesDoneN").textContent=doneEx;$("sesTotN").textContent="/"+active.length;
   $("sesProg").style.width=(totalSets?doneSets/totalSets*100:0)+"%";
   $("sesProgText").textContent=doneSets+" / "+totalSets+" séries complétées";
-  $("sesToday").textContent=doneEx+" / "+active.length+" exercices";
   var bar=$("finishBar");
   if(bar)bar.querySelector(".inner .n").textContent=doneSets+" / "+totalSets;
 }
@@ -1274,7 +1279,6 @@ function renderSession(){
   var bar=$("finishBar");
   if(!bar){bar=document.createElement("div");bar.className="finish";bar.id="finishBar";document.body.appendChild(bar);}
   if(isRunning){
-    $("sesToday").textContent="";
     bar.style.display="none";
     renderRunningView();
     return;
@@ -1307,6 +1311,45 @@ function switchSessionCategory(cat){
   }
   save();renderSession();
 }
+/* extrait un objectif numérique (minutes / km) d'un texte de semaine "course continue" —
+   les semaines en fractionné (1-6) ne s'y prêtent pas, pas de comparaison fiable possible */
+function parseWeekTarget(goal){
+  var mm=goal.match(/(\d+)(?:-(\d+))?\s*min/);
+  if(!mm)return null;
+  var mk=goal.match(/(\d+(?:[.,]\d+)?)(?:-(\d+(?:[.,]\d+)?))?\s*km/);
+  return {
+    minMin:Number(mm[1]),maxMin:mm[2]?Number(mm[2]):Number(mm[1]),
+    minKm:mk?Number(String(mk[1]).replace(",",".")):null,
+    maxKm:mk?Number(String(mk[2]||mk[1]).replace(",",".")):null
+  };
+}
+function runsSinceWeekStart(){
+  var sd=state.runProg.weekStartDate||today();
+  return state.runs.filter(function(r){return r.d>=sd;});
+}
+/* suggestion d'adaptation du programme à partir des courses réellement loguées cette
+   semaine, comparées à l'objectif — seulement pour les semaines "course continue"
+   (7-10) où kcal/distance sont comparables ; le fractionné (1-6) n'est pas mesurable
+   avec juste distance+durée totales */
+function computeRunSuggestion(){
+  if(state.runProg.week<7)return null;
+  if(!state.runProg.done.every(function(x){return x;}))return null;
+  var target=parseWeekTarget(RUNNING_PROGRAM[state.runProg.week-1].goal);
+  if(!target)return null;
+  var runs=runsSinceWeekStart();
+  if(!runs.length)return null;
+  var avgDur=runs.reduce(function(s,r){return s+Number(r.dur||0);},0)/runs.length;
+  var avgDist=runs.reduce(function(s,r){return s+Number(r.dist||0);},0)/runs.length;
+  var comfortable=avgDur>=target.maxMin*1.1||(target.maxKm&&avgDist>=target.maxKm*1.1);
+  var struggled=avgDur<target.minMin*0.75&&(!target.minKm||avgDist<target.minKm*0.75);
+  if(comfortable&&state.runProg.week<RUNNING_PROGRAM.length){
+    return {type:"advance",text:"Tes courses dépassent nettement l'objectif (moy. "+num(avgDur)+" min"+(avgDist?" · "+num(avgDist)+" km":"")+") — tu peux avancer plus vite."};
+  }
+  if(struggled){
+    return {type:"repeat",text:"Tes courses restent en dessous de l'objectif (moy. "+num(avgDur)+" min) — reprends cette semaine tranquillement avant d'avancer."};
+  }
+  return {type:"normal",text:"Objectif de la semaine atteint, bien joué !"};
+}
 function renderRunningView(){
   var wk=RUNNING_PROGRAM[state.runProg.week-1];
   $("runProgWeekN").textContent="Semaine "+state.runProg.week+" / "+RUNNING_PROGRAM.length;
@@ -1315,6 +1358,13 @@ function renderRunningView(){
     var done=!!state.runProg.done[i];
     return '<div class="run-prog-s '+(done?"done":"")+'" data-act="runProgToggle" data-i="'+i+'"><div class="rs-check">✓</div><span>Séance '+(i+1)+' / 3</span></div>';
   }).join("");
+  var sugg=computeRunSuggestion(),suggEl=$("runProgSuggestion");
+  if(sugg){
+    var btn=sugg.type==="advance"?'<button class="btn mint" data-act="runProgSkip">⏩ Avancer plus vite</button>'
+      :sugg.type==="repeat"?'<button class="btn ghost" data-act="runProgRepeat">🔁 Refaire cette semaine</button>':"";
+    suggEl.innerHTML='<div class="sub">'+esc(sugg.text)+'</div>'+btn;
+    suggEl.style.display="";
+  }else{suggEl.style.display="none";}
   var info=$("runProgInfo");
   if(state.runs&&state.runs.length){
     var lastRun=state.runs.slice().sort(function(a,b){return b.d.localeCompare(a.d);})[0];
@@ -1326,8 +1376,16 @@ function runProgToggle(i){
   state.runProg.done[i]=!state.runProg.done[i];
   save();renderRunningView();
 }
+function runProgRepeat(){
+  state.runProg.done=[false,false,false];
+  state.runProg.weekStartDate=today();
+  save();renderRunningView();
+  toast("Semaine relancée");
+}
 function runProgWeekShift(d){
-  state.runProg.week=Math.max(1,Math.min(RUNNING_PROGRAM.length,state.runProg.week+d));
+  var nw=Math.max(1,Math.min(RUNNING_PROGRAM.length,state.runProg.week+d));
+  if(nw!==state.runProg.week)state.runProg.weekStartDate=today();
+  state.runProg.week=nw;
   if(d!==0)state.runProg.done=[false,false,false];
   save();renderRunningView();
 }
@@ -2336,6 +2394,8 @@ document.addEventListener("click",function(e){
     case "runProgToggle": runProgToggle(Number(a.dataset.i)); break;
     case "runProgPrev": runProgWeekShift(-1); break;
     case "runProgNext": runProgWeekShift(1); break;
+    case "runProgSkip": runProgWeekShift(2); break;
+    case "runProgRepeat": runProgRepeat(); break;
     case "toggle": toggleEx(ex); break;
     case "setTick": setTick(ex,Number(a.dataset.i)); break;
     case "w-": setWeight(ex,-2.5); break;
