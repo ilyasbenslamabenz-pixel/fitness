@@ -364,7 +364,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 .exc-name .t{font-size:12.5px;color:var(--muted);margin-top:2px}
 .exc-badge{flex:0 0 auto;width:28px;height:28px;border-radius:9px;border:2px solid var(--faint);background:transparent;display:grid;place-items:center;font-size:15px;color:transparent}
 .exc.done .exc-badge{background:var(--mint);border-color:var(--mint);color:#062b20}
-.exc-x{flex:0 0 auto;width:28px;height:28px;border-radius:9px;background:transparent;color:var(--faint);font-size:14px;display:grid;place-items:center}
+.exc-x{flex:0 0 auto;width:24px;height:24px;margin-right:10px;border-radius:8px;background:transparent;color:var(--faint);font-size:12px;opacity:.6;display:grid;place-items:center}
 .sets{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
 .setpill{flex:1 1 0;min-width:42px;height:40px;border-radius:11px;background:var(--surface2);border:1px solid var(--hair);color:var(--muted);font-family:var(--display);font-weight:600;font-size:14px;display:grid;place-items:center}
 .setpill:active{transform:scale(.96)}
@@ -1244,7 +1244,11 @@ function removeSet(exName){
 function excludeEx(exName){
   var p=state.program[state.selDay];
   var exc=excludedFor(p.id);if(exc.indexOf(exName)<0)exc.push(exName);
-  save();renderSession();toast("Exercice retiré pour aujourd’hui");
+  save();renderSession();
+  snack("« "+exName+" » retiré pour aujourd’hui","Annuler",function(){
+    var exc2=excludedFor(p.id),i=exc2.indexOf(exName);if(i>=0)exc2.splice(i,1);
+    save();renderSession();
+  },5000);
 }
 function restoreEx(){
   var p=state.program[state.selDay];
@@ -1253,9 +1257,17 @@ function restoreEx(){
 }
 function removeExtraEx(exName){
   var p=state.program[state.selDay],ex=extraFor(p.id);
+  var removed=ex.find(function(x){return x.n===exName;});
   state.session.extra[p.id]=ex.filter(function(x){return x.n!==exName;});
-  var mk=marksFor(p.id);delete mk[exName];
+  var mk=marksFor(p.id),removedMarks=mk[exName];delete mk[exName];
   save();renderSession();
+  if(removed){
+    snack("« "+exName+" » supprimé","Annuler",function(){
+      extraFor(p.id).push(removed);
+      if(removedMarks)marksFor(p.id)[exName]=removedMarks;
+      save();renderSession();
+    },5000);
+  }
 }
 function openAddExercise(){
   $("addExName").value="";$("addExSets").value="3";$("addExReps").value="";$("addExWeighted").checked=true;
@@ -1266,10 +1278,11 @@ function saveAddExercise(){
   var name=$("addExName").value.trim();if(!name){toast("Indique un nom d'exercice");return;}
   var sets=Math.max(1,Math.min(15,Math.round(Number($("addExSets").value)||3)));
   var reps=$("addExReps").value.trim();
+  if(reps&&!/^\d+(?:[-–]\d+)?$/.test(reps)){toast("Répétitions : un nombre ou une plage, ex. 8-10");return;}
   var weighted=$("addExWeighted").checked;
   var t=sets+" ×"+(reps?" "+reps:"");
-  var p=state.program[state.selDay],ex=extraFor(p.id);
-  if(ex.some(function(x){return x.n===name;})||p.ex.some(function(x){return x.n===name;})){toast("Un exercice porte déjà ce nom");return;}
+  var p=state.program[state.selDay],ex=extraFor(p.id),lname=name.toLowerCase();
+  if(ex.some(function(x){return x.n.toLowerCase()===lname;})||p.ex.some(function(x){return x.n.toLowerCase()===lname;})){toast("Un exercice porte déjà ce nom");return;}
   ex.push({n:name,t:t,w:weighted,extra:true});
   closeAddExercise();save();renderSession();toast("Exercice ajouté pour aujourd’hui");
 }
@@ -1428,6 +1441,31 @@ function saveRun(){
 /* ===== live GPS run tracking ===== */
 var geoWatch=null,geoRetryTimer=null,geoStaleTimer=null,geoRetryCount=0,runActive=false,runPaused=false;
 var runMeters=0,runElapsedMs=0,runSegStart=0,runLastPt=null,runLastTime=0,runLastGeoTimestamp=0,runPts=[],runTick=null,wakeLock=null,runStartDate=today();
+var LIVE_RUN_KEY="evoFitV3_liveRun",lastCheckpointAt=0;
+function checkpointLiveRun(){
+  var now=Date.now();
+  if(now-lastCheckpointAt<5000)return;
+  lastCheckpointAt=now;
+  var elapsed=runElapsedMs+(runPaused?0:now-runSegStart);
+  try{lsSet(LIVE_RUN_KEY,JSON.stringify({d:runStartDate,meters:runMeters,elapsedMs:elapsed,pts:runPts,savedAt:now}));}catch(e){}
+}
+function clearLiveRunCheckpoint(){lsDel(LIVE_RUN_KEY);}
+function recoverLiveRunIfAny(){
+  var raw=lsGet(LIVE_RUN_KEY);if(!raw)return;
+  try{
+    var ck=JSON.parse(raw);
+    var km=Math.round((ck.meters||0)/10)/100,min=Math.round((ck.elapsedMs||0)/6000)/10;
+    var ageOk=ck.savedAt&&(Date.now()-ck.savedAt)<21600000; /* 6h max, sinon trop périmé pour être fiable */
+    if(ageOk&&km>=0.05&&min>=0.2){
+      if(confirm("Une course interrompue a été retrouvée (~"+num(km)+" km, "+fmtClock(ck.elapsedMs||0)+"). L'enregistrer ?")){
+        var runObj={id:"r"+Date.now()+Math.floor(Math.random()*1000),d:ck.d||today(),dist:km,dur:min,src:"gps"};
+        if(ck.pts&&ck.pts.length>1)runObj.pts=ck.pts;
+        state.runs.push(runObj);save();toast("Course récupérée · "+num(km)+" km");
+      }
+    }
+  }catch(e){}
+  clearLiveRunCheckpoint();
+}
 var lrMap=null,lrLine=null,lrHead=null,lrStart=null,mapReady=false,mapMode="svg",mapCentered=false;
 function fmtClock(ms){var s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;return (h>0?h+":"+pad(m):String(m))+":"+pad(sec);}
 function haversine(a,b){var R=6371000,toR=Math.PI/180;var dLat=(b.lat-a.lat)*toR,dLng=(b.lng-a.lng)*toR,la1=a.lat*toR,la2=b.lat*toR;var x=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(la1)*Math.cos(la2)*Math.sin(dLng/2)*Math.sin(dLng/2);return 2*R*Math.asin(Math.min(1,Math.sqrt(x)));}
@@ -1466,13 +1504,14 @@ function finishRun(){
   if(!runPaused)runElapsedMs+=Date.now()-runSegStart;
   runActive=false;stopGeo();releaseWake();if(runTick){clearInterval(runTick);runTick=null;}runLastPt=null;runLastTime=0;runLastGeoTimestamp=0;
   var km=Math.round(runMeters/10)/100,min=Math.round(runElapsedMs/6000)/10;
-  if(km<0.05||min<0.2){toast("Course trop courte, non enregistrée");closeLiveRun();return;}
+  if(km<0.05||min<0.2){clearLiveRunCheckpoint();toast("Course trop courte, non enregistrée");closeLiveRun();return;}
   var runObj={id:"r"+Date.now()+Math.floor(Math.random()*1000),d:runStartDate,dist:km,dur:min,src:"gps"};
   if(runPts.length>1)runObj.pts=runPts.slice();
   state.runs.push(runObj);
+  clearLiveRunCheckpoint();
   save();closeLiveRun();showPage("progress");renderProgress();toast("Course enregistrée · "+num(km)+" km");
 }
-function discardRun(){if(runActive&&runMeters>50){if(!confirm("Abandonner la course en cours ?"))return;}closeLiveRun();}
+function discardRun(){if(runActive){if(!confirm("Abandonner la course en cours ?"))return;}clearLiveRunCheckpoint();closeLiveRun();}
 function startGeo(){
   if(!runActive||runPaused||!navigator.geolocation)return;
   if(geoRetryTimer){clearTimeout(geoRetryTimer);geoRetryTimer=null;}
@@ -1530,6 +1569,7 @@ function onGeo(pos){
     var minMove=Math.max(4,Math.min(10,acc*0.45));
     if(seg>=minMove&&seg<150&&segSpeed<=8.33){
       runMeters+=seg;runPts.push(pt);runLastPt=pt;runLastTime=now;
+      checkpointLiveRun();
     }else if(seg>=150){
       // Très gros saut GPS : on ne compte rien et on attend un point cohérent.
       $("lrGps").textContent="GPS recalage…";
@@ -1766,7 +1806,20 @@ function useFavorite(i){
   addMealObj(Object.assign({},f));closeFavorites();toast("Aliment ajouté");
 }
 function deleteFavorite(i){state.foodFavorites.splice(i,1);save();openFavorites();}
+var fastBeeped=false;
 function renderFasting(){
+  /* détection de fin de jeûne (vibration/toast) tourne toujours, même sur un autre
+     onglet ; seul l'affichage DOM est sauté quand Repas n'est pas affiché */
+  if(state.fast&&state.fast.active&&state.fast.start){
+    var leftChk=Number(state.fast.hours||16)*3600000-(Date.now()-Number(state.fast.start));
+    if(leftChk<=0&&!fastBeeped){
+      fastBeeped=true;
+      try{if(navigator.vibrate)navigator.vibrate([120,60,120]);}catch(e){}
+      toast("Jeûne terminé 🎉");
+    }
+  }else{
+    fastBeeped=false;
+  }
   if(state.page!=="meals")return; /* carte + modale ne vivent que sur Repas, inutile de la repeindre chaque seconde ailleurs */
   var title=$("fastTitle"),txt=$("fastText"),bar=$("fastProgress"),btn=$("fastBtn"),actBtn=$("fastActBtn");if(!title||!txt||!bar||!btn)return;
   var hours=Number(state.fast.hours||16);title.textContent="Routine "+hours+":8";
@@ -2076,7 +2129,8 @@ function saveProfile(){
   var s=Number($("fStart").value),t=Number($("fTarget").value),c=Number($("fCal").value);
   var ca=Number($("fCarbs").value),pr=Number($("fProt").value),fa=Number($("fFat").value),wg=Number($("fWater").value);
   var sd=$("fStartDate").value;if(!/^\d{4}-\d{2}-\d{2}$/.test(sd))sd=state.profile.startDate||START_DATE;
-  if(!isFinite(s)||!isFinite(t)||!isFinite(c)||!isFinite(ca)||!isFinite(pr)||!isFinite(fa)||!isFinite(wg)||s<30||t<30||c<500||wg<0.5||wg>8){toast("Vérifie les objectifs");return;}
+  if(!isFinite(s)||!isFinite(t)||!isFinite(c)||!isFinite(ca)||!isFinite(pr)||!isFinite(fa)||!isFinite(wg)||s<30||t<30||c<500||c>6000||wg<0.5||wg>8){toast("Vérifie les objectifs");return;}
+  if(t>=s&&!confirm("Ton objectif ("+num(t)+" kg) n'est pas inférieur à ton poids de départ ("+num(s)+" kg) : as-tu inversé les deux champs ? La barre de progression suppose une perte de poids. Continuer quand même ?"))return;
   state.profile={start:s,target:t,cal:c,startDate:sd};state.macro={carbs:ca,protein:pr,fat:fa};state.waterGoal=wg;save();renderAll();toast("Objectifs enregistrés");
 }
 
@@ -2151,7 +2205,12 @@ document.addEventListener("click",function(e){
     case "toggleMenuDay": toggleMenuDay(Number(a.dataset.d)); break;
     case "menuAdd": var row=MENU[Number(a.dataset.d)][1][Number(a.dataset.m)];
       var xk=row[2].match(/(\d+)\s*kcal/),xp=row[2].match(/(\d+)\s*g prot/);
-      addMealObj({name:row[1],kcal:xk?Number(xk[1]):0,protein:xp?Number(xp[1]):0,carbs:0,fat:0,qty:100,type:row[0]}); toast("Ajouté au journal"); break;
+      var mKcal=xk?Number(xk[1]):0,mProt=xp?Number(xp[1]):0;
+      /* glucides/lipides non détaillés dans le menu : estimation à partir du reste des
+         calories (au-delà des protéines), répartition 65/35 cohérente avec des plats
+         riz/pommes de terre — meilleur qu'un 0 franchement faux, mais reste une estimation */
+      var mRemain=Math.max(0,mKcal-mProt*4),mCarbs=Math.round(mRemain*0.65/4),mFat=Math.round(mRemain*0.35/9);
+      addMealObj({name:row[1],kcal:mKcal,protein:mProt,carbs:mCarbs,fat:mFat,qty:100,type:row[0]}); toast("Ajouté au journal"); break;
     case "saveProfile": saveProfile(); break;
     case "login": login(); break;
     case "backup": backup(); break;
@@ -2193,6 +2252,7 @@ function evoBoot(){
     ensureDay();
     renderAll();
     showPage("today");
+    recoverLiveRunIfAny();
     setupFirebase();
     setInterval(updateRest,300);
     setInterval(renderFasting,1000);
