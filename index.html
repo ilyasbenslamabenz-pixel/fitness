@@ -286,11 +286,19 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 .runrow .del{color:var(--faint);font-size:20px;padding:2px 6px}
 .runrow .mapbtn{font-size:16px;padding:2px 6px;opacity:.85}
 #stepsInput{width:170px;font-size:34px}
+#wInput{width:150px;font-size:36px}
 .daily-dash{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
 .daily-dash .dd{background:var(--surface);border:1px solid var(--hair);border-radius:14px;padding:12px 8px;text-align:center}
 .daily-dash .dd .ico{font-size:20px}.daily-dash .dd b{display:block;font-family:var(--display);font-size:16px;margin-top:4px}.daily-dash .dd span{display:block;color:var(--muted);font-size:10.5px;margin-top:2px}
 .fast-progress{height:8px;background:var(--surface2);border-radius:99px;overflow:hidden;margin-top:12px}.fast-progress i{display:block;height:100%;background:var(--mint);width:0}
 .favorite-list{max-height:52vh;overflow:auto;margin-top:10px}.favorite-item{display:flex;align-items:center;gap:10px;padding:11px 2px;border-bottom:1px solid var(--hair)}.favorite-item:last-child{border-bottom:0}.favorite-item .fi{flex:1;min-width:0}.favorite-item b{display:block;font-size:14px}.favorite-item span{display:block;color:var(--muted);font-size:11.5px;margin-top:3px}.favorite-item button{background:var(--surface2);border:1px solid var(--hair);border-radius:9px;padding:8px 10px;font-size:12px}
+.food-search-results{max-height:40vh;overflow:auto;margin-top:8px}
+.food-search-results:empty{margin-top:0}
+.food-result{display:block;width:100%;text-align:left;padding:10px 12px;border:1px solid var(--hair);border-radius:11px;background:var(--surface2);margin-top:7px}
+.food-result b{display:block;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.food-result span{display:block;color:var(--muted);font-size:11.5px;margin-top:3px}
+.food-search-status{font-size:13px;color:var(--muted);text-align:center;margin-top:9px}
+.food-ref-hint{font-size:11.5px;color:var(--mint);margin-top:-8px;margin-bottom:4px}
 @media(max-width:390px){.daily-dash{grid-template-columns:repeat(2,1fr)}}
 
 /* live GPS run tracker */
@@ -618,9 +626,12 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 <div class="modal" id="mealModal"><div class="sheet">
   <h3>Ajouter un repas</h3>
   <div class="sub">Estime au plus proche, la régularité prime sur la précision.</div>
-  <div class="field"><label>Aliment</label><input id="foodName" placeholder="Poulet + riz"></div>
+  <div class="field"><label>Aliment</label><input id="foodName" placeholder="Poulet + riz, ou nom d'un produit"></div>
+  <button class="btn" style="width:100%;margin-top:8px" data-act="foodSearch">🔍 Rechercher en ligne (Migros, Coop, Denner…)</button>
+  <div id="foodSearchResults" class="food-search-results"></div>
   <div class="row2"><div class="field"><label>Quantité (g / ml)</label><input id="foodQty" type="number" inputmode="decimal" step="1" placeholder="100"></div>
   <div class="field"><label>Calories</label><input id="foodKcal" type="number" inputmode="numeric" placeholder="500"></div></div>
+  <div id="foodRefHint" class="food-ref-hint" style="display:none">⚡ Valeurs recalculées automatiquement selon la quantité</div>
   <div class="row2"><div class="field"><label>Protéines (g)</label><input id="foodProt" type="number" inputmode="numeric" placeholder="40"></div>
   <div class="field"><label>Glucides (g)</label><input id="foodCarbs" type="number" inputmode="decimal" placeholder="50"></div></div>
   <div class="row2"><div class="field"><label>Lipides (g)</label><input id="foodFat" type="number" inputmode="decimal" placeholder="15"></div><div></div></div>
@@ -1439,6 +1450,21 @@ function ring(svg,frac,color,center){
 }
 function addMealObj(o){o.date=today();o.qty=Number(o.qty||100);state.meals.push(o);save();renderMeals();renderToday();}
 function currentFoodFromForm(){return {name:$("foodName").value.trim(),kcal:fnum($("foodKcal").value,0),protein:fnum($("foodProt").value,0),carbs:fnum($("foodCarbs").value,0),fat:fnum($("foodFat").value,0),qty:fnum($("foodQty").value,100),type:$("foodType").value};}
+/* per-100g reference: once a product is scanned or searched, recompute kcal/macros live as the quantity changes */
+var foodRef100=null;
+function setFoodRef100(kcal,protein,carbs,fat){
+  foodRef100={kcal:Number(kcal)||0,protein:Number(protein)||0,carbs:Number(carbs)||0,fat:Number(fat)||0};
+  var hint=$("foodRefHint");if(hint)hint.style.display="";
+}
+function clearFoodRef100(){foodRef100=null;var hint=$("foodRefHint");if(hint)hint.style.display="none";}
+function applyFoodRef100ToQty(){
+  if(!foodRef100)return;
+  var qty=fnum($("foodQty").value,100),f=qty/100;
+  $("foodKcal").value=Math.round(foodRef100.kcal*f);
+  $("foodProt").value=Math.round(foodRef100.protein*f*10)/10;
+  $("foodCarbs").value=Math.round(foodRef100.carbs*f*10)/10;
+  $("foodFat").value=Math.round(foodRef100.fat*f*10)/10;
+}
 function saveFavorite(){
   var f=currentFoodFromForm();if(!f.name){toast("Indique l’aliment");return;}
   var i=state.foodFavorites.findIndex(function(x){return x.name.toLowerCase()===f.name.toLowerCase();});
@@ -1507,7 +1533,7 @@ function saveWeigh(){
   h.sort(function(a,b){return a.d.localeCompare(b.d);});
   save();closeWeigh();renderToday();renderProgress();toast("Pesée enregistrée · "+num(n)+" kg");
 }
-function openMeal(type){$("foodName").value="";$("foodQty").value="100";$("foodKcal").value="";$("foodProt").value="";$("foodCarbs").value="";$("foodFat").value="";if(type)$("foodType").value=type;$("mealModal").classList.add("on");setTimeout(function(){$("foodName").focus();},50);}
+function openMeal(type){$("foodName").value="";$("foodQty").value="100";$("foodKcal").value="";$("foodProt").value="";$("foodCarbs").value="";$("foodFat").value="";if(type)$("foodType").value=type;clearFoodRef100();$("foodSearchResults").innerHTML="";$("mealModal").classList.add("on");setTimeout(function(){$("foodName").focus();},50);}
 function closeMeal(){$("mealModal").classList.remove("on");}
 function saveMeal(){
   var f=currentFoodFromForm();if(!f.name){toast("Indique l'aliment");return;}
@@ -1555,12 +1581,64 @@ async function lookupBarcode(code){
     $("foodCarbs").value=carbs?Math.round(carbs*10)/10:"";
     $("foodQty").value="100";
     $("foodFat").value=fat?Math.round(fat*10)/10:"";
+    setFoodRef100(kcal,prot,carbs,fat);
     stopBarcode();
     setTimeout(function(){closeScanner();$("mealModal").classList.add("on");},500);
   }catch(e){
     $("scanStatus").textContent="Produit introuvable. Vérifie le code ou saisis l’aliment manuellement.";
     barcodeBusy=false;
   }
+}
+/* online food search (OpenFoodFacts — inclut de nombreux produits Migros/Coop/Denner ajoutés par des utilisateurs suisses) */
+var foodSearchCache=[],foodSearchBusy=false;
+function brandsStr(b){if(!b)return"";return Array.isArray(b)?b.join(", "):String(b);}
+async function searchFoodOnline(){
+  var q=$("foodName").value.trim();
+  if(!q){toast("Indique un nom d'aliment à rechercher");return;}
+  if(foodSearchBusy)return;
+  foodSearchBusy=true;
+  var box=$("foodSearchResults");
+  box.innerHTML='<div class="food-search-status">Recherche…</div>';
+  try{
+    var url="https://search.openfoodfacts.org/search?q="+encodeURIComponent(q)+"&page_size=8&fields=product_name,brands,nutriments,code";
+    var res=await fetch(url,{headers:{Accept:"application/json"}});
+    if(!res.ok)throw new Error("HTTP "+res.status);
+    var data=await res.json();
+    foodSearchCache=(data.hits||data.products||[]).filter(function(p){return p.product_name;});
+    if(!foodSearchCache.length){
+      box.innerHTML='<div class="food-search-status">Aucun résultat pour « '+esc(q)+' ». Essaie un autre nom, ou saisis les valeurs manuellement.</div>';
+    }else{
+      box.innerHTML=foodSearchCache.map(function(p,i){
+        var n=p.nutriments||{};
+        var kcal=offVal(n,["energy-kcal_100g","energy-kcal"]);
+        var br=brandsStr(p.brands);
+        var name=(br?br+" ":"")+p.product_name;
+        return '<button class="food-result" type="button" data-act="foodPick" data-i="'+i+'"><b>'+esc(name)+'</b><span>'+(kcal?Math.round(kcal)+" kcal / 100 g":"kcal inconnues")+'</span></button>';
+      }).join("");
+    }
+  }catch(e){
+    box.innerHTML='<div class="food-search-status">Recherche indisponible. Vérifie ta connexion, ou saisis les valeurs manuellement.</div>';
+  }
+  foodSearchBusy=false;
+}
+function pickFoodResult(i){
+  var p=foodSearchCache[i];if(!p)return;
+  var n=p.nutriments||{};
+  var kcal=offVal(n,["energy-kcal_100g","energy-kcal"]);
+  var prot=offVal(n,["proteins_100g","proteins"]);
+  var carbs=offVal(n,["carbohydrates_100g","carbohydrates"]);
+  var fat=offVal(n,["fat_100g","fat"]);
+  var br=brandsStr(p.brands);
+  var name=(br?br+" ":"")+(p.product_name||"Produit");
+  $("foodName").value=name;
+  $("foodQty").value="100";
+  $("foodKcal").value=kcal?Math.round(kcal):"";
+  $("foodProt").value=prot?Math.round(prot*10)/10:"";
+  $("foodCarbs").value=carbs?Math.round(carbs*10)/10:"";
+  $("foodFat").value=fat?Math.round(fat*10)/10:"";
+  setFoodRef100(kcal,prot,carbs,fat);
+  $("foodSearchResults").innerHTML="";
+  toast("Aliment sélectionné · valeurs pour 100 g");
 }
 function openScanner(){
   $("mealModal").classList.remove("on");
@@ -1691,6 +1769,8 @@ document.addEventListener("click",function(e){
     case "scanLookup": lookupBarcode(document.getElementById("manualBarcode").value); break;
     case "mClose": closeMeal(); break;
     case "mSave": saveMeal(); break;
+    case "foodSearch": searchFoodOnline(); break;
+    case "foodPick": pickFoodResult(Number(a.dataset.i)); break;
     case "delMeal": state.meals.splice(Number(a.dataset.i),1); save(); renderMeals(); renderToday(); break;
     case "openRun": openRun(); break;
     case "liveStart": openLiveRun(); break;
@@ -1718,7 +1798,12 @@ document.addEventListener("click",function(e){
   }
 });
 document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible"){if(runActive&&!runPaused)requestWake();fixLiveMapSize();}});
-document.addEventListener("input",function(e){if(e.target.id==="runDist"||e.target.id==="runDur")updateRunPace();});
+document.addEventListener("input",function(e){
+  var id=e.target.id;
+  if(id==="runDist"||id==="runDur")updateRunPace();
+  else if(id==="foodQty")applyFoodRef100ToQty();
+  else if(id==="foodKcal"||id==="foodProt"||id==="foodCarbs"||id==="foodFat")clearFoodRef100();
+});
 document.addEventListener("change",function(e){var el=e.target;
   if(el.classList&&el.classList.contains("wval")&&el.dataset.ex){setWeightExact(el.dataset.ex,el.value);}
   else if(el.id==="importFile"&&el.files&&el.files[0]){importData(el.files[0]);el.value="";}
