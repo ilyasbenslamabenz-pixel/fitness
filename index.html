@@ -301,9 +301,14 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 .lr-x{width:36px;height:36px;border-radius:10px;background:var(--surface2);border:1px solid var(--hair);font-size:16px;display:grid;place-items:center;color:var(--text)}
 .lr-title{font-family:var(--display);font-weight:700;font-size:16px}
 .lr-gps{font-size:11.5px;color:var(--muted);background:var(--surface);border:1px solid var(--hair);padding:5px 10px;border-radius:999px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lr-map{position:relative;margin:14px 0;background:var(--surface);border:1px solid var(--hair);border-radius:16px;aspect-ratio:1/1;max-height:34vh;overflow:hidden;display:grid;place-items:center}
-.lr-map svg{width:100%;height:100%;display:block}
-.lr-mapempty{position:absolute;font-size:13px;color:var(--faint);text-align:center;padding:0 20px}
+.lr-map{position:relative;margin:12px 0 10px;background:#0b0d12;border:1px solid var(--hair);border-radius:16px;width:100%;height:clamp(210px,32vh,300px);min-height:210px;overflow:hidden;display:block;flex:0 0 auto}
+.lr-map #lrMap{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;min-height:0!important;border-radius:15px;overflow:hidden}
+.lr-map .leaflet-container{width:100%!important;height:100%!important;min-height:0!important;border-radius:15px}
+.lr-map svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.lr-mapempty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--faint);text-align:center;padding:0 28px;z-index:3;pointer-events:none}
+.lr-map .leaflet-control-attribution{z-index:500}
+@media(max-height:700px){.lr-map{height:220px;min-height:220px}.lr-time{font-size:48px}.lr-stats{margin-top:10px}.lr-controls{padding-top:10px}}
+@media(min-width:520px){.lr-map{height:300px}}
 .lr-time{font-family:var(--display);font-weight:700;font-size:60px;line-height:1;text-align:center;letter-spacing:-.02em;margin-top:2px}
 .lr-sub{text-align:center;font-size:12.5px;color:var(--muted);margin-top:3px}
 .lr-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
@@ -1135,7 +1140,7 @@ function openLiveRun(){
   if(window.L){
     mapMode="leaflet";
     $("lrMap").style.display="";$("lrTrace").style.display="none";$("lrMapEmpty").style.display="none";
-    setTimeout(function(){initMap();mapReady=!!lrMap;resetMapLayers();if(lrMap){try{lrMap.invalidateSize();}catch(e){}}},60);
+    setTimeout(function(){initMap();mapReady=!!lrMap;resetMapLayers();if(lrMap){try{lrMap.invalidateSize(true);lrMap.fitBounds(lrMap.getBounds(),{padding:[20,20]});}catch(e){}}},180);
   }else{
     mapMode="svg";mapReady=false;
     $("lrMap").style.display="none";$("lrTrace").style.display="";$("lrMapEmpty").style.display="";
@@ -1204,7 +1209,7 @@ function initMap(){
     lrMap.setView([46.2044,6.1432],15);
     L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",{maxZoom:20,subdomains:"abcd",attribution:"© OpenStreetMap, © CARTO"}).addTo(lrMap);
     lrLine=L.polyline([],{color:"#FF6A3D",weight:5,opacity:.95,lineJoin:"round",lineCap:"round"}).addTo(lrMap);
-    setTimeout(function(){try{lrMap.invalidateSize();}catch(e){}},60);
+    setTimeout(function(){try{lrMap.invalidateSize(true);}catch(e){}},120);
   }catch(e){lrMap=null;lrLine=null;}
 }
 function resetMapLayers(){
@@ -1213,6 +1218,7 @@ function resetMapLayers(){
   lrHead=null;lrStart=null;mapCentered=false;
   try{if(lrLine)lrLine.setLatLngs([]);}catch(e){}
 }
+function havermapDistance(a,b,c,d){return haversine({lat:a,lng:b},{lat:c,lng:d});}
 function updateMap(){
   if(!lrMap||!lrLine||!runPts.length)return;
   lrLine.setLatLngs(runPts.map(function(p){return [p.lat,p.lng];}));
@@ -1220,7 +1226,20 @@ function updateMap(){
   if(!lrStart){try{lrStart=L.circleMarker([runPts[0].lat,runPts[0].lng],{radius:6,color:"#12141A",weight:2,fillColor:"#37E0A6",fillOpacity:1}).addTo(lrMap);}catch(e){}}
   if(!lrHead){try{lrHead=L.marker([last.lat,last.lng],{icon:L.divIcon({className:"lr-headwrap",html:'<div class="lr-dot"></div>',iconSize:[15,15],iconAnchor:[7,7]})}).addTo(lrMap);}catch(e){}}
   else{try{lrHead.setLatLng([last.lat,last.lng]);}catch(e){}}
-  try{if(!mapCentered){lrMap.setView([last.lat,last.lng],16);mapCentered=true;}else lrMap.panTo([last.lat,last.lng],{animate:true,duration:.5});}catch(e){}
+  try{
+    if(!mapCentered){
+      if(runPts.length>1){
+        var b=L.latLngBounds(runPts.map(function(p){return [p.lat,p.lng];}));
+        lrMap.fitBounds(b,{padding:[28,28],maxZoom:17});
+      }else{
+        lrMap.setView([last.lat,last.lng],17);
+      }
+      mapCentered=true;
+    }else{
+      var c=lrMap.getCenter(), d=havermapDistance(c.lat,c.lng,last.lat,last.lng);
+      if(d>35) lrMap.panTo([last.lat,last.lng],{animate:true,duration:.35});
+    }
+  }catch(e){}
 }
 function renderRoute(){
   if(mapMode==="leaflet"&&mapReady&&lrMap){$("lrTrace").style.display="none";updateMap();}
