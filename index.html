@@ -1027,6 +1027,7 @@ function renderAll(){
 }
 
 function renderToday(){
+  if(state.page!=="today")return; /* repeinte automatiquement par showPage() à la prochaine visite */
   var w=latestBody(),start=Number(state.profile.start),target=Number(state.profile.target);
   $("hWeight").textContent=num(w);
   var lost=start-w;
@@ -1294,13 +1295,29 @@ function undoFinish(){
 function startRest(sec){restEnd=Date.now()+sec*1000;restBeeped=false;updateRest();}
 function stopRest(){restEnd=0;updateRest();}
 function updateRest(){
-  var lab=document.getElementById("restLabel"),stop=document.getElementById("restStop");if(!lab)return;
-  if(!restEnd){lab.textContent="Repos";lab.classList.remove("run");if(stop)stop.style.display="none";return;}
+  /* la détection de fin de repos (vibration/toast) tourne toujours, même sur un autre
+     onglet ; seules les écritures DOM (texte/barre) sont sautées quand Séance n'est
+     pas affichée — inutile de repeindre un minuteur que personne ne regarde */
+  var onSession=state.page==="session";
+  if(!restEnd){
+    if(onSession){var lab=document.getElementById("restLabel"),stop=document.getElementById("restStop");if(lab){lab.textContent="Repos";lab.classList.remove("run");if(stop)stop.style.display="none";}}
+    return;
+  }
   var left=restEnd-Date.now();
-  if(left<=0){restEnd=0;lab.textContent="Terminé";lab.classList.remove("run");if(stop)stop.style.display="none";
+  if(left<=0){
+    restEnd=0;
     if(!restBeeped){restBeeped=true;try{if(navigator.vibrate)navigator.vibrate([120,60,120]);}catch(e){}toast("Repos terminé");}
-    setTimeout(function(){if(!restEnd){var l=document.getElementById("restLabel");if(l&&l.textContent==="Terminé")l.textContent="Repos";}},1600);return;}
-  var sc=Math.ceil(left/1000);lab.textContent=Math.floor(sc/60)+":"+String(sc%60).padStart(2,"0");lab.classList.add("run");if(stop)stop.style.display="";
+    if(onSession){
+      var lab2=document.getElementById("restLabel"),stop2=document.getElementById("restStop");
+      if(lab2){lab2.textContent="Terminé";lab2.classList.remove("run");if(stop2)stop2.style.display="none";}
+      setTimeout(function(){if(!restEnd){var l=document.getElementById("restLabel");if(l&&l.textContent==="Terminé")l.textContent="Repos";}},1600);
+    }
+    return;
+  }
+  if(onSession){
+    var lab3=document.getElementById("restLabel"),stop3=document.getElementById("restStop");
+    var sc=Math.ceil(left/1000);lab3.textContent=Math.floor(sc/60)+":"+String(sc%60).padStart(2,"0");lab3.classList.add("run");if(stop3)stop3.style.display="";
+  }
 }
 function snack(msg,label,cb,ms){
   var el=document.getElementById("snack");document.getElementById("snackMsg").textContent=msg;document.getElementById("snackBtn").textContent=label;
@@ -1319,6 +1336,7 @@ function importData(file){
 }
 
 function renderProgress(){
+  if(state.page!=="progress")return; /* évite de repeindre 3 graphiques SVG pour une page qu'on ne regarde pas */
   var w=latestBody(),start=Number(state.profile.start),target=Number(state.profile.target);
   $("pwNow").textContent=num(w);
   $("pwLost").textContent=num(Math.max(0,start-w));
@@ -1652,7 +1670,15 @@ function openSteps(){var t=valToday(state.steps);$("stepsInput").value=t||"";$("
 function closeSteps(){$("stepsModal").classList.remove("on");}
 function saveSteps(){var v=Math.round(Number($("stepsInput").value));if(!(v>=0)||!isFinite(v)){toast("Nombre invalide");return;}upsertV(state.steps,today(),v);save();closeSteps();renderProgress();renderToday();toast("Pas enregistrés");}
 
+var weeklyMenuDay=-1;
+function renderWeeklyMenuIfNeeded(){
+  var idx=(new Date().getDay()+6)%7;
+  if(idx===weeklyMenuDay)return; /* le menu ne change qu'une fois par jour : inutile de reconstruire ses 28 lignes à chaque repas/eau ajoutés */
+  weeklyMenuDay=idx;
+  $("weeklyMenu").innerHTML=MENU.map(function(d,i){var dk=d[1].reduce(function(s,m){var x=m[2].match(/(\d+)\s*kcal/);return s+(x?Number(x[1]):0);},0);return '<div class="menuday '+(i===idx?"today":"")+'"><div class="mh"><b>'+d[0]+(i===idx?" · aujourd'hui":"")+'</b><span style="color:var(--muted)">'+dk+' kcal</span></div>'+d[1].map(function(m,j){return '<div class="mm"><div class="mt"><span>'+esc(m[0])+'</span><span style="color:var(--muted)">'+esc(m[2])+'</span></div><div class="md">'+esc(m[1])+'</div><button class="add" data-act="menuAdd" data-d="'+i+'" data-m="'+j+'">＋ Ajouter au journal</button></div>';}).join("")+'</div>';}).join("");
+}
 function renderMeals(){
+  if(state.page!=="meals")return; /* repeinte automatiquement par showPage() à la prochaine visite */
   var kcal=state.meals.reduce(function(s,m){return s+Number(m.kcal||0);},0),prot=state.meals.reduce(function(s,m){return s+Number(m.protein||0);},0),carbs=state.meals.reduce(function(s,m){return s+Number(m.carbs||0);},0),fat=state.meals.reduce(function(s,m){return s+Number(m.fat||0);},0);
   var goal=Number(state.profile.cal||2400),carbGoal=fnum(state.macro.carbs,240),protGoal=fnum(state.macro.protein,180),fatGoal=fnum(state.macro.fat,80);
   ring($("calRing"),Math.min(1,kcal/goal),"#FF6A3D",Math.round(kcal)+"\n/ "+goal+" kcal");
@@ -1668,7 +1694,7 @@ function renderMeals(){
   $("bodyWeight").textContent=num(latestBody())+" kg";$("bodyTarget").textContent=num(state.profile.target||85)+" kg";
   var tv=valToday(state.steps),ev=valToday(state.energy);$("mealSteps").textContent=tv?Number(tv).toLocaleString("fr-CH"):"—";$("mealRuns").textContent=state.runs.length;$("mealEnergy").textContent=ev||"—";
   $("mealJournal").innerHTML=state.meals.length?state.meals.map(function(m,i){return '<div class="meal"><div class="mi"><b>'+esc(m.name)+'</b><div class="d">'+esc(m.type||"Repas")+' · '+num(m.qty||100)+' g · '+num(m.protein||0)+' g prot.</div></div><div class="kc">'+Math.round(Number(m.kcal||0))+' kcal</div><button class="del" data-act="delMeal" data-i="'+i+'">×</button></div>';}).join(""):'<div class="empty">Aucun aliment enregistré aujourd\'hui.</div>';
-  var idx=(new Date().getDay()+6)%7;$("weeklyMenu").innerHTML=MENU.map(function(d,i){var dk=d[1].reduce(function(s,m){var x=m[2].match(/(\d+)\s*kcal/);return s+(x?Number(x[1]):0);},0);return '<div class="menuday '+(i===idx?"today":"")+'"><div class="mh"><b>'+d[0]+(i===idx?" · aujourd'hui":"")+'</b><span style="color:var(--muted)">'+dk+' kcal</span></div>'+d[1].map(function(m,j){return '<div class="mm"><div class="mt"><span>'+esc(m[0])+'</span><span style="color:var(--muted)">'+esc(m[2])+'</span></div><div class="md">'+esc(m[1])+'</div><button class="add" data-act="menuAdd" data-d="'+i+'" data-m="'+j+'">＋ Ajouter au journal</button></div>';}).join("")+'</div>';}).join("");
+  renderWeeklyMenuIfNeeded();
 }
 function ring(svg,frac,color,center){
   var p=Math.max(0,Math.min(1,Number(frac)||0)),parts=String(center).split("\n");
@@ -1713,6 +1739,7 @@ function useFavorite(i){
 }
 function deleteFavorite(i){state.foodFavorites.splice(i,1);save();openFavorites();}
 function renderFasting(){
+  if(state.page!=="meals")return; /* carte + modale ne vivent que sur Repas, inutile de la repeindre chaque seconde ailleurs */
   var title=$("fastTitle"),txt=$("fastText"),bar=$("fastProgress"),btn=$("fastBtn"),actBtn=$("fastActBtn");if(!title||!txt||!bar||!btn)return;
   var hours=Number(state.fast.hours||16);title.textContent="Routine "+hours+":8";
   if(!state.fast.active||!state.fast.start){txt.textContent="Aucun jeûne en cours";bar.style.width="0%";btn.textContent="Démarrer";if(actBtn)actBtn.textContent="Démarrer";return;}
