@@ -18,6 +18,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script src="https://unpkg.com/@zxing/browser@0.1.5/umd/index.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 :root{
   --bg:#12141A; --surface:#1B1E27; --surface2:#232733; --hair:#2E3340;
@@ -220,7 +222,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 
 /* barcode scanner */
 .scan-actions{display:grid;gap:10px;margin-top:14px}
-.scan-preview{width:100%;aspect-ratio:4/3;background:#0b0d12;border:1px solid var(--hair);border-radius:14px;overflow:hidden;position:relative}
+.scan-preview{width:100%;aspect-ratio:4/3;min-height:240px;background:#0b0d12;border:1px solid var(--hair);border-radius:14px;overflow:hidden;position:relative}
 .scan-preview video{width:100%;height:100%;object-fit:cover;display:block}
 .scan-frame{position:absolute;inset:18% 12%;border:2px solid var(--mint);border-radius:14px;box-shadow:0 0 0 999px rgba(0,0,0,.18)}
 .scan-status{font-size:13px;color:var(--muted);text-align:center;margin-top:9px;min-height:18px}
@@ -272,6 +274,38 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 .fast-progress{height:8px;background:var(--surface2);border-radius:99px;overflow:hidden;margin-top:12px}.fast-progress i{display:block;height:100%;background:var(--mint);width:0}
 .favorite-list{max-height:52vh;overflow:auto;margin-top:10px}.favorite-item{display:flex;align-items:center;gap:10px;padding:11px 2px;border-bottom:1px solid var(--hair)}.favorite-item:last-child{border-bottom:0}.favorite-item .fi{flex:1;min-width:0}.favorite-item b{display:block;font-size:14px}.favorite-item span{display:block;color:var(--muted);font-size:11.5px;margin-top:3px}.favorite-item button{background:var(--surface2);border:1px solid var(--hair);border-radius:9px;padding:8px 10px;font-size:12px}
 @media(max-width:390px){.daily-dash{grid-template-columns:repeat(2,1fr)}}
+
+/* live GPS run tracker */
+.or-sep{display:flex;align-items:center;gap:10px;margin:12px 0 6px;color:var(--faint);font-size:12px}
+.or-sep::before,.or-sep::after{content:"";flex:1;height:1px;background:var(--hair)}
+.liverun{position:fixed;inset:0;z-index:80;background:var(--bg);display:none;flex-direction:column;max-width:520px;margin:0 auto;padding:calc(var(--safe-top) + 14px) 18px calc(var(--safe-bot) + 16px)}
+.liverun.on{display:flex}
+.lr-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex:0 0 auto}
+.lr-x{width:36px;height:36px;border-radius:10px;background:var(--surface2);border:1px solid var(--hair);font-size:16px;display:grid;place-items:center;color:var(--text)}
+.lr-title{font-family:var(--display);font-weight:700;font-size:16px}
+.lr-gps{font-size:11.5px;color:var(--muted);background:var(--surface);border:1px solid var(--hair);padding:5px 10px;border-radius:999px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lr-map{position:relative;margin:14px 0;background:var(--surface);border:1px solid var(--hair);border-radius:16px;aspect-ratio:1/1;max-height:34vh;overflow:hidden;display:grid;place-items:center}
+.lr-map svg{width:100%;height:100%;display:block}
+.lr-mapempty{position:absolute;font-size:13px;color:var(--faint);text-align:center;padding:0 20px}
+.lr-time{font-family:var(--display);font-weight:700;font-size:60px;line-height:1;text-align:center;letter-spacing:-.02em;margin-top:2px}
+.lr-sub{text-align:center;font-size:12.5px;color:var(--muted);margin-top:3px}
+.lr-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.lr-stats>div{background:var(--surface);border:1px solid var(--hair);border-radius:14px;padding:13px 6px;text-align:center}
+.lr-stats .v{font-family:var(--display);font-weight:700;font-size:25px}
+.lr-stats .l{font-size:10.5px;color:var(--muted);margin-top:3px}
+.lr-controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:auto;padding-top:16px;flex:0 0 auto}
+.lr-note{font-size:11.5px;color:var(--faint);text-align:center;margin-top:11px}
+
+/* live run map (Leaflet, modern dark) */
+#lrMap{position:absolute;inset:0;width:100%;height:100%;z-index:1}
+.leaflet-container{background:#0b0d12 !important;font-family:var(--font)}
+.leaflet-tile-pane{filter:saturate(1.05) contrast(1.02)}
+.leaflet-control-attribution{background:rgba(18,20,26,.72) !important;color:var(--faint) !important;font-size:9px !important;padding:1px 6px !important;border-radius:8px 0 0 0}
+.leaflet-control-attribution a{color:var(--muted) !important}
+.leaflet-control-zoom{display:none !important}
+.lr-dot{width:15px;height:15px;border-radius:50%;background:var(--ember);border:3px solid #12141A;box-shadow:0 0 12px 2px rgba(255,106,61,.55)}
+.lr-dot::after{content:"";position:absolute;left:50%;top:50%;width:15px;height:15px;transform:translate(-50%,-50%);border-radius:50%;box-shadow:0 0 0 2px rgba(255,106,61,.6);animation:lrpulse 1.6s ease-out infinite}
+@keyframes lrpulse{0%{transform:translate(-50%,-50%) scale(1);opacity:.85}100%{transform:translate(-50%,-50%) scale(2.8);opacity:0}}
 </style>
 </head>
 <body>
@@ -520,7 +554,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
   <h3>Scanner un code-barres</h3>
   <div class="sub">Place le code-barres dans le cadre. Le produit sera recherché automatiquement.</div>
   <div class="scan-preview">
-    <video id="scanVideo" playsinline muted></video>
+    <video id="scanVideo" playsinline autoplay muted></video>
     <div class="scan-frame"></div>
   </div>
   <div class="scan-status" id="scanStatus">Autorise l’accès à la caméra…</div>
@@ -546,13 +580,41 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 
 <div class="modal" id="runModal"><div class="sheet">
   <h3>Ajouter une course</h3>
-  <div class="sub">L'allure est calculée automatiquement.</div>
+  <button class="btn primary" data-act="liveStart" style="margin:6px 0 2px">🛰️ Suivi GPS en direct</button>
+  <div class="or-sep"><span>ou saisir manuellement</span></div>
   <div class="row2"><div class="field"><label>Distance (km)</label><input id="runDist" type="number" inputmode="decimal" step="0.1" placeholder="8.5"></div>
   <div class="field"><label>Durée (min)</label><input id="runDur" type="number" inputmode="decimal" step="1" placeholder="48"></div></div>
   <div class="field"><label>Date</label><input id="runDate" type="date"></div>
   <div id="runPace" class="date" style="text-align:center;margin-top:8px;min-height:16px"></div>
   <div class="acts"><button class="btn ghost" data-act="runClose">Annuler</button><button class="btn primary" data-act="runSave">Ajouter</button></div>
 </div></div>
+
+<!-- live GPS run overlay -->
+<div class="liverun" id="liveRunModal">
+  <div class="lr-head">
+    <button class="lr-x" data-act="liveClose">✕</button>
+    <span class="lr-title">Course en direct</span>
+    <span class="lr-gps" id="lrGps">GPS prêt</span>
+  </div>
+  <div class="lr-map">
+    <div id="lrMap"></div>
+    <svg id="lrTrace" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="lr-mapempty" id="lrMapEmpty">Le tracé apparaîtra dès les premiers points GPS.</div>
+  </div>
+  <div class="lr-time num" id="lrTime">0:00</div>
+  <div class="lr-sub">durée</div>
+  <div class="lr-stats">
+    <div><div class="v" id="lrDist">0.00</div><div class="l">km</div></div>
+    <div><div class="v" id="lrPace">—</div><div class="l">allure /km</div></div>
+    <div><div class="v" id="lrSpeed">—</div><div class="l">km/h</div></div>
+  </div>
+  <div class="lr-controls">
+    <button class="btn" data-act="runDiscard" id="lrDiscard">Annuler</button>
+    <button class="btn primary" data-act="runToggle" id="lrToggle">Démarrer</button>
+    <button class="btn mint" data-act="runFinish" id="lrFinish" style="display:none">Terminer</button>
+  </div>
+  <div class="lr-note" id="lrNote">Garde l'écran allumé et l'app au premier plan pendant la course.</div>
+</div>
 
 <div class="modal" id="stepsModal"><div class="sheet">
   <h3>Pas du jour</h3>
@@ -630,6 +692,7 @@ function today(){var d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)
 function pad(n){return String(n).padStart(2,"0");}
 function fmtDate(s){return new Date(s+"T12:00:00").toLocaleDateString("fr-CH",{day:"numeric",month:"short"});}
 function num(n){n=Number(n);return (Math.round(n*10)/10).toString();}
+function fnum(x,d){x=Number(String(x==null?"":x).replace(",","."));return isFinite(x)?x:(d||0);}
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});}
 function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
@@ -949,6 +1012,131 @@ function saveRun(){
   state.runs.push({id:"r"+Date.now()+Math.floor(Math.random()*1000),d:d,dist:Math.round(di*100)/100,dur:Math.round(du*10)/10,src:"manual"});
   save();closeRun();renderProgress();toast("Course ajoutée");
 }
+/* ===== live GPS run tracking ===== */
+var geoWatch=null,runActive=false,runPaused=false;
+var runMeters=0,runElapsedMs=0,runSegStart=0,runLastPt=null,runPts=[],runTick=null,wakeLock=null,runStartDate=today();
+var lrMap=null,lrLine=null,lrHead=null,lrStart=null,mapReady=false,mapMode="svg",mapCentered=false;
+function fmtClock(ms){var s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;return (h>0?h+":"+pad(m):String(m))+":"+pad(sec);}
+function haversine(a,b){var R=6371000,toR=Math.PI/180;var dLat=(b.lat-a.lat)*toR,dLng=(b.lng-a.lng)*toR,la1=a.lat*toR,la2=b.lat*toR;var x=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(la1)*Math.cos(la2)*Math.sin(dLng/2)*Math.sin(dLng/2);return 2*R*Math.asin(Math.min(1,Math.sqrt(x)));}
+function openLiveRun(){
+  closeRun();
+  runActive=false;runPaused=false;runMeters=0;runElapsedMs=0;runSegStart=0;runLastPt=null;runPts=[];runStartDate=today();
+  $("lrTime").textContent="0:00";$("lrDist").textContent="0.00";$("lrPace").textContent="—";$("lrSpeed").textContent="—";
+  $("lrToggle").textContent="Démarrer";$("lrToggle").style.display="";$("lrFinish").style.display="none";$("lrDiscard").style.display="";$("lrDiscard").textContent="Annuler";
+  $("lrGps").textContent="GPS prêt";$("lrTrace").innerHTML="";$("lrMapEmpty").style.display="";
+  resetMapLayers();
+  if(window.L){
+    mapMode="leaflet";
+    $("lrMap").style.display="";$("lrTrace").style.display="none";$("lrMapEmpty").style.display="none";
+    setTimeout(function(){initMap();mapReady=!!lrMap;resetMapLayers();if(lrMap){try{lrMap.invalidateSize();}catch(e){}}},60);
+  }else{
+    mapMode="svg";mapReady=false;
+    $("lrMap").style.display="none";$("lrTrace").style.display="";$("lrMapEmpty").style.display="";
+  }
+  $("liveRunModal").classList.add("on");
+}
+function closeLiveRun(){stopGeo();releaseWake();if(runTick){clearInterval(runTick);runTick=null;}runActive=false;runPaused=false;$("liveRunModal").classList.remove("on");}
+function toggleRun(){if(!runActive)startRun();else if(!runPaused)pauseRun();else resumeRun();}
+function startRun(){
+  if(!navigator.geolocation){$("lrGps").textContent="GPS non supporté";toast("Géolocalisation indisponible");return;}
+  runActive=true;runPaused=false;runSegStart=Date.now();
+  $("lrToggle").textContent="Pause";$("lrFinish").style.display="";$("lrDiscard").style.display="none";
+  $("lrGps").textContent="Recherche du signal…";
+  requestWake();startGeo();
+  if(runTick)clearInterval(runTick);runTick=setInterval(updateLiveUI,250);
+  updateLiveUI();
+}
+function pauseRun(){if(!runActive||runPaused)return;runPaused=true;runElapsedMs+=Date.now()-runSegStart;runLastPt=null;$("lrToggle").textContent="Reprendre";$("lrGps").textContent="En pause";updateLiveUI();}
+function resumeRun(){if(!runActive||!runPaused)return;runPaused=false;runSegStart=Date.now();runLastPt=null;$("lrToggle").textContent="Pause";$("lrGps").textContent="Recherche du signal…";updateLiveUI();}
+function finishRun(){
+  if(!runActive){closeLiveRun();return;}
+  if(!runPaused)runElapsedMs+=Date.now()-runSegStart;
+  runActive=false;stopGeo();releaseWake();if(runTick){clearInterval(runTick);runTick=null;}
+  var km=Math.round(runMeters/10)/100,min=Math.round(runElapsedMs/6000)/10;
+  if(km<0.05||min<0.2){toast("Course trop courte, non enregistrée");closeLiveRun();return;}
+  state.runs.push({id:"r"+Date.now()+Math.floor(Math.random()*1000),d:runStartDate,dist:km,dur:min,src:"gps"});
+  save();closeLiveRun();showPage("progress");renderProgress();toast("Course enregistrée · "+num(km)+" km");
+}
+function discardRun(){if(runActive&&runMeters>50){if(!confirm("Abandonner la course en cours ?"))return;}closeLiveRun();}
+function startGeo(){stopGeo();try{geoWatch=navigator.geolocation.watchPosition(onGeo,onGeoErr,{enableHighAccuracy:true,maximumAge:1000,timeout:20000});}catch(e){$("lrGps").textContent="GPS inaccessible";}}
+function stopGeo(){if(geoWatch!=null&&navigator.geolocation){try{navigator.geolocation.clearWatch(geoWatch);}catch(e){}}geoWatch=null;}
+function onGeo(pos){
+  if(!runActive||runPaused)return;
+  var c=pos.coords;
+  if(c.accuracy>40){$("lrGps").textContent="Signal faible · "+Math.round(c.accuracy)+" m";return;}
+  var pt={lat:c.latitude,lng:c.longitude};
+  if(runLastPt){
+    var seg=haversine(runLastPt,pt);
+    if(seg>=3&&seg<200){runMeters+=seg;runPts.push(pt);runLastPt=pt;}
+    else if(seg>=200){runLastPt=pt;} /* saut GPS : on resynchronise sans compter */
+  }else{runLastPt=pt;runPts.push(pt);}
+  $("lrGps").textContent="GPS ok · "+Math.round(c.accuracy)+" m";
+  $("lrMapEmpty").style.display=(mapMode==="leaflet"||runPts.length>1)?"none":"";
+  renderRoute();updateLiveUI();
+}
+function onGeoErr(e){
+  var m="GPS indisponible";
+  if(e&&e.code===1)m="Localisation refusée — autorise-la dans les réglages";
+  else if(e&&e.code===2)m="Position indisponible";
+  else if(e&&e.code===3)m="Recherche du signal…";
+  $("lrGps").textContent=m;
+  if(e&&e.code===1)toast("Localisation refusée");
+}
+function curElapsed(){return runElapsedMs+((runActive&&!runPaused)?(Date.now()-runSegStart):0);}
+function updateLiveUI(){
+  var ms=curElapsed();$("lrTime").textContent=fmtClock(ms);
+  var km=runMeters/1000;$("lrDist").textContent=km.toFixed(2);
+  var min=ms/60000;
+  $("lrPace").textContent=(km>0.02&&min>0)?fmtPace(min/km):"—";
+  $("lrSpeed").textContent=(ms>3000&&km>0)?num(km/(ms/3600000)):"—";
+}
+function initMap(){
+  if(lrMap||!window.L)return;
+  try{
+    lrMap=L.map("lrMap",{zoomControl:false,attributionControl:true,dragging:true});
+    lrMap.setView([46.2044,6.1432],15);
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",{maxZoom:20,subdomains:"abcd",attribution:"© OpenStreetMap, © CARTO"}).addTo(lrMap);
+    lrLine=L.polyline([],{color:"#FF6A3D",weight:5,opacity:.95,lineJoin:"round",lineCap:"round"}).addTo(lrMap);
+    setTimeout(function(){try{lrMap.invalidateSize();}catch(e){}},60);
+  }catch(e){lrMap=null;lrLine=null;}
+}
+function resetMapLayers(){
+  try{if(lrHead&&lrMap)lrMap.removeLayer(lrHead);}catch(e){}
+  try{if(lrStart&&lrMap)lrMap.removeLayer(lrStart);}catch(e){}
+  lrHead=null;lrStart=null;mapCentered=false;
+  try{if(lrLine)lrLine.setLatLngs([]);}catch(e){}
+}
+function updateMap(){
+  if(!lrMap||!lrLine||!runPts.length)return;
+  lrLine.setLatLngs(runPts.map(function(p){return [p.lat,p.lng];}));
+  var last=runPts[runPts.length-1];
+  if(!lrStart){try{lrStart=L.circleMarker([runPts[0].lat,runPts[0].lng],{radius:6,color:"#12141A",weight:2,fillColor:"#37E0A6",fillOpacity:1}).addTo(lrMap);}catch(e){}}
+  if(!lrHead){try{lrHead=L.marker([last.lat,last.lng],{icon:L.divIcon({className:"lr-headwrap",html:'<div class="lr-dot"></div>',iconSize:[15,15],iconAnchor:[7,7]})}).addTo(lrMap);}catch(e){}}
+  else{try{lrHead.setLatLng([last.lat,last.lng]);}catch(e){}}
+  try{if(!mapCentered){lrMap.setView([last.lat,last.lng],16);mapCentered=true;}else lrMap.panTo([last.lat,last.lng],{animate:true,duration:.5});}catch(e){}
+}
+function renderRoute(){
+  if(mapMode==="leaflet"&&mapReady&&lrMap){$("lrTrace").style.display="none";updateMap();}
+  else{$("lrTrace").style.display="";$("lrMapEmpty").style.display=runPts.length>1?"none":"";drawTrace();}
+}
+function drawTrace(){
+  var svg=$("lrTrace");if(!svg)return;
+  if(runPts.length<2){svg.innerHTML="";return;}
+  var lats=runPts.map(function(p){return p.lat;}),lngs=runPts.map(function(p){return p.lng;});
+  var minLat=Math.min.apply(null,lats),maxLat=Math.max.apply(null,lats),minLng=Math.min.apply(null,lngs),maxLng=Math.max.apply(null,lngs);
+  var span=Math.max(1e-5,maxLat-minLat,maxLng-minLng),pad=10,sz=100-2*pad;
+  var cLat=(minLat+maxLat)/2,cLng=(minLng+maxLng)/2;
+  var X=function(lng){return (pad+((lng-cLng)/span+0.5)*sz).toFixed(1);};
+  var Y=function(lat){return (pad+(0.5-(lat-cLat)/span)*sz).toFixed(1);};
+  var dd=runPts.map(function(p,i){return (i?"L":"M")+X(p.lng)+" "+Y(p.lat);}).join(" ");
+  var f=runPts[0],l=runPts[runPts.length-1];
+  svg.innerHTML='<path d="'+dd+'" fill="none" stroke="#FF6A3D" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>'
+    +'<circle cx="'+X(f.lng)+'" cy="'+Y(f.lat)+'" r="3" fill="#37E0A6"/>'
+    +'<circle cx="'+X(l.lng)+'" cy="'+Y(l.lat)+'" r="3.4" fill="#FF6A3D"/>';
+}
+function requestWake(){try{if("wakeLock"in navigator&&navigator.wakeLock)navigator.wakeLock.request("screen").then(function(w){wakeLock=w;}).catch(function(){});}catch(e){}}
+function releaseWake(){try{if(wakeLock){wakeLock.release();wakeLock=null;}}catch(e){}}
+
 function openSteps(){var t=valToday(state.steps);$("stepsInput").value=t||"";$("stepsModal").classList.add("on");}
 function closeSteps(){$("stepsModal").classList.remove("on");}
 function saveSteps(){var v=Math.round(Number($("stepsInput").value));if(!(v>=0)||!isFinite(v)){toast("Nombre invalide");return;}upsertV(state.steps,today(),v);save();closeSteps();renderProgress();toast("Pas enregistrés");}
@@ -956,7 +1144,7 @@ function saveSteps(){var v=Math.round(Number($("stepsInput").value));if(!(v>=0)|
 function renderMeals(){
   var kcal=state.meals.reduce(function(s,m){return s+Number(m.kcal||0);},0),prot=state.meals.reduce(function(s,m){return s+Number(m.protein||0);},0),carbs=state.meals.reduce(function(s,m){return s+Number(m.carbs||0);},0),fat=state.meals.reduce(function(s,m){return s+Number(m.fat||0);},0);
   var goal=Number(state.profile.cal||2400),carbGoal=Number(state.macro&&state.macro.carbs||240),protGoal=Number(state.macro&&state.macro.protein||180),fatGoal=Number(state.macro&&state.macro.fat||80);
-  ring($("calRing"),Math.min(1,kcal/goal),"#FF6A3D",kcal+"\n/ "+goal+" kcal");
+  ring($("calRing"),Math.min(1,kcal/goal),"#FF6A3D",Math.round(kcal)+"\n/ "+goal+" kcal");
   $("mCarbs").textContent=Math.round(carbs*10)/10;$("mProt").textContent=Math.round(prot*10)/10;$("mFat").textContent=Math.round(fat*10)/10;
   $("mCarbsBar").style.width=Math.min(100,carbs/carbGoal*100)+"%";$("mProtBar").style.width=Math.min(100,prot/protGoal*100)+"%";$("mFatBar").style.width=Math.min(100,fat/fatGoal*100)+"%";
   var limits={"Petit-déjeuner":600,"Déjeuner":600,"Dîner":600,"Collation":600},ids={"Petit-déjeuner":"breakfastKcal","Déjeuner":"lunchKcal","Dîner":"dinnerKcal","Collation":"snackKcal"};
@@ -977,7 +1165,7 @@ function ring(svg,frac,color,center){
   svg.innerHTML='<path d="M 8 50 A 42 42 0 0 1 92 50" fill="none" stroke="#3c4145" stroke-width="9" stroke-linecap="round"/><path d="M 8 50 A 42 42 0 0 1 92 50" fill="none" stroke="'+color+'" stroke-width="9" stroke-linecap="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="'+(100-p*100)+'"/><text x="50" y="35" text-anchor="middle" fill="#F2F3F5" font-family="Space Grotesk" font-weight="700" font-size="18">'+parts[0]+'</text>'+(parts[1]?'<text x="50" y="48" text-anchor="middle" fill="#BFC5D1" font-size="8.5">'+parts[1]+'</text>':'');
 }
 function addMealObj(o){o.date=today();o.qty=Number(o.qty||100);state.meals.push(o);save();renderMeals();renderToday();}
-function currentFoodFromForm(){return {name:$("foodName").value.trim(),kcal:Number($("foodKcal").value||0),protein:Number($("foodProt").value||0),carbs:Number($("foodCarbs").value||0),fat:Number($("foodFat").value||0),qty:Number($("foodQty").value||100),type:$("foodType").value};}
+function currentFoodFromForm(){return {name:$("foodName").value.trim(),kcal:fnum($("foodKcal").value,0),protein:fnum($("foodProt").value,0),carbs:fnum($("foodCarbs").value,0),fat:fnum($("foodFat").value,0),qty:fnum($("foodQty").value,100),type:$("foodType").value};}
 function saveFavorite(){
   var f=currentFoodFromForm();if(!f.name){toast("Indique l’aliment");return;}
   var i=state.foodFavorites.findIndex(function(x){return x.name.toLowerCase()===f.name.toLowerCase();});
@@ -1053,12 +1241,14 @@ function saveMeal(){
 
 
 /* barcode scanner */
-var barcodeReader=null,barcodeControls=null,barcodeBusy=false;
+var barcodeReader=null,barcodeControls=null,barcodeBusy=false,barcodeStream=null;
 function stopBarcode(){
   try{if(barcodeControls&&barcodeControls.stop)barcodeControls.stop();}catch(e){}
   barcodeControls=null;
   try{if(barcodeReader&&barcodeReader.reset)barcodeReader.reset();}catch(e){}
   barcodeReader=null;
+  try{if(barcodeStream){barcodeStream.getTracks().forEach(function(t){try{t.stop();}catch(e){}});}}catch(e){}
+  barcodeStream=null;
   var v=$("scanVideo");if(v){try{v.pause();}catch(e){};v.srcObject=null;}
 }
 function closeScanner(){stopBarcode();$("scanModal").classList.remove("on");}
@@ -1104,14 +1294,42 @@ function openScanner(){
   $("scanProduct").classList.remove("on");
   $("manualBarcode").value="";
   barcodeBusy=false;
-  if(!window.ZXingBrowser){
-    $("scanStatus").textContent="Scanner indisponible. Utilise le code-barres manuel ci-dessous.";
+  stopBarcode();
+  startCamera();
+}
+async function startCamera(){
+  var v=$("scanVideo");
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+    $("scanStatus").textContent="Caméra indisponible ici. Sur iPhone, ouvre l’app dans Safari (pas depuis l’icône installée) — ou saisis le code manuellement.";
     return;
   }
-  stopBarcode();
+  var stream;
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false});
+  }catch(e){
+    var msg="Caméra inaccessible.";
+    var nm=e&&e.name;
+    if(nm==="NotAllowedError"||nm==="SecurityError")msg="Accès à la caméra refusé. Autorise-le dans les réglages du navigateur puis rouvre le scanner.";
+    else if(nm==="NotFoundError"||nm==="OverconstrainedError")msg="Aucune caméra détectée sur cet appareil.";
+    else if(nm==="NotReadableError")msg="La caméra est déjà utilisée par une autre application. Ferme-la puis réessaie.";
+    $("scanStatus").textContent=msg+" Tu peux saisir le code manuellement ci-dessous.";
+    return;
+  }
+  barcodeStream=stream;
+  try{
+    v.setAttribute("playsinline","");v.setAttribute("autoplay","");v.muted=true;
+    v.srcObject=stream;
+    await new Promise(function(res){ if(v.readyState>=2)return res(); v.onloadedmetadata=function(){res();}; setTimeout(res,1200); });
+    try{await v.play();}catch(e){}
+  }catch(e){}
+  $("scanStatus").textContent="Vise le code-barres du produit…";
+  if(!window.ZXingBrowser){
+    $("scanStatus").textContent="La caméra fonctionne, mais le lecteur automatique est indisponible. Lis le chiffre sous le code-barres et saisis-le ci-dessous.";
+    return;
+  }
   try{
     barcodeReader=new ZXingBrowser.BrowserMultiFormatReader();
-    var p=barcodeReader.decodeFromConstraints({video:{facingMode:{ideal:"environment"}}},"scanVideo",function(result,err,controls){
+    var pr=barcodeReader.decodeFromVideoElement(v,function(result,err,controls){
       if(controls)barcodeControls=controls;
       if(result&&!barcodeBusy){
         barcodeBusy=true;
@@ -1120,11 +1338,9 @@ function openScanner(){
         lookupBarcode(code);
       }
     });
-    if(p&&p.catch)p.catch(function(){
-      $("scanStatus").textContent="Caméra refusée ou indisponible. Tu peux entrer le code manuellement.";
-    });
+    if(pr&&pr.catch)pr.catch(function(){});
   }catch(e){
-    $("scanStatus").textContent="Scanner indisponible. Tu peux entrer le code manuellement.";
+    $("scanStatus").textContent="La caméra fonctionne, mais la lecture auto a échoué. Saisis le code manuellement.";
   }
 }
 
@@ -1200,6 +1416,11 @@ document.addEventListener("click",function(e){
     case "mSave": saveMeal(); break;
     case "delMeal": state.meals.splice(Number(a.dataset.i),1); save(); renderMeals(); renderToday(); break;
     case "openRun": openRun(); break;
+    case "liveStart": openLiveRun(); break;
+    case "liveClose": discardRun(); break;
+    case "runToggle": toggleRun(); break;
+    case "runFinish": finishRun(); break;
+    case "runDiscard": discardRun(); break;
     case "runClose": closeRun(); break;
     case "runSave": saveRun(); break;
     case "delRun": state.runs=state.runs.filter(function(r){return r.id!==a.dataset.id;}); save(); renderProgress(); break;
@@ -1217,6 +1438,7 @@ document.addEventListener("click",function(e){
     case "reset": resetAll(); break;
   }
 });
+document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible"&&runActive&&!runPaused)requestWake();});
 document.addEventListener("input",function(e){if(e.target.id==="runDist"||e.target.id==="runDur")updateRunPace();});
 document.addEventListener("change",function(e){var el=e.target;
   if(el.classList&&el.classList.contains("wval")&&el.dataset.ex){setWeightExact(el.dataset.ex,el.value);}
@@ -1322,7 +1544,7 @@ window.EVO_V3_READY=true;
 <script>
 if("serviceWorker" in navigator){
   function registerEvoSW(){
-    navigator.serviceWorker.register("/fitness/sw.js?v=26",{updateViaCache:"none"}).catch(function(e){console.warn("SW:",e);});
+    navigator.serviceWorker.register("/fitness/sw.js?v=30",{updateViaCache:"none"}).catch(function(e){console.warn("SW:",e);});
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",registerEvoSW);
   else registerEvoSW();
