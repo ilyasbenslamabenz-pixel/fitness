@@ -278,13 +278,13 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 /* live GPS run tracker */
 .or-sep{display:flex;align-items:center;gap:10px;margin:12px 0 6px;color:var(--faint);font-size:12px}
 .or-sep::before,.or-sep::after{content:"";flex:1;height:1px;background:var(--hair)}
-.liverun{position:fixed;inset:0;z-index:80;background:var(--bg);display:none;flex-direction:column;max-width:520px;margin:0 auto;padding:calc(var(--safe-top) + 14px) 18px calc(var(--safe-bot) + 16px)}
+.liverun{position:fixed;inset:0;z-index:80;background:var(--bg);display:none;flex-direction:column;max-width:520px;margin:0 auto;padding:calc(var(--safe-top) + 14px) 18px calc(var(--safe-bot) + 16px);overflow-y:auto}
 .liverun.on{display:flex}
 .lr-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex:0 0 auto}
 .lr-x{width:36px;height:36px;border-radius:10px;background:var(--surface2);border:1px solid var(--hair);font-size:16px;display:grid;place-items:center;color:var(--text)}
 .lr-title{font-family:var(--display);font-weight:700;font-size:16px}
 .lr-gps{font-size:11.5px;color:var(--muted);background:var(--surface);border:1px solid var(--hair);padding:5px 10px;border-radius:999px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lr-map{position:relative;margin:14px 0;background:var(--surface);border:1px solid var(--hair);border-radius:16px;aspect-ratio:1/1;max-height:34vh;overflow:hidden;display:grid;place-items:center}
+.lr-map{position:relative;margin:14px auto;width:min(100%,34vh);background:var(--surface);border:1px solid var(--hair);border-radius:16px;aspect-ratio:1/1;overflow:hidden;display:grid;place-items:center;flex:0 0 auto}
 .lr-map svg{width:100%;height:100%;display:block}
 .lr-mapempty{position:absolute;font-size:13px;color:var(--faint);text-align:center;padding:0 20px}
 .lr-time{font-family:var(--display);font-weight:700;font-size:60px;line-height:1;text-align:center;letter-spacing:-.02em;margin-top:2px}
@@ -1198,6 +1198,9 @@ function drawTrace(){
 }
 function requestWake(){try{if("wakeLock"in navigator&&navigator.wakeLock)navigator.wakeLock.request("screen").then(function(w){wakeLock=w;}).catch(function(){});}catch(e){}}
 function releaseWake(){try{if(wakeLock){wakeLock.release();wakeLock=null;}}catch(e){}}
+function fixLiveMapSize(){if(lrMap&&$("liveRunModal").classList.contains("on")){try{lrMap.invalidateSize();}catch(e){}}}
+window.addEventListener("resize",fixLiveMapSize);
+window.addEventListener("orientationchange",function(){setTimeout(fixLiveMapSize,200);});
 
 function openSteps(){var t=valToday(state.steps);$("stepsInput").value=t||"";$("stepsModal").classList.add("on");}
 function closeSteps(){$("stepsModal").classList.remove("on");}
@@ -1501,7 +1504,7 @@ document.addEventListener("click",function(e){
     case "reset": resetAll(); break;
   }
 });
-document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible"&&runActive&&!runPaused)requestWake();});
+document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible"){if(runActive&&!runPaused)requestWake();fixLiveMapSize();}});
 document.addEventListener("input",function(e){if(e.target.id==="runDist"||e.target.id==="runDur")updateRunPace();});
 document.addEventListener("change",function(e){var el=e.target;
   if(el.classList&&el.classList.contains("wval")&&el.dataset.ex){setWeightExact(el.dataset.ex,el.value);}
