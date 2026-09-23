@@ -648,6 +648,8 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
   <div class="field"><label>Glucides (g)</label><input id="foodCarbs" type="number" inputmode="decimal" placeholder="50"></div></div>
   <div class="row2"><div class="field"><label>Lipides (g)</label><input id="foodFat" type="number" inputmode="decimal" placeholder="15"></div><div></div></div>
   <div class="field"><label>Moment</label><select id="foodType"><option>Petit-déjeuner</option><option>Déjeuner</option><option>Dîner</option><option>Collation</option></select></div>
+  <button class="btn mint" style="width:100%;margin-top:8px" data-act="foodPhotoOpen" id="foodPhotoBtn">📸 Analyser une photo du plat</button>
+  <input type="file" id="foodPhotoInput" accept="image/*" capture="environment" style="display:none">
   <div class="row2"><button class="btn" data-act="saveFavorite">⭐ Enregistrer aliment</button><button class="btn mint" data-act="scanOpen">📷 Scanner</button></div>
   <div class="acts"><button class="btn ghost" data-act="mClose">Annuler</button><button class="btn primary" data-act="mSave">Ajouter</button></div>
 </div></div>
@@ -1732,6 +1734,50 @@ function ring(svg,frac,color,center){
 }
 function addMealObj(o){o.date=today();o.qty=Number(o.qty||100);state.meals.push(o);save();renderMeals();renderToday();}
 function currentFoodFromForm(){return {name:$("foodName").value.trim(),kcal:fnum($("foodKcal").value,0),protein:fnum($("foodProt").value,0),carbs:fnum($("foodCarbs").value,0),fat:fnum($("foodFat").value,0),qty:fnum($("foodQty").value,100),type:$("foodType").value};}
+/* photo -> estimation calorique via Cloudflare Worker (Claude vision) */
+var FOOD_ANALYZE_WORKER_URL="";
+function openFoodPhotoPicker(){
+  if(!cloudUser){toast("Connecte-toi (onglet Profil) pour utiliser l'analyse photo");return;}
+  if(!FOOD_ANALYZE_WORKER_URL){toast("Analyse photo pas encore configurée");return;}
+  $("foodPhotoInput").click();
+}
+function resizeImageToBase64(file,maxDim,quality){
+  return new Promise(function(resolve,reject){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      var img=new Image();
+      img.onload=function(){
+        var w=img.width,h=img.height;
+        if(w>maxDim||h>maxDim){if(w>h){h=Math.round(h*maxDim/w);w=maxDim;}else{w=Math.round(w*maxDim/h);h=maxDim;}}
+        var canvas=document.createElement("canvas");canvas.width=w;canvas.height=h;
+        canvas.getContext("2d").drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL("image/jpeg",quality).split(",")[1]);
+      };
+      img.onerror=reject;img.src=e.target.result;
+    };
+    reader.onerror=reject;reader.readAsDataURL(file);
+  });
+}
+async function analyzeFoodPhoto(file){
+  var btn=$("foodPhotoBtn"),original=btn.textContent;
+  btn.textContent="⏳ Analyse en cours…";btn.disabled=true;
+  try{
+    var base64=await resizeImageToBase64(file,1024,0.85);
+    var token=await cloudUser.getIdToken();
+    var res=await fetch(FOOD_ANALYZE_WORKER_URL,{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({image:base64,mediaType:"image/jpeg"})});
+    var data=await res.json().catch(function(){return null;});
+    if(!res.ok||!data||data.error){toast("Erreur analyse"+(data&&data.error?" : "+data.error:""));return;}
+    $("foodName").value=data.name||"";
+    $("foodQty").value=data.qty||100;
+    $("foodKcal").value=Math.round(Number(data.kcal)||0);
+    $("foodProt").value=Math.round((Number(data.protein)||0)*10)/10;
+    $("foodCarbs").value=Math.round((Number(data.carbs)||0)*10)/10;
+    $("foodFat").value=Math.round((Number(data.fat)||0)*10)/10;
+    clearFoodRef100();
+    toast("Photo analysée"+(data.confidence==="low"?" (à vérifier)":""));
+  }catch(e){toast("Analyse impossible");}
+  finally{btn.textContent=original;btn.disabled=false;}
+}
 /* per-100g reference: once a product is scanned or searched, recompute kcal/macros live as the quantity changes */
 var foodRef100=null;
 function setFoodRef100(kcal,protein,carbs,fat){
@@ -2110,6 +2156,7 @@ document.addEventListener("click",function(e){
     case "fastClose": $("fastModal").classList.remove("on"); break;
     case "fastStart": toggleFasting(); break;
     case "scanOpen": openScanner(); break;
+    case "foodPhotoOpen": openFoodPhotoPicker(); break;
     case "scanClose": closeScanner(); break;
     case "scanLookup": lookupBarcode(document.getElementById("manualBarcode").value); break;
     case "mClose": closeMeal(); break;
@@ -2154,6 +2201,7 @@ document.addEventListener("change",function(e){var el=e.target;
   if(el.classList&&el.classList.contains("wval")&&el.dataset.ex){setWeightExact(el.dataset.ex,el.value);}
   else if(el.classList&&el.classList.contains("rval")&&el.dataset.ex){setRepsExact(el.dataset.ex,el.value);}
   else if(el.id==="importFile"&&el.files&&el.files[0]){importData(el.files[0]);el.value="";}
+  else if(el.id==="foodPhotoInput"&&el.files&&el.files[0]){analyzeFoodPhoto(el.files[0]);el.value="";}
 });
 document.querySelectorAll(".nav button").forEach(function(b){
   function navGo(ev){if(ev)ev.preventDefault();showPage(b.dataset.page);}
