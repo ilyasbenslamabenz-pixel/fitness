@@ -128,6 +128,21 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 .chip.on{background:var(--text);color:#12141A;border-color:transparent}
 .chip .e{font-size:15px}
 
+/* séance : bascule musculation / maison / running */
+.sess-cat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 14px}
+.cat-tab{padding:10px 6px;border-radius:12px;background:var(--surface);border:1px solid var(--hair);font-weight:600;font-size:12.5px;color:var(--muted)}
+.cat-tab.on{background:var(--text);color:#12141A;border-color:transparent}
+.run-prog-week{display:flex;align-items:center;gap:12px;margin-top:6px}
+.run-prog-week button{flex:0 0 auto;width:38px;height:38px;border-radius:11px;background:var(--surface2);border:1px solid var(--hair);font-size:18px;font-weight:700}
+.rpw-mid{flex:1;text-align:center}
+.rpw-mid b{display:block;font-size:15px}
+.rpw-mid span{display:block;font-size:12.5px;color:var(--muted);margin-top:3px}
+.run-prog-sessions{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.run-prog-s{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;background:var(--surface2);border:1px solid var(--hair);font-size:13.5px;font-weight:600}
+.run-prog-s .rs-check{flex:0 0 auto;width:24px;height:24px;border-radius:8px;border:2px solid var(--faint);display:grid;place-items:center;font-size:14px;color:transparent}
+.run-prog-s.done .rs-check{background:var(--mint);border-color:var(--mint);color:#062b20}
+.run-prog-s.done{opacity:.6}
+
 /* exercise rows */
 .ex{display:flex;align-items:center;gap:13px;padding:14px 4px;border-bottom:1px solid var(--hair)}
 .ex:last-child{border-bottom:0}
@@ -427,13 +442,6 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
       </div>
     </div>
 
-    <div class="card run-card" style="margin-top:12px">
-      <div class="head" style="margin:0 0 12px"><h2 style="font-size:16px">🏃 Course à pied</h2><span class="link" data-act="go" data-page="progress">Historique</span></div>
-      <button class="btn primary" data-act="liveStart">🛰️ Démarrer une course (GPS en direct)</button>
-      <button class="btn ghost" style="margin-top:9px" data-act="openRun">Saisir une course manuellement</button>
-      <div id="runTodayInfo" style="font-size:12.5px;color:var(--muted);margin-top:11px;text-align:center">—</div>
-    </div>
-
     <div class="card" style="margin-top:12px">
       <div class="eyebrow">Prochaine séance</div>
       <div class="next">
@@ -469,19 +477,46 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
   <!-- SÉANCE -->
   <section class="page" id="session">
     <div class="head"><h2>Séance</h2><span class="link" id="sesToday"></span></div>
-    <div class="days" id="dayChips"></div>
-    <div class="card sess-head">
-      <div class="sess-top">
-        <div class="ic" id="sesIc" style="width:46px;height:46px;border-radius:12px;background:var(--surface2);display:grid;place-items:center;font-size:24px">🔥</div>
-        <div style="flex:1"><h3 id="sesName" style="font-size:17px">—</h3><div class="sub" id="sesFocus" style="font-size:12.5px;color:var(--muted)">—</div></div>
-        <div class="sess-count"><span class="num" id="sesDoneN">0</span><small id="sesTotN">/0</small></div>
-      </div>
-      <div class="sprog"><i id="sesProg" style="width:0%"></i></div>
-      <div class="sess-progtext" id="sesProgText">0 / 0 séries complétées</div>
+    <div class="sess-cat" id="sessCatTabs">
+      <button class="cat-tab" data-act="sessCat" data-cat="muscu">🏋️ Musculation</button>
+      <button class="cat-tab" data-act="sessCat" data-cat="maison">🏠 Séance maison</button>
+      <button class="cat-tab" data-act="sessCat" data-cat="running">🏃 Running</button>
     </div>
-    <div class="rest" id="restBar"><div class="rlabel" id="restLabel">Repos</div><button class="stop" id="restStop" data-act="restStop" style="display:none">Arrêter</button><div class="rbtns"><button data-act="rest" data-s="60">1:00</button><button data-act="rest" data-s="90">1:30</button><button data-act="rest" data-s="120">2:00</button></div></div>
-    <div id="exList"></div>
-    <p style="font-size:12px;color:var(--faint);text-align:center;margin:14px 4px">Tape chaque série pour la valider — le chrono de repos démarre tout seul. Ajuste le poids avec −/+ ou tape le chiffre. Une séance terminée peut s'annuler quelques secondes.</p>
+
+    <div id="sessExerciseView">
+      <div class="days" id="dayChips"></div>
+      <div class="card sess-head">
+        <div class="sess-top">
+          <div class="ic" id="sesIc" style="width:46px;height:46px;border-radius:12px;background:var(--surface2);display:grid;place-items:center;font-size:24px">🔥</div>
+          <div style="flex:1"><h3 id="sesName" style="font-size:17px">—</h3><div class="sub" id="sesFocus" style="font-size:12.5px;color:var(--muted)">—</div></div>
+          <div class="sess-count"><span class="num" id="sesDoneN">0</span><small id="sesTotN">/0</small></div>
+        </div>
+        <div class="sprog"><i id="sesProg" style="width:0%"></i></div>
+        <div class="sess-progtext" id="sesProgText">0 / 0 séries complétées</div>
+      </div>
+      <div class="rest" id="restBar"><div class="rlabel" id="restLabel">Repos</div><button class="stop" id="restStop" data-act="restStop" style="display:none">Arrêter</button><div class="rbtns"><button data-act="rest" data-s="60">1:00</button><button data-act="rest" data-s="90">1:30</button><button data-act="rest" data-s="120">2:00</button></div></div>
+      <div id="exList"></div>
+      <p style="font-size:12px;color:var(--faint);text-align:center;margin:14px 4px">Tape chaque série pour la valider — le chrono de repos démarre tout seul. Ajuste le poids avec −/+ ou tape le chiffre. Une séance terminée peut s'annuler quelques secondes.</p>
+    </div>
+
+    <div id="sessRunningView" style="display:none">
+      <div class="card">
+        <div class="head" style="margin:0 0 4px"><h2 style="font-size:16px">Programme 0 → 5-10 km</h2><span class="link" data-act="go" data-page="progress">Historique</span></div>
+        <div class="sub" style="margin-bottom:10px">10 semaines pour passer de zéro à la course continue.</div>
+        <div class="run-prog-week">
+          <button data-act="runProgPrev">−</button>
+          <div class="rpw-mid"><b id="runProgWeekN">Semaine 1</b><span id="runProgGoal">—</span></div>
+          <button data-act="runProgNext">＋</button>
+        </div>
+        <div class="run-prog-sessions" id="runProgSessions"></div>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <div class="eyebrow">Lancer une course</div>
+        <button class="btn primary" style="margin-top:10px" data-act="liveStart">🛰️ Démarrer une course (GPS en direct)</button>
+        <button class="btn ghost" style="margin-top:9px" data-act="openRun">Saisir une course manuellement</button>
+        <div id="runProgInfo" style="font-size:12.5px;color:var(--muted);margin-top:11px;text-align:center">—</div>
+      </div>
+    </div>
   </section>
 
   <!-- PROGRÈS -->
@@ -497,6 +532,14 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
       </div>
       <div class="chartwrap" id="weightChart"></div>
       <div class="chartmeta"><span id="wcFrom"></span><span id="wcTo"></span></div>
+    </div>
+
+    <div class="card" id="bodyCompCard" style="display:none">
+      <div class="eyebrow">Composition corporelle</div>
+      <div class="big3" style="grid-template-columns:repeat(2,1fr)">
+        <div><div class="v num" id="bcFat">—</div><div class="l">masse grasse</div></div>
+        <div><div class="v num" id="bcMuscle">—</div><div class="l">masse musculaire</div></div>
+      </div>
     </div>
 
     <div class="card">
@@ -630,6 +673,10 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
     <button data-act="wMinus">−</button>
     <input id="wInput" type="number" inputmode="decimal" step="0.1">
     <button data-act="wPlus">＋</button>
+  </div>
+  <div class="row2" style="margin-top:14px">
+    <div class="field"><label>Masse grasse (%)</label><input id="wFat" type="number" inputmode="decimal" step="0.1" placeholder="optionnel"></div>
+    <div class="field"><label>Masse musculaire (%)</label><input id="wMuscle" type="number" inputmode="decimal" step="0.1" placeholder="optionnel"></div>
   </div>
   <div class="acts"><button class="btn ghost" data-act="wClose">Annuler</button><button class="btn primary" data-act="wSave">Enregistrer</button></div>
 </div></div>
@@ -781,6 +828,48 @@ var DEFAULT_PROGRAM=[
    {n:"Cardio (vélo ou tapis)",t:"20 min",w:false}]}
 ];
 
+/* séance maison : force au poids du corps + cardio HIIT en alternance, sans matériel */
+var HOME_PROGRAM=[
+ {id:"home-fb1",cat:"maison",name:"Full body 1",short:"FB1",icon:"🏠",focus:"Poids du corps · corps entier",ex:[
+   {n:"Pompes",t:"4 × 10-15",w:false},
+   {n:"Squats",t:"4 × 15-20",w:false},
+   {n:"Fentes avant",t:"3 × 12",w:false},
+   {n:"Gainage (planche)",t:"3 × 30-45 s",w:false},
+   {n:"Superman (lombaires)",t:"3 × 15",w:false}]},
+ {id:"home-hiit1",cat:"maison",name:"HIIT cardio 1",short:"HIIT1",icon:"⚡",focus:"Cardio · circuit intense",ex:[
+   {n:"Jumping jacks",t:"4 × 30 s",w:false},
+   {n:"Mountain climbers",t:"4 × 30 s",w:false},
+   {n:"Burpees",t:"4 × 10",w:false},
+   {n:"Squat jumps",t:"4 × 15",w:false},
+   {n:"Corde à sauter (ou sur place)",t:"4 × 45 s",w:false}]},
+ {id:"home-fb2",cat:"maison",name:"Full body 2",short:"FB2",icon:"🏠",focus:"Poids du corps · corps entier",ex:[
+   {n:"Pompes déclinées",t:"4 × 10-15",w:false},
+   {n:"Squats sumo",t:"4 × 15",w:false},
+   {n:"Fentes arrière",t:"3 × 12",w:false},
+   {n:"Gainage latéral",t:"3 × 20-30 s",w:false},
+   {n:"Dips sur chaise",t:"3 × 10-15",w:false}]},
+ {id:"home-hiit2",cat:"maison",name:"HIIT cardio 2",short:"HIIT2",icon:"⚡",focus:"Cardio · circuit intense",ex:[
+   {n:"High knees",t:"4 × 30 s",w:false},
+   {n:"Burpees",t:"4 × 12",w:false},
+   {n:"Jumping lunges",t:"4 × 12",w:false},
+   {n:"Plank jacks",t:"4 × 30 s",w:false},
+   {n:"Sprint sur place",t:"4 × 40 s",w:false}]}
+];
+
+/* programme running progressif : 10 semaines, 3 séances identiques par semaine */
+var RUNNING_PROGRAM=[
+ {goal:"8 x (1 min course / 1 min 30 marche)"},
+ {goal:"6 x (1 min 30 course / 1 min marche)"},
+ {goal:"5 x (2 min course / 1 min marche)"},
+ {goal:"4 x (3 min course / 1 min 30 marche)"},
+ {goal:"3 x (5 min course / 2 min marche)"},
+ {goal:"2 x (8 min course / 2 min marche)"},
+ {goal:"20 min de course continue"},
+ {goal:"25 min de course continue (≈ 4 km)"},
+ {goal:"30 min de course continue (≈ 5 km)"},
+ {goal:"35-40 min de course, viser 6-8 km"}
+];
+
 var MENU=[
  ["Lundi",[["Petit-déjeuner","Avoine 50 g + skyr 200 g + banane","≈ 400 kcal · 25 g prot."],["Déjeuner","Riz 70 g + crevettes 180 g + poivrons + curry","≈ 550 kcal · 42 g prot."],["Dîner","Pommes de terre 300 g + 3 œufs + haricots verts","≈ 560 kcal · 28 g prot."],["Collation","Skyr 150 g + pomme","≈ 160 kcal · 16 g prot."]]],
  ["Mardi",[["Petit-déjeuner","2 œufs + pommes de terre 200 g + fruit","≈ 430 kcal · 20 g prot."],["Déjeuner","Riz 70 g + thon 120 g + courgette + tomate","≈ 520 kcal · 38 g prot."],["Dîner","Lentilles 220 g + riz 50 g + 2 œufs + légumes","≈ 620 kcal · 34 g prot."],["Collation","Fromage blanc 200 g + banane","≈ 180 kcal · 18 g prot."]]],
@@ -878,10 +967,12 @@ var LOCAL_FOODS=[
 ];
 
 var state={
-  suggest:0, selDay:0,
+  suggest:0, selDay:0, sessionCategory:"muscu",
   profile:{start:103,target:85,cal:2400,startDate:START_DATE},
   weightHistory:[{d:START_DATE,w:103}],
-  program:JSON.parse(JSON.stringify(DEFAULT_PROGRAM)),
+  bodyComp:[],
+  program:JSON.parse(JSON.stringify(DEFAULT_PROGRAM.concat(HOME_PROGRAM))),
+  runProg:{week:1,done:[false,false,false]},
   session:{date:today(),marks:{},excluded:{},extra:{}},
   sessions:[],
   perf:{},
@@ -948,6 +1039,7 @@ function load(){
 function merge(p){
   state.profile=Object.assign(state.profile,p.profile||{});
   if(Array.isArray(p.weightHistory)&&p.weightHistory.length)state.weightHistory=p.weightHistory;
+  if(Array.isArray(p.bodyComp))state.bodyComp=p.bodyComp;
   if(Array.isArray(p.program)&&p.program.length)state.program=p.program;
   if(Array.isArray(p.sessions))state.sessions=p.sessions;
   if(p.perf&&typeof p.perf==="object")state.perf=p.perf;
@@ -964,12 +1056,16 @@ function merge(p){
   if(typeof p.suggest==="number")state.suggest=p.suggest;
   if(p.session&&typeof p.session==="object")state.session=p.session;
   if(p.lastDay)state.lastDay=p.lastDay;
+  if(typeof p.sessionCategory==="string")state.sessionCategory=p.sessionCategory;
+  if(p.runProg&&typeof p.runProg==="object")state.runProg=p.runProg;
 }
 function normalizeState(){
   if(!/^\d{4}-\d{2}-\d{2}$/.test(state.profile.startDate||""))state.profile.startDate=START_DATE;
   if(!Array.isArray(state.weightHistory))state.weightHistory=[];
   state.weightHistory=state.weightHistory.filter(function(x){return x&&x.d&&isFinite(Number(x.w));}).map(function(x){return {d:x.d,w:Number(x.w)};}).sort(function(a,b){return a.d.localeCompare(b.d);});
   if(!state.weightHistory.length)state.weightHistory=[{d:state.profile.startDate,w:Number(state.profile.start||103)}];
+  if(!Array.isArray(state.bodyComp))state.bodyComp=[];
+  state.bodyComp=state.bodyComp.filter(function(x){return x&&x.d&&(isFinite(Number(x.fat))||isFinite(Number(x.muscle)));}).map(function(x){return {d:x.d,fat:isFinite(Number(x.fat))?Number(x.fat):null,muscle:isFinite(Number(x.muscle))?Number(x.muscle):null};}).sort(function(a,b){return a.d.localeCompare(b.d);});
   if(!Array.isArray(state.meals))state.meals=[];
   if(!Array.isArray(state.mealHistory))state.mealHistory=[];
   if(!Array.isArray(state.foodFavorites))state.foodFavorites=[];
@@ -979,6 +1075,19 @@ function normalizeState(){
   if(!state.fast)state.fast={active:false,start:null,hours:16};
   state.fast.hours=Number(state.fast.hours||16);
   if(state.lastDay==null)state.lastDay=today();
+  if(!Array.isArray(state.program)||!state.program.length)state.program=JSON.parse(JSON.stringify(DEFAULT_PROGRAM));
+  if(!state.program.some(function(p){return p.cat==="maison";})){
+    state.program=state.program.concat(JSON.parse(JSON.stringify(HOME_PROGRAM)));
+  }
+  if(["muscu","maison","running"].indexOf(state.sessionCategory)<0)state.sessionCategory="muscu";
+  if(state.selDay>=state.program.length||state.selDay<0)state.selDay=0;
+  if((state.program[state.selDay].cat||"muscu")!==state.sessionCategory&&state.sessionCategory!=="running"){
+    var firstIdx=state.program.findIndex(function(p){return (p.cat||"muscu")===state.sessionCategory;});
+    if(firstIdx>=0)state.selDay=firstIdx;
+  }
+  if(!state.runProg||typeof state.runProg!=="object")state.runProg={week:1,done:[false,false,false]};
+  state.runProg.week=Math.max(1,Math.min(RUNNING_PROGRAM.length,Math.round(Number(state.runProg.week)||1)));
+  if(!Array.isArray(state.runProg.done)||state.runProg.done.length!==3)state.runProg.done=[false,false,false];
 }
 function ensureDay(){
   var d=today();
@@ -994,6 +1103,7 @@ function ensureDay(){
 function marksFor(id){if(!state.session.marks[id])state.session.marks[id]={};return state.session.marks[id];}
 function excludedFor(id){if(!state.session.excluded[id])state.session.excluded[id]=[];return state.session.excluded[id];}
 function extraFor(id){if(!state.session.extra[id])state.session.extra[id]=[];return state.session.extra[id];}
+function muscuProgram(){return state.program.filter(function(p){return (p.cat||"muscu")==="muscu";});}
 function activeExercises(p){
   var exc=excludedFor(p.id),ex=p.ex.filter(function(e){return exc.indexOf(e.n)<0;});
   return ex.concat(extraFor(p.id));
@@ -1054,7 +1164,7 @@ function renderToday(){
   $("hFrom").textContent="Départ "+num(start)+" kg";
   $("hTo").textContent="Objectif "+num(target)+" kg";
 
-  var p=state.program[state.suggest%state.program.length];
+  var mp=muscuProgram(),p=mp[state.suggest%mp.length];
   $("nIc").textContent=p.icon;$("nName").textContent=p.name;$("nFocus").textContent=p.focus;
 
   $("sLost").textContent=num(Math.max(0,lost));
@@ -1078,14 +1188,6 @@ function renderToday(){
   var lp=latestPR();
   $("lastPR").innerHTML=lp?('<b style="color:var(--text);font-size:15px">'+esc(lp.n)+'</b> — <span style="color:var(--mint);font-weight:600">'+num(lp.w)+' kg</span><br><span style="font-size:12.5px">le '+fmtDate(lp.d)+'</span>')
     :'Loggue une séance pour établir tes premiers records.';
-  var rt=$("runTodayInfo");
-  if(rt){
-    if(state.runs&&state.runs.length){
-      var lastRun=state.runs.slice().sort(function(a,b){return b.d.localeCompare(a.d);})[0];
-      var pc=(lastRun.dist>0&&lastRun.dur>0)?" · "+fmtPace(lastRun.dur/lastRun.dist)+" /km":"";
-      rt.textContent="Dernière course : "+num(lastRun.dist)+" km"+pc+" · "+state.runs.length+" au total";
-    }else{rt.textContent="Aucune course enregistrée — lance-toi !";}
-  }
   renderEnergy();
 }
 function countPRs(){var c=0;for(var k in state.perf){var a=state.perf[k];if(a&&a.length){var mx=Math.max.apply(null,a.map(function(x){return Number(x.w);}));if(mx>0)c++;}}return c;}
@@ -1165,9 +1267,26 @@ function refreshExerciseCard(exName){
   updateSessionTotals();
 }
 function renderSession(){
+  document.querySelectorAll("#sessCatTabs .cat-tab").forEach(function(b){b.classList.toggle("on",b.dataset.cat===state.sessionCategory);});
+  var isRunning=state.sessionCategory==="running";
+  $("sessExerciseView").style.display=isRunning?"none":"";
+  $("sessRunningView").style.display=isRunning?"":"none";
+  var bar=$("finishBar");
+  if(!bar){bar=document.createElement("div");bar.className="finish";bar.id="finishBar";document.body.appendChild(bar);}
+  if(isRunning){
+    $("sesToday").textContent="";
+    bar.style.display="none";
+    renderRunningView();
+    return;
+  }
+  var dayList=state.program.filter(function(p){return (p.cat||"muscu")===state.sessionCategory;});
   var chips=$("dayChips");
-  chips.innerHTML=state.program.map(function(p,i){return '<button class="chip '+(i===state.selDay?"on":"")+'" data-act="selDay" data-i="'+i+'"><span class="e">'+p.icon+'</span>'+esc(p.short)+'</button>';}).join("");
+  chips.innerHTML=state.program.map(function(p,i){
+    if((p.cat||"muscu")!==state.sessionCategory)return "";
+    return '<button class="chip '+(i===state.selDay?"on":"")+'" data-act="selDay" data-i="'+i+'"><span class="e">'+p.icon+'</span>'+esc(p.short)+'</button>';
+  }).join("");
   var p=state.program[state.selDay];
+  if(!p||(p.cat||"muscu")!==state.sessionCategory){p=dayList[0];state.selDay=state.program.indexOf(p);}
   $("sesIc").textContent=p.icon;$("sesName").textContent=p.name;$("sesFocus").textContent=p.focus;
   var mk=marksFor(p.id),active=activeExercises(p),excl=excludedFor(p.id);
   $("exList").innerHTML=active.map(function(e){return exerciseCardHTML(e,mk);}).join("")
@@ -1175,11 +1294,42 @@ function renderSession(){
     +'<button class="btn ghost" data-act="addExOpen">＋ Ajouter un exercice</button>'
     +(excl.length?'<button class="btn ghost" data-act="restoreEx">↺ Restaurer ('+excl.length+')</button>':'')
     +'</div>';
-  var bar=$("finishBar");
-  if(!bar){bar=document.createElement("div");bar.className="finish";bar.id="finishBar";document.body.appendChild(bar);}
   bar.innerHTML='<div class="inner"><div class="prog"><div class="n">0 / 0</div><div class="l">séries validées</div></div><button class="btn mint" data-act="finish">Terminer</button></div>';
   bar.style.display=(state.page==="session")?"block":"none";
   updateSessionTotals();
+}
+function switchSessionCategory(cat){
+  if(["muscu","maison","running"].indexOf(cat)<0)return;
+  state.sessionCategory=cat;
+  if(cat!=="running"){
+    var idx=state.program.findIndex(function(p){return (p.cat||"muscu")===cat;});
+    if(idx>=0)state.selDay=idx;
+  }
+  save();renderSession();
+}
+function renderRunningView(){
+  var wk=RUNNING_PROGRAM[state.runProg.week-1];
+  $("runProgWeekN").textContent="Semaine "+state.runProg.week+" / "+RUNNING_PROGRAM.length;
+  $("runProgGoal").textContent=wk.goal;
+  $("runProgSessions").innerHTML=[0,1,2].map(function(i){
+    var done=!!state.runProg.done[i];
+    return '<div class="run-prog-s '+(done?"done":"")+'" data-act="runProgToggle" data-i="'+i+'"><div class="rs-check">✓</div><span>Séance '+(i+1)+' / 3</span></div>';
+  }).join("");
+  var info=$("runProgInfo");
+  if(state.runs&&state.runs.length){
+    var lastRun=state.runs.slice().sort(function(a,b){return b.d.localeCompare(a.d);})[0];
+    var pc=(lastRun.dist>0&&lastRun.dur>0)?" · "+fmtPace(lastRun.dur/lastRun.dist)+" /km":"";
+    info.textContent="Dernière course : "+num(lastRun.dist)+" km"+pc+" · "+state.runs.length+" au total";
+  }else{info.textContent="Aucune course enregistrée — lance-toi !";}
+}
+function runProgToggle(i){
+  state.runProg.done[i]=!state.runProg.done[i];
+  save();renderRunningView();
+}
+function runProgWeekShift(d){
+  state.runProg.week=Math.max(1,Math.min(RUNNING_PROGRAM.length,state.runProg.week+d));
+  if(d!==0)state.runProg.done=[false,false,false];
+  save();renderRunningView();
 }
 function findActiveEx(p,exName){return activeExercises(p).filter(function(x){return x.n===exName;})[0];}
 function setWeight(exName,delta){
@@ -1295,7 +1445,10 @@ function finishSession(){
   doneEx.forEach(function(e){if(e.w)undoBuf.perf[e.n]=state.perf[e.n]?JSON.parse(JSON.stringify(state.perf[e.n])):null;});
   applyFinish(p,doneEx,d,active.length);
   state.session.marks[p.id]={};
-  state.suggest=(state.selDay+1)%state.program.length;
+  if((p.cat||"muscu")==="muscu"){
+    var mp=muscuProgram(),idxInMp=mp.findIndex(function(x){return x.id===p.id;});
+    if(idxInMp>=0)state.suggest=(idxInMp+1)%mp.length;
+  }
   save();
   snack("Séance enregistrée · "+doneEx.length+"/"+active.length,"Annuler",undoFinish,6000);
   renderAll();
@@ -1372,6 +1525,15 @@ function renderProgress(){
   $("weightChart").innerHTML=lineChart(wh.map(function(x){return Number(x.w);}),"#37E0A6"," kg");
   $("wcFrom").textContent=wh.length?fmtDate(wh[0].d):"";
   $("wcTo").textContent=wh.length?fmtDate(wh[wh.length-1].d):"";
+
+  var lastBC=latestBodyComp(),bcCard=$("bodyCompCard");
+  if(bcCard){
+    if(lastBC){
+      bcCard.style.display="";
+      $("bcFat").textContent=lastBC.fat!=null?num(lastBC.fat)+" %":"—";
+      $("bcMuscle").textContent=lastBC.muscle!=null?num(lastBC.muscle)+" %":"—";
+    }else bcCard.style.display="none";
+  }
 
   // exercise picker: only exercises with logged data, else all weighted exercises
   var withData=Object.keys(state.perf).filter(function(k){return state.perf[k]&&state.perf[k].length;});
@@ -1857,15 +2019,33 @@ function showPage(id){
 }
 
 /* modals */
-function openWeigh(){$("wInput").value=num(latestBody());$("weighModal").classList.add("on");}
+function latestBodyComp(){return state.bodyComp.length?state.bodyComp[state.bodyComp.length-1]:null;}
+function openWeigh(){
+  $("wInput").value=num(latestBody());
+  var d=today(),today2=state.bodyComp.find(function(x){return x.d===d;})||latestBodyComp();
+  $("wFat").value=today2&&today2.fat!=null?num(today2.fat):"";
+  $("wMuscle").value=today2&&today2.muscle!=null?num(today2.muscle):"";
+  $("weighModal").classList.add("on");
+}
 function closeWeigh(){$("weighModal").classList.remove("on");}
 function stepWeigh(d){var v=Number($("wInput").value||latestBody());$("wInput").value=(Math.round((v+d)*10)/10);}
 function saveWeigh(){
   var n=Number(String($("wInput").value).replace(",","."));
   if(!isFinite(n)||n<30||n>350){toast("Poids invalide");return;}
+  var fatRaw=$("wFat").value.trim(),muscleRaw=$("wMuscle").value.trim();
+  var fat=fatRaw?Number(String(fatRaw).replace(",",".")):null;
+  var muscle=muscleRaw?Number(String(muscleRaw).replace(",",".")):null;
+  if(fat!=null&&(!isFinite(fat)||fat<3||fat>60)){toast("Masse grasse invalide (3–60 %)");return;}
+  if(muscle!=null&&(!isFinite(muscle)||muscle<10||muscle>70)){toast("Masse musculaire invalide (10–70 %)");return;}
   var d=today(),h=state.weightHistory,ix=h.findIndex(function(x){return x.d===d;});
   if(ix>=0)h[ix].w=n;else h.push({d:d,w:n});
   h.sort(function(a,b){return a.d.localeCompare(b.d);});
+  if(fat!=null||muscle!=null){
+    var bc=state.bodyComp,bix=bc.findIndex(function(x){return x.d===d;});
+    var entry={d:d,fat:fat,muscle:muscle};
+    if(bix>=0)bc[bix]=entry;else bc.push(entry);
+    bc.sort(function(a,b){return a.d.localeCompare(b.d);});
+  }
   save();closeWeigh();renderToday();renderProgress();toast("Pesée enregistrée · "+num(n)+" kg");
 }
 function defaultMealTypeByHour(){
@@ -2145,8 +2325,17 @@ document.addEventListener("click",function(e){
     case "wPlus": stepWeigh(0.1); break;
     case "wClose": closeWeigh(); break;
     case "wSave": saveWeigh(); break;
-    case "startNext": state.selDay=state.suggest%state.program.length; showPage("session"); break;
+    case "startNext":
+      var mpNext=muscuProgram(),nextP=mpNext[state.suggest%mpNext.length];
+      state.sessionCategory="muscu";
+      state.selDay=state.program.indexOf(nextP);
+      showPage("session");
+      break;
     case "selDay": state.selDay=Number(a.dataset.i); renderSession(); break;
+    case "sessCat": switchSessionCategory(a.dataset.cat); break;
+    case "runProgToggle": runProgToggle(Number(a.dataset.i)); break;
+    case "runProgPrev": runProgWeekShift(-1); break;
+    case "runProgNext": runProgWeekShift(1); break;
     case "toggle": toggleEx(ex); break;
     case "setTick": setTick(ex,Number(a.dataset.i)); break;
     case "w-": setWeight(ex,-2.5); break;
