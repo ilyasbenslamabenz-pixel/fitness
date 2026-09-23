@@ -306,6 +306,30 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 .lr-dot{width:15px;height:15px;border-radius:50%;background:var(--ember);border:3px solid #12141A;box-shadow:0 0 12px 2px rgba(255,106,61,.55)}
 .lr-dot::after{content:"";position:absolute;left:50%;top:50%;width:15px;height:15px;transform:translate(-50%,-50%);border-radius:50%;box-shadow:0 0 0 2px rgba(255,106,61,.6);animation:lrpulse 1.6s ease-out infinite}
 @keyframes lrpulse{0%{transform:translate(-50%,-50%) scale(1);opacity:.85}100%{transform:translate(-50%,-50%) scale(2.8);opacity:0}}
+/* Séance — restructured */
+.sess-head{margin-top:4px}
+.sess-top{display:flex;align-items:center;gap:12px}
+.sess-count{font-family:var(--display);font-weight:700;font-size:22px;flex:0 0 auto;line-height:1}
+.sess-count small{font-size:13px;color:var(--muted);font-weight:600}
+.sprog{height:9px;border-radius:99px;background:var(--surface2);overflow:hidden;margin-top:14px}
+.sprog>i{display:block;height:100%;background:linear-gradient(90deg,var(--mint),#7defc0);border-radius:99px;transition:width .35s ease}
+.sess-progtext{font-size:12px;color:var(--muted);margin-top:8px}
+.exc{background:var(--surface);border:1px solid var(--hair);border-radius:var(--radius);padding:14px;margin-top:10px;transition:border-color .15s}
+.exc.done{border-color:var(--mint-dim)}
+.exc-top{display:flex;align-items:flex-start;gap:10px}
+.exc-name{flex:1;min-width:0}
+.exc-name h3{font-size:15.5px;font-weight:600;font-family:var(--font);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.exc-name .t{font-size:12.5px;color:var(--muted);margin-top:2px}
+.exc-badge{flex:0 0 auto;width:28px;height:28px;border-radius:9px;border:2px solid var(--faint);background:transparent;display:grid;place-items:center;font-size:15px;color:transparent}
+.exc.done .exc-badge{background:var(--mint);border-color:var(--mint);color:#062b20}
+.sets{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.setpill{flex:1 1 0;min-width:42px;height:40px;border-radius:11px;background:var(--surface2);border:1px solid var(--hair);color:var(--muted);font-family:var(--display);font-weight:600;font-size:14px;display:grid;place-items:center}
+.setpill:active{transform:scale(.96)}
+.setpill.on{background:var(--mint);border-color:transparent;color:#062b20}
+.exc-wrow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
+.exc-wlab{font-size:12px;color:var(--muted);min-width:0}
+.exc-wlab .last{color:var(--faint)}
+.exc-wlab .up{color:var(--mint);font-weight:600}
 </style>
 </head>
 <body>
@@ -339,6 +363,13 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
     <div class="quick-actions">
       <button class="quick-action" data-act="weigh"><span>⚖️</span><b>Ajouter une pesée</b></button>
       <button class="quick-action" data-act="waterAdd" data-amount="300"><span>💧</span><b>Ajouter 300 ml d'eau</b></button>
+    </div>
+
+    <div class="card run-card" style="margin-top:12px">
+      <div class="head" style="margin:0 0 12px"><h2 style="font-size:16px">🏃 Course à pied</h2><span class="link" data-act="go" data-page="progress">Historique</span></div>
+      <button class="btn primary" data-act="liveStart">🛰️ Démarrer une course (GPS en direct)</button>
+      <button class="btn ghost" style="margin-top:9px" data-act="openRun">Saisir une course manuellement</button>
+      <div id="runTodayInfo" style="font-size:12.5px;color:var(--muted);margin-top:11px;text-align:center">—</div>
     </div>
 
     <div class="card" style="margin-top:12px">
@@ -378,15 +409,18 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
   <section class="page" id="session">
     <div class="head"><h2>Séance</h2><span class="link" id="sesToday"></span></div>
     <div class="days" id="dayChips"></div>
-    <div class="card" style="margin-top:4px">
-      <div style="display:flex;align-items:center;gap:12px">
+    <div class="card sess-head">
+      <div class="sess-top">
         <div class="ic" id="sesIc" style="width:46px;height:46px;border-radius:12px;background:var(--surface2);display:grid;place-items:center;font-size:24px">🔥</div>
         <div style="flex:1"><h3 id="sesName" style="font-size:17px">—</h3><div class="sub" id="sesFocus" style="font-size:12.5px;color:var(--muted)">—</div></div>
+        <div class="sess-count"><span class="num" id="sesDoneN">0</span><small id="sesTotN">/0</small></div>
       </div>
-      <div class="rest" id="restBar"><div class="rlabel" id="restLabel">Repos</div><button class="stop" id="restStop" data-act="restStop" style="display:none">Arrêter</button><div class="rbtns"><button data-act="rest" data-s="60">1:00</button><button data-act="rest" data-s="90">1:30</button><button data-act="rest" data-s="120">2:00</button></div></div>
-      <div id="exList" style="margin-top:6px"></div>
+      <div class="sprog"><i id="sesProg" style="width:0%"></i></div>
+      <div class="sess-progtext" id="sesProgText">0 / 0 séries complétées</div>
     </div>
-    <p style="font-size:12px;color:var(--faint);text-align:center;margin:14px 4px">Coche l'exercice, ajuste le poids avec −/+ ou tape le chiffre. Le chrono de repos est en haut. Une séance validée peut s'annuler quelques secondes.</p>
+    <div class="rest" id="restBar"><div class="rlabel" id="restLabel">Repos</div><button class="stop" id="restStop" data-act="restStop" style="display:none">Arrêter</button><div class="rbtns"><button data-act="rest" data-s="60">1:00</button><button data-act="rest" data-s="90">1:30</button><button data-act="rest" data-s="120">2:00</button></div></div>
+    <div id="exList"></div>
+    <p style="font-size:12px;color:var(--faint);text-align:center;margin:14px 4px">Tape chaque série pour la valider — le chrono de repos démarre tout seul. Ajuste le poids avec −/+ ou tape le chiffre. Une séance terminée peut s'annuler quelques secondes.</p>
   </section>
 
   <!-- PROGRÈS -->
@@ -829,37 +863,51 @@ function renderToday(){
   var lp=latestPR();
   $("lastPR").innerHTML=lp?('<b style="color:var(--text);font-size:15px">'+esc(lp.n)+'</b> — <span style="color:var(--mint);font-weight:600">'+num(lp.w)+' kg</span><br><span style="font-size:12.5px">le '+fmtDate(lp.d)+'</span>')
     :'Loggue une séance pour établir tes premiers records.';
+  var rt=$("runTodayInfo");
+  if(rt){
+    if(state.runs&&state.runs.length){
+      var lastRun=state.runs.slice().sort(function(a,b){return b.d.localeCompare(a.d);})[0];
+      var pc=(lastRun.dist>0&&lastRun.dur>0)?" · "+fmtPace(lastRun.dur/lastRun.dist)+" /km":"";
+      rt.textContent="Dernière course : "+num(lastRun.dist)+" km"+pc+" · "+state.runs.length+" au total";
+    }else{rt.textContent="Aucune course enregistrée — lance-toi !";}
+  }
   renderEnergy();
 }
 function countPRs(){var c=0;for(var k in state.perf){var a=state.perf[k];if(a&&a.length){var mx=Math.max.apply(null,a.map(function(x){return Number(x.w);}));if(mx>0)c++;}}return c;}
 function latestPR(){var best=null;for(var k in state.perf){var a=state.perf[k];if(!a||!a.length)continue;var last=a[a.length-1];var prevMax=a.slice(0,-1).reduce(function(m,x){return Math.max(m,Number(x.w));},0);if(Number(last.w)>0&&Number(last.w)>prevMax){if(!best||last.d>=best.d)best={n:k,w:Number(last.w),d:last.d};}}return best;}
 
+function setCount(e){var m=String(e.t).match(/^\s*(\d+)\s*[×xX]/);return m?Math.max(1,Number(m[1])):1;}
+function exSets(mk,e){var st=mk[e.n]||{};var cnt=setCount(e);var s=st.sets!=null?st.sets:(st.done?cnt:0);return Math.max(0,Math.min(cnt,s));}
 function renderSession(){
   var chips=$("dayChips");
   chips.innerHTML=state.program.map(function(p,i){return '<button class="chip '+(i===state.selDay?"on":"")+'" data-act="selDay" data-i="'+i+'"><span class="e">'+p.icon+'</span>'+esc(p.short)+'</button>';}).join("");
   var p=state.program[state.selDay];
   $("sesIc").textContent=p.icon;$("sesName").textContent=p.name;$("sesFocus").textContent=p.focus;
   var mk=marksFor(p.id);
-  var done=p.ex.filter(function(e){return mk[e.n]&&mk[e.n].done;}).length;
-  $("sesToday").textContent=done+" / "+p.ex.length+" fait";
+  var totalSets=0,doneSets=0,doneEx=0;
+  p.ex.forEach(function(e){var cnt=setCount(e),s=exSets(mk,e);totalSets+=cnt;doneSets+=s;if(s>=cnt)doneEx++;});
+  $("sesDoneN").textContent=doneEx;$("sesTotN").textContent="/"+p.ex.length;
+  $("sesProg").style.width=(totalSets?doneSets/totalSets*100:0)+"%";
+  $("sesProgText").textContent=doneSets+" / "+totalSets+" séries complétées";
+  $("sesToday").textContent=doneEx+" / "+p.ex.length+" exercices";
   $("exList").innerHTML=p.ex.map(function(e){
-    var st=mk[e.n]||{}, isDone=!!st.done;
-    var last=lastWeight(e.n);
-    var wv=(st.w!=null?st.w:last);
-    var up=(e.w&&last>0&&Number(wv)>last);
-    var meta=esc(e.t)+(e.w&&last>0?' · <span class="last">dernier '+num(last)+' kg</span>':'');
-    var right=e.w
-      ? '<div class="stepper"><button data-act="w-" data-ex="'+esc(e.n)+'">−</button><div class="wv"><input class="wval'+(up?" up":"")+'" type="number" inputmode="decimal" step="0.5" value="'+num(wv)+'" data-ex="'+esc(e.n)+'"><small class="'+(up?"upk":"")+'">'+(up?"▲ ":"")+'kg</small></div><button data-act="w+" data-ex="'+esc(e.n)+'">＋</button></div>'
-      : '<div class="tag">'+esc(e.t)+'</div>';
-    return '<div class="ex '+(isDone?"done":"")+'" data-ex="'+esc(e.n)+'">'
-      +'<button class="check" data-act="toggle" data-ex="'+esc(e.n)+'">✓</button>'
-      +'<div class="info" data-act="toggle" data-ex="'+esc(e.n)+'"><h3>'+esc(e.n)+'</h3><div class="t">'+meta+'</div></div>'
-      +right+'</div>';
+    var cnt=setCount(e),s=exSets(mk,e),isDone=s>=cnt;
+    var st=mk[e.n]||{},last=lastWeight(e.n),wv=(st.w!=null?st.w:last),up=(e.w&&last>0&&Number(wv)>last);
+    var pills='<div class="sets">';
+    for(var i=0;i<cnt;i++)pills+='<button class="setpill'+(i<s?" on":"")+'" data-act="setTick" data-ex="'+esc(e.n)+'" data-i="'+i+'">'+(i<s?"✓":(i+1))+'</button>';
+    pills+='</div>';
+    var wrow=e.w
+      ? '<div class="exc-wrow"><div class="exc-wlab">Charge'+(last>0?' · <span class="last">dernier '+num(last)+' kg</span>':'')+(up?' · <span class="up">▲ progrès</span>':'')+'</div>'
+        +'<div class="stepper"><button data-act="w-" data-ex="'+esc(e.n)+'">−</button><div class="wv"><input class="wval" type="number" inputmode="decimal" step="0.5" value="'+num(wv)+'" data-ex="'+esc(e.n)+'"><small>kg</small></div><button data-act="w+" data-ex="'+esc(e.n)+'">＋</button></div></div>'
+      : '';
+    return '<div class="exc '+(isDone?"done":"")+'" data-ex="'+esc(e.n)+'">'
+      +'<div class="exc-top"><div class="exc-name"><h3>'+esc(e.n)+'</h3><div class="t">'+esc(e.t)+'</div></div>'
+      +'<button class="exc-badge" data-act="toggle" data-ex="'+esc(e.n)+'">✓</button></div>'
+      +pills+wrow+'</div>';
   }).join("");
-  // sticky finish bar (injected once)
   var bar=$("finishBar");
   if(!bar){bar=document.createElement("div");bar.className="finish";bar.id="finishBar";document.body.appendChild(bar);}
-  bar.innerHTML='<div class="inner"><div class="prog"><div class="n">'+done+' / '+p.ex.length+'</div><div class="l">exercices cochés</div></div><button class="btn mint" data-act="finish">Terminer</button></div>';
+  bar.innerHTML='<div class="inner"><div class="prog"><div class="n">'+doneSets+' / '+totalSets+'</div><div class="l">séries validées</div></div><button class="btn mint" data-act="finish">Terminer</button></div>';
   bar.style.display=(state.page==="session")?"block":"none";
 }
 function setWeight(exName,delta){
@@ -870,10 +918,24 @@ function setWeight(exName,delta){
 }
 function toggleEx(exName){
   var p=state.program[state.selDay],mk=marksFor(p.id);
-  if(!mk[exName])mk[exName]={};
-  mk[exName].done=!mk[exName].done;
-  if(mk[exName].done&&mk[exName].w==null){var lw=lastWeight(exName);if(lw>0)mk[exName].w=lw;}
+  var e=p.ex.filter(function(x){return x.n===exName;})[0];if(!e)return;
+  var cnt=setCount(e);if(!mk[exName])mk[exName]={};
+  var cur=exSets(mk,e),nowDone=cur<cnt;
+  mk[exName].sets=nowDone?cnt:0;
+  mk[exName].done=nowDone;
+  if(nowDone&&mk[exName].w==null&&e.w){var lw=lastWeight(exName);if(lw>0)mk[exName].w=lw;}
   save();renderSession();
+}
+function setTick(exName,i){
+  var p=state.program[state.selDay],mk=marksFor(p.id);
+  var e=p.ex.filter(function(x){return x.n===exName;})[0];if(!e)return;
+  var cnt=setCount(e);if(!mk[exName])mk[exName]={};
+  var cur=exSets(mk,e),next=(i<cur)?i:i+1;next=Math.max(0,Math.min(cnt,next));
+  var increased=next>cur;
+  mk[exName].sets=next;mk[exName].done=next>=cnt;
+  if(mk[exName].done&&mk[exName].w==null&&e.w){var lw=lastWeight(exName);if(lw>0)mk[exName].w=lw;}
+  save();renderSession();
+  if(increased&&next<cnt)startRest(90);
 }
 function finishSession(){
   var p=state.program[state.selDay],mk=marksFor(p.id);
@@ -1388,6 +1450,7 @@ document.addEventListener("click",function(e){
     case "startNext": state.selDay=state.suggest%state.program.length; showPage("session"); break;
     case "selDay": state.selDay=Number(a.dataset.i); renderSession(); break;
     case "toggle": toggleEx(ex); break;
+    case "setTick": setTick(ex,Number(a.dataset.i)); break;
     case "w-": setWeight(ex,-2.5); break;
     case "w+": setWeight(ex,2.5); break;
     case "rest": startRest(Number(a.dataset.s)); break;
@@ -1544,7 +1607,7 @@ window.EVO_V3_READY=true;
 <script>
 if("serviceWorker" in navigator){
   function registerEvoSW(){
-    navigator.serviceWorker.register("/fitness/sw.js?v=30",{updateViaCache:"none"}).catch(function(e){console.warn("SW:",e);});
+    navigator.serviceWorker.register("/fitness/sw.js?v=32",{updateViaCache:"none"}).catch(function(e){console.warn("SW:",e);});
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",registerEvoSW);
   else registerEvoSW();
