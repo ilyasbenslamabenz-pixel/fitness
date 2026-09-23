@@ -1124,15 +1124,16 @@ function startGeo(){stopGeo();try{geoWatch=navigator.geolocation.watchPosition(o
 function stopGeo(){if(geoWatch!=null&&navigator.geolocation){try{navigator.geolocation.clearWatch(geoWatch);}catch(e){}}geoWatch=null;}
 function onGeo(pos){
   if(!runActive||runPaused)return;
-  var c=pos.coords;
-  if(c.accuracy>40){$("lrGps").textContent="Signal faible · "+Math.round(c.accuracy)+" m";return;}
+  var c=pos.coords,accurate=c.accuracy<=40;
+  $("lrGps").textContent=(accurate?"GPS ok · ":"Signal faible · ")+Math.round(c.accuracy)+" m";
+  if(c.accuracy>120)return; /* trop imprécis même pour l'affichage */
   var pt={lat:c.latitude,lng:c.longitude};
   if(runLastPt){
     var seg=haversine(runLastPt,pt);
-    if(seg>=3&&seg<200){runMeters+=seg;runPts.push(pt);runLastPt=pt;}
-    else if(seg>=200){runLastPt=pt;} /* saut GPS : on resynchronise sans compter */
+    if(accurate&&seg>=3&&seg<200){runMeters+=seg;runPts.push(pt);runLastPt=pt;}
+    else if(accurate&&seg>=200){runLastPt=pt;} /* saut GPS : on resynchronise sans compter */
+    else if(!accurate&&runPts.length<2){runPts.push(pt);} /* montre un premier point même en signal faible */
   }else{runLastPt=pt;runPts.push(pt);}
-  $("lrGps").textContent="GPS ok · "+Math.round(c.accuracy)+" m";
   $("lrMapEmpty").style.display=(mapMode==="leaflet"||runPts.length>1)?"none":"";
   renderRoute();updateLiveUI();
 }
