@@ -7,8 +7,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="EVO">
 <meta name="theme-color" content="#12141A">
-<link rel="icon" type="image/jpeg" href="/fitness/ilyas-icon.jpg">
-<link rel="apple-touch-icon" href="/fitness/ilyas-icon.jpg">
+<link rel="icon" type="image/jpeg" href="/fitness/icon-180.jpg">
+<link rel="apple-touch-icon" href="/fitness/icon-180.jpg">
 <link rel="manifest" href="/fitness/manifest.json">
 <title>EVO Fit Coach</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -284,6 +284,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 .runrow .ri span{font-size:12px;color:var(--muted);display:block}
 .runrow .rp{font-family:var(--display);font-weight:600;font-size:13px;color:var(--mint)}
 .runrow .del{color:var(--faint);font-size:20px;padding:2px 6px}
+.runrow .mapbtn{font-size:16px;padding:2px 6px;opacity:.85}
 #stepsInput{width:170px;font-size:34px}
 .daily-dash{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
 .daily-dash .dd{background:var(--surface);border:1px solid var(--hair);border-radius:14px;padding:12px 8px;text-align:center}
@@ -302,7 +303,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 .lr-title{font-family:var(--display);font-weight:700;font-size:16px}
 .lr-gps{font-size:11.5px;color:var(--muted);background:var(--surface);border:1px solid var(--hair);padding:5px 10px;border-radius:999px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lr-map{position:relative;margin:12px 0 10px;background:#0b0d12;border:1px solid var(--hair);border-radius:16px;width:100%;height:clamp(210px,32vh,300px);min-height:210px;overflow:hidden;display:block;flex:0 0 auto}
-.lr-map #lrMap{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;min-height:0!important;border-radius:15px;overflow:hidden}
+.lr-map #lrMap,.lr-map #runMapEl{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;min-height:0!important;border-radius:15px;overflow:hidden}
 .lr-map .leaflet-container{width:100%!important;height:100%!important;min-height:0!important;border-radius:15px}
 .lr-map svg{position:absolute;inset:0;width:100%;height:100%;display:block}
 .lr-mapempty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--faint);text-align:center;padding:0 28px;z-index:3;pointer-events:none}
@@ -319,7 +320,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 .lr-note{font-size:11.5px;color:var(--faint);text-align:center;margin-top:11px}
 
 /* live run map (Leaflet, modern dark) */
-#lrMap{position:absolute;inset:0;width:100%;height:100%;z-index:1}
+#lrMap,#runMapEl{position:absolute;inset:0;width:100%;height:100%;z-index:1}
 .leaflet-container{background:#0b0d12 !important;font-family:var(--font)}
 .leaflet-tile-pane{filter:saturate(1.05) contrast(1.02)}
 .leaflet-control-attribution{background:rgba(18,20,26,.72) !important;color:var(--faint) !important;font-size:9px !important;padding:1px 6px !important;border-radius:8px 0 0 0}
@@ -568,6 +569,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
     <div class="head"><h2>Profil</h2></div>
     <div class="card">
       <div class="eyebrow">Objectifs</div>
+      <div class="field"><label>Date de début du programme</label><input id="fStartDate" type="date"></div>
       <div class="field"><label>Poids de départ (kg)</label><input id="fStart" type="number" inputmode="decimal"></div>
       <div class="row2"><div class="field"><label>Poids cible (kg)</label><input id="fTarget" type="number" inputmode="decimal"></div>
       <div class="field"><label>Objectif calories</label><input id="fCal" type="number" inputmode="numeric"></div></div>
@@ -667,6 +669,15 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
   <div class="acts"><button class="btn ghost" data-act="runClose">Annuler</button><button class="btn primary" data-act="runSave">Ajouter</button></div>
 </div></div>
 
+<div class="modal" id="runMapModal"><div class="sheet">
+  <h3>Parcours de la course</h3>
+  <div class="lr-map" id="runMapBox" style="margin-top:10px">
+    <div id="runMapEl"></div>
+    <svg id="runMapSvg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" style="display:none"></svg>
+  </div>
+  <div class="acts"><button class="btn ghost" data-act="runMapClose">Fermer</button></div>
+</div></div>
+
 <!-- live GPS run overlay -->
 <div class="liverun" id="liveRunModal">
   <div class="lr-head">
@@ -709,7 +720,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 "use strict";
 var CFG={apiKey:"AIzaSyDgVRLAmyY868I4Vuu_xqXb-TVJqUYeV2I",authDomain:"fitness-f423a.firebaseapp.com",projectId:"fitness-f423a",storageBucket:"fitness-f423a.firebasestorage.app",messagingSenderId:"186607401810",appId:"1:186607401810:web:309ca695d884a6ec96588b"};
 var KEY="evoFitV3", OLDKEY="evoFitCoachV2", BACKUPKEY="evoFitV3_backup";
-var START_DATE="2026-09-07";
+var START_DATE="2026-09-21";
 
 var DEFAULT_PROGRAM=[
  {id:"push",name:"Poussée",short:"Push",icon:"🔥",focus:"Pecs · épaules · triceps",ex:[
@@ -750,7 +761,7 @@ var MENU=[
 
 var state={
   suggest:0, selDay:0,
-  profile:{start:103,target:85,cal:2400},
+  profile:{start:103,target:85,cal:2400,startDate:START_DATE},
   weightHistory:[{d:START_DATE,w:103}],
   program:JSON.parse(JSON.stringify(DEFAULT_PROGRAM)),
   session:{date:today(),marks:{}},
@@ -827,9 +838,10 @@ function merge(p){
   if(p.lastDay)state.lastDay=p.lastDay;
 }
 function normalizeState(){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(state.profile.startDate||""))state.profile.startDate=START_DATE;
   if(!Array.isArray(state.weightHistory))state.weightHistory=[];
   state.weightHistory=state.weightHistory.filter(function(x){return x&&x.d&&isFinite(Number(x.w));}).map(function(x){return {d:x.d,w:Number(x.w)};}).sort(function(a,b){return a.d.localeCompare(b.d);});
-  if(!state.weightHistory.length)state.weightHistory=[{d:START_DATE,w:Number(state.profile.start||103)}];
+  if(!state.weightHistory.length)state.weightHistory=[{d:state.profile.startDate,w:Number(state.profile.start||103)}];
   if(!Array.isArray(state.meals))state.meals=[];
   if(!Array.isArray(state.mealHistory))state.mealHistory=[];
   if(!Array.isArray(state.foodFavorites))state.foodFavorites=[];
@@ -852,7 +864,7 @@ function ensureDay(){
 function marksFor(id){if(!state.session.marks[id])state.session.marks[id]={};return state.session.marks[id];}
 function lastWeight(name){var a=state.perf[name];return a&&a.length?Number(a[a.length-1].w):0;}
 function latestBody(){var a=state.weightHistory;return a.length?Number(a[a.length-1].w):Number(state.profile.start);}
-function weekNo(){var s=new Date(START_DATE+"T12:00:00"),diff=Math.floor((Date.now()-s)/864e5);return Math.min(12,Math.max(1,Math.floor(diff/7)+1));}
+function weekNo(){var s=new Date((state.profile.startDate||START_DATE)+"T12:00:00"),diff=Math.floor((Date.now()-s)/864e5);return Math.max(1,Math.floor(diff/7)+1);}
 
 /* charts */
 function lineChart(vals,color,unit){
@@ -889,7 +901,7 @@ function renderAll(){
   safeRender(renderProgress);
   safeRender(renderMeals);
   safeRender(renderProfile);
-  safeRender(function(){$("weekTag").textContent="Semaine "+weekNo()+"/12";});
+  safeRender(function(){var wn=weekNo();$("weekTag").textContent="Semaine "+wn+(wn<=12?"/12":"");});
 }
 
 function renderToday(){
@@ -1111,7 +1123,10 @@ function renderCardio(){
   var recent=state.runs.slice().sort(function(a,b){return b.d.localeCompare(a.d);}).slice(0,8);
   $("runList").innerHTML=recent.length?recent.map(function(r){
     var pace=(r.dist>0&&r.dur>0)?fmtPace(r.dur/r.dist)+" /km":"—";
-    return '<div class="runrow"><div class="ri"><b>'+num(r.dist)+' km</b><span>'+fmtDate(r.d)+' · '+num(r.dur)+' min</span></div><div class="rp">'+pace+'</div><button class="del" data-act="delRun" data-id="'+esc(r.id||"")+'">×</button></div>';
+    var hasRoute=Array.isArray(r.pts)&&r.pts.length>1;
+    return '<div class="runrow"><div class="ri"><b>'+num(r.dist)+' km</b><span>'+fmtDate(r.d)+' · '+num(r.dur)+' min</span></div><div class="rp">'+pace+'</div>'
+      +(hasRoute?'<button class="mapbtn" data-act="viewRunMap" data-id="'+esc(r.id||"")+'">🗺️</button>':'')
+      +'<button class="del" data-act="delRun" data-id="'+esc(r.id||"")+'">×</button></div>';
   }).join(""):'<div class="empty">Aucune course. Ajoute-en une, ou branche Strava en étape 2.</div>';
 }
 function renderSteps(){
@@ -1182,7 +1197,9 @@ function finishRun(){
   runActive=false;stopGeo();releaseWake();if(runTick){clearInterval(runTick);runTick=null;}runLastPt=null;runLastTime=0;runLastGeoTimestamp=0;
   var km=Math.round(runMeters/10)/100,min=Math.round(runElapsedMs/6000)/10;
   if(km<0.05||min<0.2){toast("Course trop courte, non enregistrée");closeLiveRun();return;}
-  state.runs.push({id:"r"+Date.now()+Math.floor(Math.random()*1000),d:runStartDate,dist:km,dur:min,src:"gps"});
+  var runObj={id:"r"+Date.now()+Math.floor(Math.random()*1000),d:runStartDate,dist:km,dur:min,src:"gps"};
+  if(runPts.length>1)runObj.pts=runPts.slice();
+  state.runs.push(runObj);
   save();closeLiveRun();showPage("progress");renderProgress();toast("Course enregistrée · "+num(km)+" km");
 }
 function discardRun(){if(runActive&&runMeters>50){if(!confirm("Abandonner la course en cours ?"))return;}closeLiveRun();}
@@ -1334,21 +1351,59 @@ function renderRoute(){
   if(mapMode==="leaflet"&&mapReady&&lrMap){$("lrTrace").style.display="none";updateMap();}
   else{$("lrTrace").style.display="";$("lrMapEmpty").style.display=runPts.length>1?"none":"";drawTrace();}
 }
-function drawTrace(){
-  var svg=$("lrTrace");if(!svg)return;
-  if(runPts.length<2){svg.innerHTML="";return;}
-  var lats=runPts.map(function(p){return p.lat;}),lngs=runPts.map(function(p){return p.lng;});
+function drawTraceInto(svg,pts){
+  if(!svg)return;
+  if(!pts||pts.length<2){svg.innerHTML="";return;}
+  var lats=pts.map(function(p){return p.lat;}),lngs=pts.map(function(p){return p.lng;});
   var minLat=Math.min.apply(null,lats),maxLat=Math.max.apply(null,lats),minLng=Math.min.apply(null,lngs),maxLng=Math.max.apply(null,lngs);
   var span=Math.max(1e-5,maxLat-minLat,maxLng-minLng),pad=10,sz=100-2*pad;
   var cLat=(minLat+maxLat)/2,cLng=(minLng+maxLng)/2;
   var X=function(lng){return (pad+((lng-cLng)/span+0.5)*sz).toFixed(1);};
   var Y=function(lat){return (pad+(0.5-(lat-cLat)/span)*sz).toFixed(1);};
-  var dd=runPts.map(function(p,i){return (i?"L":"M")+X(p.lng)+" "+Y(p.lat);}).join(" ");
-  var f=runPts[0],l=runPts[runPts.length-1];
+  var dd=pts.map(function(p,i){return (i?"L":"M")+X(p.lng)+" "+Y(p.lat);}).join(" ");
+  var f=pts[0],l=pts[pts.length-1];
   svg.innerHTML='<path d="'+dd+'" fill="none" stroke="#FF6A3D" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>'
     +'<circle cx="'+X(f.lng)+'" cy="'+Y(f.lat)+'" r="3" fill="#37E0A6"/>'
     +'<circle cx="'+X(l.lng)+'" cy="'+Y(l.lat)+'" r="3.4" fill="#FF6A3D"/>';
 }
+function drawTrace(){drawTraceInto($("lrTrace"),runPts);}
+var rmMap=null,rmLine=null,rmStart=null,rmEnd=null;
+function openRunMap(id){
+  var r=state.runs.find(function(x){return x.id===id;});
+  if(!r||!Array.isArray(r.pts)||r.pts.length<2){toast("Aucun tracé enregistré pour cette course");return;}
+  $("runMapModal").classList.add("on");
+  if(window.L){
+    $("runMapEl").style.display="";$("runMapSvg").style.display="none";
+    setTimeout(function(){
+      if(!rmMap){
+        try{
+          rmMap=L.map("runMapEl",{zoomControl:false,attributionControl:true,dragging:true,preferCanvas:true});
+          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,subdomains:["a","b","c"],attribution:"© OpenStreetMap contributors"}).addTo(rmMap);
+          rmLine=L.polyline([],{color:"#FF6A3D",weight:5,opacity:.95,lineJoin:"round",lineCap:"round"}).addTo(rmMap);
+        }catch(e){rmMap=null;rmLine=null;}
+      }
+      if(rmMap&&rmLine){
+        try{
+          if(rmStart){rmMap.removeLayer(rmStart);rmStart=null;}
+          if(rmEnd){rmMap.removeLayer(rmEnd);rmEnd=null;}
+          var latlngs=r.pts.map(function(p){return [p.lat,p.lng];});
+          rmLine.setLatLngs(latlngs);
+          rmMap.invalidateSize(true);
+          rmMap.fitBounds(L.latLngBounds(latlngs),{padding:[24,24],maxZoom:17});
+          rmStart=L.circleMarker(latlngs[0],{radius:6,color:"#12141A",weight:2,fillColor:"#37E0A6",fillOpacity:1}).addTo(rmMap);
+          rmEnd=L.circleMarker(latlngs[latlngs.length-1],{radius:6,color:"#12141A",weight:2,fillColor:"#FF6A3D",fillOpacity:1}).addTo(rmMap);
+        }catch(e){}
+      }else{
+        $("runMapEl").style.display="none";$("runMapSvg").style.display="";
+        drawTraceInto($("runMapSvg"),r.pts);
+      }
+    },60);
+  }else{
+    $("runMapEl").style.display="none";$("runMapSvg").style.display="";
+    drawTraceInto($("runMapSvg"),r.pts);
+  }
+}
+function closeRunMap(){$("runMapModal").classList.remove("on");}
 function requestWake(){try{if("wakeLock"in navigator&&navigator.wakeLock)navigator.wakeLock.request("screen").then(function(w){wakeLock=w;}).catch(function(){});}catch(e){}}
 function releaseWake(){try{if(wakeLock){wakeLock.release();wakeLock=null;}}catch(e){}}
 function fixLiveMapSize(){if(lrMap&&$("liveRunModal").classList.contains("on")){try{lrMap.invalidateSize();}catch(e){}}}
@@ -1419,6 +1474,7 @@ function stopFasting(){state.fast={active:false,start:null,hours:Number(state.fa
 function toggleFasting(){if(state.fast&&state.fast.active)stopFasting();else startFasting();}
 
 function renderProfile(){
+  $("fStartDate").value=state.profile.startDate||START_DATE;
   $("fStart").value=state.profile.start;$("fTarget").value=state.profile.target;$("fCal").value=state.profile.cal;
   $("fCarbs").value=state.macro.carbs;$("fProt").value=state.macro.protein;$("fFat").value=state.macro.fat;$("fWater").value=state.waterGoal;
   $("progList").innerHTML=state.program.map(function(p){return '<div class="progline"><span class="e">'+p.icon+'</span><div class="n"><b>'+esc(p.name)+'</b><span>'+esc(p.focus)+' · '+p.ex.length+' exercices</span></div></div>';}).join("");
@@ -1589,8 +1645,9 @@ function adjustBodyWeight(delta){var n=Math.round((latestBody()+delta)*10)/10;if
 function saveProfile(){
   var s=Number($("fStart").value),t=Number($("fTarget").value),c=Number($("fCal").value);
   var ca=Number($("fCarbs").value),pr=Number($("fProt").value),fa=Number($("fFat").value),wg=Number($("fWater").value);
+  var sd=$("fStartDate").value;if(!/^\d{4}-\d{2}-\d{2}$/.test(sd))sd=state.profile.startDate||START_DATE;
   if(!isFinite(s)||!isFinite(t)||!isFinite(c)||!isFinite(ca)||!isFinite(pr)||!isFinite(fa)||!isFinite(wg)||s<30||t<30||c<500||wg<0.5||wg>8){toast("Vérifie les objectifs");return;}
-  state.profile={start:s,target:t,cal:c};state.macro={carbs:ca,protein:pr,fat:fa};state.waterGoal=wg;save();renderAll();toast("Objectifs enregistrés");
+  state.profile={start:s,target:t,cal:c,startDate:sd};state.macro={carbs:ca,protein:pr,fat:fa};state.waterGoal=wg;save();renderAll();toast("Objectifs enregistrés");
 }
 
 /* events */
@@ -1644,6 +1701,8 @@ document.addEventListener("click",function(e){
     case "runClose": closeRun(); break;
     case "runSave": saveRun(); break;
     case "delRun": state.runs=state.runs.filter(function(r){return r.id!==a.dataset.id;}); save(); renderProgress(); break;
+    case "viewRunMap": openRunMap(a.dataset.id); break;
+    case "runMapClose": closeRunMap(); break;
     case "openSteps": openSteps(); break;
     case "stepsClose": closeSteps(); break;
     case "stepsSave": saveSteps(); break;
@@ -1771,7 +1830,7 @@ window.EVO_V3_READY=true;
 <script>
 if("serviceWorker" in navigator){
   function registerEvoSW(){
-    navigator.serviceWorker.register("/fitness/sw.js?v=32",{updateViaCache:"none"}).catch(function(e){console.warn("SW:",e);});
+    navigator.serviceWorker.register("/fitness/sw.js?v=33",{updateViaCache:"none"}).catch(function(e){console.warn("SW:",e);});
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",registerEvoSW);
   else registerEvoSW();
