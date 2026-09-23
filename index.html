@@ -2020,7 +2020,9 @@ function setupFirebase(){
 function login(){if(!window.firebase){toast("Cloud indisponible");return;}
   if(cloudUser){firebase.auth().signOut();return;}
   lsSet("evoLoginAttempted","1");
-  firebase.auth().signInWithRedirect(new firebase.auth.GoogleAuthProvider()).catch(function(e){
+  firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider()).then(function(){
+    lsDel("evoLoginAttempted");
+  }).catch(function(e){
     $("authStatus").textContent="Erreur connexion : "+(e&&e.code?e.code:(e&&e.message)||"inconnue");
   });}
 function backup(){if(!cloudUser){toast("Connecte-toi d'abord");return;}
