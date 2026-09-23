@@ -568,6 +568,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
     <div class="head"><h2>Profil</h2></div>
     <div class="card">
       <div class="eyebrow">Objectifs</div>
+      <div class="field"><label>Date de début du programme</label><input id="fStartDate" type="date"></div>
       <div class="field"><label>Poids de départ (kg)</label><input id="fStart" type="number" inputmode="decimal"></div>
       <div class="row2"><div class="field"><label>Poids cible (kg)</label><input id="fTarget" type="number" inputmode="decimal"></div>
       <div class="field"><label>Objectif calories</label><input id="fCal" type="number" inputmode="numeric"></div></div>
@@ -709,7 +710,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 "use strict";
 var CFG={apiKey:"AIzaSyDgVRLAmyY868I4Vuu_xqXb-TVJqUYeV2I",authDomain:"fitness-f423a.firebaseapp.com",projectId:"fitness-f423a",storageBucket:"fitness-f423a.firebasestorage.app",messagingSenderId:"186607401810",appId:"1:186607401810:web:309ca695d884a6ec96588b"};
 var KEY="evoFitV3", OLDKEY="evoFitCoachV2", BACKUPKEY="evoFitV3_backup";
-var START_DATE="2026-09-07";
+var START_DATE="2026-09-21";
 
 var DEFAULT_PROGRAM=[
  {id:"push",name:"Poussée",short:"Push",icon:"🔥",focus:"Pecs · épaules · triceps",ex:[
@@ -750,7 +751,7 @@ var MENU=[
 
 var state={
   suggest:0, selDay:0,
-  profile:{start:103,target:85,cal:2400},
+  profile:{start:103,target:85,cal:2400,startDate:START_DATE},
   weightHistory:[{d:START_DATE,w:103}],
   program:JSON.parse(JSON.stringify(DEFAULT_PROGRAM)),
   session:{date:today(),marks:{}},
@@ -827,9 +828,10 @@ function merge(p){
   if(p.lastDay)state.lastDay=p.lastDay;
 }
 function normalizeState(){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(state.profile.startDate||""))state.profile.startDate=START_DATE;
   if(!Array.isArray(state.weightHistory))state.weightHistory=[];
   state.weightHistory=state.weightHistory.filter(function(x){return x&&x.d&&isFinite(Number(x.w));}).map(function(x){return {d:x.d,w:Number(x.w)};}).sort(function(a,b){return a.d.localeCompare(b.d);});
-  if(!state.weightHistory.length)state.weightHistory=[{d:START_DATE,w:Number(state.profile.start||103)}];
+  if(!state.weightHistory.length)state.weightHistory=[{d:state.profile.startDate,w:Number(state.profile.start||103)}];
   if(!Array.isArray(state.meals))state.meals=[];
   if(!Array.isArray(state.mealHistory))state.mealHistory=[];
   if(!Array.isArray(state.foodFavorites))state.foodFavorites=[];
@@ -852,7 +854,7 @@ function ensureDay(){
 function marksFor(id){if(!state.session.marks[id])state.session.marks[id]={};return state.session.marks[id];}
 function lastWeight(name){var a=state.perf[name];return a&&a.length?Number(a[a.length-1].w):0;}
 function latestBody(){var a=state.weightHistory;return a.length?Number(a[a.length-1].w):Number(state.profile.start);}
-function weekNo(){var s=new Date(START_DATE+"T12:00:00"),diff=Math.floor((Date.now()-s)/864e5);return Math.min(12,Math.max(1,Math.floor(diff/7)+1));}
+function weekNo(){var s=new Date((state.profile.startDate||START_DATE)+"T12:00:00"),diff=Math.floor((Date.now()-s)/864e5);return Math.min(12,Math.max(1,Math.floor(diff/7)+1));}
 
 /* charts */
 function lineChart(vals,color,unit){
@@ -1419,6 +1421,7 @@ function stopFasting(){state.fast={active:false,start:null,hours:Number(state.fa
 function toggleFasting(){if(state.fast&&state.fast.active)stopFasting();else startFasting();}
 
 function renderProfile(){
+  $("fStartDate").value=state.profile.startDate||START_DATE;
   $("fStart").value=state.profile.start;$("fTarget").value=state.profile.target;$("fCal").value=state.profile.cal;
   $("fCarbs").value=state.macro.carbs;$("fProt").value=state.macro.protein;$("fFat").value=state.macro.fat;$("fWater").value=state.waterGoal;
   $("progList").innerHTML=state.program.map(function(p){return '<div class="progline"><span class="e">'+p.icon+'</span><div class="n"><b>'+esc(p.name)+'</b><span>'+esc(p.focus)+' · '+p.ex.length+' exercices</span></div></div>';}).join("");
@@ -1589,8 +1592,9 @@ function adjustBodyWeight(delta){var n=Math.round((latestBody()+delta)*10)/10;if
 function saveProfile(){
   var s=Number($("fStart").value),t=Number($("fTarget").value),c=Number($("fCal").value);
   var ca=Number($("fCarbs").value),pr=Number($("fProt").value),fa=Number($("fFat").value),wg=Number($("fWater").value);
+  var sd=$("fStartDate").value;if(!/^\d{4}-\d{2}-\d{2}$/.test(sd))sd=state.profile.startDate||START_DATE;
   if(!isFinite(s)||!isFinite(t)||!isFinite(c)||!isFinite(ca)||!isFinite(pr)||!isFinite(fa)||!isFinite(wg)||s<30||t<30||c<500||wg<0.5||wg>8){toast("Vérifie les objectifs");return;}
-  state.profile={start:s,target:t,cal:c};state.macro={carbs:ca,protein:pr,fat:fa};state.waterGoal=wg;save();renderAll();toast("Objectifs enregistrés");
+  state.profile={start:s,target:t,cal:c,startDate:sd};state.macro={carbs:ca,protein:pr,fat:fa};state.waterGoal=wg;save();renderAll();toast("Objectifs enregistrés");
 }
 
 /* events */
