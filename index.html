@@ -968,11 +968,11 @@ function renderMeals(){
   var glasses=Math.min(10,Math.round(Number(wt.ml||0)/waterStep));$("waterGlasses").innerHTML=Array.from({length:10},function(_,i){return '<div class="glass"><button data-act="waterAdd" data-amount="'+(i<glasses?(-waterStep):waterStep)+'">'+(i<glasses?"✓":"＋")+'</button></div>';}).join("");
   $("bodyWeight").textContent=num(latestBody())+" kg";$("bodyTarget").textContent=num(state.profile.target||85)+" kg";
   var tv=valToday(state.steps),ev=valToday(state.energy);$("mealSteps").textContent=tv?Number(tv).toLocaleString("fr-CH"):"—";$("mealRuns").textContent=state.runs.length;$("mealEnergy").textContent=ev||"—";
-  $("mealJournal").innerHTML=state.meals.length?state.meals.map(function(m,i){return '<div class="meal"><div class="mi"><b>'+esc(m.name)+'</b><div class="d">'+esc(m.type||"Repas")+' · '+num(m.qty||100)+' g · '+num(m.protein||0)+' g prot.</div></div><div class="kc">'+Math.round(Number(m.kcal||0))+' kcal</div><button class="del" data-act="delMeal" data-i="'+i+'">×</button></div>';}).join(""):'<div class="empty">Aucun aliment enregistré aujourd'hui.</div>';
-  var idx=(new Date().getDay()+6)%7;$("weeklyMenu").innerHTML=MENU.map(function(d,i){var dk=d[1].reduce(function(s,m){var x=m[2].match(/(\\d+)\\s*kcal/);return s+(x?Number(x[1]):0);},0);return '<div class="menuday '+(i===idx?"today":"")+'"><div class="mh"><b>'+d[0]+(i===idx?" · aujourd'hui":"")+'</b><span style="color:var(--muted)">'+dk+' kcal</span></div>'+d[1].map(function(m,j){return '<div class="mm"><div class="mt"><span>'+esc(m[0])+'</span><span style="color:var(--muted)">'+esc(m[2])+'</span></div><div class="md">'+esc(m[1])+'</div><button class="add" data-act="menuAdd" data-d="'+i+'" data-m="'+j+'">＋ Ajouter au journal</button></div>';}).join("")+'</div>';}).join("");
+  $("mealJournal").innerHTML=state.meals.length?state.meals.map(function(m,i){return '<div class="meal"><div class="mi"><b>'+esc(m.name)+'</b><div class="d">'+esc(m.type||"Repas")+' · '+num(m.qty||100)+' g · '+num(m.protein||0)+' g prot.</div></div><div class="kc">'+Math.round(Number(m.kcal||0))+' kcal</div><button class="del" data-act="delMeal" data-i="'+i+'">×</button></div>';}).join(""):'<div class="empty">Aucun aliment enregistré aujourd\'hui.</div>';
+  var idx=(new Date().getDay()+6)%7;$("weeklyMenu").innerHTML=MENU.map(function(d,i){var dk=d[1].reduce(function(s,m){var x=m[2].match(/(\d+)\s*kcal/);return s+(x?Number(x[1]):0);},0);return '<div class="menuday '+(i===idx?"today":"")+'"><div class="mh"><b>'+d[0]+(i===idx?" · aujourd'hui":"")+'</b><span style="color:var(--muted)">'+dk+' kcal</span></div>'+d[1].map(function(m,j){return '<div class="mm"><div class="mt"><span>'+esc(m[0])+'</span><span style="color:var(--muted)">'+esc(m[2])+'</span></div><div class="md">'+esc(m[1])+'</div><button class="add" data-act="menuAdd" data-d="'+i+'" data-m="'+j+'">＋ Ajouter au journal</button></div>';}).join("")+'</div>';}).join("");
 }
 function ring(svg,frac,color,center){
-  var p=Math.max(0,Math.min(1,Number(frac)||0)),parts=String(center).split("\\n");
+  var p=Math.max(0,Math.min(1,Number(frac)||0)),parts=String(center).split("\n");
   svg.setAttribute("viewBox","0 0 100 62");
   svg.innerHTML='<path d="M 8 50 A 42 42 0 0 1 92 50" fill="none" stroke="#3c4145" stroke-width="9" stroke-linecap="round"/><path d="M 8 50 A 42 42 0 0 1 92 50" fill="none" stroke="'+color+'" stroke-width="9" stroke-linecap="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="'+(100-p*100)+'"/><text x="50" y="35" text-anchor="middle" fill="#F2F3F5" font-family="Space Grotesk" font-weight="700" font-size="18">'+parts[0]+'</text>'+(parts[1]?'<text x="50" y="48" text-anchor="middle" fill="#BFC5D1" font-size="8.5">'+parts[1]+'</text>':'');
 }
@@ -1067,7 +1067,7 @@ function offVal(n,keys){
   return 0;
 }
 async function lookupBarcode(code){
-  code=String(code||"").replace(/\\D/g,"");
+  code=String(code||"").replace(/\D/g,"");
   if(code.length<8){$("scanStatus").textContent="Code-barres invalide.";barcodeBusy=false;return;}
   $("scanStatus").textContent="Recherche du produit…";$("scanProduct").classList.remove("on");
   try{
