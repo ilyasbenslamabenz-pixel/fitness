@@ -708,7 +708,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 (function(){
 "use strict";
 var CFG={apiKey:"AIzaSyDgVRLAmyY868I4Vuu_xqXb-TVJqUYeV2I",authDomain:"fitness-f423a.firebaseapp.com",projectId:"fitness-f423a",storageBucket:"fitness-f423a.firebasestorage.app",messagingSenderId:"186607401810",appId:"1:186607401810:web:309ca695d884a6ec96588b"};
-var KEY="evoFitV3", OLDKEY="evoFitCoachV2";
+var KEY="evoFitV3", OLDKEY="evoFitCoachV2", BACKUPKEY="evoFitV3_backup";
 var START_DATE="2026-09-07";
 
 var DEFAULT_PROGRAM=[
@@ -778,11 +778,27 @@ function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
 function $(id){return document.getElementById(id);}
 function toast(m){var el=$("toast");el.textContent=m;el.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){el.hidden=true;},2000);}
 
-function save(){lsSet(KEY,JSON.stringify(state));}
+function save(){
+  try{
+    var payload=JSON.stringify(state);
+    lsSet(KEY,payload);
+    lsSet(BACKUPKEY,payload);
+  }catch(e){}
+}
 function load(){
-  var raw=lsGet(KEY);
-  if(raw){try{var p=JSON.parse(raw);if(p&&typeof p==="object")merge(p);}catch(e){}}
-  else{ // migrate body weight from the old app if present
+  var raw=lsGet(KEY),loaded=false;
+  if(raw){
+    try{var p=JSON.parse(raw);if(p&&typeof p==="object"){merge(p);loaded=true;}}
+    catch(e){}
+  }
+  if(!loaded){
+    var backup=lsGet(BACKUPKEY);
+    if(backup){
+      try{var b=JSON.parse(backup);if(b&&typeof b==="object"){merge(b);loaded=true;lsSet(KEY,backup);}}
+      catch(e){}
+    }
+  }
+  if(!loaded){
     var old=lsGet(OLDKEY);
     if(old){try{var o=JSON.parse(old);
       if(o&&Array.isArray(o.weightHistory)&&o.weightHistory.length)state.weightHistory=o.weightHistory.slice();
@@ -1125,7 +1141,7 @@ function saveRun(){
   save();closeRun();renderProgress();toast("Course ajoutée");
 }
 /* ===== live GPS run tracking ===== */
-var geoWatch=null,geoRetryTimer=null,geoRetryCount=0,runActive=false,runPaused=false;
+var geoWatch=null,geoRetryTimer=null,geoStaleTimer=null,geoRetryCount=0,runActive=false,runPaused=false;
 var runMeters=0,runElapsedMs=0,runSegStart=0,runLastPt=null,runLastTime=0,runLastGeoTimestamp=0,runPts=[],runTick=null,wakeLock=null,runStartDate=today();
 var lrMap=null,lrLine=null,lrHead=null,lrStart=null,mapReady=false,mapMode="svg",mapCentered=false;
 function fmtClock(ms){var s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;return (h>0?h+":"+pad(m):String(m))+":"+pad(sec);}
@@ -1173,13 +1189,21 @@ function discardRun(){if(runActive&&runMeters>50){if(!confirm("Abandonner la cou
 function startGeo(){
   if(!runActive||runPaused||!navigator.geolocation)return;
   if(geoRetryTimer){clearTimeout(geoRetryTimer);geoRetryTimer=null;}
+  if(geoStaleTimer){clearTimeout(geoStaleTimer);geoStaleTimer=null;}
   if(geoWatch!=null)stopGeo();
   try{
     geoWatch=navigator.geolocation.watchPosition(onGeo,onGeoErr,{enableHighAccuracy:true,maximumAge:500,timeout:15000});
+    geoStaleTimer=setTimeout(function(){
+      if(runActive&&!runPaused){
+        $("lrGps").textContent="GPS en recherche…";
+        startGeo();
+      }
+    },14000);
   }catch(e){$("lrGps").textContent="GPS inaccessible";}
 }
 function stopGeo(){
   if(geoRetryTimer){clearTimeout(geoRetryTimer);geoRetryTimer=null;}
+  if(geoStaleTimer){clearTimeout(geoStaleTimer);geoStaleTimer=null;}
   if(geoWatch!=null&&navigator.geolocation){try{navigator.geolocation.clearWatch(geoWatch);}catch(e){}}
   geoWatch=null;
 }
@@ -1220,6 +1244,13 @@ function onGeo(pos){
     runLastPt=pt;runLastTime=now;runPts.push(pt);
   }
   geoRetryCount=0;
+  if(geoStaleTimer){clearTimeout(geoStaleTimer);geoStaleTimer=null;}
+  geoStaleTimer=setTimeout(function(){
+    if(runActive&&!runPaused){
+      $("lrGps").textContent="GPS en recherche…";
+      startGeo();
+    }
+  },14000);
   $("lrGps").textContent="GPS ok · "+Math.round(acc)+" m";
   $("lrMapEmpty").style.display=(mapMode==="leaflet"||runPts.length>1)?"none":"";
   renderRoute();updateLiveUI();
@@ -1243,12 +1274,21 @@ function updateLiveUI(){
 function initMap(){
   if(lrMap||!window.L)return;
   try{
-    lrMap=L.map("lrMap",{zoomControl:false,attributionControl:true,dragging:true});
+    lrMap=L.map("lrMap",{zoomControl:false,attributionControl:true,dragging:true,preferCanvas:true});
     lrMap.setView([46.2044,6.1432],15);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,subdomains:["a","b","c"],attribution:"© OpenStreetMap contributors"}).addTo(lrMap);
+    var tiles=L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,subdomains:["a","b","c"],attribution:"© OpenStreetMap contributors"});
+    tiles.on("tileerror",function(){
+      var g=$("lrGps");if(g&&!runActive)g.textContent="Carte indisponible";
+    });
+    tiles.addTo(lrMap);
     lrLine=L.polyline([],{color:"#FF6A3D",weight:5,opacity:.95,lineJoin:"round",lineCap:"round"}).addTo(lrMap);
     setTimeout(function(){try{lrMap.invalidateSize(true);}catch(e){}},120);
-  }catch(e){lrMap=null;lrLine=null;}
+    setTimeout(function(){try{lrMap.invalidateSize(true);}catch(e){}},700);
+  }catch(e){
+    lrMap=null;lrLine=null;mapReady=false;mapMode="svg";
+    $("lrMap").style.display="none";$("lrTrace").style.display="";
+    $("lrMapEmpty").style.display="";
+  }
 }
 function resetMapLayers(){
   try{if(lrHead&&lrMap)lrMap.removeLayer(lrHead);}catch(e){}
@@ -1703,6 +1743,13 @@ window.EVO_V3_READY=true;
       console.error("EVO runtime error:",e.error||e.message);
       installFallback();
     }
+  });
+  window.addEventListener("unhandledrejection",function(e){
+    console.error("EVO promise error:",e.reason||e);
+    try{
+      var t=document.getElementById("toast");
+      if(t){t.textContent="Un petit bug a été récupéré automatiquement.";t.hidden=false;setTimeout(function(){t.hidden=true;},2200);}
+    }catch(err){}
   });
 })();
 </script>
