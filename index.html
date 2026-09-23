@@ -609,7 +609,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
   <h3>Routine de jeûne</h3>
   <div class="sub">Choisis une durée puis démarre ou arrête ton jeûne.</div>
   <div class="field"><label>Durée</label><select id="fastHours"><option value="12">12 h</option><option value="14">14 h</option><option value="16" selected>16 h</option><option value="18">18 h</option><option value="20">20 h</option></select></div>
-  <div class="acts"><button class="btn ghost" data-act="fastClose">Fermer</button><button class="btn primary" data-act="fastStart">Démarrer</button></div>
+  <div class="acts"><button class="btn ghost" data-act="fastClose">Fermer</button><button class="btn primary" data-act="fastStart" id="fastActBtn">Démarrer</button></div>
 </div></div>
 
 <div class="modal" id="runModal"><div class="sheet">
@@ -774,7 +774,7 @@ function normalizeState(){
   if(!Array.isArray(state.mealHistory))state.mealHistory=[];
   if(!Array.isArray(state.foodFavorites))state.foodFavorites=[];
   if(!state.macro)state.macro={carbs:240,protein:180,fat:80};
-  state.macro={carbs:Number(state.macro.carbs||240),protein:Number(state.macro.protein||180),fat:Number(state.macro.fat||80)};
+  state.macro={carbs:fnum(state.macro.carbs,240),protein:fnum(state.macro.protein,180),fat:fnum(state.macro.fat,80)};
   state.waterGoal=Number(state.waterGoal||3);if(state.waterGoal<0.5||state.waterGoal>8)state.waterGoal=3;
   if(!state.fast)state.fast={active:false,start:null,hours:16};
   state.fast.hours=Number(state.fast.hours||16);
@@ -1063,7 +1063,7 @@ function renderEnergy(){
   var faces=["😫","😕","😐","🙂","🔥"],cur=valToday(state.energy),el=$("efaces");
   if(el)el.innerHTML=faces.map(function(f,i){return '<button class="'+(cur===i+1?"on":"")+'" data-act="energy" data-v="'+(i+1)+'">'+f+'</button>';}).join("");
 }
-function setEnergy(v){upsertV(state.energy,today(),v);save();renderEnergy();toast("Forme du jour enregistrée");}
+function setEnergy(v){upsertV(state.energy,today(),v);save();renderEnergy();renderToday();toast("Forme du jour enregistrée");}
 function openRun(){$("runDist").value="";$("runDur").value="";$("runDate").value=today();$("runPace").textContent="";$("runModal").classList.add("on");}
 function closeRun(){$("runModal").classList.remove("on");}
 function updateRunPace(){var di=Number($("runDist").value),du=Number($("runDur").value);$("runPace").textContent=(di>0&&du>0)?("Allure "+fmtPace(du/di)+" /km"):"";}
@@ -1205,11 +1205,11 @@ window.addEventListener("orientationchange",function(){setTimeout(fixLiveMapSize
 
 function openSteps(){var t=valToday(state.steps);$("stepsInput").value=t||"";$("stepsModal").classList.add("on");}
 function closeSteps(){$("stepsModal").classList.remove("on");}
-function saveSteps(){var v=Math.round(Number($("stepsInput").value));if(!(v>=0)||!isFinite(v)){toast("Nombre invalide");return;}upsertV(state.steps,today(),v);save();closeSteps();renderProgress();toast("Pas enregistrés");}
+function saveSteps(){var v=Math.round(Number($("stepsInput").value));if(!(v>=0)||!isFinite(v)){toast("Nombre invalide");return;}upsertV(state.steps,today(),v);save();closeSteps();renderProgress();renderToday();toast("Pas enregistrés");}
 
 function renderMeals(){
   var kcal=state.meals.reduce(function(s,m){return s+Number(m.kcal||0);},0),prot=state.meals.reduce(function(s,m){return s+Number(m.protein||0);},0),carbs=state.meals.reduce(function(s,m){return s+Number(m.carbs||0);},0),fat=state.meals.reduce(function(s,m){return s+Number(m.fat||0);},0);
-  var goal=Number(state.profile.cal||2400),carbGoal=Number(state.macro&&state.macro.carbs||240),protGoal=Number(state.macro&&state.macro.protein||180),fatGoal=Number(state.macro&&state.macro.fat||80);
+  var goal=Number(state.profile.cal||2400),carbGoal=fnum(state.macro.carbs,240),protGoal=fnum(state.macro.protein,180),fatGoal=fnum(state.macro.fat,80);
   ring($("calRing"),Math.min(1,kcal/goal),"#FF6A3D",Math.round(kcal)+"\n/ "+goal+" kcal");
   $("mCarbs").textContent=Math.round(carbs*10)/10;$("mProt").textContent=Math.round(prot*10)/10;$("mFat").textContent=Math.round(fat*10)/10;
   $("mCarbsBar").style.width=Math.min(100,carbs/carbGoal*100)+"%";$("mProtBar").style.width=Math.min(100,prot/protGoal*100)+"%";$("mFatBar").style.width=Math.min(100,fat/fatGoal*100)+"%";
@@ -1253,17 +1253,18 @@ function useFavorite(i){
 }
 function deleteFavorite(i){state.foodFavorites.splice(i,1);save();openFavorites();}
 function renderFasting(){
-  var title=$("fastTitle"),txt=$("fastText"),bar=$("fastProgress"),btn=$("fastBtn");if(!title||!txt||!bar||!btn)return;
+  var title=$("fastTitle"),txt=$("fastText"),bar=$("fastProgress"),btn=$("fastBtn"),actBtn=$("fastActBtn");if(!title||!txt||!bar||!btn)return;
   var hours=Number(state.fast.hours||16);title.textContent="Routine "+hours+":8";
-  if(!state.fast.active||!state.fast.start){txt.textContent="Aucun jeûne en cours";bar.style.width="0%";btn.textContent="Démarrer";return;}
+  if(!state.fast.active||!state.fast.start){txt.textContent="Aucun jeûne en cours";bar.style.width="0%";btn.textContent="Démarrer";if(actBtn)actBtn.textContent="Démarrer";return;}
   var elapsed=Math.max(0,Date.now()-Number(state.fast.start)),total=hours*3600000,pct=Math.min(100,elapsed/total*100);
   var left=Math.max(0,total-elapsed),lh=Math.floor(left/3600000),lm=Math.floor((left%3600000)/60000);
   txt.textContent=left?("Encore "+lh+" h "+String(lm).padStart(2,"0")):"Jeûne terminé 🎉";
-  bar.style.width=pct+"%";btn.textContent=left?"Arrêter":"Terminé";
+  bar.style.width=pct+"%";btn.textContent=left?"Arrêter":"Terminé";if(actBtn)actBtn.textContent="Arrêter";
 }
 function openFasting(){renderFasting();$("fastModal").classList.add("on");}
 function startFasting(){var h=Number($("fastHours").value||16);state.fast={active:true,start:Date.now(),hours:h};save();$("fastModal").classList.remove("on");renderFasting();toast("Jeûne démarré · "+h+" h");}
-function stopFasting(){state.fast={active:false,start:null,hours:Number(state.fast.hours||16)};save();renderFasting();toast("Jeûne arrêté");}
+function stopFasting(){state.fast={active:false,start:null,hours:Number(state.fast.hours||16)};save();$("fastModal").classList.remove("on");renderFasting();toast("Jeûne arrêté");}
+function toggleFasting(){if(state.fast&&state.fast.active)stopFasting();else startFasting();}
 
 function renderProfile(){
   $("fStart").value=state.profile.start;$("fTarget").value=state.profile.target;$("fCal").value=state.profile.cal;
@@ -1431,7 +1432,7 @@ function restore(){if(!cloudUser){toast("Connecte-toi d'abord");return;}
     merge(d);save();renderAll();toast("Données restaurées");}).catch(function(){toast("Restauration impossible");});}
 function resetAll(){if(!confirm("Effacer toutes les données locales ?"))return;lsDel(KEY);location.reload();}
 
-function addWater(amount){var wt=state.water||{date:today(),ml:0};if(wt.date!==today())wt={date:today(),ml:0};var goalMl=Math.max(500,Number(state.waterGoal||3)*1000);wt.ml=Math.max(0,Math.min(goalMl,Number(wt.ml||0)+Number(amount||300)));state.water=wt;save();renderMeals();toast((amount>=0?"+":"")+amount+" ml d’eau");}
+function addWater(amount){var wt=state.water||{date:today(),ml:0};if(wt.date!==today())wt={date:today(),ml:0};var goalMl=Math.max(500,Number(state.waterGoal||3)*1000);wt.ml=Math.max(0,Math.min(goalMl,Number(wt.ml||0)+Number(amount||300)));state.water=wt;save();renderMeals();renderToday();toast((amount>=0?"+":"")+amount+" ml d’eau");}
 function adjustBodyWeight(delta){var n=Math.round((latestBody()+delta)*10)/10;if(n<30||n>350)return;var d=today(),h=state.weightHistory,ix=h.findIndex(function(x){return x.d===d;});if(ix>=0)h[ix].w=n;else h.push({d:d,w:n});h.sort(function(a,b){return a.d.localeCompare(b.d);});save();renderMeals();renderToday();toast("Poids : "+num(n)+" kg");}
 function saveProfile(){
   var s=Number($("fStart").value),t=Number($("fTarget").value),c=Number($("fCal").value);
@@ -1475,7 +1476,7 @@ document.addEventListener("click",function(e){
     case "bodyWeightPlus": adjustBodyWeight(0.1); break;
     case "fasting": openFasting(); break;
     case "fastClose": $("fastModal").classList.remove("on"); break;
-    case "fastStart": startFasting(); break;
+    case "fastStart": toggleFasting(); break;
     case "scanOpen": openScanner(); break;
     case "scanClose": closeScanner(); break;
     case "scanLookup": lookupBarcode(document.getElementById("manualBarcode").value); break;
