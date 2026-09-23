@@ -1991,6 +1991,9 @@ async function startCamera(){
 function setupFirebase(){
   if(!window.firebase)return;
   try{firebase.initializeApp(CFG);
+    firebase.auth().getRedirectResult().catch(function(e){
+      toast("Connexion impossible"+(e&&e.code?" ("+e.code+")":""));
+    });
     firebase.auth().onAuthStateChanged(function(u){
       var justSignedIn=!cloudUser&&u;
       cloudUser=u;
@@ -2009,7 +2012,9 @@ function setupFirebase(){
 }
 function login(){if(!window.firebase){toast("Cloud indisponible");return;}
   if(cloudUser){firebase.auth().signOut();return;}
-  firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(function(){toast("Connexion impossible");});}
+  firebase.auth().signInWithRedirect(new firebase.auth.GoogleAuthProvider()).catch(function(e){
+    toast("Connexion impossible"+(e&&e.code?" ("+e.code+")":""));
+  });}
 function backup(){if(!cloudUser){toast("Connecte-toi d'abord");return;}
   firebase.firestore().collection("users").doc(cloudUser.uid).set({appData:state,updatedAt:Date.now()},{merge:true})
     .then(function(){toast("Sauvegarde effectuée");}).catch(function(){toast("Sauvegarde impossible");});}
