@@ -1,8 +1,8 @@
-const CACHE='evo-fit-coach-v26';
+const CACHE='evo-fit-coach-v27';
 
 self.addEventListener('install',e=>e.waitUntil(
   caches.open(CACHE)
-    .then(c=>c.addAll(['./','./index.html','./manifest.json','./icon.svg','./ilyas-icon.jpg']))
+    .then(c=>c.addAll(['./','./index.html','./manifest.json','./icon-180.jpg','./icon-512.jpg']))
     .then(()=>self.skipWaiting())
 ));
 

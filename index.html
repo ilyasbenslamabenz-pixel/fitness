@@ -7,8 +7,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="EVO">
 <meta name="theme-color" content="#12141A">
-<link rel="icon" type="image/jpeg" href="/fitness/ilyas-icon.jpg">
-<link rel="apple-touch-icon" href="/fitness/ilyas-icon.jpg">
+<link rel="icon" type="image/jpeg" href="/fitness/icon-180.jpg">
+<link rel="apple-touch-icon" href="/fitness/icon-180.jpg">
 <link rel="manifest" href="/fitness/manifest.json">
 <title>EVO Fit Coach</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1830,7 +1830,7 @@ window.EVO_V3_READY=true;
 <script>
 if("serviceWorker" in navigator){
   function registerEvoSW(){
-    navigator.serviceWorker.register("/fitness/sw.js?v=32",{updateViaCache:"none"}).catch(function(e){console.warn("SW:",e);});
+    navigator.serviceWorker.register("/fitness/sw.js?v=33",{updateViaCache:"none"}).catch(function(e){console.warn("SW:",e);});
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",registerEvoSW);
   else registerEvoSW();
