@@ -1991,13 +1991,20 @@ async function startCamera(){
 function setupFirebase(){
   if(!window.firebase)return;
   try{firebase.initializeApp(CFG);
-    firebase.auth().getRedirectResult().catch(function(e){
-      toast("Connexion impossible"+(e&&e.code?" ("+e.code+")":""));
+    firebase.auth().getRedirectResult().then(function(r){
+      if(!cloudUser&&!(r&&r.user)&&lsGet("evoLoginAttempted")){
+        $("authStatus").textContent="Retour de connexion sans session (redirect perdu)";
+      }
+      lsDel("evoLoginAttempted");
+    }).catch(function(e){
+      $("authStatus").textContent="Erreur connexion : "+(e&&e.code?e.code:(e&&e.message)||"inconnue");
+      lsDel("evoLoginAttempted");
     });
     firebase.auth().onAuthStateChanged(function(u){
-      var justSignedIn=!cloudUser&&u;
+      var wasSignedIn=!!cloudUser, justSignedIn=!wasSignedIn&&u;
       cloudUser=u;
-      $("authStatus").textContent=u?("Connecté · "+(u.email||"Google")):"Non connecté";
+      if(u){lsDel("evoLoginAttempted");$("authStatus").textContent="Connecté · "+(u.email||"Google");}
+      else if(wasSignedIn){$("authStatus").textContent="Non connecté";}
       $("loginBtn").textContent=u?"Se déconnecter":"Se connecter";
       if(justSignedIn&&!autoRestoreAttempted){
         autoRestoreAttempted=true;
@@ -2012,8 +2019,9 @@ function setupFirebase(){
 }
 function login(){if(!window.firebase){toast("Cloud indisponible");return;}
   if(cloudUser){firebase.auth().signOut();return;}
+  lsSet("evoLoginAttempted","1");
   firebase.auth().signInWithRedirect(new firebase.auth.GoogleAuthProvider()).catch(function(e){
-    toast("Connexion impossible"+(e&&e.code?" ("+e.code+")":""));
+    $("authStatus").textContent="Erreur connexion : "+(e&&e.code?e.code:(e&&e.message)||"inconnue");
   });}
 function backup(){if(!cloudUser){toast("Connecte-toi d'abord");return;}
   firebase.firestore().collection("users").doc(cloudUser.uid).set({appData:state,updatedAt:Date.now()},{merge:true})
