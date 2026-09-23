@@ -638,8 +638,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 <div class="modal" id="mealModal"><div class="sheet">
   <h3>Ajouter un repas</h3>
   <div class="sub">Estime au plus proche, la régularité prime sur la précision.</div>
-  <div class="field"><label>Aliment</label><input id="foodName" placeholder="Poulet + riz, ou nom d'un produit"></div>
-  <button class="btn" style="width:100%;margin-top:8px" data-act="foodSearch">🔍 Rechercher en ligne (Migros, Coop, Denner…)</button>
+  <div class="field"><label>Aliment</label><input id="foodName" placeholder="Poulet + riz, ou nom d'un produit" autocomplete="off"></div>
   <div id="foodSearchResults" class="food-search-results"></div>
   <div class="row2"><div class="field"><label>Quantité (g / ml)</label><input id="foodQty" type="number" inputmode="decimal" step="1" placeholder="100"></div>
   <div class="field"><label>Calories</label><input id="foodKcal" type="number" inputmode="numeric" placeholder="500"></div></div>
@@ -648,8 +647,6 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
   <div class="field"><label>Glucides (g)</label><input id="foodCarbs" type="number" inputmode="decimal" placeholder="50"></div></div>
   <div class="row2"><div class="field"><label>Lipides (g)</label><input id="foodFat" type="number" inputmode="decimal" placeholder="15"></div><div></div></div>
   <div class="field"><label>Moment</label><select id="foodType"><option>Petit-déjeuner</option><option>Déjeuner</option><option>Dîner</option><option>Collation</option></select></div>
-  <button class="btn mint" style="width:100%;margin-top:8px" data-act="foodPhotoOpen" id="foodPhotoBtn">📸 Analyser une photo du plat</button>
-  <input type="file" id="foodPhotoInput" accept="image/*" capture="environment" style="display:none">
   <div class="row2"><button class="btn" data-act="saveFavorite">⭐ Enregistrer aliment</button><button class="btn mint" data-act="scanOpen">📷 Scanner</button></div>
   <div class="acts"><button class="btn ghost" data-act="mClose">Annuler</button><button class="btn primary" data-act="mSave">Ajouter</button></div>
 </div></div>
@@ -1734,50 +1731,6 @@ function ring(svg,frac,color,center){
 }
 function addMealObj(o){o.date=today();o.qty=Number(o.qty||100);state.meals.push(o);save();renderMeals();renderToday();}
 function currentFoodFromForm(){return {name:$("foodName").value.trim(),kcal:fnum($("foodKcal").value,0),protein:fnum($("foodProt").value,0),carbs:fnum($("foodCarbs").value,0),fat:fnum($("foodFat").value,0),qty:fnum($("foodQty").value,100),type:$("foodType").value};}
-/* photo -> estimation calorique via Cloudflare Worker (Claude vision) */
-var FOOD_ANALYZE_WORKER_URL="";
-function openFoodPhotoPicker(){
-  if(!cloudUser){toast("Connecte-toi (onglet Profil) pour utiliser l'analyse photo");return;}
-  if(!FOOD_ANALYZE_WORKER_URL){toast("Analyse photo pas encore configurée");return;}
-  $("foodPhotoInput").click();
-}
-function resizeImageToBase64(file,maxDim,quality){
-  return new Promise(function(resolve,reject){
-    var reader=new FileReader();
-    reader.onload=function(e){
-      var img=new Image();
-      img.onload=function(){
-        var w=img.width,h=img.height;
-        if(w>maxDim||h>maxDim){if(w>h){h=Math.round(h*maxDim/w);w=maxDim;}else{w=Math.round(w*maxDim/h);h=maxDim;}}
-        var canvas=document.createElement("canvas");canvas.width=w;canvas.height=h;
-        canvas.getContext("2d").drawImage(img,0,0,w,h);
-        resolve(canvas.toDataURL("image/jpeg",quality).split(",")[1]);
-      };
-      img.onerror=reject;img.src=e.target.result;
-    };
-    reader.onerror=reject;reader.readAsDataURL(file);
-  });
-}
-async function analyzeFoodPhoto(file){
-  var btn=$("foodPhotoBtn"),original=btn.textContent;
-  btn.textContent="⏳ Analyse en cours…";btn.disabled=true;
-  try{
-    var base64=await resizeImageToBase64(file,1024,0.85);
-    var token=await cloudUser.getIdToken();
-    var res=await fetch(FOOD_ANALYZE_WORKER_URL,{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({image:base64,mediaType:"image/jpeg"})});
-    var data=await res.json().catch(function(){return null;});
-    if(!res.ok||!data||data.error){toast("Erreur analyse"+(data&&data.error?" : "+data.error:""));return;}
-    $("foodName").value=data.name||"";
-    $("foodQty").value=data.qty||100;
-    $("foodKcal").value=Math.round(Number(data.kcal)||0);
-    $("foodProt").value=Math.round((Number(data.protein)||0)*10)/10;
-    $("foodCarbs").value=Math.round((Number(data.carbs)||0)*10)/10;
-    $("foodFat").value=Math.round((Number(data.fat)||0)*10)/10;
-    clearFoodRef100();
-    toast("Photo analysée"+(data.confidence==="low"?" (à vérifier)":""));
-  }catch(e){toast("Analyse impossible");}
-  finally{btn.textContent=original;btn.disabled=false;}
-}
 /* per-100g reference: once a product is scanned or searched, recompute kcal/macros live as the quantity changes */
 var foodRef100=null;
 function setFoodRef100(kcal,protein,carbs,fat){
@@ -1862,7 +1815,14 @@ function saveWeigh(){
   h.sort(function(a,b){return a.d.localeCompare(b.d);});
   save();closeWeigh();renderToday();renderProgress();toast("Pesée enregistrée · "+num(n)+" kg");
 }
-function openMeal(type){$("foodName").value="";$("foodQty").value="100";$("foodKcal").value="";$("foodProt").value="";$("foodCarbs").value="";$("foodFat").value="";if(type)$("foodType").value=type;clearFoodRef100();$("foodSearchResults").innerHTML="";$("mealModal").classList.add("on");setTimeout(function(){$("foodName").focus();},50);}
+function defaultMealTypeByHour(){
+  var h=new Date().getHours();
+  if(h<11)return "Petit-déjeuner";
+  if(h<15)return "Déjeuner";
+  if(h<21)return "Dîner";
+  return "Collation";
+}
+function openMeal(type){$("foodName").value="";$("foodQty").value="100";$("foodKcal").value="";$("foodProt").value="";$("foodCarbs").value="";$("foodFat").value="";$("foodType").value=type||defaultMealTypeByHour();clearFoodRef100();$("foodSearchResults").innerHTML="";$("mealModal").classList.add("on");setTimeout(function(){$("foodName").focus();},50);}
 function closeMeal(){$("mealModal").classList.remove("on");}
 function saveMeal(){
   var f=currentFoodFromForm();if(!f.name){toast("Indique l'aliment");return;}
@@ -1938,9 +1898,26 @@ function renderFoodResults(list,q){
     return '<button class="food-result" type="button" data-act="foodPick" data-i="'+i+'"><b>'+(f.local?"🏠 ":"")+esc(f.name)+'</b><span>'+(f.kcal?Math.round(f.kcal)+" kcal / 100 g":"kcal inconnues")+'</span></button>';
   }).join("");
 }
+var foodSearchT=null;
+function scheduleFoodSearch(){
+  clearTimeout(foodSearchT);
+  if($("foodName").value.trim().length<2){$("foodSearchResults").innerHTML="";return;}
+  foodSearchT=setTimeout(searchFoodOnline,400);
+}
+async function fetchOffResults(q,swissOnly){
+  var qs=swissOnly?(q+' countries_tags:"en:switzerland"'):q;
+  var url="https://search.openfoodfacts.org/search?q="+encodeURIComponent(qs)+"&page_size=8&fields=product_name,brands,nutriments,code";
+  var res=await fetch(url,{headers:{Accept:"application/json"}});
+  if(!res.ok)throw new Error("HTTP "+res.status);
+  var data=await res.json();
+  return (data.hits||data.products||[]).filter(function(p){return p.product_name;}).map(function(p){
+    var n=p.nutriments||{},br=brandsStr(p.brands);
+    return {name:(br?br+" ":"")+p.product_name,kcal:offVal(n,["energy-kcal_100g","energy-kcal"]),protein:offVal(n,["proteins_100g","proteins"]),carbs:offVal(n,["carbohydrates_100g","carbohydrates"]),fat:offVal(n,["fat_100g","fat"]),local:false};
+  });
+}
 async function searchFoodOnline(){
   var q=$("foodName").value.trim();
-  if(!q){toast("Indique un nom d'aliment à rechercher");return;}
+  if(q.length<2){$("foodSearchResults").innerHTML="";return;}
   if(foodSearchBusy)return;
   foodSearchBusy=true;
   var local=searchLocalFoods(q);
@@ -1948,14 +1925,8 @@ async function searchFoodOnline(){
   if(local.length){renderFoodResults(foodSearchCache,q);$("foodSearchResults").insertAdjacentHTML("beforeend",'<div class="food-search-status" id="foodOnlineStatus">Recherche en ligne…</div>');}
   else{$("foodSearchResults").innerHTML='<div class="food-search-status">Recherche en ligne…</div>';}
   try{
-    var url="https://search.openfoodfacts.org/search?q="+encodeURIComponent(q)+"&page_size=8&fields=product_name,brands,nutriments,code";
-    var res=await fetch(url,{headers:{Accept:"application/json"}});
-    if(!res.ok)throw new Error("HTTP "+res.status);
-    var data=await res.json();
-    var online=(data.hits||data.products||[]).filter(function(p){return p.product_name;}).map(function(p){
-      var n=p.nutriments||{},br=brandsStr(p.brands);
-      return {name:(br?br+" ":"")+p.product_name,kcal:offVal(n,["energy-kcal_100g","energy-kcal"]),protein:offVal(n,["proteins_100g","proteins"]),carbs:offVal(n,["carbohydrates_100g","carbohydrates"]),fat:offVal(n,["fat_100g","fat"]),local:false};
-    });
+    var online=await fetchOffResults(q,true);
+    if(!online.length)online=await fetchOffResults(q,false);
     foodSearchCache=local.concat(online);
     renderFoodResults(foodSearchCache,q);
   }catch(e){
@@ -2156,12 +2127,10 @@ document.addEventListener("click",function(e){
     case "fastClose": $("fastModal").classList.remove("on"); break;
     case "fastStart": toggleFasting(); break;
     case "scanOpen": openScanner(); break;
-    case "foodPhotoOpen": openFoodPhotoPicker(); break;
     case "scanClose": closeScanner(); break;
     case "scanLookup": lookupBarcode(document.getElementById("manualBarcode").value); break;
     case "mClose": closeMeal(); break;
     case "mSave": saveMeal(); break;
-    case "foodSearch": searchFoodOnline(); break;
     case "foodPick": pickFoodResult(Number(a.dataset.i)); break;
     case "delMeal": state.meals.splice(Number(a.dataset.i),1); save(); renderMeals(); renderToday(); break;
     case "openRun": openRun(); break;
@@ -2196,12 +2165,12 @@ document.addEventListener("input",function(e){
   if(id==="runDist"||id==="runDur")updateRunPace();
   else if(id==="foodQty")applyFoodRef100ToQty();
   else if(id==="foodKcal"||id==="foodProt"||id==="foodCarbs"||id==="foodFat")clearFoodRef100();
+  else if(id==="foodName")scheduleFoodSearch();
 });
 document.addEventListener("change",function(e){var el=e.target;
   if(el.classList&&el.classList.contains("wval")&&el.dataset.ex){setWeightExact(el.dataset.ex,el.value);}
   else if(el.classList&&el.classList.contains("rval")&&el.dataset.ex){setRepsExact(el.dataset.ex,el.value);}
   else if(el.id==="importFile"&&el.files&&el.files[0]){importData(el.files[0]);el.value="";}
-  else if(el.id==="foodPhotoInput"&&el.files&&el.files[0]){analyzeFoodPhoto(el.files[0]);el.value="";}
 });
 document.querySelectorAll(".nav button").forEach(function(b){
   function navGo(ev){if(ev)ev.preventDefault();showPage(b.dataset.page);}
