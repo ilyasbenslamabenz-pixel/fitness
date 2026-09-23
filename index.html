@@ -180,8 +180,10 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 .meal .del{color:var(--faint);font-size:20px;line-height:1;padding:4px 6px;flex:0 0 auto}
 .menuday{border:1px solid var(--hair);border-radius:var(--radius-sm);padding:12px;margin-top:10px}
 .menuday.today{border-color:var(--ember)}
-.menuday .mh{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:8px}
+.menuday .mh{display:flex;justify-content:space-between;align-items:center;font-size:13.5px;width:100%;text-align:left}
+.menuday.open .mh{margin-bottom:8px}
 .menuday .mh b{font-family:var(--display)}
+.menuday .mh .chev{display:inline-block;margin-left:6px;font-size:11px}
 .mm{padding:8px 0;border-top:1px solid var(--hair)}
 .mm .mt{display:flex;justify-content:space-between;font-size:13px;gap:10px}
 .mm .md{font-size:12px;color:var(--muted);margin:2px 0 6px}
@@ -1671,11 +1673,25 @@ function closeSteps(){$("stepsModal").classList.remove("on");}
 function saveSteps(){var v=Math.round(Number($("stepsInput").value));if(!(v>=0)||!isFinite(v)){toast("Nombre invalide");return;}upsertV(state.steps,today(),v);save();closeSteps();renderProgress();renderToday();toast("Pas enregistrés");}
 
 var weeklyMenuDay=-1;
+var menuOpenDay=null; /* accordéon : un seul jour développé à la fois (aujourd'hui par défaut) */
+function buildWeeklyMenuHTML(){
+  var idx=(new Date().getDay()+6)%7;
+  if(menuOpenDay==null)menuOpenDay=idx;
+  $("weeklyMenu").innerHTML=MENU.map(function(d,i){
+    var dk=d[1].reduce(function(s,m){var x=m[2].match(/(\d+)\s*kcal/);return s+(x?Number(x[1]):0);},0);
+    var isOpen=i===menuOpenDay;
+    return '<div class="menuday '+(i===idx?"today":"")+(isOpen?" open":"")+'">'
+      +'<button class="mh" data-act="toggleMenuDay" data-d="'+i+'"><b>'+d[0]+(i===idx?" · aujourd'hui":"")+'</b><span style="color:var(--muted)">'+dk+' kcal <span class="chev">'+(isOpen?"▾":"▸")+'</span></span></button>'
+      +(isOpen?d[1].map(function(m,j){return '<div class="mm"><div class="mt"><span>'+esc(m[0])+'</span><span style="color:var(--muted)">'+esc(m[2])+'</span></div><div class="md">'+esc(m[1])+'</div><button class="add" data-act="menuAdd" data-d="'+i+'" data-m="'+j+'">＋ Ajouter au journal</button></div>';}).join(""):"")
+      +'</div>';
+  }).join("");
+}
+function toggleMenuDay(i){menuOpenDay=(menuOpenDay===i)?-1:i;buildWeeklyMenuHTML();}
 function renderWeeklyMenuIfNeeded(){
   var idx=(new Date().getDay()+6)%7;
-  if(idx===weeklyMenuDay)return; /* le menu ne change qu'une fois par jour : inutile de reconstruire ses 28 lignes à chaque repas/eau ajoutés */
+  if(idx===weeklyMenuDay)return; /* le menu ne change qu'une fois par jour : inutile de reconstruire ses lignes à chaque repas/eau ajoutés */
   weeklyMenuDay=idx;
-  $("weeklyMenu").innerHTML=MENU.map(function(d,i){var dk=d[1].reduce(function(s,m){var x=m[2].match(/(\d+)\s*kcal/);return s+(x?Number(x[1]):0);},0);return '<div class="menuday '+(i===idx?"today":"")+'"><div class="mh"><b>'+d[0]+(i===idx?" · aujourd'hui":"")+'</b><span style="color:var(--muted)">'+dk+' kcal</span></div>'+d[1].map(function(m,j){return '<div class="mm"><div class="mt"><span>'+esc(m[0])+'</span><span style="color:var(--muted)">'+esc(m[2])+'</span></div><div class="md">'+esc(m[1])+'</div><button class="add" data-act="menuAdd" data-d="'+i+'" data-m="'+j+'">＋ Ajouter au journal</button></div>';}).join("")+'</div>';}).join("");
+  buildWeeklyMenuHTML();
 }
 function renderMeals(){
   if(state.page!=="meals")return; /* repeinte automatiquement par showPage() à la prochaine visite */
@@ -1684,7 +1700,7 @@ function renderMeals(){
   ring($("calRing"),Math.min(1,kcal/goal),"#FF6A3D",Math.round(kcal)+"\n/ "+goal+" kcal");
   $("mCarbs").textContent=Math.round(carbs*10)/10;$("mProt").textContent=Math.round(prot*10)/10;$("mFat").textContent=Math.round(fat*10)/10;
   $("mCarbsBar").style.width=Math.min(100,carbs/carbGoal*100)+"%";$("mProtBar").style.width=Math.min(100,prot/protGoal*100)+"%";$("mFatBar").style.width=Math.min(100,fat/fatGoal*100)+"%";
-  var limits={"Petit-déjeuner":600,"Déjeuner":600,"Dîner":600,"Collation":600},ids={"Petit-déjeuner":"breakfastKcal","Déjeuner":"lunchKcal","Dîner":"dinnerKcal","Collation":"snackKcal"};
+  var limits={"Petit-déjeuner":Math.round(goal*0.25/10)*10,"Déjeuner":Math.round(goal*0.35/10)*10,"Dîner":Math.round(goal*0.30/10)*10,"Collation":Math.round(goal*0.10/10)*10},ids={"Petit-déjeuner":"breakfastKcal","Déjeuner":"lunchKcal","Dîner":"dinnerKcal","Collation":"snackKcal"};
   Object.keys(ids).forEach(function(type){var total=state.meals.filter(function(m){return m.type===type;}).reduce(function(s,m){return s+Number(m.kcal||0);},0);$(ids[type]).textContent=Math.round(total)+" / "+limits[type]+" kcal";});
   var wt=state.water||{date:today(),ml:0};if(wt.date!==today()){wt={date:today(),ml:0};state.water=wt;save();}
   var waterGoal=Number(state.waterGoal||3),waterStep=Math.max(100,Math.round(waterGoal*1000/10/50)*50);
@@ -2058,6 +2074,7 @@ document.addEventListener("click",function(e){
     case "stepsClose": closeSteps(); break;
     case "stepsSave": saveSteps(); break;
     case "energy": setEnergy(Number(a.dataset.v)); break;
+    case "toggleMenuDay": toggleMenuDay(Number(a.dataset.d)); break;
     case "menuAdd": var row=MENU[Number(a.dataset.d)][1][Number(a.dataset.m)];
       var xk=row[2].match(/(\d+)\s*kcal/),xp=row[2].match(/(\d+)\s*g prot/);
       addMealObj({name:row[1],kcal:xk?Number(xk[1]):0,protein:xp?Number(xp[1]):0,carbs:0,fat:0,qty:100,type:row[0]}); toast("Ajouté au journal"); break;
