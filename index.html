@@ -84,6 +84,23 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 
 /* stat strip */
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.quick-action{min-height:58px;padding:10px 12px;border-radius:14px;background:var(--surface);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px}.quick-action span{font-size:21px}.quick-action b{font-weight:600}
+.today-water{margin-top:12px;padding:16px;background:linear-gradient(145deg,#20252b,#181b20)}
+.today-water-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.today-water-head strong{display:block;font-family:var(--display);font-size:32px;line-height:1;margin-top:5px}
+.today-water-head span{display:block;color:var(--muted);font-size:12px;margin-top:5px}.today-water-head span b{color:var(--text)}
+.today-water-pct{font-family:var(--display);font-size:24px;font-weight:700;color:var(--mint)}
+.today-water-bar{height:10px;border-radius:99px;background:var(--surface2);overflow:hidden;margin:14px 0 12px}
+.today-water-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--mint),#7defc0);border-radius:99px;transition:width .25s}
+.water-quick{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.water-quick button{min-height:42px;border-radius:10px;background:var(--surface2);border:1px solid var(--hair);font-size:12px;font-weight:700}
+.water-quick button:active{transform:scale(.97);background:var(--hair)}
+.water-quick .water-undo{color:var(--muted)}
+.water-big-add{width:100%;height:44px;margin-top:8px;border-radius:11px;background:var(--mint);color:#062b20;font-size:14px;font-weight:800}
+.body-card-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.body-card-top b,.body-card-top span{display:block}.body-card-top span{font-size:12px;color:var(--muted);margin-top:4px}
+.body-weigh-btn{padding:10px 14px;border-radius:11px;background:var(--text);color:#12141A;font-weight:700;white-space:nowrap}
+.body-current{display:block;text-align:center;font-family:var(--display);font-size:34px;margin-top:14px}
+
 .stat{background:var(--surface);border:1px solid var(--hair);border-radius:var(--radius-sm);padding:13px 12px;text-align:center}
 .stat .v{font-family:var(--display);font-weight:700;font-size:22px}
 .stat .l{font-size:11.5px;color:var(--muted);margin-top:3px}
@@ -362,7 +379,26 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
     </div>
     <div class="quick-actions">
       <button class="quick-action" data-act="weigh"><span>⚖️</span><b>Ajouter une pesée</b></button>
-      <button class="quick-action" data-act="waterAdd" data-amount="300"><span>💧</span><b>Ajouter 300 ml d'eau</b></button>
+      <button class="quick-action" data-act="go" data-page="meals"><span>🍽️</span><b>Ajouter un repas</b></button>
+    </div>
+
+    <div class="today-water card">
+      <div class="today-water-head">
+        <div>
+          <div class="eyebrow">💧 Hydratation</div>
+          <strong id="todayWaterTotal">0.00 L</strong>
+          <span>sur <b id="todayWaterGoal">3.00 L</b> aujourd'hui</span>
+        </div>
+        <div class="today-water-pct" id="todayWaterPct">0%</div>
+      </div>
+      <div class="today-water-bar"><i id="todayWaterBar"></i></div>
+      <div class="water-quick">
+        <button data-act="waterAdd" data-amount="250">+250 ml</button>
+        <button data-act="waterAdd" data-amount="500">+500 ml</button>
+        <button data-act="waterAdd" data-amount="750">+750 ml</button>
+        <button class="water-undo" data-act="waterAdd" data-amount="-250">−250</button>
+      </div>
+      <button class="water-big-add" data-act="waterAdd" data-amount="300">💧 +300 ml</button>
     </div>
 
     <div class="card run-card" style="margin-top:12px">
@@ -510,8 +546,11 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
       <div class="water-head"><span class="water-drop">💧</span><div><b>Eau</b><span>Objectif : <span id="waterGoalLabel">3.00 L</span></span><strong id="waterTotal">0.00 L</strong></div><button data-act="waterAdd" data-amount="300" class="water-add">＋</button></div>
       <div class="glasses" id="waterGlasses"></div><div class="water-foot">+ Eau provenant de votre alimentation : 0 ml</div>
     </div>
-    <div class="section-title-row"><h2>Données corporelles</h2><span class="plus-pill">Plus</span></div>
-    <div class="body-card"><b>Poids</b><span>Objectif : <span id="bodyTarget">85.0 kg</span></span><div class="body-weight"><button data-act="bodyWeightMinus">−</button><strong id="bodyWeight">— kg</strong><button data-act="bodyWeightPlus">＋</button></div></div>
+    <div class="section-title-row"><h2>Données corporelles</h2></div>
+    <div class="body-card">
+      <div class="body-card-top"><div><b>Dernière pesée</b><span>Objectif : <span id="bodyTarget">85.0 kg</span></span></div><button class="body-weigh-btn" data-act="weigh">＋ Pesée</button></div>
+      <strong class="body-current" id="bodyWeight">— kg</strong>
+    </div>
     <div class="section-title-row"><h2>Jeûne</h2></div>
     <div class="fast-card"><div class="fast-ico">⌛</div><div><b id="fastTitle">Routine 16:8</b><span id="fastText">Aucun jeûne en cours</span><div class="fast-progress"><i id="fastProgress"></i></div></div><button data-act="fasting" id="fastBtn">Démarrer</button></div>
     <div class="section-title-row"><h2>Activité</h2></div>
@@ -856,7 +895,13 @@ function renderToday(){
   var dk=state.meals.reduce(function(s,m){return s+Number(m.kcal||0);},0);
   var wt=state.water||{date:today(),ml:0};
   $("dashKcal").textContent=Math.round(dk)+" / "+Number(state.profile.cal||2400);
-  $("dashWater").textContent=(Number(wt.ml||0)/1000).toFixed(2)+" / "+Number(state.waterGoal||3).toFixed(1)+" L";
+  var waterMl=Number(wt.ml||0), waterGoalMl=Math.max(500,Number(state.waterGoal||3)*1000);
+  var waterPct=Math.round(Math.min(100,waterMl/waterGoalMl*100));
+  $("dashWater").textContent=(waterMl/1000).toFixed(2)+" / "+Number(state.waterGoal||3).toFixed(1)+" L";
+  $("todayWaterTotal").textContent=(waterMl/1000).toFixed(2)+" L";
+  $("todayWaterGoal").textContent=(waterGoalMl/1000).toFixed(2)+" L";
+  $("todayWaterPct").textContent=waterPct+"%";
+  $("todayWaterBar").style.width=waterPct+"%";
   $("dashSteps").textContent=valToday(state.steps)?Number(valToday(state.steps)).toLocaleString("fr-CH"):"—";
   $("dashForm").textContent=valToday(state.energy)||"—";
 
@@ -1427,7 +1472,7 @@ function restore(){if(!cloudUser){toast("Connecte-toi d'abord");return;}
     merge(d);save();renderAll();toast("Données restaurées");}).catch(function(){toast("Restauration impossible");});}
 function resetAll(){if(!confirm("Effacer toutes les données locales ?"))return;lsDel(KEY);location.reload();}
 
-function addWater(amount){var wt=state.water||{date:today(),ml:0};if(wt.date!==today())wt={date:today(),ml:0};var goalMl=Math.max(500,Number(state.waterGoal||3)*1000);wt.ml=Math.max(0,Math.min(goalMl,Number(wt.ml||0)+Number(amount||300)));state.water=wt;save();renderMeals();toast((amount>=0?"+":"")+amount+" ml d’eau");}
+function addWater(amount){var wt=state.water||{date:today(),ml:0};if(wt.date!==today())wt={date:today(),ml:0};var goalMl=Math.max(500,Number(state.waterGoal||3)*1000);wt.ml=Math.max(0,Math.min(goalMl,Number(wt.ml||0)+Number(amount||300)));state.water=wt;save();renderMeals();renderToday();toast((amount>=0?"+":"")+amount+" ml d’eau");}
 function adjustBodyWeight(delta){var n=Math.round((latestBody()+delta)*10)/10;if(n<30||n>350)return;var d=today(),h=state.weightHistory,ix=h.findIndex(function(x){return x.d===d;});if(ix>=0)h[ix].w=n;else h.push({d:d,w:n});h.sort(function(a,b){return a.d.localeCompare(b.d);});save();renderMeals();renderToday();toast("Poids : "+num(n)+" kg");}
 function saveProfile(){
   var s=Number($("fStart").value),t=Number($("fTarget").value),c=Number($("fCal").value);
