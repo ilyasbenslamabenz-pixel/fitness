@@ -499,6 +499,14 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
       <div class="chartmeta"><span id="wcFrom"></span><span id="wcTo"></span></div>
     </div>
 
+    <div class="card" id="bodyCompCard" style="display:none">
+      <div class="eyebrow">Composition corporelle</div>
+      <div class="big3" style="grid-template-columns:repeat(2,1fr)">
+        <div><div class="v num" id="bcFat">—</div><div class="l">masse grasse</div></div>
+        <div><div class="v num" id="bcMuscle">—</div><div class="l">masse musculaire</div></div>
+      </div>
+    </div>
+
     <div class="card">
       <div class="eyebrow">Force par exercice</div>
       <div class="picker" id="exPicker" style="margin-top:10px"></div>
@@ -630,6 +638,10 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
     <button data-act="wMinus">−</button>
     <input id="wInput" type="number" inputmode="decimal" step="0.1">
     <button data-act="wPlus">＋</button>
+  </div>
+  <div class="row2" style="margin-top:14px">
+    <div class="field"><label>Masse grasse (%)</label><input id="wFat" type="number" inputmode="decimal" step="0.1" placeholder="optionnel"></div>
+    <div class="field"><label>Masse musculaire (%)</label><input id="wMuscle" type="number" inputmode="decimal" step="0.1" placeholder="optionnel"></div>
   </div>
   <div class="acts"><button class="btn ghost" data-act="wClose">Annuler</button><button class="btn primary" data-act="wSave">Enregistrer</button></div>
 </div></div>
@@ -881,6 +893,7 @@ var state={
   suggest:0, selDay:0,
   profile:{start:103,target:85,cal:2400,startDate:START_DATE},
   weightHistory:[{d:START_DATE,w:103}],
+  bodyComp:[],
   program:JSON.parse(JSON.stringify(DEFAULT_PROGRAM)),
   session:{date:today(),marks:{},excluded:{},extra:{}},
   sessions:[],
@@ -948,6 +961,7 @@ function load(){
 function merge(p){
   state.profile=Object.assign(state.profile,p.profile||{});
   if(Array.isArray(p.weightHistory)&&p.weightHistory.length)state.weightHistory=p.weightHistory;
+  if(Array.isArray(p.bodyComp))state.bodyComp=p.bodyComp;
   if(Array.isArray(p.program)&&p.program.length)state.program=p.program;
   if(Array.isArray(p.sessions))state.sessions=p.sessions;
   if(p.perf&&typeof p.perf==="object")state.perf=p.perf;
@@ -970,6 +984,8 @@ function normalizeState(){
   if(!Array.isArray(state.weightHistory))state.weightHistory=[];
   state.weightHistory=state.weightHistory.filter(function(x){return x&&x.d&&isFinite(Number(x.w));}).map(function(x){return {d:x.d,w:Number(x.w)};}).sort(function(a,b){return a.d.localeCompare(b.d);});
   if(!state.weightHistory.length)state.weightHistory=[{d:state.profile.startDate,w:Number(state.profile.start||103)}];
+  if(!Array.isArray(state.bodyComp))state.bodyComp=[];
+  state.bodyComp=state.bodyComp.filter(function(x){return x&&x.d&&(isFinite(Number(x.fat))||isFinite(Number(x.muscle)));}).map(function(x){return {d:x.d,fat:isFinite(Number(x.fat))?Number(x.fat):null,muscle:isFinite(Number(x.muscle))?Number(x.muscle):null};}).sort(function(a,b){return a.d.localeCompare(b.d);});
   if(!Array.isArray(state.meals))state.meals=[];
   if(!Array.isArray(state.mealHistory))state.mealHistory=[];
   if(!Array.isArray(state.foodFavorites))state.foodFavorites=[];
@@ -1372,6 +1388,15 @@ function renderProgress(){
   $("weightChart").innerHTML=lineChart(wh.map(function(x){return Number(x.w);}),"#37E0A6"," kg");
   $("wcFrom").textContent=wh.length?fmtDate(wh[0].d):"";
   $("wcTo").textContent=wh.length?fmtDate(wh[wh.length-1].d):"";
+
+  var lastBC=latestBodyComp(),bcCard=$("bodyCompCard");
+  if(bcCard){
+    if(lastBC){
+      bcCard.style.display="";
+      $("bcFat").textContent=lastBC.fat!=null?num(lastBC.fat)+" %":"—";
+      $("bcMuscle").textContent=lastBC.muscle!=null?num(lastBC.muscle)+" %":"—";
+    }else bcCard.style.display="none";
+  }
 
   // exercise picker: only exercises with logged data, else all weighted exercises
   var withData=Object.keys(state.perf).filter(function(k){return state.perf[k]&&state.perf[k].length;});
@@ -1857,15 +1882,33 @@ function showPage(id){
 }
 
 /* modals */
-function openWeigh(){$("wInput").value=num(latestBody());$("weighModal").classList.add("on");}
+function latestBodyComp(){return state.bodyComp.length?state.bodyComp[state.bodyComp.length-1]:null;}
+function openWeigh(){
+  $("wInput").value=num(latestBody());
+  var d=today(),today2=state.bodyComp.find(function(x){return x.d===d;})||latestBodyComp();
+  $("wFat").value=today2&&today2.fat!=null?num(today2.fat):"";
+  $("wMuscle").value=today2&&today2.muscle!=null?num(today2.muscle):"";
+  $("weighModal").classList.add("on");
+}
 function closeWeigh(){$("weighModal").classList.remove("on");}
 function stepWeigh(d){var v=Number($("wInput").value||latestBody());$("wInput").value=(Math.round((v+d)*10)/10);}
 function saveWeigh(){
   var n=Number(String($("wInput").value).replace(",","."));
   if(!isFinite(n)||n<30||n>350){toast("Poids invalide");return;}
+  var fatRaw=$("wFat").value.trim(),muscleRaw=$("wMuscle").value.trim();
+  var fat=fatRaw?Number(String(fatRaw).replace(",",".")):null;
+  var muscle=muscleRaw?Number(String(muscleRaw).replace(",",".")):null;
+  if(fat!=null&&(!isFinite(fat)||fat<3||fat>60)){toast("Masse grasse invalide (3–60 %)");return;}
+  if(muscle!=null&&(!isFinite(muscle)||muscle<10||muscle>70)){toast("Masse musculaire invalide (10–70 %)");return;}
   var d=today(),h=state.weightHistory,ix=h.findIndex(function(x){return x.d===d;});
   if(ix>=0)h[ix].w=n;else h.push({d:d,w:n});
   h.sort(function(a,b){return a.d.localeCompare(b.d);});
+  if(fat!=null||muscle!=null){
+    var bc=state.bodyComp,bix=bc.findIndex(function(x){return x.d===d;});
+    var entry={d:d,fat:fat,muscle:muscle};
+    if(bix>=0)bc[bix]=entry;else bc.push(entry);
+    bc.sort(function(a,b){return a.d.localeCompare(b.d);});
+  }
   save();closeWeigh();renderToday();renderProgress();toast("Pesée enregistrée · "+num(n)+" kg");
 }
 function defaultMealTypeByHour(){
