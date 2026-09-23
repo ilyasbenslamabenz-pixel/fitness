@@ -83,7 +83,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 .next .sub{font-size:13px;color:var(--muted);margin-top:2px}
 
 /* stat strip */
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.quick-action{min-height:58px;padding:10px 12px;border-radius:14px;background:var(--surface);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px}.quick-action span{font-size:21px}.quick-action b{font-weight:600}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
 .today-water{margin-top:12px;padding:16px;background:linear-gradient(145deg,#20252b,#181b20)}
 .today-water-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
 .today-water-head strong{display:block;font-family:var(--display);font-size:32px;line-height:1;margin-top:5px}
@@ -95,7 +95,6 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 .water-quick button{min-height:42px;border-radius:10px;background:var(--surface2);border:1px solid var(--hair);font-size:12px;font-weight:700}
 .water-quick button:active{transform:scale(.97);background:var(--hair)}
 .water-quick .water-undo{color:var(--muted)}
-.water-big-add{width:100%;height:44px;margin-top:8px;border-radius:11px;background:var(--mint);color:#062b20;font-size:14px;font-weight:800}
 .body-card-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .body-card-top b,.body-card-top span{display:block}.body-card-top span{font-size:12px;color:var(--muted);margin-top:4px}
 .body-weigh-btn{padding:10px 14px;border-radius:11px;background:var(--text);color:#12141A;font-weight:700;white-space:nowrap}
@@ -180,8 +179,10 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 .meal .del{color:var(--faint);font-size:20px;line-height:1;padding:4px 6px;flex:0 0 auto}
 .menuday{border:1px solid var(--hair);border-radius:var(--radius-sm);padding:12px;margin-top:10px}
 .menuday.today{border-color:var(--ember)}
-.menuday .mh{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:8px}
+.menuday .mh{display:flex;justify-content:space-between;align-items:center;font-size:13.5px;width:100%;text-align:left}
+.menuday.open .mh{margin-bottom:8px}
 .menuday .mh b{font-family:var(--display)}
+.menuday .mh .chev{display:inline-block;margin-left:6px;font-size:11px}
 .mm{padding:8px 0;border-top:1px solid var(--hair)}
 .mm .mt{display:flex;justify-content:space-between;font-size:13px;gap:10px}
 .mm .md{font-size:12px;color:var(--muted);margin:2px 0 6px}
@@ -268,7 +269,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 .snack button{background:#12141A;color:var(--text);font-weight:600;font-size:13px;padding:9px 15px;border-radius:9px}
 
 /* quick log + energy + cardio */
-.qlog{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.qlog{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
 .qlog button{display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 6px;border-radius:12px;background:var(--surface2);border:1px solid var(--hair);font-size:12.5px;font-weight:600;color:var(--text)}
 .qlog button:active{background:var(--hair)}
 .qlog .qe{font-size:22px}
@@ -398,11 +399,6 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
       <div class="dd"><div class="ico">👟</div><b id="dashSteps">—</b><span>pas aujourd'hui</span></div>
       <div class="dd"><div class="ico">🔥</div><b id="dashForm">—</b><span>forme / 5</span></div>
     </div>
-    <div class="quick-actions">
-      <button class="quick-action" data-act="weigh"><span>⚖️</span><b>Ajouter une pesée</b></button>
-      <button class="quick-action" data-act="go" data-page="meals"><span>🍽️</span><b>Ajouter un repas</b></button>
-    </div>
-
     <div class="today-water card">
       <div class="today-water-head">
         <div>
@@ -419,7 +415,6 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
         <button data-act="waterAdd" data-amount="750">+750 ml</button>
         <button class="water-undo" data-act="waterAdd" data-amount="-250">−250</button>
       </div>
-      <button class="water-big-add" data-act="waterAdd" data-amount="300">💧 +300 ml</button>
     </div>
 
     <div class="card run-card" style="margin-top:12px">
@@ -450,9 +445,8 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
     <div class="card" style="margin-top:12px">
       <div class="eyebrow">Suivi du jour</div>
       <div class="qlog">
-        <button data-act="weigh"><span class="qe">⚖️</span>Pesée</button>
+        <button data-act="go" data-page="meals"><span class="qe">🍽️</span>Repas</button>
         <button data-act="openSteps"><span class="qe">👟</span>Pas</button>
-        <button data-act="openRun"><span class="qe">🏃</span>Course</button>
       </div>
       <div class="energy"><span class="elab">Forme du jour</span><div class="efaces" id="efaces"></div></div>
     </div>
@@ -1671,11 +1665,25 @@ function closeSteps(){$("stepsModal").classList.remove("on");}
 function saveSteps(){var v=Math.round(Number($("stepsInput").value));if(!(v>=0)||!isFinite(v)){toast("Nombre invalide");return;}upsertV(state.steps,today(),v);save();closeSteps();renderProgress();renderToday();toast("Pas enregistrés");}
 
 var weeklyMenuDay=-1;
+var menuOpenDay=null; /* accordéon : un seul jour développé à la fois (aujourd'hui par défaut) */
+function buildWeeklyMenuHTML(){
+  var idx=(new Date().getDay()+6)%7;
+  if(menuOpenDay==null)menuOpenDay=idx;
+  $("weeklyMenu").innerHTML=MENU.map(function(d,i){
+    var dk=d[1].reduce(function(s,m){var x=m[2].match(/(\d+)\s*kcal/);return s+(x?Number(x[1]):0);},0);
+    var isOpen=i===menuOpenDay;
+    return '<div class="menuday '+(i===idx?"today":"")+(isOpen?" open":"")+'">'
+      +'<button class="mh" data-act="toggleMenuDay" data-d="'+i+'"><b>'+d[0]+(i===idx?" · aujourd'hui":"")+'</b><span style="color:var(--muted)">'+dk+' kcal <span class="chev">'+(isOpen?"▾":"▸")+'</span></span></button>'
+      +(isOpen?d[1].map(function(m,j){return '<div class="mm"><div class="mt"><span>'+esc(m[0])+'</span><span style="color:var(--muted)">'+esc(m[2])+'</span></div><div class="md">'+esc(m[1])+'</div><button class="add" data-act="menuAdd" data-d="'+i+'" data-m="'+j+'">＋ Ajouter au journal</button></div>';}).join(""):"")
+      +'</div>';
+  }).join("");
+}
+function toggleMenuDay(i){menuOpenDay=(menuOpenDay===i)?-1:i;buildWeeklyMenuHTML();}
 function renderWeeklyMenuIfNeeded(){
   var idx=(new Date().getDay()+6)%7;
-  if(idx===weeklyMenuDay)return; /* le menu ne change qu'une fois par jour : inutile de reconstruire ses 28 lignes à chaque repas/eau ajoutés */
+  if(idx===weeklyMenuDay)return; /* le menu ne change qu'une fois par jour : inutile de reconstruire ses lignes à chaque repas/eau ajoutés */
   weeklyMenuDay=idx;
-  $("weeklyMenu").innerHTML=MENU.map(function(d,i){var dk=d[1].reduce(function(s,m){var x=m[2].match(/(\d+)\s*kcal/);return s+(x?Number(x[1]):0);},0);return '<div class="menuday '+(i===idx?"today":"")+'"><div class="mh"><b>'+d[0]+(i===idx?" · aujourd'hui":"")+'</b><span style="color:var(--muted)">'+dk+' kcal</span></div>'+d[1].map(function(m,j){return '<div class="mm"><div class="mt"><span>'+esc(m[0])+'</span><span style="color:var(--muted)">'+esc(m[2])+'</span></div><div class="md">'+esc(m[1])+'</div><button class="add" data-act="menuAdd" data-d="'+i+'" data-m="'+j+'">＋ Ajouter au journal</button></div>';}).join("")+'</div>';}).join("");
+  buildWeeklyMenuHTML();
 }
 function renderMeals(){
   if(state.page!=="meals")return; /* repeinte automatiquement par showPage() à la prochaine visite */
@@ -1684,7 +1692,7 @@ function renderMeals(){
   ring($("calRing"),Math.min(1,kcal/goal),"#FF6A3D",Math.round(kcal)+"\n/ "+goal+" kcal");
   $("mCarbs").textContent=Math.round(carbs*10)/10;$("mProt").textContent=Math.round(prot*10)/10;$("mFat").textContent=Math.round(fat*10)/10;
   $("mCarbsBar").style.width=Math.min(100,carbs/carbGoal*100)+"%";$("mProtBar").style.width=Math.min(100,prot/protGoal*100)+"%";$("mFatBar").style.width=Math.min(100,fat/fatGoal*100)+"%";
-  var limits={"Petit-déjeuner":600,"Déjeuner":600,"Dîner":600,"Collation":600},ids={"Petit-déjeuner":"breakfastKcal","Déjeuner":"lunchKcal","Dîner":"dinnerKcal","Collation":"snackKcal"};
+  var limits={"Petit-déjeuner":Math.round(goal*0.25/10)*10,"Déjeuner":Math.round(goal*0.35/10)*10,"Dîner":Math.round(goal*0.30/10)*10,"Collation":Math.round(goal*0.10/10)*10},ids={"Petit-déjeuner":"breakfastKcal","Déjeuner":"lunchKcal","Dîner":"dinnerKcal","Collation":"snackKcal"};
   Object.keys(ids).forEach(function(type){var total=state.meals.filter(function(m){return m.type===type;}).reduce(function(s,m){return s+Number(m.kcal||0);},0);$(ids[type]).textContent=Math.round(total)+" / "+limits[type]+" kcal";});
   var wt=state.water||{date:today(),ml:0};if(wt.date!==today()){wt={date:today(),ml:0};state.water=wt;save();}
   var waterGoal=Number(state.waterGoal||3),waterStep=Math.max(100,Math.round(waterGoal*1000/10/50)*50);
@@ -1979,7 +1987,26 @@ function restore(){if(!cloudUser){toast("Connecte-toi d'abord");return;}
     merge(d);save();renderAll();toast("Données restaurées");}).catch(function(){toast("Restauration impossible");});}
 function resetAll(){if(!confirm("Effacer toutes les données locales ?"))return;lsDel(KEY);location.reload();}
 
-function addWater(amount){var wt=state.water||{date:today(),ml:0};if(wt.date!==today())wt={date:today(),ml:0};var goalMl=Math.max(500,Number(state.waterGoal||3)*1000);wt.ml=Math.max(0,Math.min(goalMl,Number(wt.ml||0)+Number(amount||300)));state.water=wt;save();renderMeals();renderToday();toast((amount>=0?"+":"")+amount+" ml d’eau");}
+function updateWaterUI(){
+  var wt=state.water||{date:today(),ml:0},waterMl=Number(wt.ml||0);
+  if(state.page==="today"){
+    var waterGoalMl=Math.max(500,Number(state.waterGoal||3)*1000);
+    var waterPct=Math.round(Math.min(100,waterMl/waterGoalMl*100));
+    $("dashWater").textContent=(waterMl/1000).toFixed(2)+" / "+Number(state.waterGoal||3).toFixed(1)+" L";
+    $("todayWaterTotal").textContent=(waterMl/1000).toFixed(2)+" L";
+    $("todayWaterGoal").textContent=(waterGoalMl/1000).toFixed(2)+" L";
+    $("todayWaterPct").textContent=waterPct+"%";
+    $("todayWaterBar").style.width=waterPct+"%";
+  }
+  if(state.page==="meals"){
+    var waterGoal=Number(state.waterGoal||3),waterStep=Math.max(100,Math.round(waterGoal*1000/10/50)*50);
+    $("waterTotal").textContent=(waterMl/1000).toFixed(2)+" L";
+    $("waterGoalLabel").textContent=waterGoal.toFixed(2)+" L";
+    var glasses=Math.min(10,Math.round(waterMl/waterStep));
+    $("waterGlasses").innerHTML=Array.from({length:10},function(_,i){return '<div class="glass"><button data-act="waterAdd" data-amount="'+(i<glasses?(-waterStep):waterStep)+'">'+(i<glasses?"✓":"＋")+'</button></div>';}).join("");
+  }
+}
+function addWater(amount){var wt=state.water||{date:today(),ml:0};if(wt.date!==today())wt={date:today(),ml:0};var goalMl=Math.max(500,Number(state.waterGoal||3)*1000);wt.ml=Math.max(0,Math.min(goalMl,Number(wt.ml||0)+Number(amount||300)));state.water=wt;save();updateWaterUI();toast((amount>=0?"+":"")+amount+" ml d’eau");}
 function adjustBodyWeight(delta){var n=Math.round((latestBody()+delta)*10)/10;if(n<30||n>350)return;var d=today(),h=state.weightHistory,ix=h.findIndex(function(x){return x.d===d;});if(ix>=0)h[ix].w=n;else h.push({d:d,w:n});h.sort(function(a,b){return a.d.localeCompare(b.d);});save();renderMeals();renderToday();toast("Poids : "+num(n)+" kg");}
 function saveProfile(){
   var s=Number($("fStart").value),t=Number($("fTarget").value),c=Number($("fCal").value);
@@ -2058,6 +2085,7 @@ document.addEventListener("click",function(e){
     case "stepsClose": closeSteps(); break;
     case "stepsSave": saveSteps(); break;
     case "energy": setEnergy(Number(a.dataset.v)); break;
+    case "toggleMenuDay": toggleMenuDay(Number(a.dataset.d)); break;
     case "menuAdd": var row=MENU[Number(a.dataset.d)][1][Number(a.dataset.m)];
       var xk=row[2].match(/(\d+)\s*kcal/),xp=row[2].match(/(\d+)\s*g prot/);
       addMealObj({name:row[1],kcal:xk?Number(xk[1]):0,protein:xp?Number(xp[1]):0,carbs:0,fat:0,qty:100,type:row[0]}); toast("Ajouté au journal"); break;
