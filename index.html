@@ -605,7 +605,8 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
     <div class="card">
       <div class="eyebrow">Sauvegarde cloud</div>
       <div class="pline"><span id="authStatus">Non connecté</span><button class="link" id="loginBtn" data-act="login">Se connecter</button></div>
-      <div class="row2" style="margin-top:10px"><button class="btn" data-act="backup">Sauvegarder</button><button class="btn" data-act="restore">Restaurer</button></div>
+      <div style="font-size:12.5px;color:var(--muted);margin-top:6px">Une fois connecté, tes données sont sauvegardées automatiquement dans le cloud à chaque modification.</div>
+      <div class="row2" style="margin-top:10px"><button class="btn" data-act="backup">Sauvegarder maintenant</button><button class="btn" data-act="restore">Restaurer</button></div>
       <div class="row2" style="margin-top:10px"><button class="btn" data-act="export">Exporter (JSON)</button><button class="btn" data-act="import">Importer</button></div>
       <input type="file" id="importFile" accept="application/json,.json" style="display:none">
       <button class="btn ghost" style="margin-top:10px;color:var(--faint)" data-act="reset">Réinitialiser les données</button>
@@ -891,7 +892,7 @@ var state={
   fast:{active:false,start:null,hours:16},
   selEx:null
 };
-var cloudUser=null, toastT=null;
+var cloudUser=null, toastT=null, cloudBackupT=null, autoRestoreAttempted=false;
 var restEnd=0, restBeeped=false, undoBuf=null, snackCb=null, snackT=null;
 
 /* helpers */
@@ -913,6 +914,16 @@ function save(){
     lsSet(KEY,payload);
     lsSet(BACKUPKEY,payload);
   }catch(e){}
+  cloudAutoBackup();
+}
+function isLocalStateEmpty(){
+  return !state.sessions.length&&!state.meals.length&&!state.runs.length&&state.weightHistory.length<=1;
+}
+function cloudAutoBackup(immediate){
+  if(!cloudUser||!window.firebase)return;
+  clearTimeout(cloudBackupT);
+  var push=function(){firebase.firestore().collection("users").doc(cloudUser.uid).set({appData:state,updatedAt:Date.now()},{merge:true}).catch(function(){});};
+  if(immediate)push();else cloudBackupT=setTimeout(push,2500);
 }
 function load(){
   var raw=lsGet(KEY),loaded=false;
@@ -1980,9 +1991,20 @@ async function startCamera(){
 function setupFirebase(){
   if(!window.firebase)return;
   try{firebase.initializeApp(CFG);
-    firebase.auth().onAuthStateChanged(function(u){cloudUser=u;
+    firebase.auth().onAuthStateChanged(function(u){
+      var justSignedIn=!cloudUser&&u;
+      cloudUser=u;
       $("authStatus").textContent=u?("Connecté · "+(u.email||"Google")):"Non connecté";
-      $("loginBtn").textContent=u?"Se déconnecter":"Se connecter";});
+      $("loginBtn").textContent=u?"Se déconnecter":"Se connecter";
+      if(justSignedIn&&!autoRestoreAttempted){
+        autoRestoreAttempted=true;
+        firebase.firestore().collection("users").doc(u.uid).get().then(function(s){
+          var d=s.exists&&s.data().appData;
+          if(d&&isLocalStateEmpty()){merge(d);save();renderAll();toast("Données restaurées depuis le cloud");}
+          else cloudAutoBackup(true);
+        }).catch(function(){});
+      }
+    });
   }catch(e){}
 }
 function login(){if(!window.firebase){toast("Cloud indisponible");return;}
@@ -2106,7 +2128,7 @@ document.addEventListener("click",function(e){
     case "reset": resetAll(); break;
   }
 });
-document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible"){if(runActive&&!runPaused)requestWake();fixLiveMapSize();}});
+document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible"){if(runActive&&!runPaused)requestWake();fixLiveMapSize();}else{cloudAutoBackup(true);}});
 document.addEventListener("input",function(e){
   var id=e.target.id;
   if(id==="runDist"||id==="runDur")updateRunPace();
