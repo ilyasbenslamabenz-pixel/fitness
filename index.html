@@ -84,6 +84,23 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 
 /* stat strip */
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.quick-action{min-height:58px;padding:10px 12px;border-radius:14px;background:var(--surface);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px}.quick-action span{font-size:21px}.quick-action b{font-weight:600}
+.today-water{margin-top:12px;padding:16px;background:linear-gradient(145deg,#20252b,#181b20)}
+.today-water-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.today-water-head strong{display:block;font-family:var(--display);font-size:32px;line-height:1;margin-top:5px}
+.today-water-head span{display:block;color:var(--muted);font-size:12px;margin-top:5px}.today-water-head span b{color:var(--text)}
+.today-water-pct{font-family:var(--display);font-size:24px;font-weight:700;color:var(--mint)}
+.today-water-bar{height:10px;border-radius:99px;background:var(--surface2);overflow:hidden;margin:14px 0 12px}
+.today-water-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--mint),#7defc0);border-radius:99px;transition:width .25s}
+.water-quick{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.water-quick button{min-height:42px;border-radius:10px;background:var(--surface2);border:1px solid var(--hair);font-size:12px;font-weight:700}
+.water-quick button:active{transform:scale(.97);background:var(--hair)}
+.water-quick .water-undo{color:var(--muted)}
+.water-big-add{width:100%;height:44px;margin-top:8px;border-radius:11px;background:var(--mint);color:#062b20;font-size:14px;font-weight:800}
+.body-card-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.body-card-top b,.body-card-top span{display:block}.body-card-top span{font-size:12px;color:var(--muted);margin-top:4px}
+.body-weigh-btn{padding:10px 14px;border-radius:11px;background:var(--text);color:#12141A;font-weight:700;white-space:nowrap}
+.body-current{display:block;text-align:center;font-family:var(--display);font-size:34px;margin-top:14px}
+
 .stat{background:var(--surface);border:1px solid var(--hair);border-radius:var(--radius-sm);padding:13px 12px;text-align:center}
 .stat .v{font-family:var(--display);font-weight:700;font-size:22px}
 .stat .l{font-size:11.5px;color:var(--muted);margin-top:3px}
@@ -284,9 +301,14 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 .lr-x{width:36px;height:36px;border-radius:10px;background:var(--surface2);border:1px solid var(--hair);font-size:16px;display:grid;place-items:center;color:var(--text)}
 .lr-title{font-family:var(--display);font-weight:700;font-size:16px}
 .lr-gps{font-size:11.5px;color:var(--muted);background:var(--surface);border:1px solid var(--hair);padding:5px 10px;border-radius:999px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lr-map{position:relative;margin:14px auto;width:min(100%,34vh);background:var(--surface);border:1px solid var(--hair);border-radius:16px;aspect-ratio:1/1;overflow:hidden;display:grid;place-items:center;flex:0 0 auto}
-.lr-map svg{width:100%;height:100%;display:block}
-.lr-mapempty{position:absolute;font-size:13px;color:var(--faint);text-align:center;padding:0 20px}
+.lr-map{position:relative;margin:12px 0 10px;background:#0b0d12;border:1px solid var(--hair);border-radius:16px;width:100%;height:clamp(210px,32vh,300px);min-height:210px;overflow:hidden;display:block;flex:0 0 auto}
+.lr-map #lrMap{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;min-height:0!important;border-radius:15px;overflow:hidden}
+.lr-map .leaflet-container{width:100%!important;height:100%!important;min-height:0!important;border-radius:15px}
+.lr-map svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.lr-mapempty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--faint);text-align:center;padding:0 28px;z-index:3;pointer-events:none}
+.lr-map .leaflet-control-attribution{z-index:500}
+@media(max-height:700px){.lr-map{height:220px;min-height:220px}.lr-time{font-size:48px}.lr-stats{margin-top:10px}.lr-controls{padding-top:10px}}
+@media(min-width:520px){.lr-map{height:300px}}
 .lr-time{font-family:var(--display);font-weight:700;font-size:60px;line-height:1;text-align:center;letter-spacing:-.02em;margin-top:2px}
 .lr-sub{text-align:center;font-size:12.5px;color:var(--muted);margin-top:3px}
 .lr-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
@@ -362,7 +384,26 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
     </div>
     <div class="quick-actions">
       <button class="quick-action" data-act="weigh"><span>⚖️</span><b>Ajouter une pesée</b></button>
-      <button class="quick-action" data-act="waterAdd" data-amount="300"><span>💧</span><b>Ajouter 300 ml d'eau</b></button>
+      <button class="quick-action" data-act="go" data-page="meals"><span>🍽️</span><b>Ajouter un repas</b></button>
+    </div>
+
+    <div class="today-water card">
+      <div class="today-water-head">
+        <div>
+          <div class="eyebrow">💧 Hydratation</div>
+          <strong id="todayWaterTotal">0.00 L</strong>
+          <span>sur <b id="todayWaterGoal">3.00 L</b> aujourd'hui</span>
+        </div>
+        <div class="today-water-pct" id="todayWaterPct">0%</div>
+      </div>
+      <div class="today-water-bar"><i id="todayWaterBar"></i></div>
+      <div class="water-quick">
+        <button data-act="waterAdd" data-amount="250">+250 ml</button>
+        <button data-act="waterAdd" data-amount="500">+500 ml</button>
+        <button data-act="waterAdd" data-amount="750">+750 ml</button>
+        <button class="water-undo" data-act="waterAdd" data-amount="-250">−250</button>
+      </div>
+      <button class="water-big-add" data-act="waterAdd" data-amount="300">💧 +300 ml</button>
     </div>
 
     <div class="card run-card" style="margin-top:12px">
@@ -510,8 +551,11 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
       <div class="water-head"><span class="water-drop">💧</span><div><b>Eau</b><span>Objectif : <span id="waterGoalLabel">3.00 L</span></span><strong id="waterTotal">0.00 L</strong></div><button data-act="waterAdd" data-amount="300" class="water-add">＋</button></div>
       <div class="glasses" id="waterGlasses"></div><div class="water-foot">+ Eau provenant de votre alimentation : 0 ml</div>
     </div>
-    <div class="section-title-row"><h2>Données corporelles</h2><span class="plus-pill">Plus</span></div>
-    <div class="body-card"><b>Poids</b><span>Objectif : <span id="bodyTarget">85.0 kg</span></span><div class="body-weight"><button data-act="bodyWeightMinus">−</button><strong id="bodyWeight">— kg</strong><button data-act="bodyWeightPlus">＋</button></div></div>
+    <div class="section-title-row"><h2>Données corporelles</h2></div>
+    <div class="body-card">
+      <div class="body-card-top"><div><b>Dernière pesée</b><span>Objectif : <span id="bodyTarget">85.0 kg</span></span></div><button class="body-weigh-btn" data-act="weigh">＋ Pesée</button></div>
+      <strong class="body-current" id="bodyWeight">— kg</strong>
+    </div>
     <div class="section-title-row"><h2>Jeûne</h2></div>
     <div class="fast-card"><div class="fast-ico">⌛</div><div><b id="fastTitle">Routine 16:8</b><span id="fastText">Aucun jeûne en cours</span><div class="fast-progress"><i id="fastProgress"></i></div></div><button data-act="fasting" id="fastBtn">Démarrer</button></div>
     <div class="section-title-row"><h2>Activité</h2></div>
@@ -664,7 +708,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 (function(){
 "use strict";
 var CFG={apiKey:"AIzaSyDgVRLAmyY868I4Vuu_xqXb-TVJqUYeV2I",authDomain:"fitness-f423a.firebaseapp.com",projectId:"fitness-f423a",storageBucket:"fitness-f423a.firebasestorage.app",messagingSenderId:"186607401810",appId:"1:186607401810:web:309ca695d884a6ec96588b"};
-var KEY="evoFitV3", OLDKEY="evoFitCoachV2";
+var KEY="evoFitV3", OLDKEY="evoFitCoachV2", BACKUPKEY="evoFitV3_backup";
 var START_DATE="2026-09-07";
 
 var DEFAULT_PROGRAM=[
@@ -734,11 +778,27 @@ function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
 function $(id){return document.getElementById(id);}
 function toast(m){var el=$("toast");el.textContent=m;el.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){el.hidden=true;},2000);}
 
-function save(){lsSet(KEY,JSON.stringify(state));}
+function save(){
+  try{
+    var payload=JSON.stringify(state);
+    lsSet(KEY,payload);
+    lsSet(BACKUPKEY,payload);
+  }catch(e){}
+}
 function load(){
-  var raw=lsGet(KEY);
-  if(raw){try{var p=JSON.parse(raw);if(p&&typeof p==="object")merge(p);}catch(e){}}
-  else{ // migrate body weight from the old app if present
+  var raw=lsGet(KEY),loaded=false;
+  if(raw){
+    try{var p=JSON.parse(raw);if(p&&typeof p==="object"){merge(p);loaded=true;}}
+    catch(e){}
+  }
+  if(!loaded){
+    var backup=lsGet(BACKUPKEY);
+    if(backup){
+      try{var b=JSON.parse(backup);if(b&&typeof b==="object"){merge(b);loaded=true;lsSet(KEY,backup);}}
+      catch(e){}
+    }
+  }
+  if(!loaded){
     var old=lsGet(OLDKEY);
     if(old){try{var o=JSON.parse(old);
       if(o&&Array.isArray(o.weightHistory)&&o.weightHistory.length)state.weightHistory=o.weightHistory.slice();
@@ -856,7 +916,13 @@ function renderToday(){
   var dk=state.meals.reduce(function(s,m){return s+Number(m.kcal||0);},0);
   var wt=state.water||{date:today(),ml:0};
   $("dashKcal").textContent=Math.round(dk)+" / "+Number(state.profile.cal||2400);
-  $("dashWater").textContent=(Number(wt.ml||0)/1000).toFixed(2)+" / "+Number(state.waterGoal||3).toFixed(1)+" L";
+  var waterMl=Number(wt.ml||0), waterGoalMl=Math.max(500,Number(state.waterGoal||3)*1000);
+  var waterPct=Math.round(Math.min(100,waterMl/waterGoalMl*100));
+  $("dashWater").textContent=(waterMl/1000).toFixed(2)+" / "+Number(state.waterGoal||3).toFixed(1)+" L";
+  $("todayWaterTotal").textContent=(waterMl/1000).toFixed(2)+" L";
+  $("todayWaterGoal").textContent=(waterGoalMl/1000).toFixed(2)+" L";
+  $("todayWaterPct").textContent=waterPct+"%";
+  $("todayWaterBar").style.width=waterPct+"%";
   $("dashSteps").textContent=valToday(state.steps)?Number(valToday(state.steps)).toLocaleString("fr-CH"):"—";
   $("dashForm").textContent=valToday(state.energy)||"—";
 
@@ -1075,14 +1141,14 @@ function saveRun(){
   save();closeRun();renderProgress();toast("Course ajoutée");
 }
 /* ===== live GPS run tracking ===== */
-var geoWatch=null,runActive=false,runPaused=false;
-var runMeters=0,runElapsedMs=0,runSegStart=0,runLastPt=null,runPts=[],runTick=null,wakeLock=null,runStartDate=today();
+var geoWatch=null,geoRetryTimer=null,geoStaleTimer=null,geoRetryCount=0,runActive=false,runPaused=false;
+var runMeters=0,runElapsedMs=0,runSegStart=0,runLastPt=null,runLastTime=0,runLastGeoTimestamp=0,runPts=[],runTick=null,wakeLock=null,runStartDate=today();
 var lrMap=null,lrLine=null,lrHead=null,lrStart=null,mapReady=false,mapMode="svg",mapCentered=false;
 function fmtClock(ms){var s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;return (h>0?h+":"+pad(m):String(m))+":"+pad(sec);}
 function haversine(a,b){var R=6371000,toR=Math.PI/180;var dLat=(b.lat-a.lat)*toR,dLng=(b.lng-a.lng)*toR,la1=a.lat*toR,la2=b.lat*toR;var x=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(la1)*Math.cos(la2)*Math.sin(dLng/2)*Math.sin(dLng/2);return 2*R*Math.asin(Math.min(1,Math.sqrt(x)));}
 function openLiveRun(){
   closeRun();
-  runActive=false;runPaused=false;runMeters=0;runElapsedMs=0;runSegStart=0;runLastPt=null;runPts=[];runStartDate=today();
+  runActive=false;runPaused=false;runMeters=0;runElapsedMs=0;runSegStart=0;runLastPt=null;runLastTime=0;runLastGeoTimestamp=0;runPts=[];runTick=null;geoRetryCount=0;runStartDate=today();
   $("lrTime").textContent="0:00";$("lrDist").textContent="0.00";$("lrPace").textContent="—";$("lrSpeed").textContent="—";
   $("lrToggle").textContent="Démarrer";$("lrToggle").style.display="";$("lrFinish").style.display="none";$("lrDiscard").style.display="";$("lrDiscard").textContent="Annuler";
   $("lrGps").textContent="GPS prêt";$("lrTrace").innerHTML="";$("lrMapEmpty").style.display="";
@@ -1090,78 +1156,150 @@ function openLiveRun(){
   if(window.L){
     mapMode="leaflet";
     $("lrMap").style.display="";$("lrTrace").style.display="none";$("lrMapEmpty").style.display="none";
-    setTimeout(function(){initMap();mapReady=!!lrMap;resetMapLayers();if(lrMap){try{lrMap.invalidateSize();}catch(e){}}},60);
+    setTimeout(function(){initMap();mapReady=!!lrMap;resetMapLayers();if(lrMap){try{lrMap.invalidateSize(true);}catch(e){}}},180);
   }else{
     mapMode="svg";mapReady=false;
     $("lrMap").style.display="none";$("lrTrace").style.display="";$("lrMapEmpty").style.display="";
   }
   $("liveRunModal").classList.add("on");
 }
-function closeLiveRun(){stopGeo();releaseWake();if(runTick){clearInterval(runTick);runTick=null;}runActive=false;runPaused=false;$("liveRunModal").classList.remove("on");}
+function closeLiveRun(){stopGeo();releaseWake();if(runTick){clearInterval(runTick);runTick=null;}runActive=false;runPaused=false;runLastPt=null;runLastTime=0;runLastGeoTimestamp=0;$("liveRunModal").classList.remove("on");}
 function toggleRun(){if(!runActive)startRun();else if(!runPaused)pauseRun();else resumeRun();}
 function startRun(){
   if(!navigator.geolocation){$("lrGps").textContent="GPS non supporté";toast("Géolocalisation indisponible");return;}
-  runActive=true;runPaused=false;runSegStart=Date.now();
+  runActive=true;runPaused=false;runSegStart=Date.now();runLastPt=null;runLastTime=0;runLastGeoTimestamp=0;geoRetryCount=0;
   $("lrToggle").textContent="Pause";$("lrFinish").style.display="";$("lrDiscard").style.display="none";
   $("lrGps").textContent="Recherche du signal…";
   requestWake();startGeo();
   if(runTick)clearInterval(runTick);runTick=setInterval(updateLiveUI,250);
   updateLiveUI();
 }
-function pauseRun(){if(!runActive||runPaused)return;runPaused=true;runElapsedMs+=Date.now()-runSegStart;runLastPt=null;$("lrToggle").textContent="Reprendre";$("lrGps").textContent="En pause";updateLiveUI();}
-function resumeRun(){if(!runActive||!runPaused)return;runPaused=false;runSegStart=Date.now();runLastPt=null;$("lrToggle").textContent="Pause";$("lrGps").textContent="Recherche du signal…";updateLiveUI();}
+function pauseRun(){if(!runActive||runPaused)return;runPaused=true;runElapsedMs+=Date.now()-runSegStart;runLastPt=null;runLastTime=0;runLastGeoTimestamp=0;stopGeo();$("lrToggle").textContent="Reprendre";$("lrGps").textContent="En pause";updateLiveUI();}
+function resumeRun(){if(!runActive||!runPaused)return;runPaused=false;runSegStart=Date.now();runLastPt=null;runLastTime=0;runLastGeoTimestamp=0;$("lrToggle").textContent="Pause";$("lrGps").textContent="Recherche du signal…";startGeo();updateLiveUI();}
 function finishRun(){
   if(!runActive){closeLiveRun();return;}
   if(!runPaused)runElapsedMs+=Date.now()-runSegStart;
-  runActive=false;stopGeo();releaseWake();if(runTick){clearInterval(runTick);runTick=null;}
+  runActive=false;stopGeo();releaseWake();if(runTick){clearInterval(runTick);runTick=null;}runLastPt=null;runLastTime=0;runLastGeoTimestamp=0;
   var km=Math.round(runMeters/10)/100,min=Math.round(runElapsedMs/6000)/10;
   if(km<0.05||min<0.2){toast("Course trop courte, non enregistrée");closeLiveRun();return;}
   state.runs.push({id:"r"+Date.now()+Math.floor(Math.random()*1000),d:runStartDate,dist:km,dur:min,src:"gps"});
   save();closeLiveRun();showPage("progress");renderProgress();toast("Course enregistrée · "+num(km)+" km");
 }
 function discardRun(){if(runActive&&runMeters>50){if(!confirm("Abandonner la course en cours ?"))return;}closeLiveRun();}
-function startGeo(){stopGeo();try{geoWatch=navigator.geolocation.watchPosition(onGeo,onGeoErr,{enableHighAccuracy:true,maximumAge:1000,timeout:20000});}catch(e){$("lrGps").textContent="GPS inaccessible";}}
-function stopGeo(){if(geoWatch!=null&&navigator.geolocation){try{navigator.geolocation.clearWatch(geoWatch);}catch(e){}}geoWatch=null;}
+function startGeo(){
+  if(!runActive||runPaused||!navigator.geolocation)return;
+  if(geoRetryTimer){clearTimeout(geoRetryTimer);geoRetryTimer=null;}
+  if(geoStaleTimer){clearTimeout(geoStaleTimer);geoStaleTimer=null;}
+  if(geoWatch!=null)stopGeo();
+  try{
+    geoWatch=navigator.geolocation.watchPosition(onGeo,onGeoErr,{enableHighAccuracy:true,maximumAge:500,timeout:15000});
+    geoStaleTimer=setTimeout(function(){
+      if(runActive&&!runPaused){
+        $("lrGps").textContent="GPS en recherche…";
+        startGeo();
+      }
+    },14000);
+  }catch(e){$("lrGps").textContent="GPS inaccessible";}
+}
+function stopGeo(){
+  if(geoRetryTimer){clearTimeout(geoRetryTimer);geoRetryTimer=null;}
+  if(geoStaleTimer){clearTimeout(geoStaleTimer);geoStaleTimer=null;}
+  if(geoWatch!=null&&navigator.geolocation){try{navigator.geolocation.clearWatch(geoWatch);}catch(e){}}
+  geoWatch=null;
+}
+function scheduleGeoRetry(){
+  if(!runActive||runPaused||geoRetryTimer)return;
+  var delay=Math.min(8000,1200+geoRetryCount*1200);geoRetryCount++;
+  geoRetryTimer=setTimeout(function(){geoRetryTimer=null;if(runActive&&!runPaused)startGeo();},delay);
+}
 function onGeo(pos){
-  if(!runActive||runPaused)return;
-  var c=pos.coords,accurate=c.accuracy<=40;
-  $("lrGps").textContent=(accurate?"GPS ok · ":"Signal faible · ")+Math.round(c.accuracy)+" m";
-  if(c.accuracy>120)return; /* trop imprécis même pour l'affichage */
-  var pt={lat:c.latitude,lng:c.longitude};
+  if(!runActive||runPaused||!pos||!pos.coords)return;
+  var c=pos.coords,acc=Number(c.accuracy||999);
+  if(!isFinite(acc)||acc>30){
+    $("lrGps").textContent="Signal faible · "+Math.round(acc)+" m";
+    if(!runLastPt&&runPts.length===0&&isFinite(acc)&&acc<=120){
+      var lat0=Number(c.latitude),lng0=Number(c.longitude);
+      if(isFinite(lat0)&&isFinite(lng0)&&Math.abs(lat0)<=90&&Math.abs(lng0)<=180){
+        runPts.push({lat:lat0,lng:lng0}); /* montre un premier point même en signal faible, sans le fixer comme référence */
+        $("lrMapEmpty").style.display=(mapMode==="leaflet"||runPts.length>1)?"none":"";
+        renderRoute();
+      }
+    }
+    return;
+  }
+  var lat=Number(c.latitude),lng=Number(c.longitude);
+  if(!isFinite(lat)||!isFinite(lng)||Math.abs(lat)>90||Math.abs(lng)>180)return;
+  var pt={lat:lat,lng:lng},now=Date.now();
+  var gpsTime=Number(pos.timestamp);
+  if(isFinite(gpsTime)&&gpsTime>0&&runLastGeoTimestamp&&gpsTime<=runLastGeoTimestamp)return;
+  if(isFinite(gpsTime)&&gpsTime>0)runLastGeoTimestamp=gpsTime;
+
   if(runLastPt){
     var seg=haversine(runLastPt,pt);
-    if(accurate&&seg>=3&&seg<200){runMeters+=seg;runPts.push(pt);runLastPt=pt;}
-    else if(accurate&&seg>=200){runLastPt=pt;} /* saut GPS : on resynchronise sans compter */
-    else if(!accurate&&runPts.length<2){runPts.push(pt);} /* montre un premier point même en signal faible */
-  }else{runLastPt=pt;runPts.push(pt);}
+    var dt=Math.max(0.5,(now-runLastTime)/1000);
+    var segSpeed=seg/dt;
+    // Filtre anti-bruit : un petit déplacement inférieur à ~4 m n'est pas ajouté.
+    // Les gros bonds ou vitesses irréalistes sont ignorés sans déplacer le point de référence.
+    var minMove=Math.max(4,Math.min(10,acc*0.45));
+    if(seg>=minMove&&seg<150&&segSpeed<=8.33){
+      runMeters+=seg;runPts.push(pt);runLastPt=pt;runLastTime=now;
+    }else if(seg>=150){
+      // Très gros saut GPS : on ne compte rien et on attend un point cohérent.
+      $("lrGps").textContent="GPS recalage…";
+      return;
+    }else if(segSpeed>8.33){
+      $("lrGps").textContent="GPS instable…";
+      return;
+    }
+  }else{
+    runLastPt=pt;runLastTime=now;runPts.push(pt);
+  }
+  geoRetryCount=0;
+  if(geoStaleTimer){clearTimeout(geoStaleTimer);geoStaleTimer=null;}
+  geoStaleTimer=setTimeout(function(){
+    if(runActive&&!runPaused){
+      $("lrGps").textContent="GPS en recherche…";
+      startGeo();
+    }
+  },14000);
+  $("lrGps").textContent="GPS ok · "+Math.round(acc)+" m";
   $("lrMapEmpty").style.display=(mapMode==="leaflet"||runPts.length>1)?"none":"";
   renderRoute();updateLiveUI();
 }
 function onGeoErr(e){
   var m="GPS indisponible";
-  if(e&&e.code===1)m="Localisation refusée — autorise-la dans les réglages";
-  else if(e&&e.code===2)m="Position indisponible";
-  else if(e&&e.code===3)m="Recherche du signal…";
+  if(e&&e.code===1){m="Localisation refusée — autorise-la dans les réglages";stopGeo();toast("Localisation refusée");}
+  else if(e&&e.code===2){m="Recherche du signal…";scheduleGeoRetry();}
+  else if(e&&e.code===3){m="Recherche du signal…";scheduleGeoRetry();}
   $("lrGps").textContent=m;
-  if(e&&e.code===1)toast("Localisation refusée");
 }
 function curElapsed(){return runElapsedMs+((runActive&&!runPaused)?(Date.now()-runSegStart):0);}
 function updateLiveUI(){
   var ms=curElapsed();$("lrTime").textContent=fmtClock(ms);
   var km=runMeters/1000;$("lrDist").textContent=km.toFixed(2);
   var min=ms/60000;
-  $("lrPace").textContent=(km>0.02&&min>0)?fmtPace(min/km):"—";
-  $("lrSpeed").textContent=(ms>3000&&km>0)?num(km/(ms/3600000)):"—";
+  $("lrPace").textContent=(km>=0.10&&min>=0.5)?fmtPace(min/km):"—";
+  var speedKmh=(ms>20000&&km>=0.05)?(km/(ms/3600000)):0;
+  $("lrSpeed").textContent=speedKmh?num(Math.min(speedKmh,25)):"—";
 }
 function initMap(){
   if(lrMap||!window.L)return;
   try{
-    lrMap=L.map("lrMap",{zoomControl:false,attributionControl:true,dragging:true});
+    lrMap=L.map("lrMap",{zoomControl:false,attributionControl:true,dragging:true,preferCanvas:true});
     lrMap.setView([46.2044,6.1432],15);
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",{maxZoom:20,subdomains:"abcd",attribution:"© OpenStreetMap, © CARTO"}).addTo(lrMap);
+    var tiles=L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,subdomains:["a","b","c"],attribution:"© OpenStreetMap contributors"});
+    tiles.on("tileerror",function(){
+      var g=$("lrGps");if(g&&!runActive)g.textContent="Carte indisponible";
+    });
+    tiles.addTo(lrMap);
     lrLine=L.polyline([],{color:"#FF6A3D",weight:5,opacity:.95,lineJoin:"round",lineCap:"round"}).addTo(lrMap);
-    setTimeout(function(){try{lrMap.invalidateSize();}catch(e){}},60);
-  }catch(e){lrMap=null;lrLine=null;}
+    setTimeout(function(){try{lrMap.invalidateSize(true);}catch(e){}},120);
+    setTimeout(function(){try{lrMap.invalidateSize(true);}catch(e){}},700);
+  }catch(e){
+    lrMap=null;lrLine=null;mapReady=false;mapMode="svg";
+    $("lrMap").style.display="none";$("lrTrace").style.display="";
+    $("lrMapEmpty").style.display="";
+  }
 }
 function resetMapLayers(){
   try{if(lrHead&&lrMap)lrMap.removeLayer(lrHead);}catch(e){}
@@ -1169,6 +1307,7 @@ function resetMapLayers(){
   lrHead=null;lrStart=null;mapCentered=false;
   try{if(lrLine)lrLine.setLatLngs([]);}catch(e){}
 }
+function havermapDistance(a,b,c,d){return haversine({lat:a,lng:b},{lat:c,lng:d});}
 function updateMap(){
   if(!lrMap||!lrLine||!runPts.length)return;
   lrLine.setLatLngs(runPts.map(function(p){return [p.lat,p.lng];}));
@@ -1176,7 +1315,20 @@ function updateMap(){
   if(!lrStart){try{lrStart=L.circleMarker([runPts[0].lat,runPts[0].lng],{radius:6,color:"#12141A",weight:2,fillColor:"#37E0A6",fillOpacity:1}).addTo(lrMap);}catch(e){}}
   if(!lrHead){try{lrHead=L.marker([last.lat,last.lng],{icon:L.divIcon({className:"lr-headwrap",html:'<div class="lr-dot"></div>',iconSize:[15,15],iconAnchor:[7,7]})}).addTo(lrMap);}catch(e){}}
   else{try{lrHead.setLatLng([last.lat,last.lng]);}catch(e){}}
-  try{if(!mapCentered){lrMap.setView([last.lat,last.lng],16);mapCentered=true;}else lrMap.panTo([last.lat,last.lng],{animate:true,duration:.5});}catch(e){}
+  try{
+    if(!mapCentered){
+      if(runPts.length>1){
+        var b=L.latLngBounds(runPts.map(function(p){return [p.lat,p.lng];}));
+        lrMap.fitBounds(b,{padding:[28,28],maxZoom:17});
+      }else{
+        lrMap.setView([last.lat,last.lng],17);
+      }
+      mapCentered=true;
+    }else{
+      var c=lrMap.getCenter(), d=havermapDistance(c.lat,c.lng,last.lat,last.lng);
+      if(d>35) lrMap.panTo([last.lat,last.lng],{animate:true,duration:.35});
+    }
+  }catch(e){}
 }
 function renderRoute(){
   if(mapMode==="leaflet"&&mapReady&&lrMap){$("lrTrace").style.display="none";updateMap();}
@@ -1606,6 +1758,13 @@ window.EVO_V3_READY=true;
       console.error("EVO runtime error:",e.error||e.message);
       installFallback();
     }
+  });
+  window.addEventListener("unhandledrejection",function(e){
+    console.error("EVO promise error:",e.reason||e);
+    try{
+      var t=document.getElementById("toast");
+      if(t){t.textContent="Un petit bug a été récupéré automatiquement.";t.hidden=false;setTimeout(function(){t.hidden=true;},2200);}
+    }catch(err){}
   });
 })();
 </script>
