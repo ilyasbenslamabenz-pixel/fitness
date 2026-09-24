@@ -86,30 +86,66 @@ var MENU=[
 /* liste de courses Migros par défaut : végétarien, orienté protéines, ~150.-/mois */
 var DEFAULT_GROCERY={
  once:[
-  {n:"Riz M-Budget 1 kg",done:false},
+  {n:"Riz complet 1 kg",done:false},
   {n:"Flocons d'avoine 1 kg",done:false},
   {n:"Lentilles corail 500 g",done:false},
   {n:"Lentilles vertes 500 g",done:false},
   {n:"Pois chiches en boîte ×4",done:false},
   {n:"Haricots rouges en boîte ×3",done:false},
-  {n:"Huile (tournesol/olive) 1 L",done:false},
+  {n:"Graines de chia 200 g",done:false},
+  {n:"Huile de colza/tournesol 1 L",done:false},
   {n:"Beurre de cacahuète",done:false},
   {n:"Tomates pelées/passata ×4",done:false},
-  {n:"Bouillon de légumes",done:false}
+  {n:"Bouillon de légumes",done:false},
+  {n:"Thé vert",done:false},
+  {n:"Épices (piment, paprika fumé)",done:false},
+  {n:"Poudre de protéine végétale",done:false}
  ],
  weekly:[
-  {n:"Lait 2 L",done:false},
+  {n:"Lait écrémé 2 L",done:false},
   {n:"Skyr/yogourt protéiné 500 g ×2",done:false},
-  {n:"Fromage râpé 150 g",done:false},
-  {n:"Œufs (boîte de 12)",done:false},
-  {n:"Tofu nature 300 g ×2",done:false},
+  {n:"Cottage cheese 250 g",done:false},
   {n:"Quark maigre 500 g",done:false},
-  {n:"Pain",done:false},
-  {n:"Beurre/margarine",done:false},
-  {n:"Légumes frais (~1.5 kg)",done:false},
-  {n:"Fruits (~1 kg)",done:false}
+  {n:"Fromage râpé allégé 150 g",done:false},
+  {n:"Pain complet",done:false},
+  {n:"Légumes verts à volume (brocoli, épinards, courgettes, ~2 kg)",done:false},
+  {n:"Fruits à faible IG (pommes, baies, ~1 kg)",done:false}
  ]
 };
+var GROCERY_VERSION=2;
+/* noms de tous les articles par défaut v1 (retirés ou renommés en v2) : jamais réinjectés
+   comme "ajout personnel" lors de la migration, même s'ils n'ont plus de correspondance exacte
+   dans DEFAULT_GROCERY */
+var GROCERY_RETIRED_V1={
+ "Riz M-Budget 1 kg":1,"Flocons d'avoine 1 kg":1,"Lentilles corail 500 g":1,"Lentilles vertes 500 g":1,
+ "Pois chiches en boîte ×4":1,"Haricots rouges en boîte ×3":1,"Huile (tournesol/olive) 1 L":1,
+ "Beurre de cacahuète":1,"Tomates pelées/passata ×4":1,"Bouillon de légumes":1,
+ "Lait 2 L":1,"Skyr/yogourt protéiné 500 g ×2":1,"Fromage râpé 150 g":1,"Œufs (boîte de 12)":1,
+ "Tofu nature 300 g ×2":1,"Quark maigre 500 g":1,"Pain":1,"Beurre/margarine":1,
+ "Légumes frais (~1.5 kg)":1,"Fruits (~1 kg)":1
+};
+function migrateGrocerySection(defaultList,oldList){
+  var doneByName={};
+  (oldList||[]).forEach(function(x){doneByName[String(x.n).trim().toLowerCase()]=!!x.done;});
+  var fresh=defaultList.map(function(x){
+    var key=x.n.trim().toLowerCase();
+    return {n:x.n,done:doneByName.hasOwnProperty(key)?doneByName[key]:false};
+  });
+  var newNames={};defaultList.forEach(function(x){newNames[x.n.trim().toLowerCase()]=1;});
+  (oldList||[]).forEach(function(x){
+    var key=String(x.n).trim().toLowerCase();
+    if(newNames[key])return; /* déjà repris ci-dessus */
+    if(GROCERY_RETIRED_V1[x.n])return; /* ancien article par défaut volontairement retiré */
+    fresh.push({n:x.n,done:!!x.done}); /* ajout personnel de l'utilisateur : conservé */
+  });
+  return fresh;
+}
+function migrateGroceryList(old){
+  return {
+    once:migrateGrocerySection(DEFAULT_GROCERY.once,old&&old.once),
+    weekly:migrateGrocerySection(DEFAULT_GROCERY.weekly,old&&old.weekly)
+  };
+}
 /* base locale d'aliments bruts courants (kcal/protéines/glucides/lipides pour 100 g) —
    consultable instantanément sans réseau, complète OpenFoodFacts qui couvre mal le non-transformé */
 var LOCAL_FOODS=[
@@ -287,6 +323,7 @@ function merge(p){
   if(isFinite(Number(p.waterGoal)))state.waterGoal=Number(p.waterGoal);
   if(p.fast&&typeof p.fast==="object")state.fast=Object.assign(state.fast,p.fast);
   if(p.groceryList&&typeof p.groceryList==="object"&&Array.isArray(p.groceryList.once)&&Array.isArray(p.groceryList.weekly))state.groceryList=p.groceryList;
+  if(typeof p.groceryVersion==="number")state.groceryVersion=p.groceryVersion;
   if(typeof p.suggest==="number")state.suggest=p.suggest;
   if(p.session&&typeof p.session==="object")state.session=p.session;
   if(p.lastDay)state.lastDay=p.lastDay;
@@ -311,6 +348,7 @@ function normalizeState(){
   if(!state.fast)state.fast={active:false,start:null,hours:16};
   state.fast.hours=Number(state.fast.hours||16);
   if(!state.groceryList||!Array.isArray(state.groceryList.once)||!Array.isArray(state.groceryList.weekly))state.groceryList=JSON.parse(JSON.stringify(DEFAULT_GROCERY));
+  if(state.groceryVersion!==GROCERY_VERSION){state.groceryList=migrateGroceryList(state.groceryList);state.groceryVersion=GROCERY_VERSION;save();}
   if(state.lastDay==null)state.lastDay=today();
   if(!Array.isArray(state.program)||!state.program.length)state.program=JSON.parse(JSON.stringify(DEFAULT_PROGRAM));
   if(!state.program.some(function(p){return p.cat==="maison";})){
