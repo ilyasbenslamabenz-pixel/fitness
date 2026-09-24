@@ -59,6 +59,30 @@ var HOME_PROGRAM=[
    {n:"Sprint sur place",t:"4 × 40 s",w:false}]}
 ];
 
+/* photos de démonstration pour les exercices au poids du corps (img/exercises/*.jpg),
+   affichées dans l'écran de séance guidée à la place de l'icône générique du jour */
+var EX_PHOTOS={
+ "Pompes":"pompes",
+ "Pompes déclinées":"pompes-declinees",
+ "Squats":"squats",
+ "Squats sumo":"squats-sumo",
+ "Squat jumps":"squat-jumps",
+ "Fentes avant":"fentes-avant",
+ "Fentes arrière":"fentes-arriere",
+ "Jumping lunges":"jumping-lunges",
+ "Gainage (planche)":"gainage-planche",
+ "Gainage latéral":"gainage-lateral",
+ "Superman (lombaires)":"superman",
+ "Dips sur chaise":"dips-chaise",
+ "Jumping jacks":"jumping-jacks",
+ "Mountain climbers":"mountain-climbers",
+ "Burpees":"burpees",
+ "Corde à sauter (ou sur place)":"corde-a-sauter",
+ "High knees":"high-knees",
+ "Plank jacks":"plank-jacks",
+ "Sprint sur place":"sprint-place"
+};
+
 /* programme running progressif : 10 semaines, 3 séances identiques par semaine */
 var RUNNING_PROGRAM=[
  {goal:"8 x (1 min course / 1 min 30 marche)"},
@@ -864,7 +888,9 @@ function renderGuided(){
   $("gExName").textContent=e.n;
   var last=lastWeight(e.n);
   $("gExSub").textContent=e.t+(last>0?" · dernière fois "+num(last)+" kg":"");
-  $("gExIcon").innerHTML=p.icon||'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="3"/><circle cx="18.5" cy="12" r="3"/><line x1="8.5" y1="12" x2="15.5" y2="12"/></svg>';
+  var exPhoto=EX_PHOTOS[e.n];
+  $("gExIcon").classList.toggle("has-photo",!!exPhoto);
+  $("gExIcon").innerHTML=exPhoto?'<img src="/fitness/img/exercises/'+exPhoto+'.jpg" alt="" class="guided-photo">':(p.icon||'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="3"/><circle cx="18.5" cy="12" r="3"/><line x1="8.5" y1="12" x2="15.5" y2="12"/></svg>');
 
   var st=mk[e.n]||{},wv=(st.w!=null?st.w:last),rt=repTarget(e),rv=repsFor(mk,e),vals="";
   if(e.w)vals+='<div class="val-group"><button data-act="w-" data-ex="'+esc(e.n)+'">−</button><div class="val"><b>'+num(wv)+'</b><span>KG</span></div><button data-act="w+" data-ex="'+esc(e.n)+'">＋</button></div>';
