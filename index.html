@@ -293,6 +293,8 @@
         <div class="meal-section-items" id="itemsSnack"></div>
       </div>
     </div>
+    <div class="section-title-row"><h2>Liste de courses</h2></div>
+    <div class="fast-card"><div class="fast-ico"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1.3"/><circle cx="18" cy="21" r="1.3"/><path d="M2.5 3h2.4l2.7 12.4a2 2 0 0 0 2 1.6h8.1a2 2 0 0 0 2-1.6l1.5-7.4H6"/></svg></div><div><b>Migros · mois</b><span id="groceryText">—</span></div><button data-act="groceryOpen" id="groceryBtn">Ouvrir</button></div>
     <div class="section-title-row"><h2>Jeûne</h2></div>
     <div class="fast-card"><div class="fast-ico"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12,7 12,12 16,14"/></svg></div><div><b id="fastTitle">Routine 16:8</b><span id="fastText">Aucun jeûne en cours</span><div class="fast-progress"><i id="fastProgress"></i></div></div><button data-act="fasting" id="fastBtn">Démarrer</button></div>
     <div class="section-title-row"><h2>Idées de la semaine</h2></div><div id="weeklyMenu"></div>
@@ -504,6 +506,17 @@
   <div class="sub">Tes aliments enregistrés pour les ajouter rapidement.</div>
   <div class="favorite-list" id="favoriteList"></div>
   <div class="acts"><button class="btn ghost" data-act="favoritesClose">Fermer</button></div>
+</div></div>
+
+<div class="modal" id="groceryModal"><div class="sheet">
+  <h3>Liste de courses</h3>
+  <div class="sub">Migros, végétarien, orienté protéines · ~150.-/mois</div>
+  <div class="grocery-sec-h">Une fois (stock du mois)</div>
+  <div class="grocery-list" id="groceryOnceList"></div>
+  <div class="grocery-sec-h">Chaque semaine (×4 dans le mois)</div>
+  <div class="grocery-list" id="groceryWeeklyList"></div>
+  <div class="grocery-add"><input id="groceryAddInput" placeholder="Ajouter un article…"><button data-act="groceryAdd">＋</button></div>
+  <div class="acts"><button class="btn ghost" data-act="groceryReset">Tout décocher</button><button class="btn primary" data-act="groceryClose">Fermer</button></div>
 </div></div>
 
 <div class="modal" id="fastModal"><div class="sheet">
