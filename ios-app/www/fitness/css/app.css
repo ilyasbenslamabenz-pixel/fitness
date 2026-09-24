@@ -495,7 +495,7 @@ button.lrow:active{background:var(--surface2)}
 /* ===== refonte ergonomie : accueil, FAB, séance guidée ===== */
 .topbar .streak{display:flex;align-items:center;gap:5px;background:var(--surface);border:1px solid var(--hair);padding:7px 11px;border-radius:999px}
 .topbar .streak b{font-size:13.5px;font-weight:700}
-.ring-card{display:flex;align-items:center;gap:18px;margin:14px 2px 0;padding:16px 18px}
+.ring-card{display:flex;align-items:center;gap:18px;margin:14px 0 0;padding:16px 18px}
 .ring-wrap{position:relative;width:128px;height:128px;margin:0;flex:0 0 auto}
 .ring-wrap svg{transform:rotate(-90deg)}
 .ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
@@ -510,7 +510,7 @@ button.lrow:active{background:var(--surface2)}
 .ring-row-val{font-size:13px;font-weight:700;flex:0 0 auto}
 .ring-row-bar{height:5px;border-radius:3px;background:var(--surface2);overflow:hidden}
 .ring-row-fill{height:100%;border-radius:3px;transition:width .3s ease}
-.next-cta{display:block;margin:16px 16px 0;padding:18px;border-radius:24px;background:var(--surface);border:1px solid var(--hair);position:relative;overflow:hidden;text-align:left;box-shadow:var(--shadow-card)}
+.next-cta{display:block;margin:12px 0 0;padding:18px;border-radius:24px;background:var(--surface);border:1px solid var(--hair);position:relative;overflow:hidden;text-align:left;box-shadow:var(--shadow-card)}
 .next-cta::before{content:"";position:absolute;top:-34px;right:-34px;width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,rgba(10,132,255,.20),transparent 70%)}
 .next-cta .eyebrow{position:relative}
 .next-cta .row{display:flex;align-items:center;gap:14px;margin-top:10px;position:relative}
@@ -561,7 +561,7 @@ button.lrow:active{background:var(--surface2)}
 .guided-sets .gs.on{background:var(--accent);color:#ffffff;border-color:transparent}
 .guided-sets .gs.cur{background:var(--surface2);border:2px solid var(--primary);color:var(--text)}
 .guided-bottom{padding:24px 20px calc(18px + var(--safe-bot));flex:0 0 auto}
-.guided-next{display:block;padding:17px;border-radius:999px;background:linear-gradient(90deg,#4fb2ff,var(--primary),var(--accent));text-align:center;font-weight:700;font-size:16px;color:#ffffff;box-shadow:0 10px 26px -10px rgba(10,132,255,.45),var(--shadow-pop);transition:transform .15s,filter .15s}
+.guided-next{display:block;width:100%;padding:17px;border-radius:999px;background:linear-gradient(90deg,#4fb2ff,var(--primary),var(--accent));text-align:center;font-weight:700;font-size:16px;color:#ffffff;box-shadow:0 10px 26px -10px rgba(10,132,255,.45),var(--shadow-pop);transition:transform .15s,filter .15s}
 .guided-next:active{transform:scale(.97);filter:brightness(1.1)}
 .guided-nav-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
 .guided-nav-btn{display:flex;align-items:center;justify-content:center;gap:5px;padding:13px;border-radius:999px;background:var(--surface);border:1px solid var(--hair);color:var(--text);font-weight:600;font-size:13.5px;box-shadow:var(--shadow-pop);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);transition:transform .15s,filter .15s}
@@ -619,3 +619,9 @@ button.lrow:active{background:var(--surface2)}
   background:var(--nav-bg);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);
   border-bottom:1px solid var(--nav-border);opacity:0;pointer-events:none;transition:opacity .2s ease}
 .ios-navbar.on{opacity:1}
+
+/* boutons ronds de navigation iOS 26 : pastille de verre claire, pictogramme épais */
+.guided-x,.lr-x{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.16);color:#fff;font-size:20px;
+  backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 4px 14px rgba(0,0,0,.25)}
+:root[data-theme="light"] .guided-x,:root[data-theme="light"] .lr-x{background:rgba(0,0,0,.06);border-color:rgba(0,0,0,.08);color:#000}
