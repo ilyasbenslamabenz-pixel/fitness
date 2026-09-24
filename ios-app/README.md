@@ -16,6 +16,10 @@ copie simplement ces fichiers dans un projet Xcode.
 - Permissions iOS ajoutées dans `ios/App/App/Info.plist` : accès caméra
   (scanner de code-barres) et position (suivi GPS des courses) — sans ça,
   l'app plante dès qu'on utilise ces fonctions
+- Icône App Store (1024×1024, sans transparence) et écran de lancement
+  générés à partir du monogramme "IB" blanc sur fond bleu nuit
+  (`scripts/gen-ios-branding.js`, `npm run gen:ios-branding` pour
+  régénérer si la marque change)
 - Testé : le bundle généré (`ios/App/App/public/`) charge bien l'app,
   0 requête en échec, 0 erreur JS
 
@@ -42,10 +46,6 @@ copie simplement ces fichiers dans un projet Xcode.
 
 ## Restant à peaufiner avant une vraie soumission
 
-- Icône et écran de lancement : Capacitor a mis des placeholders génériques
-  dans `ios/App/App/Assets.xcassets/`. Il faut les remplacer par l'icône
-  EVO Fit Coach (Apple demande un visuel 1024×1024 sans transparence pour
-  l'App Store).
 - Captures d'écran et métadonnées App Store Connect (description,
   mots-clés, politique de confidentialité...).
 

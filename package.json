@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "sync:ios": "node scripts/sync-ios-www.js",
+    "gen:ios-branding": "node scripts/gen-ios-branding.js",
     "cap:copy": "npm run sync:ios && npx cap copy ios",
     "cap:sync": "npm run sync:ios && npx cap sync ios"
   },
@@ -25,6 +26,7 @@
     "@capacitor/ios": "^8.5.2"
   },
   "devDependencies": {
-    "@capacitor/cli": "^8.5.2"
+    "@capacitor/cli": "^8.5.2",
+    "sharp": "^0.35.4"
   }
 }
