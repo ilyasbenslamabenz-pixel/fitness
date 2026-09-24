@@ -830,8 +830,19 @@ a{color:inherit;text-decoration:none}
     </div>
     <div class="card">
       <div class="eyebrow">Sauvegarde cloud</div>
-      <div class="pline"><span id="authStatus">Non connecté</span><button class="link" id="loginBtn" data-act="login">Se connecter</button></div>
-      <div style="font-size:12.5px;color:var(--muted);margin-top:6px">Une fois connecté, tes données sont sauvegardées automatiquement dans le cloud à chaque modification.</div>
+      <div class="pline"><span id="authStatus">Non connecté</span></div>
+      <div style="font-size:12.5px;color:var(--muted);margin-top:2px">Une fois connecté, tes données sont sauvegardées automatiquement dans le cloud à chaque modification.</div>
+      <div class="row2" id="loginBtns" style="margin-top:10px">
+        <button class="btn" id="loginBtn" data-act="login">
+          <svg class="ic-s" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.52 12.27c0-.82-.07-1.6-.2-2.36H12v4.47h6.47a5.53 5.53 0 0 1-2.4 3.63v3h3.88c2.27-2.09 3.57-5.17 3.57-8.74z"/><path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.95-2.9l-3.88-3c-1.08.73-2.46 1.15-4.07 1.15-3.13 0-5.78-2.11-6.73-4.96H1.27v3.1A12 12 0 0 0 12 24z"/><path fill="#FBBC05" d="M5.27 14.29a7.2 7.2 0 0 1 0-4.58v-3.1H1.27a12 12 0 0 0 0 10.78z"/><path fill="#EA4335" d="M12 4.75c1.76 0 3.35.6 4.6 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.27 6.61l4 3.1C6.22 6.86 8.87 4.75 12 4.75z"/></svg>
+          Google
+        </button>
+        <button class="btn" id="loginAppleBtn" data-act="loginApple">
+          <svg class="ic-s" viewBox="0 0 24 24" fill="currentColor"><path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.014-.076-.034-.229-.034-.373 0-1.09.579-2.237 1.263-2.877.762-.706 1.958-1.36 2.996-1.36.126 0 .224.03.24.03zM20.803 17.39c-.4.911-.598 1.318-1.117 2.126-.727 1.13-1.751 2.542-3.024 2.554-1.13.012-1.42-.735-2.955-.727-1.535.008-1.85.74-2.985.728-1.276-.012-2.25-1.28-2.977-2.412-2.04-3.163-2.25-6.876-.995-8.858.892-1.408 2.297-2.233 3.622-2.233 1.348 0 2.195.744 3.31.744 1.08 0 1.735-.745 3.29-.745 1.18 0 2.43.643 3.32 1.752-2.917 1.6-2.443 5.766.51 6.97z"/></svg>
+          Apple
+        </button>
+      </div>
+      <button class="btn ghost" id="logoutBtn" data-act="logout" style="margin-top:10px;display:none">Se déconnecter</button>
       <div class="row2" style="margin-top:10px"><button class="btn" data-act="backup">Sauvegarder maintenant</button><button class="btn" data-act="restore">Restaurer</button></div>
       <div class="row2" style="margin-top:10px"><button class="btn" data-act="export">Exporter (JSON)</button><button class="btn" data-act="import">Importer</button></div>
       <input type="file" id="importFile" accept="application/json,.json" style="display:none">
@@ -2734,9 +2745,16 @@ function setupFirebase(){
     firebase.auth().onAuthStateChanged(function(u){
       var wasSignedIn=!!cloudUser, justSignedIn=!wasSignedIn&&u;
       cloudUser=u;
-      if(u){lsDel("evoLoginAttempted");$("authStatus").textContent="Connecté · "+(u.email||"Google");}
-      else if(wasSignedIn){$("authStatus").textContent="Non connecté";}
-      $("loginBtn").textContent=u?"Se déconnecter":"Se connecter";
+      if(u){
+        lsDel("evoLoginAttempted");
+        var providerId=(u.providerData&&u.providerData[0]&&u.providerData[0].providerId)||"";
+        var providerLabel=providerId.indexOf("apple")>=0?"Apple":providerId.indexOf("google")>=0?"Google":"cloud";
+        $("authStatus").textContent="Connecté · "+(u.email||providerLabel);
+        $("loginBtns").style.display="none";$("logoutBtn").style.display="";
+      }else{
+        if(wasSignedIn)$("authStatus").textContent="Non connecté";
+        $("loginBtns").style.display="";$("logoutBtn").style.display="none";
+      }
       if(justSignedIn&&!autoRestoreAttempted){
         autoRestoreAttempted=true;
         firebase.firestore().collection("users").doc(u.uid).get().then(function(s){
@@ -2749,13 +2767,22 @@ function setupFirebase(){
   }catch(e){}
 }
 function login(){if(!window.firebase){toast("Cloud indisponible");return;}
-  if(cloudUser){firebase.auth().signOut();return;}
   lsSet("evoLoginAttempted","1");
   firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider()).then(function(){
     lsDel("evoLoginAttempted");
   }).catch(function(e){
     $("authStatus").textContent="Erreur connexion : "+(e&&e.code?e.code:(e&&e.message)||"inconnue");
   });}
+function loginApple(){if(!window.firebase){toast("Cloud indisponible");return;}
+  lsSet("evoLoginAttempted","1");
+  var provider=new firebase.auth.OAuthProvider("apple.com");
+  provider.addScope("email");provider.addScope("name");
+  firebase.auth().signInWithPopup(provider).then(function(){
+    lsDel("evoLoginAttempted");
+  }).catch(function(e){
+    $("authStatus").textContent="Erreur connexion : "+(e&&e.code?e.code:(e&&e.message)||"inconnue");
+  });}
+function logout(){if(!window.firebase||!cloudUser)return;firebase.auth().signOut();}
 function backup(){if(!cloudUser){toast("Connecte-toi d'abord");return;}
   firebase.firestore().collection("users").doc(cloudUser.uid).set({appData:state,updatedAt:Date.now()},{merge:true})
     .then(function(){toast("Sauvegarde effectuée");}).catch(function(){toast("Sauvegarde impossible");});}
@@ -2912,6 +2939,8 @@ document.addEventListener("click",function(e){
       addMealObj({name:row[1],kcal:mKcal,protein:mProt,carbs:mCarbs,fat:mFat,qty:100,type:row[0]}); toast("Ajouté au journal"); break;
     case "saveProfile": saveProfile(); break;
     case "login": login(); break;
+    case "loginApple": loginApple(); break;
+    case "logout": logout(); break;
     case "backup": backup(); break;
     case "restore": restore(); break;
     case "reset": resetAll(); break;
