@@ -392,9 +392,12 @@ function renderToday(){
 
   var rings=todayRings(p);
   $("ringWrap").innerHTML=ringSVG(rings.seance,rings.eau,rings.repas,rings.score);
-  $("legSeance").textContent="Séance "+rings.seance+"%";
-  $("legEau").textContent="Eau "+rings.eau+"%";
-  $("legRepas").textContent="Repas "+rings.repas+"%";
+  $("legSeance").textContent=rings.seance+"%";
+  $("legSeanceBar").style.width=Math.max(0,Math.min(100,rings.seance))+"%";
+  $("legEau").textContent=rings.eau+"%";
+  $("legEauBar").style.width=Math.max(0,Math.min(100,rings.eau))+"%";
+  $("legRepas").textContent=rings.repas+"%";
+  $("legRepasBar").style.width=Math.max(0,Math.min(100,rings.repas))+"%";
   $("streakN").textContent=computeStreak();
 
   var lp=latestPR();
@@ -416,14 +419,14 @@ function todayRings(p){
   return {seance:seance,eau:eau,repas:repas,score:score};
 }
 function ringSVG(seancePct,eauPct,repasPct,score){
-  var cx=92,cy=92,r1=78,r2=60,r3=42,sw=12;
+  var cx=64,cy=64,r1=54,r2=42,r3=29,sw=8.5;
   var c1=2*Math.PI*r1,c2=2*Math.PI*r2,c3=2*Math.PI*r3;
   function arc(pct,r,c,color,trackColor){
     var p=Math.max(0,Math.min(100,pct)),dash=(Math.max(p,1.4)/100*c).toFixed(1);
     return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+trackColor+'" stroke-width="'+sw+'"/>'
       +'<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="'+sw+'" stroke-linecap="round" stroke-dasharray="'+dash+' '+c.toFixed(1)+'"/>';
   }
-  return '<svg width="184" height="184" viewBox="0 0 184 184">'
+  return '<svg width="128" height="128" viewBox="0 0 128 128">'
     +arc(seancePct,r1,c1,'var(--primary)','rgba(10,132,255,.16)')
     +arc(eauPct,r2,c2,'var(--accent)','rgba(48,217,143,.16)')
     +arc(repasPct,r3,c3,'#5e7ce6','rgba(94,124,230,.16)')
