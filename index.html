@@ -49,8 +49,8 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none
 a{color:inherit;text-decoration:none}
 .num{font-family:var(--display);font-variant-numeric:tabular-nums}
 
-.app{max-width:520px;margin:0 auto;padding:0 16px 96px}
-#session{padding-bottom:84px}
+.app{max-width:520px;margin:0 auto;padding:0 16px calc(120px + var(--safe-bot))}
+#session{padding-bottom:calc(110px + var(--safe-bot))}
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:18px 2px 8px}
 .brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:700;font-size:18px}
 .brand .dot{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,var(--primary),var(--accent));display:grid;place-items:center;font-size:15px}
@@ -1339,15 +1339,15 @@ function todayRings(p){
 function ringSVG(seancePct,eauPct,repasPct,score){
   var cx=92,cy=92,r1=78,r2=60,r3=42,sw=12;
   var c1=2*Math.PI*r1,c2=2*Math.PI*r2,c3=2*Math.PI*r3;
-  function arc(pct,r,c,color){
-    var dash=(Math.max(0,Math.min(100,pct))/100*c).toFixed(1);
-    return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="var(--surface2)" stroke-width="'+sw+'"/>'
+  function arc(pct,r,c,color,trackColor){
+    var p=Math.max(0,Math.min(100,pct)),dash=(Math.max(p,1.4)/100*c).toFixed(1);
+    return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+trackColor+'" stroke-width="'+sw+'"/>'
       +'<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="'+sw+'" stroke-linecap="round" stroke-dasharray="'+dash+' '+c.toFixed(1)+'"/>';
   }
   return '<svg width="184" height="184" viewBox="0 0 184 184">'
-    +arc(seancePct,r1,c1,'var(--primary)')
-    +arc(eauPct,r2,c2,'var(--accent)')
-    +arc(repasPct,r3,c3,'#6b7bf5')
+    +arc(seancePct,r1,c1,'var(--primary)','rgba(255,138,99,.16)')
+    +arc(eauPct,r2,c2,'var(--accent)','rgba(212,91,196,.16)')
+    +arc(repasPct,r3,c3,'#6b7bf5','rgba(107,123,245,.16)')
     +'</svg>'
     +'<div class="ring-center"><div class="score">'+(isFinite(score)?score:0)+'</div><div class="lab">SCORE DU JOUR</div></div>';
 }
