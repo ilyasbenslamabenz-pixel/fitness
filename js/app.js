@@ -1366,8 +1366,12 @@ function renderMeals(){
   $("mCarbs").textContent=Math.round(carbs*10)/10;$("mProt").textContent=Math.round(prot*10)/10;$("mFat").textContent=Math.round(fat*10)/10;
   $("mCarbsBar").style.width=Math.min(100,carbs/carbGoal*100)+"%";$("mProtBar").style.width=Math.min(100,prot/protGoal*100)+"%";$("mFatBar").style.width=Math.min(100,fat/fatGoal*100)+"%";
   var limits={"Petit-déjeuner":Math.round(goal*0.25/10)*10,"Déjeuner":Math.round(goal*0.35/10)*10,"Dîner":Math.round(goal*0.30/10)*10,"Collation":Math.round(goal*0.10/10)*10},ids={"Petit-déjeuner":"breakfastKcal","Déjeuner":"lunchKcal","Dîner":"dinnerKcal","Collation":"snackKcal"};
-  Object.keys(ids).forEach(function(type){var total=state.meals.filter(function(m){return m.type===type;}).reduce(function(s,m){return s+Number(m.kcal||0);},0);$(ids[type]).textContent=Math.round(total)+" / "+limits[type]+" kcal";});
-  $("mealJournal").innerHTML=state.meals.length?state.meals.map(function(m,i){return '<div class="meal"><div class="mi"><b>'+esc(m.name)+'</b><div class="d">'+esc(m.type||"Repas")+' · '+num(m.qty||100)+' g · '+num(m.protein||0)+' g prot.</div></div><div class="kc">'+Math.round(Number(m.kcal||0))+' kcal</div><button class="del" data-act="delMeal" data-i="'+i+'">×</button></div>';}).join(""):'<div class="empty">Aucun aliment enregistré aujourd\'hui.</div>';
+  var itemIds={"Petit-déjeuner":"itemsBreakfast","Déjeuner":"itemsLunch","Dîner":"itemsDinner","Collation":"itemsSnack"};
+  var byType={};Object.keys(itemIds).forEach(function(t){byType[t]=[];});
+  state.meals.forEach(function(m,i){var t=byType[m.type]?m.type:"Collation";byType[t].push({m:m,i:i});});
+  Object.keys(ids).forEach(function(type){var total=byType[type].reduce(function(s,x){return s+Number(x.m.kcal||0);},0);$(ids[type]).textContent=Math.round(total)+" / "+limits[type]+" kcal";
+    $(itemIds[type]).innerHTML=byType[type].map(function(x){var m=x.m;return '<div class="meal"><div class="mi"><b>'+esc(m.name)+'</b><div class="d">'+num(m.qty||100)+' g · '+num(m.protein||0)+' g prot.</div></div><div class="kc">'+Math.round(Number(m.kcal||0))+' kcal</div><button class="del" data-act="delMeal" data-i="'+x.i+'">×</button></div>';}).join("");
+  });
   renderWeeklyMenuIfNeeded();
 }
 function renderWater(){
@@ -1381,7 +1385,7 @@ function renderWater(){
 function ring(svg,frac,color,center){
   var p=Math.max(0,Math.min(1,Number(frac)||0)),parts=String(center).split("\n");
   svg.setAttribute("viewBox","0 0 100 62");
-  svg.innerHTML='<path d="M 8 50 A 42 42 0 0 1 92 50" fill="none" stroke="#3c4145" stroke-width="9" stroke-linecap="round"/><path d="M 8 50 A 42 42 0 0 1 92 50" fill="none" stroke="'+color+'" stroke-width="9" stroke-linecap="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="'+(100-p*100)+'"/><text x="50" y="35" text-anchor="middle" fill="#F2F3F5" font-family="Space Grotesk" font-weight="700" font-size="18">'+parts[0]+'</text>'+(parts[1]?'<text x="50" y="48" text-anchor="middle" fill="#BFC5D1" font-size="8.5">'+parts[1]+'</text>':'');
+  svg.innerHTML='<path d="M 8 50 A 42 42 0 0 1 92 50" fill="none" stroke="var(--ring-track)" stroke-width="9" stroke-linecap="round"/><path d="M 8 50 A 42 42 0 0 1 92 50" fill="none" stroke="'+color+'" stroke-width="9" stroke-linecap="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="'+(100-p*100)+'"/><text x="50" y="35" text-anchor="middle" fill="var(--text)" font-family="Space Grotesk" font-weight="700" font-size="18">'+parts[0]+'</text>'+(parts[1]?'<text x="50" y="48" text-anchor="middle" fill="var(--muted)" font-size="8.5">'+parts[1]+'</text>':'');
 }
 function addMealObj(o){o.date=today();o.qty=Number(o.qty||100);state.meals.push(o);save();renderMeals();renderToday();}
 function currentFoodFromForm(){return {name:$("foodName").value.trim(),kcal:fnum($("foodKcal").value,0),protein:fnum($("foodProt").value,0),carbs:fnum($("foodCarbs").value,0),fat:fnum($("foodFat").value,0),qty:fnum($("foodQty").value,100),type:$("foodType").value};}
