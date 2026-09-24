@@ -59,11 +59,31 @@
       <div style="font-size:12.5px;color:var(--muted);margin-top:2px" id="greetSub">—</div>
     </div>
 
-    <div class="ring-wrap" id="ringWrap"></div>
-    <div class="ring-legend">
-      <div><span class="dot" style="background:var(--primary)"></span><span class="lab" id="legSeance">Séance —</span></div>
-      <div><span class="dot" style="background:var(--accent)"></span><span class="lab" id="legEau">Eau —</span></div>
-      <div><span class="dot" style="background:#5e7ce6"></span><span class="lab" id="legRepas">Repas —</span></div>
+    <div class="card ring-card">
+      <div class="ring-wrap" id="ringWrap"></div>
+      <div class="ring-rows">
+        <div class="ring-row">
+          <div class="ring-row-ic" style="color:var(--primary);background:rgba(10,132,255,.14)"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="3"/><circle cx="18.5" cy="12" r="3"/><line x1="8.5" y1="12" x2="15.5" y2="12"/></svg></div>
+          <div class="ring-row-main">
+            <div class="ring-row-top"><span class="ring-row-lab">Séance</span><span class="ring-row-val" id="legSeance">0%</span></div>
+            <div class="ring-row-bar"><div class="ring-row-fill" id="legSeanceBar" style="width:0%;background:var(--primary)"></div></div>
+          </div>
+        </div>
+        <div class="ring-row">
+          <div class="ring-row-ic" style="color:var(--accent);background:rgba(48,217,143,.14)"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5s7 8.2 7 13a7 7 0 0 1-14 0c0-4.8 7-13 7-13z"/></svg></div>
+          <div class="ring-row-main">
+            <div class="ring-row-top"><span class="ring-row-lab">Eau</span><span class="ring-row-val" id="legEau">0%</span></div>
+            <div class="ring-row-bar"><div class="ring-row-fill" id="legEauBar" style="width:0%;background:var(--accent)"></div></div>
+          </div>
+        </div>
+        <div class="ring-row">
+          <div class="ring-row-ic" style="color:#5e7ce6;background:rgba(94,124,230,.14)"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2.5v7.5a1.8 1.8 0 0 0 1.8 1.8v9.7"/><path d="M7 2.5v4.3M9.3 2.5v4.3M11.6 2.5v4.3"/><path d="M17 2.5c-1.8 0-3.2 2-3.2 4.6s1.4 4.6 3.2 4.6v9.8"/></svg></div>
+          <div class="ring-row-main">
+            <div class="ring-row-top"><span class="ring-row-lab">Repas</span><span class="ring-row-val" id="legRepas">0%</span></div>
+            <div class="ring-row-bar"><div class="ring-row-fill" id="legRepasBar" style="width:0%;background:#5e7ce6"></div></div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <a href="#" class="next-cta" data-act="startNext">
