@@ -1,4 +1,4 @@
-const CACHE='evo-fit-coach-v30';
+const CACHE='evo-fit-coach-v31';
 
 self.addEventListener('install',e=>e.waitUntil(
   caches.open(CACHE)
@@ -22,6 +22,21 @@ self.addEventListener('fetch',e=>{
     e.respondWith(
       fetch(new Request(e.request,{cache:'no-store'}))
         .catch(()=>caches.match(e.request))
+    );
+    return;
+  }
+
+  // Le code de l'app (JS/CSS) : sert le cache instantanément pour la vitesse,
+  // mais revalide toujours en arrière-plan pour que les mises à jour soient
+  // captées dès le chargement suivant, sans dépendre d'un ?v= bumpé à la main.
+  if(u.pathname.indexOf('/fitness/js/')!==-1 || u.pathname.indexOf('/fitness/css/')!==-1){
+    e.respondWith(
+      caches.open(CACHE).then(cache=>
+        cache.match(e.request).then(cached=>{
+          const network=fetch(e.request).then(r=>{cache.put(e.request,r.clone());return r;}).catch(()=>cached);
+          return cached||network;
+        })
+      )
     );
     return;
   }

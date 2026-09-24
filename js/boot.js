@@ -60,7 +60,7 @@
 
 if("serviceWorker" in navigator){
   function registerEvoSW(){
-    navigator.serviceWorker.register("/fitness/sw.js?v=36",{updateViaCache:"none"}).catch(function(e){console.warn("SW:",e);});
+    navigator.serviceWorker.register("/fitness/sw.js?v=37",{updateViaCache:"none"}).catch(function(e){console.warn("SW:",e);});
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",registerEvoSW);
   else registerEvoSW();

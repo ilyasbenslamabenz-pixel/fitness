@@ -88,40 +88,39 @@ var DEFAULT_GROCERY={
  once:[
   {n:"Riz complet 1 kg",done:false},
   {n:"Flocons d'avoine 1 kg",done:false},
-  {n:"Pois chiches en boîte ×4",done:false},
-  {n:"Haricots rouges en boîte ×3",done:false},
-  {n:"Haricots noirs en boîte ×2",done:false},
-  {n:"Haricots blancs en boîte ×2",done:false},
   {n:"Graines de chia 200 g",done:false},
+  {n:"Graines de tournesol/courge 200 g",done:false},
   {n:"Huile de colza/tournesol 1 L",done:false},
   {n:"Beurre de cacahuète",done:false},
   {n:"Tomates pelées/passata ×4",done:false},
   {n:"Bouillon de légumes",done:false},
   {n:"Thé vert",done:false},
   {n:"Épices (piment, paprika fumé)",done:false},
-  {n:"Poudre de protéine végétale",done:false}
+  {n:"Poudre de protéine végétale",done:false},
+  {n:"Boisson protéinée UHT ×2",done:false}
  ],
  weekly:[
   {n:"Lait écrémé 2 L",done:false},
   {n:"Skyr/yogourt protéiné 500 g ×2",done:false},
-  {n:"Cottage cheese 250 g",done:false},
-  {n:"Quark maigre 500 g",done:false},
+  {n:"Cottage cheese 250 g ×2",done:false},
+  {n:"Quark maigre 500 g ×2",done:false},
   {n:"Fromage râpé allégé 150 g",done:false},
   {n:"Pain complet",done:false},
   {n:"Légumes verts à volume (brocoli, épinards, courgettes, ~2 kg)",done:false},
   {n:"Fruits à faible IG (pommes, baies, ~1 kg)",done:false}
  ]
 };
-var GROCERY_VERSION=3;
+var GROCERY_VERSION=4;
 /* noms de tous les articles par défaut v1 (retirés ou renommés en v2) : jamais réinjectés
    comme "ajout personnel" lors de la migration, même s'ils n'ont plus de correspondance exacte
    dans DEFAULT_GROCERY */
 var GROCERY_RETIRED_V1={
  "Riz M-Budget 1 kg":1,"Flocons d'avoine 1 kg":1,"Lentilles corail 500 g":1,"Lentilles vertes 500 g":1,
- "Pois chiches en boîte ×4":1,"Haricots rouges en boîte ×3":1,"Huile (tournesol/olive) 1 L":1,
+ "Pois chiches en boîte ×4":1,"Haricots rouges en boîte ×3":1,"Haricots noirs en boîte ×2":1,"Haricots blancs en boîte ×2":1,
+ "Huile (tournesol/olive) 1 L":1,
  "Beurre de cacahuète":1,"Tomates pelées/passata ×4":1,"Bouillon de légumes":1,
  "Lait 2 L":1,"Skyr/yogourt protéiné 500 g ×2":1,"Fromage râpé 150 g":1,"Œufs (boîte de 12)":1,
- "Tofu nature 300 g ×2":1,"Quark maigre 500 g":1,"Pain":1,"Beurre/margarine":1,
+ "Tofu nature 300 g ×2":1,"Cottage cheese 250 g":1,"Quark maigre 500 g":1,"Pain":1,"Beurre/margarine":1,
  "Légumes frais (~1.5 kg)":1,"Fruits (~1 kg)":1
 };
 function migrateGrocerySection(defaultList,oldList){
