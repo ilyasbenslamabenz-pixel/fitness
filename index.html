@@ -2836,6 +2836,7 @@ window.EVO_V3_READY=true;
     try{window.scrollTo(0,0);}catch(e){}
   }
   function fallbackData(){
+    if(window.EVO_BOOT_OK)return; /* le moteur principal a déjà pris le relais : ne pas écraser ses données */
     try{
       var p=JSON.parse(localStorage.getItem("evoFitV3")||"null")||{};
       var profile=p.profile||{start:103,target:85,cal:2400};
