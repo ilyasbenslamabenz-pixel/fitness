@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="EVO">
+<meta name="theme-color" content="#04101f">
+<link rel="icon" type="image/jpeg" href="/fitness/icon-180.jpg?v=3">
+<link rel="apple-touch-icon" href="/fitness/icon-180.jpg?v=3">
+<link rel="manifest" href="/fitness/manifest.json">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="EVO Fit Coach">
+<meta property="og:title" content="EVO Fit Coach">
+<meta property="og:description" content="Programme fitness, nutrition et suivi pour EVO Fitness Genève Jonction.">
+<meta property="og:url" content="https://ilyasbenslamabenz-pixel.github.io/fitness/">
+<meta property="og:image" content="https://ilyasbenslamabenz-pixel.github.io/fitness/og-image.jpg?v=2">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://ilyasbenslamabenz-pixel.github.io/fitness/og-image.jpg?v=2">
+<title>EVO Fit Coach</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script src="https://unpkg.com/@zxing/browser@0.1.5/umd/index.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4/dist/maplibre-gl.css">
+<script>
+(function(){
+  function load(url){var s=document.createElement("script");s.src=url;document.head.appendChild(s);}
+  load("https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.js");
+  setTimeout(function(){
+    if(!window.maplibregl)load("https://cdn.jsdelivr.net/npm/maplibre-gl@4/dist/maplibre-gl.js");
+  },2500);
+})();
+</script>
+<link rel="stylesheet" href="/fitness/css/app.css?v=4">
+<script>
+(function(){
+  try{
+    var pref=localStorage.getItem("evoTheme")||"system";
+    var mode=pref==="system"?(matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):pref;
+    if(mode==="light")document.documentElement.setAttribute("data-theme","light");
+  }catch(e){}
+})();
+</script>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="brand"><span class="dot"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="3"/><circle cx="18.5" cy="12" r="3"/><line x1="8.5" y1="12" x2="15.5" y2="12"/></svg></span>EVO Fit Coach</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="streak" id="streakBadge"><span><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5a2.5 2.5 0 0 0 5 0c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7.5 7.5 0 1 1-15 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 1 2z"/></svg></span><b id="streakN">0</b></div>
+      <div class="week" id="weekTag">Semaine 1</div>
+    </div>
+  </div>
+
+  <div class="wrap">
+  <!-- AUJOURD'HUI -->
+  <section class="page on" id="today">
+    <div style="padding:2px 2px 0">
+      <div style="font-size:19px;font-weight:700" id="greetHello">Salut 👋</div>
+      <div style="font-size:12.5px;color:var(--muted);margin-top:2px" id="greetSub">—</div>
+    </div>
+
+    <div class="card ring-card">
+      <div class="ring-wrap" id="ringWrap"></div>
+      <div class="ring-rows">
+        <div class="ring-row">
+          <div class="ring-row-ic" style="color:var(--primary);background:rgba(10,132,255,.14)"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="3"/><circle cx="18.5" cy="12" r="3"/><line x1="8.5" y1="12" x2="15.5" y2="12"/></svg></div>
+          <div class="ring-row-main">
+            <div class="ring-row-top"><span class="ring-row-lab">Séance</span><span class="ring-row-val" id="legSeance">0%</span></div>
+            <div class="ring-row-bar"><div class="ring-row-fill" id="legSeanceBar" style="width:0%;background:var(--primary)"></div></div>
+          </div>
+        </div>
+        <div class="ring-row">
+          <div class="ring-row-ic" style="color:var(--accent);background:rgba(48,217,143,.14)"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5s7 8.2 7 13a7 7 0 0 1-14 0c0-4.8 7-13 7-13z"/></svg></div>
+          <div class="ring-row-main">
+            <div class="ring-row-top"><span class="ring-row-lab">Eau</span><span class="ring-row-val" id="legEau">0%</span></div>
+            <div class="ring-row-bar"><div class="ring-row-fill" id="legEauBar" style="width:0%;background:var(--accent)"></div></div>
+          </div>
+        </div>
+        <div class="ring-row">
+          <div class="ring-row-ic" style="color:#5e7ce6;background:rgba(94,124,230,.14)"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2.5v7.5a1.8 1.8 0 0 0 1.8 1.8v9.7"/><path d="M7 2.5v4.3M9.3 2.5v4.3M11.6 2.5v4.3"/><path d="M17 2.5c-1.8 0-3.2 2-3.2 4.6s1.4 4.6 3.2 4.6v9.8"/></svg></div>
+          <div class="ring-row-main">
+            <div class="ring-row-top"><span class="ring-row-lab">Repas</span><span class="ring-row-val" id="legRepas">0%</span></div>
+            <div class="ring-row-bar"><div class="ring-row-fill" id="legRepasBar" style="width:0%;background:#5e7ce6"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <a href="#" class="next-cta" data-act="startNext">
+      <div class="eyebrow">PROCHAINE SÉANCE</div>
+      <div class="row">
+        <div class="ic" id="nIc"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5a2.5 2.5 0 0 0 5 0c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7.5 7.5 0 1 1-15 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 1 2z"/></svg></div>
+        <div style="flex:1;min-width:0">
+          <h3 id="nName">—</h3>
+          <div class="sub" id="nFocus">—</div>
+        </div>
+      </div>
+      <div class="go">Démarrer la séance</div>
+    </a>
+
+    <div class="quick-access">
+      <button class="qa-btn" data-act="weigh"><div class="ic"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4.5"/><circle cx="12" cy="13" r="3.6"/><path d="M12 7.5v1.8"/></svg></div><span class="lab">Peser</span></button>
+      <button class="qa-btn" data-act="waterAdd" data-amount="250"><div class="ic"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5s7 8.2 7 13a7 7 0 0 1-14 0c0-4.8 7-13 7-13z"/></svg></div><span class="lab">Eau</span></button>
+      <button class="qa-btn" data-act="addMeal"><div class="ic"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2.5v7.5a1.8 1.8 0 0 0 1.8 1.8v9.7"/><path d="M7 2.5v4.3M9.3 2.5v4.3M11.6 2.5v4.3"/><path d="M17 2.5c-1.8 0-3.2 2-3.2 4.6s1.4 4.6 3.2 4.6v9.8"/></svg></div><span class="lab">Repas</span></button>
+      <button class="qa-btn" data-act="goRunning"><div class="ic"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22,12 18,12 15,20 9,4 6,12 2,12"/></svg></div><span class="lab">Course</span></button>
+      <button class="qa-btn" data-act="scanOpen"><div class="ic"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V4.5a1.5 1.5 0 0 1 1.5-1.5H7M17 3h2.5A1.5 1.5 0 0 1 21 4.5V7M21 17v2.5a1.5 1.5 0 0 1-1.5 1.5H17M7 21H4.5A1.5 1.5 0 0 1 3 19.5V17"/><line x1="7" y1="8" x2="7" y2="16"/><line x1="10.3" y1="8" x2="10.3" y2="16"/><line x1="13.6" y1="8" x2="13.6" y2="16"/><line x1="17" y1="8" x2="17" y2="16"/></svg></div><span class="lab">Scanner</span></button>
+    </div>
+
+    <div class="stats" style="margin-top:18px">
+      <div class="stat"><div class="v mint num" id="sLost">—</div><div class="l">kg perdus</div></div>
+      <div class="stat"><div class="v num" id="sSessions">—</div><div class="l">séances</div></div>
+      <div class="stat"><div class="v num" id="sPR">—</div><div class="l">exercices</div></div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <div class="eyebrow">Forme du jour</div>
+      <div class="energy" style="margin-top:2px"><span class="elab">Comment tu te sens ?</span><div class="efaces" id="efaces"></div></div>
+    </div>
+    <div class="card" style="margin-top:12px" id="prCard">
+      <div class="head" style="margin:0 0 4px"><h2 style="font-size:16px">Dernier record</h2><span class="link" data-act="go" data-page="progress">Voir les progrès</span></div>
+      <div id="lastPR" style="font-size:14px;color:var(--muted)">Loggue une séance pour établir tes premiers records.</div>
+    </div>
+  </section>
+
+  <!-- SÉANCE -->
+  <section class="page" id="session">
+    <div class="head"><h2>Séance</h2></div>
+    <div class="sess-cat" id="sessCatTabs">
+      <button class="cat-tab" data-act="sessCat" data-cat="muscu"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="3"/><circle cx="18.5" cy="12" r="3"/><line x1="8.5" y1="12" x2="15.5" y2="12"/></svg> Musculation</button>
+      <button class="cat-tab" data-act="sessCat" data-cat="maison"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9"/></svg> Séance maison</button>
+      <button class="cat-tab" data-act="sessCat" data-cat="running"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22,12 18,12 15,20 9,4 6,12 2,12"/></svg> Running</button>
+    </div>
+
+    <div id="sessExerciseView">
+      <div class="eyebrow" style="margin:12px 2px 6px">Jour</div>
+      <div class="days" id="dayChips"></div>
+
+      <div class="card sday-card">
+        <div class="sday-top">
+          <div class="ic" id="sesIc" style="width:46px;height:46px;border-radius:12px;background:var(--surface2);display:grid;place-items:center;font-size:24px;flex:0 0 auto"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5a2.5 2.5 0 0 0 5 0c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7.5 7.5 0 1 1-15 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 1 2z"/></svg></div>
+          <div class="sday-info"><h3 id="sesName">—</h3><div class="sub" id="sesFocus">—</div></div>
+        </div>
+        <div class="sday-meta" id="sesMeta">—</div>
+        <button class="btn primary" id="sesCta" data-act="guidedStart">Démarrer la séance</button>
+        <div class="sday-prog" id="sesProgWrap" style="display:none">
+          <div class="sprog-mini"><i id="sesProg" style="width:0%"></i></div>
+          <div class="sday-prog-text"><span id="sesDoneN">0</span><small id="sesTotN">/0</small> exos · <span id="sesProgText">0/0 séries</span></div>
+        </div>
+      </div>
+      <div id="restBar" style="display:none"><span id="restLabel"></span><button id="restStop" data-act="restStop" style="display:none"></button></div>
+
+      <div class="head" style="margin-top:22px"><h2 style="font-size:18px">Exercices</h2></div>
+      <div class="card" style="padding:4px 14px">
+        <div id="exList"></div>
+      </div>
+      <p style="font-size:12px;color:var(--faint);text-align:center;margin:14px 4px">Tape un exercice pour démarrer la séance guidée à partir de celui-ci.</p>
+    </div>
+
+    <div id="sessRunningView" style="display:none">
+      <div class="card">
+        <div class="head" style="margin:0 0 4px"><h2 style="font-size:16px">Programme 0 → 5-10 km</h2><span class="link" data-act="go" data-page="progress">Historique</span></div>
+        <div class="sub" style="margin-bottom:10px">10 semaines pour passer de zéro à la course continue.</div>
+        <div class="run-prog-week">
+          <button data-act="runProgPrev">−</button>
+          <div class="rpw-mid"><b id="runProgWeekN">Semaine 1</b><span id="runProgGoal">—</span></div>
+          <button data-act="runProgNext">＋</button>
+        </div>
+        <div class="run-prog-sessions" id="runProgSessions"></div>
+        <div class="run-prog-suggestion" id="runProgSuggestion" style="display:none"></div>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <div class="eyebrow">Lancer une course</div>
+        <button class="btn primary" style="margin-top:10px" data-act="liveStart"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 7 9 3 3 9l4 4"/><path d="M17 11l4 4-6 6-4-4"/><path d="M8 12l4 4"/><path d="M14.5 5.5 18 2"/><path d="M19 9.5 22 6.5"/></svg> Démarrer une course (GPS en direct)</button>
+        <button class="btn ghost" style="margin-top:9px" data-act="openRun">Saisir une course manuellement</button>
+        <div id="runProgInfo" style="font-size:12.5px;color:var(--muted);margin-top:11px;text-align:center">—</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROGRÈS -->
+  <section class="page" id="progress">
+    <div class="head"><h2>Progrès</h2></div>
+
+    <div class="card">
+      <div class="head" style="margin:0 0 2px"><div class="eyebrow">Résumé de la semaine</div><span class="link" id="weekDelta"></span></div>
+      <div class="weekbar" id="weekBar"></div>
+      <div class="badge-row" id="badgeRow"></div>
+    </div>
+
+    <div class="card">
+      <div class="eyebrow">Poids du corps</div>
+      <div class="big3">
+        <div><div class="v num" id="pwNow">—</div><div class="l">actuel</div></div>
+        <div><div class="v mint num" id="pwLost">—</div><div class="l">perdus</div></div>
+        <div><div class="v num" id="pwLeft">—</div><div class="l">restants</div></div>
+      </div>
+      <div class="chartwrap" id="weightChart"></div>
+      <div class="chartmeta"><span id="wcFrom"></span><span id="wcTo"></span></div>
+    </div>
+
+    <div class="card" id="bodyCompCard" style="display:none">
+      <div class="eyebrow">Composition corporelle</div>
+      <div class="big3" style="grid-template-columns:repeat(2,1fr)">
+        <div><div class="v num" id="bcFat">—</div><div class="l">masse grasse</div></div>
+        <div><div class="v num" id="bcMuscle">—</div><div class="l">masse musculaire</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="eyebrow">Force par exercice</div>
+      <div class="picker" id="exPicker" style="margin-top:10px"></div>
+      <div class="big3">
+        <div><div class="v ember num" id="stNow">—</div><div class="l">actuel</div></div>
+        <div><div class="v num" id="stPR">—</div><div class="l">record</div></div>
+        <div><div class="v mint num" id="stGain">—</div><div class="l">gain</div></div>
+      </div>
+      <div class="chartwrap" id="strengthChart"></div>
+      <div class="chartmeta"><span id="scFrom"></span><span id="scTo"></span></div>
+    </div>
+
+    <div class="card">
+      <div class="head" style="margin:0 0 4px"><h2 style="font-size:16px">Cardio</h2><span class="link" data-act="openRun">＋ Course</span></div>
+      <div class="big3">
+        <div><div class="v ember num" id="cdRuns">0</div><div class="l">courses</div></div>
+        <div><div class="v num" id="cdKm">0</div><div class="l">km total</div></div>
+        <div><div class="v mint num" id="cdPace">—</div><div class="l">meilleure allure</div></div>
+      </div>
+      <div class="chartwrap" id="cardioChart"></div>
+      <div class="chartmeta"><span>distance par course (km)</span><span id="cdLast"></span></div>
+      <div id="runList" style="margin-top:8px"></div>
+    </div>
+
+    <div class="card">
+      <div class="head" style="margin:0 0 4px"><h2 style="font-size:16px">Pas</h2><span class="link" data-act="openSteps">＋ Pas</span></div>
+      <div class="big3">
+        <div><div class="v num" id="stpToday">—</div><div class="l">aujourd'hui</div></div>
+        <div><div class="v num" id="stpAvg">—</div><div class="l">moyenne</div></div>
+        <div><div class="v num" id="stpDays">0</div><div class="l">jours suivis</div></div>
+      </div>
+      <div class="chartwrap" id="stepsChart"></div>
+      <div class="chartmeta"><span id="stpKcal"></span><span></span></div>
+    </div>
+
+    <div class="card">
+      <div class="head" style="margin:0 0 4px"><h2 style="font-size:16px">Forme</h2></div>
+      <div class="chartwrap" id="energyChart"></div>
+      <div class="chartmeta"><span>1 = épuisé · 5 = au top</span><span id="enLast"></span></div>
+    </div>
+  </section>
+
+  <!-- REPAS -->
+  <section class="page" id="meals">
+    <div class="meals-title"><h1>Alimentation</h1><span class="plus-pill">Plus</span></div>
+    <div class="nutrition-card">
+      <div class="cal-donut"><svg class="ringsvg" viewBox="0 0 100 100" id="calRing"></svg></div>
+      <div class="macro-grid">
+        <div class="macro-col"><span>Glucides</span><div class="mini-bar"><i id="mCarbsBar"></i></div><b><span id="mCarbs">0</span> / 240 g</b></div>
+        <div class="macro-col"><span>Protéines</span><div class="mini-bar"><i id="mProtBar"></i></div><b><span id="mProt">0</span> / 180 g</b></div>
+        <div class="macro-col"><span>Lipides</span><div class="mini-bar"><i id="mFatBar"></i></div><b><span id="mFat">0</span> / 80 g</b></div>
+      </div>
+    </div>
+    <button class="meal-main-add" data-act="addMeal">＋ <span>Ajouter un repas</span></button>
+    <div class="meal-tools">
+      <button data-act="scanOpen"><span class="tool-ico"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V4.5a1.5 1.5 0 0 1 1.5-1.5H7M17 3h2.5A1.5 1.5 0 0 1 21 4.5V7M21 17v2.5a1.5 1.5 0 0 1-1.5 1.5H17M7 21H4.5A1.5 1.5 0 0 1 3 19.5V17"/><line x1="7" y1="8" x2="7" y2="16"/><line x1="10.3" y1="8" x2="10.3" y2="16"/><line x1="13.6" y1="8" x2="13.6" y2="16"/><line x1="17" y1="8" x2="17" y2="16"/></svg></span>Scanner<br>un code-barres</button>
+      <button data-act="addMeal"><span class="tool-ico">⌕</span>Rechercher<br>un aliment</button>
+      <button data-act="openFavorites"><span class="tool-ico"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg></span>Mes aliments</button>
+    </div>
+    <div class="section-title-row"><h2>Mes repas</h2></div>
+    <div class="meal-sections">
+      <div class="meal-section">
+        <div class="meal-section-head"><div class="meal-group-ico"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12,7 12,12 16,14"/></svg></div><div class="meal-group-info"><b>Petit déjeuner</b><span id="breakfastKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Petit-déjeuner">＋</button></div>
+        <div class="meal-section-items" id="itemsBreakfast"></div>
+      </div>
+      <div class="meal-section">
+        <div class="meal-section-head"><div class="meal-group-ico"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18a9 8 0 0 1-18 0z"/><path d="M12 12V4"/><path d="M8.5 5.5 12 4l3.5 1.5"/></svg></div><div class="meal-group-info"><b>Déjeuner</b><span id="lunchKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Déjeuner">＋</button></div>
+        <div class="meal-section-items" id="itemsLunch"></div>
+      </div>
+      <div class="meal-section">
+        <div class="meal-section-head"><div class="meal-group-ico"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4C10 4 4 10 4 18v2h2c8 0 14-6 14-16V4z"/><path d="M6 20c4-4 8-8 14-14"/></svg></div><div class="meal-group-info"><b>Dîner</b><span id="dinnerKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Dîner">＋</button></div>
+        <div class="meal-section-items" id="itemsDinner"></div>
+      </div>
+      <div class="meal-section">
+        <div class="meal-section-head"><div class="meal-group-ico"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12,7 12,12 16,14"/></svg></div><div class="meal-group-info"><b>En-cas</b><span id="snackKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Collation">＋</button></div>
+        <div class="meal-section-items" id="itemsSnack"></div>
+      </div>
+    </div>
+    <div class="section-title-row"><h2>Liste de courses</h2></div>
+    <div class="fast-card"><div class="fast-ico"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1.3"/><circle cx="18" cy="21" r="1.3"/><path d="M2.5 3h2.4l2.7 12.4a2 2 0 0 0 2 1.6h8.1a2 2 0 0 0 2-1.6l1.5-7.4H6"/></svg></div><div><b>Migros · mois</b><span id="groceryText">—</span></div><button data-act="groceryOpen" id="groceryBtn">Ouvrir</button></div>
+    <div class="section-title-row"><h2>Jeûne</h2></div>
+    <div class="fast-card"><div class="fast-ico"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12,7 12,12 16,14"/></svg></div><div><b id="fastTitle">Routine 16:8</b><span id="fastText">Aucun jeûne en cours</span><div class="fast-progress"><i id="fastProgress"></i></div></div><button data-act="fasting" id="fastBtn">Démarrer</button></div>
+    <div class="section-title-row"><h2>Idées de la semaine</h2></div><div id="weeklyMenu"></div>
+  </section>
+
+  <!-- EAU -->
+  <section class="page" id="water">
+    <div class="meals-title"><h1>Hydratation</h1></div>
+    <div class="water-card">
+      <div class="water-head"><span class="water-drop"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5s7 8.2 7 13a7 7 0 0 1-14 0c0-4.8 7-13 7-13z"/></svg></span><div><b>Eau</b><span>Objectif : <span id="waterGoalLabel">3.00 L</span></span><strong id="waterTotal">0.00 L</strong></div><button data-act="waterAdd" data-amount="300" class="water-add">＋</button></div>
+      <div class="glasses" id="waterGlasses"></div><div class="water-foot">+ Eau provenant de votre alimentation : 0 ml</div>
+    </div>
+    <div class="section-title-row"><h2>Ajout rapide</h2></div>
+    <div class="water-quick">
+      <button data-act="waterAdd" data-amount="150">+150 ml</button>
+      <button data-act="waterAdd" data-amount="250">+250 ml</button>
+      <button data-act="waterAdd" data-amount="500">+500 ml</button>
+      <button class="water-undo" data-act="waterAdd" data-amount="-250">Annuler</button>
+    </div>
+  </section>
+
+  <!-- PROFIL -->
+  <section class="page" id="profile">
+    <div class="head"><h2>Profil</h2></div>
+    <div class="card">
+      <div class="eyebrow">Objectifs</div>
+      <div class="field"><label>Date de début du programme</label><input id="fStartDate" type="date"></div>
+      <div class="field"><label>Poids de départ (kg)</label><input id="fStart" type="number" inputmode="decimal"></div>
+      <div class="row2"><div class="field"><label>Poids cible (kg)</label><input id="fTarget" type="number" inputmode="decimal"></div>
+      <div class="field"><label>Objectif calories</label><input id="fCal" type="number" inputmode="numeric"></div></div>
+      <div class="row2"><div class="field"><label>Glucides (g)</label><input id="fCarbs" type="number" inputmode="decimal"></div>
+      <div class="field"><label>Protéines (g)</label><input id="fProt" type="number" inputmode="decimal"></div></div>
+      <div class="row2"><div class="field"><label>Lipides (g)</label><input id="fFat" type="number" inputmode="decimal"></div>
+      <div class="field"><label>Objectif eau (L)</label><input id="fWater" type="number" inputmode="decimal" step="0.1"></div></div>
+      <button class="btn" style="margin-top:14px" data-act="saveProfile">Enregistrer les objectifs</button>
+    </div>
+    <div class="card">
+      <div class="eyebrow">Apparence</div>
+      <div class="sess-cat" id="themePicker" style="margin:10px 0 0">
+        <button class="cat-tab" data-act="setTheme" data-theme="system">Système</button>
+        <button class="cat-tab" data-act="setTheme" data-theme="light">Clair</button>
+        <button class="cat-tab" data-act="setTheme" data-theme="dark">Sombre</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">Mon programme</div>
+      <div id="progList" style="margin-top:8px"></div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">Sauvegarde cloud</div>
+      <div class="pline"><span id="authStatus">Non connecté</span></div>
+      <div style="font-size:12.5px;color:var(--muted);margin-top:2px">Une fois connecté, tes données sont sauvegardées automatiquement dans le cloud à chaque modification.</div>
+      <div class="row2" id="loginBtns" style="margin-top:10px">
+        <button class="btn" id="loginBtn" data-act="login">
+          <svg class="ic-s" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.52 12.27c0-.82-.07-1.6-.2-2.36H12v4.47h6.47a5.53 5.53 0 0 1-2.4 3.63v3h3.88c2.27-2.09 3.57-5.17 3.57-8.74z"/><path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.95-2.9l-3.88-3c-1.08.73-2.46 1.15-4.07 1.15-3.13 0-5.78-2.11-6.73-4.96H1.27v3.1A12 12 0 0 0 12 24z"/><path fill="#FBBC05" d="M5.27 14.29a7.2 7.2 0 0 1 0-4.58v-3.1H1.27a12 12 0 0 0 0 10.78z"/><path fill="#EA4335" d="M12 4.75c1.76 0 3.35.6 4.6 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.27 6.61l4 3.1C6.22 6.86 8.87 4.75 12 4.75z"/></svg>
+          Google
+        </button>
+        <button class="btn" id="loginAppleBtn" data-act="loginApple">
+          <svg class="ic-s" viewBox="0 0 24 24" fill="currentColor"><path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.014-.076-.034-.229-.034-.373 0-1.09.579-2.237 1.263-2.877.762-.706 1.958-1.36 2.996-1.36.126 0 .224.03.24.03zM20.803 17.39c-.4.911-.598 1.318-1.117 2.126-.727 1.13-1.751 2.542-3.024 2.554-1.13.012-1.42-.735-2.955-.727-1.535.008-1.85.74-2.985.728-1.276-.012-2.25-1.28-2.977-2.412-2.04-3.163-2.25-6.876-.995-8.858.892-1.408 2.297-2.233 3.622-2.233 1.348 0 2.195.744 3.31.744 1.08 0 1.735-.745 3.29-.745 1.18 0 2.43.643 3.32 1.752-2.917 1.6-2.443 5.766.51 6.97z"/></svg>
+          Apple
+        </button>
+      </div>
+      <button class="btn ghost" id="logoutBtn" data-act="logout" style="margin-top:10px;display:none">Se déconnecter</button>
+      <div class="row2" style="margin-top:10px"><button class="btn" data-act="backup">Sauvegarder maintenant</button><button class="btn" data-act="restore">Restaurer</button></div>
+      <div class="row2" style="margin-top:10px"><button class="btn" data-act="export">Exporter (JSON)</button><button class="btn" data-act="import">Importer</button></div>
+      <input type="file" id="importFile" accept="application/json,.json" style="display:none">
+      <button class="btn ghost" style="margin-top:10px;color:var(--faint)" data-act="reset">Réinitialiser les données</button>
+    </div>
+  </section>
+  </div>
+</div>
+
+<nav class="nav"><div class="in" id="navIn">
+  <button data-page="today" class="on"><span class="e"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9"/></svg></span>Aujourd'hui</button>
+  <button data-page="session"><span class="e"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="3"/><circle cx="18.5" cy="12" r="3"/><line x1="8.5" y1="12" x2="15.5" y2="12"/></svg></span>Séance</button>
+  <button data-page="progress"><span class="e"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,17 9,11 13,15 21,6"/><polyline points="15,6 21,6 21,12"/></svg></span>Progrès</button>
+  <button class="nav-add" data-act="quicklogOpen" aria-label="Ajouter">
+    <span class="e"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+    Ajouter
+  </button>
+  <button data-page="water"><span class="e"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5s7 8.2 7 13a7 7 0 0 1-14 0c0-4.8 7-13 7-13z"/></svg></span>Eau</button>
+  <button data-page="meals"><span class="e"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2.5v7.5a1.8 1.8 0 0 0 1.8 1.8v9.7"/><path d="M7 2.5v4.3M9.3 2.5v4.3M11.6 2.5v4.3"/><path d="M17 2.5c-1.8 0-3.2 2-3.2 4.6s1.4 4.6 3.2 4.6v9.8"/></svg></span>Repas</button>
+  <button data-page="profile"><span class="e"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>Profil</button>
+</div></nav>
+
+<!-- sheet de log rapide (FAB) -->
+<div class="modal" id="quicklogSheet"><div class="sheet">
+  <h3>Ajouter</h3>
+  <div class="sub">Loggue une donnée en un tap, depuis n'importe où.</div>
+  <div class="quicklog-grid">
+    <button class="ql-item" data-act="weigh"><div class="ic" style="background:rgba(10,132,255,.16)"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4.5"/><circle cx="12" cy="13" r="3.6"/><path d="M12 7.5v1.8"/></svg></div><span class="lab">Pesée</span></button>
+    <button class="ql-item" data-act="waterAdd" data-amount="250"><div class="ic" style="background:rgba(107,184,255,.14)"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5s7 8.2 7 13a7 7 0 0 1-14 0c0-4.8 7-13 7-13z"/></svg></div><span class="lab">Eau +250ml</span></button>
+    <button class="ql-item" data-act="addMeal"><div class="ic" style="background:rgba(48,217,143,.16)"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2.5v7.5a1.8 1.8 0 0 0 1.8 1.8v9.7"/><path d="M7 2.5v4.3M9.3 2.5v4.3M11.6 2.5v4.3"/><path d="M17 2.5c-1.8 0-3.2 2-3.2 4.6s1.4 4.6 3.2 4.6v9.8"/></svg></div><span class="lab">Repas</span></button>
+    <button class="ql-item" data-act="scanOpen"><div class="ic" style="background:rgba(90,200,250,.16)"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V4.5a1.5 1.5 0 0 1 1.5-1.5H7M17 3h2.5A1.5 1.5 0 0 1 21 4.5V7M21 17v2.5a1.5 1.5 0 0 1-1.5 1.5H17M7 21H4.5A1.5 1.5 0 0 1 3 19.5V17"/><line x1="7" y1="8" x2="7" y2="16"/><line x1="10.3" y1="8" x2="10.3" y2="16"/><line x1="13.6" y1="8" x2="13.6" y2="16"/><line x1="17" y1="8" x2="17" y2="16"/></svg></div><span class="lab">Scanner</span></button>
+    <button class="ql-item" data-act="goRunning"><div class="ic" style="background:rgba(94,124,230,.16)"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22,12 18,12 15,20 9,4 6,12 2,12"/></svg></div><span class="lab">Course</span></button>
+    <button class="ql-item" data-act="openSteps"><div class="ic" style="background:rgba(168,179,193,.14)"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="8" cy="6" rx="2.3" ry="3"/><ellipse cx="16" cy="15" rx="2.3" ry="3"/><path d="M6 10c0 2 .5 3 2 3s2-1 2-2-0.5-2-2-2-2 0-2 1z"/><path d="M14 19c0 2 .5 3 2 3s2-1 2-2-0.5-2-2-2-2 0-2 1z"/></svg></div><span class="lab">Pas</span></button>
+  </div>
+  <div class="acts"><button class="btn ghost" data-act="quicklogClose">Fermer</button></div>
+</div></div>
+
+<!-- mode séance guidée plein écran -->
+<div class="guided" id="guidedView">
+  <div class="guided-prog"><i id="gProgBar" style="width:0%"></i></div>
+  <div class="guided-top">
+    <button class="guided-x" data-act="guidedClose" aria-label="Retour"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,6 9,12 15,18"/></svg></button>
+    <div class="guided-mid"><b id="gExN">1 / 1</b><span id="gSessName">—</span></div>
+    <button class="guided-timer" id="gTimer" data-act="restStop" style="visibility:hidden" title="Toucher pour passer le repos"><span>⏱</span><span id="gTimerT">0:00</span></button>
+  </div>
+  <div class="guided-body">
+    <div class="guided-name">
+      <h3 id="gExName">—</h3>
+      <div class="sub" id="gExSub">—</div>
+    </div>
+    <div class="guided-ic" id="gExIcon"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="3"/><circle cx="18.5" cy="12" r="3"/><line x1="8.5" y1="12" x2="15.5" y2="12"/></svg></div>
+    <div class="guided-vals" id="gVals"></div>
+    <div class="guided-sets" id="gSets"></div>
+    <div class="guided-bottom">
+      <button class="guided-next" id="gNextBtn" data-act="guidedNext">Valider la série</button>
+      <div class="guided-nav-row">
+        <button class="guided-nav-btn" id="gPrevBtn" data-act="guidedPrev"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,6 9,12 15,18"/></svg>Précédent</button>
+        <button class="guided-nav-btn" data-act="guidedSkip">Suivant<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,6 15,12 9,18"/></svg></button>
+      </div>
+      <div class="guided-list-link"><span data-act="guidedList">Voir la liste</span> · <span data-act="guidedFinishNow">Terminer maintenant</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- écran de fin de séance -->
+<div class="complete" id="completeView">
+  <div class="complete-glow1"></div>
+  <div class="complete-glow2"></div>
+  <div class="complete-check">
+    <div class="ic">✓</div>
+    <h2>Séance terminée !</h2>
+    <div class="sub" id="cpSub">—</div>
+  </div>
+  <div class="complete-pr" id="cpPR" style="display:none"><span id="cpPRText">—</span></div>
+  <div class="complete-stats">
+    <div><b id="cpDur">0min</b><span>durée</span></div>
+    <div><b id="cpVolume">0</b><span>kg soulevés</span></div>
+    <div><b id="cpKcal">0</b><span>kcal</span></div>
+  </div>
+  <div class="complete-streak">
+    <span style="font-size:22px">🔥</span>
+    <div><b id="cpStreakN">0 jour</b><span id="cpStreakSub">—</span></div>
+  </div>
+  <div style="flex:1"></div>
+  <div class="complete-bottom">
+    <button class="complete-home" data-act="completeClose">Retour à l'accueil</button>
+  </div>
+</div>
+
+<!-- edit program day modal -->
+<div class="modal" id="editDayModal"><div class="sheet">
+  <h3>Modifier le jour</h3>
+  <div class="sub">Ajoute, modifie ou retire des exercices. L'historique de charge est conservé si tu renommes un exercice existant.</div>
+  <div class="field"><label>Nom du jour</label><input id="edName" type="text"></div>
+  <div id="editDayExList" style="margin-top:14px"></div>
+  <button class="btn ghost" style="margin-top:10px" data-act="edAddEx">＋ Ajouter un exercice</button>
+  <div class="acts"><button class="btn ghost" data-act="edClose">Annuler</button><button class="btn primary" data-act="edSave">Enregistrer</button></div>
+</div></div>
+
+<!-- weight modal -->
+<div class="modal" id="weighModal"><div class="sheet">
+  <h3>Nouvelle pesée</h3>
+  <div class="sub">Idéalement à jeun, le matin.</div>
+  <div class="wbig">
+    <button data-act="wMinus">−</button>
+    <input id="wInput" type="number" inputmode="decimal" step="0.1">
+    <button data-act="wPlus">＋</button>
+  </div>
+  <div class="row2" style="margin-top:14px">
+    <div class="field"><label>Masse grasse (%)</label><input id="wFat" type="number" inputmode="decimal" step="0.1" placeholder="optionnel"></div>
+    <div class="field"><label>Masse musculaire (kg)</label><input id="wMuscle" type="number" inputmode="decimal" step="0.1" placeholder="optionnel"></div>
+  </div>
+  <div class="acts"><button class="btn ghost" data-act="wClose">Annuler</button><button class="btn primary" data-act="wSave">Enregistrer</button></div>
+</div></div>
+
+<!-- meal modal -->
+<div class="modal" id="mealModal"><div class="sheet">
+  <h3>Ajouter un repas</h3>
+  <div class="sub">Estime au plus proche, la régularité prime sur la précision.</div>
+  <div class="field"><label>Aliment</label><input id="foodName" placeholder="Poulet + riz, ou nom d'un produit" autocomplete="off"></div>
+  <div id="foodSearchResults" class="food-search-results"></div>
+  <div class="row2"><div class="field"><label>Quantité (g / ml)</label><input id="foodQty" type="number" inputmode="decimal" step="1" placeholder="100"></div>
+  <div class="field"><label>Calories</label><input id="foodKcal" type="number" inputmode="numeric" placeholder="500"></div></div>
+  <div id="foodRefHint" class="food-ref-hint" style="display:none"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/></svg> Valeurs recalculées automatiquement selon la quantité</div>
+  <div class="row2"><div class="field"><label>Protéines (g)</label><input id="foodProt" type="number" inputmode="numeric" placeholder="40"></div>
+  <div class="field"><label>Glucides (g)</label><input id="foodCarbs" type="number" inputmode="decimal" placeholder="50"></div></div>
+  <div class="row2"><div class="field"><label>Lipides (g)</label><input id="foodFat" type="number" inputmode="decimal" placeholder="15"></div><div></div></div>
+  <div class="field"><label>Moment</label><select id="foodType"><option>Petit-déjeuner</option><option>Déjeuner</option><option>Dîner</option><option>Collation</option></select></div>
+  <div class="row2"><button class="btn" data-act="saveFavorite"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg> Enregistrer aliment</button><button class="btn mint" data-act="scanOpen"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4.5h-5L7.5 7.5h-3a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h15a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-3l-2-3z"/><circle cx="12" cy="13.5" r="3.5"/></svg> Scanner</button></div>
+  <div class="acts"><button class="btn ghost" data-act="mClose">Annuler</button><button class="btn primary" data-act="mSave">Ajouter</button></div>
+</div></div>
+
+<!-- barcode scanner modal -->
+<div class="modal" id="scanModal"><div class="sheet">
+  <h3>Scanner un code-barres</h3>
+  <div class="sub">Place le code-barres dans le cadre. Le produit sera recherché automatiquement.</div>
+  <div class="scan-preview">
+    <video id="scanVideo" playsinline autoplay muted></video>
+    <div class="scan-frame"></div>
+  </div>
+  <div class="scan-status" id="scanStatus">Autorise l’accès à la caméra…</div>
+  <div class="field"><label>Ou saisir le code manuellement</label><input id="manualBarcode" inputmode="numeric" autocomplete="off" placeholder="7612345678901"></div>
+  <button class="btn primary" data-act="scanLookup"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="7"/><line x1="20.5" y1="20.5" x2="15.5" y2="15.5"/></svg> Rechercher ce code</button>
+  <button class="btn ghost" id="scanManualEntry" hidden style="margin-top:8px">Saisir ce produit moi-même</button>
+  <div class="scan-product" id="scanProduct"></div>
+  <div class="acts"><button class="btn ghost" data-act="scanClose"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,6 9,12 15,18"/></svg> Retour</button></div>
+</div></div>
+
+<div class="modal" id="favoritesModal"><div class="sheet">
+  <h3>Mes aliments <svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg></h3>
+  <div class="sub">Tes aliments enregistrés pour les ajouter rapidement.</div>
+  <div class="favorite-list" id="favoriteList"></div>
+  <div class="acts"><button class="btn ghost" data-act="favoritesClose">Fermer</button></div>
+</div></div>
+
+<div class="modal" id="groceryModal"><div class="sheet">
+  <h3>Liste de courses</h3>
+  <div class="sub">Migros, végétarien, orienté protéines · ~150.-/mois</div>
+  <div class="grocery-sec-h">Une fois (stock du mois)</div>
+  <div class="grocery-list" id="groceryOnceList"></div>
+  <div class="grocery-sec-h">Chaque semaine (×4 dans le mois)</div>
+  <div class="grocery-list" id="groceryWeeklyList"></div>
+  <div class="grocery-add"><input id="groceryAddInput" placeholder="Ajouter un article…"><button data-act="groceryAdd">＋</button></div>
+  <div class="acts"><button class="btn ghost" data-act="groceryReset">Tout décocher</button><button class="btn primary" data-act="groceryClose">Fermer</button></div>
+</div></div>
+
+<div class="modal" id="fastModal"><div class="sheet">
+  <h3>Routine de jeûne</h3>
+  <div class="sub">Choisis une durée puis démarre ou arrête ton jeûne.</div>
+  <div class="field"><label>Durée</label><select id="fastHours"><option value="12">12 h</option><option value="14">14 h</option><option value="16" selected>16 h</option><option value="18">18 h</option><option value="20">20 h</option></select></div>
+  <div class="acts"><button class="btn ghost" data-act="fastClose">Fermer</button><button class="btn primary" data-act="fastStart" id="fastActBtn">Démarrer</button></div>
+</div></div>
+
+<div class="modal" id="runModal"><div class="sheet">
+  <h3>Ajouter une course</h3>
+  <button class="btn primary" data-act="liveStart" style="margin:6px 0 2px"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 7 9 3 3 9l4 4"/><path d="M17 11l4 4-6 6-4-4"/><path d="M8 12l4 4"/><path d="M14.5 5.5 18 2"/><path d="M19 9.5 22 6.5"/></svg> Suivi GPS en direct</button>
+  <div class="or-sep"><span>ou saisir manuellement</span></div>
+  <div class="row2"><div class="field"><label>Distance (km)</label><input id="runDist" type="number" inputmode="decimal" step="0.1" placeholder="8.5"></div>
+  <div class="field"><label>Durée (min)</label><input id="runDur" type="number" inputmode="decimal" step="1" placeholder="48"></div></div>
+  <div class="field"><label>Date</label><input id="runDate" type="date"></div>
+  <div id="runPace" class="date" style="text-align:center;margin-top:8px;min-height:16px"></div>
+  <div class="acts"><button class="btn ghost" data-act="runClose">Annuler</button><button class="btn primary" data-act="runSave">Ajouter</button></div>
+</div></div>
+
+<div class="modal" id="runMapModal"><div class="sheet">
+  <h3>Parcours de la course</h3>
+  <div class="lr-map" id="runMapBox" style="margin-top:10px">
+    <div id="runMapEl"></div>
+    <svg id="runMapSvg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" style="display:none"></svg>
+  </div>
+  <div class="acts"><button class="btn ghost" data-act="runMapClose">Fermer</button></div>
+</div></div>
+
+<!-- live GPS run overlay -->
+<div class="liverun" id="liveRunModal">
+  <div class="lr-head">
+    <button class="lr-x" data-act="liveClose">✕</button>
+    <span class="lr-title">Course en direct</span>
+    <span class="lr-gps" id="lrGps">GPS prêt</span>
+  </div>
+  <div class="lr-map">
+    <div id="lrMap"></div>
+    <svg id="lrTrace" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="lr-mapempty" id="lrMapEmpty">Le tracé apparaîtra dès les premiers points GPS.</div>
+  </div>
+  <div class="lr-time num" id="lrTime">0:00</div>
+  <div class="lr-sub">durée</div>
+  <div class="lr-stats">
+    <div><div class="v" id="lrDist">0.00</div><div class="l">km</div></div>
+    <div><div class="v" id="lrPace">—</div><div class="l">allure /km</div></div>
+    <div><div class="v" id="lrSpeed">—</div><div class="l">km/h</div></div>
+    <div><div class="v" id="lrKcal">0</div><div class="l">kcal</div></div>
+  </div>
+  <div class="lr-controls">
+    <button class="btn" data-act="runDiscard" id="lrDiscard">Annuler</button>
+    <button class="btn primary" data-act="runToggle" id="lrToggle">Démarrer</button>
+    <button class="btn mint" data-act="runFinish" id="lrFinish" style="display:none">Terminer</button>
+  </div>
+  <div class="lr-note" id="lrNote">Garde l'écran allumé et l'app au premier plan pendant la course.</div>
+</div>
+
+<div class="modal" id="stepsModal"><div class="sheet">
+  <h3>Pas du jour</h3>
+  <div class="sub">Recopie le compteur de ton téléphone.</div>
+  <div class="wbig"><input id="stepsInput" type="number" inputmode="numeric" step="100" placeholder="8000"></div>
+  <div class="acts"><button class="btn ghost" data-act="stepsClose">Annuler</button><button class="btn primary" data-act="stepsSave">Enregistrer</button></div>
+</div></div>
+
+<div class="modal" id="addExModal"><div class="sheet">
+  <h3>Ajouter un exercice</h3>
+  <div class="sub">Ajouté uniquement à la séance d'aujourd'hui.</div>
+  <div class="field"><label>Nom</label><input id="addExName" placeholder="Élévations latérales"></div>
+  <div class="row2"><div class="field"><label>Séries</label><input id="addExSets" type="number" inputmode="numeric" step="1" value="3"></div>
+  <div class="field"><label>Répétitions (optionnel)</label><input id="addExReps" placeholder="8-10"></div></div>
+  <label class="chk-row"><input id="addExWeighted" type="checkbox" checked> Exercice avec charge</label>
+  <div class="acts"><button class="btn ghost" data-act="addExClose">Annuler</button><button class="btn primary" data-act="addExSave">Ajouter</button></div>
+</div></div>
+
+<div class="snack" id="snack"><div class="msg" id="snackMsg"></div><button data-act="snackAct" id="snackBtn">Annuler</button></div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="/fitness/js/app.js?v=7"></script>
+<script src="/fitness/js/boot.js?v=3"></script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{
+  "name": "fitness",
+  "version": "1.0.0",
+  "description": "",
+  "main": "sw.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "sync:ios": "node scripts/sync-ios-www.js",
+    "cap:copy": "npm run sync:ios && npx cap copy ios",
+    "cap:sync": "npm run sync:ios && npx cap sync ios"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ilyasbenslamabenz-pixel/fitness.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ilyasbenslamabenz-pixel/fitness/issues"
+  },
+  "homepage": "https://github.com/ilyasbenslamabenz-pixel/fitness#readme",
+  "dependencies": {
+    "@capacitor/core": "^8.5.2",
+    "@capacitor/ios": "^8.5.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.2"
+  }
+}

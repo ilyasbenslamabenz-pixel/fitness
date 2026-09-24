@@ -1,0 +1,11 @@
+node_modules/
+
+# iOS / Xcode build artifacts (regenerated locally, not source)
+ios/App/Pods/
+ios/App/build/
+ios/App/output/
+ios/.build/
+ios/App/App.xcodeproj/project.xcworkspace/xcuserdata/
+ios/App/App.xcodeproj/xcuserdata/
+**/*.xcuserstate
+**/.DS_Store
