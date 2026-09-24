@@ -83,6 +83,33 @@ var MENU=[
  ["Dimanche",[["Petit-déjeuner","Avoine 50 g + lait + skyr 150 g + banane","≈ 450 kcal · 28 g prot."],["Déjeuner","Pommes de terre 350 g (airfryer) + thon 120 g + haricots verts","≈ 500 kcal · 37 g prot."],["Dîner","Riz 70 g + lentilles 200 g + 2 œufs + courgettes (airfryer)","≈ 620 kcal · 34 g prot."],["Collation","Skyr 150 g + fruit","≈ 150 kcal · 16 g prot."]]]
 ];
 
+/* liste de courses Migros par défaut : végétarien, orienté protéines, ~150.-/mois */
+var DEFAULT_GROCERY={
+ once:[
+  {n:"Riz M-Budget 1 kg",done:false},
+  {n:"Flocons d'avoine 1 kg",done:false},
+  {n:"Lentilles corail 500 g",done:false},
+  {n:"Lentilles vertes 500 g",done:false},
+  {n:"Pois chiches en boîte ×4",done:false},
+  {n:"Haricots rouges en boîte ×3",done:false},
+  {n:"Huile (tournesol/olive) 1 L",done:false},
+  {n:"Beurre de cacahuète",done:false},
+  {n:"Tomates pelées/passata ×4",done:false},
+  {n:"Bouillon de légumes",done:false}
+ ],
+ weekly:[
+  {n:"Lait 2 L",done:false},
+  {n:"Skyr/yogourt protéiné 500 g ×2",done:false},
+  {n:"Fromage râpé 150 g",done:false},
+  {n:"Œufs (boîte de 12)",done:false},
+  {n:"Tofu nature 300 g ×2",done:false},
+  {n:"Quark maigre 500 g",done:false},
+  {n:"Pain",done:false},
+  {n:"Beurre/margarine",done:false},
+  {n:"Légumes frais (~1.5 kg)",done:false},
+  {n:"Fruits (~1 kg)",done:false}
+ ]
+};
 /* base locale d'aliments bruts courants (kcal/protéines/glucides/lipides pour 100 g) —
    consultable instantanément sans réseau, complète OpenFoodFacts qui couvre mal le non-transformé */
 var LOCAL_FOODS=[
@@ -183,6 +210,7 @@ var state={
   runs:[], steps:[], energy:[], water:{date:today(),ml:0},
   macro:{carbs:240,protein:180,fat:80}, waterGoal:3,
   fast:{active:false,start:null,hours:16},
+  groceryList:JSON.parse(JSON.stringify(DEFAULT_GROCERY)),
   selEx:null
 };
 var cloudUser=null, toastT=null, cloudBackupT=null, autoRestoreAttempted=false;
@@ -258,6 +286,7 @@ function merge(p){
   if(p.macro&&typeof p.macro==="object")state.macro=Object.assign(state.macro,p.macro);
   if(isFinite(Number(p.waterGoal)))state.waterGoal=Number(p.waterGoal);
   if(p.fast&&typeof p.fast==="object")state.fast=Object.assign(state.fast,p.fast);
+  if(p.groceryList&&typeof p.groceryList==="object"&&Array.isArray(p.groceryList.once)&&Array.isArray(p.groceryList.weekly))state.groceryList=p.groceryList;
   if(typeof p.suggest==="number")state.suggest=p.suggest;
   if(p.session&&typeof p.session==="object")state.session=p.session;
   if(p.lastDay)state.lastDay=p.lastDay;
@@ -281,6 +310,7 @@ function normalizeState(){
   state.waterGoal=Number(state.waterGoal||3);if(state.waterGoal<0.5||state.waterGoal>8)state.waterGoal=3;
   if(!state.fast)state.fast={active:false,start:null,hours:16};
   state.fast.hours=Number(state.fast.hours||16);
+  if(!state.groceryList||!Array.isArray(state.groceryList.once)||!Array.isArray(state.groceryList.weekly))state.groceryList=JSON.parse(JSON.stringify(DEFAULT_GROCERY));
   if(state.lastDay==null)state.lastDay=today();
   if(!Array.isArray(state.program)||!state.program.length)state.program=JSON.parse(JSON.stringify(DEFAULT_PROGRAM));
   if(!state.program.some(function(p){return p.cat==="maison";})){
@@ -1421,6 +1451,7 @@ function renderMeals(){
     $(itemIds[type]).innerHTML=byType[type].map(function(x){var m=x.m;return '<div class="meal"><div class="mi"><b>'+esc(m.name)+'</b><div class="d">'+num(m.qty||100)+' g · '+num(m.protein||0)+' g prot.</div></div><div class="kc">'+Math.round(Number(m.kcal||0))+' kcal</div><button class="del" data-act="delMeal" data-i="'+x.i+'">×</button></div>';}).join("");
   });
   renderWeeklyMenuIfNeeded();
+  renderGrocerySummary();
 }
 function renderWater(){
   if(state.page!=="water")return;
@@ -1475,6 +1506,45 @@ function deleteFavorite(i){
   var removed=state.foodFavorites[i];if(!removed)return;
   state.foodFavorites.splice(i,1);save();openFavorites();
   snack("Aliment retiré des favoris","Annuler",function(){state.foodFavorites.splice(i,0,removed);save();openFavorites();},5000);
+}
+function groceryCount(){
+  var once=state.groceryList.once,weekly=state.groceryList.weekly;
+  var total=once.length+weekly.length,done=once.filter(function(x){return x.done;}).length+weekly.filter(function(x){return x.done;}).length;
+  return {total:total,done:done};
+}
+function renderGrocerySummary(){
+  var c=groceryCount();
+  $("groceryText").textContent=c.done+"/"+c.total+" cochés";
+}
+function groceryRowsHTML(list,key){
+  return list.length?list.map(function(x,i){
+    return '<div class="grocery-item"><label><input type="checkbox" data-act="groceryToggle" data-list="'+key+'" data-i="'+i+'"'+(x.done?" checked":"")+'><span class="'+(x.done?"done":"")+'">'+esc(x.n)+'</span></label><button class="del" data-act="groceryDel" data-list="'+key+'" data-i="'+i+'">×</button></div>';
+  }).join(""):'<div class="empty">Rien ici.</div>';
+}
+function openGrocery(){
+  $("groceryOnceList").innerHTML=groceryRowsHTML(state.groceryList.once,"once");
+  $("groceryWeeklyList").innerHTML=groceryRowsHTML(state.groceryList.weekly,"weekly");
+  $("groceryModal").classList.add("on");
+}
+function closeGrocery(){$("groceryModal").classList.remove("on");}
+function toggleGrocery(key,i){
+  var item=state.groceryList[key]&&state.groceryList[key][i];if(!item)return;
+  item.done=!item.done;save();openGrocery();renderGrocerySummary();
+}
+function deleteGrocery(key,i){
+  var list=state.groceryList[key];if(!list||!list[i])return;
+  var removed=list[i];list.splice(i,1);save();openGrocery();renderGrocerySummary();
+  snack("Article retiré","Annuler",function(){list.splice(i,0,removed);save();openGrocery();renderGrocerySummary();},5000);
+}
+function addGrocery(){
+  var v=$("groceryAddInput").value.trim();if(!v)return;
+  state.groceryList.once.push({n:v,done:false});
+  $("groceryAddInput").value="";save();openGrocery();renderGrocerySummary();
+}
+function resetGrocery(){
+  state.groceryList.once.forEach(function(x){x.done=false;});
+  state.groceryList.weekly.forEach(function(x){x.done=false;});
+  save();openGrocery();renderGrocerySummary();toast("Liste réinitialisée");
 }
 var fastBeeped=false;
 function renderFasting(){
@@ -1984,6 +2054,12 @@ document.addEventListener("click",function(e){
     case "favoritesClose": closeFavorites(); break;
     case "favUse": useFavorite(Number(a.dataset.i)); break;
     case "favDelete": deleteFavorite(Number(a.dataset.i)); break;
+    case "groceryOpen": openGrocery(); break;
+    case "groceryClose": closeGrocery(); break;
+    case "groceryToggle": toggleGrocery(a.dataset.list,Number(a.dataset.i)); break;
+    case "groceryDel": deleteGrocery(a.dataset.list,Number(a.dataset.i)); break;
+    case "groceryAdd": addGrocery(); break;
+    case "groceryReset": resetGrocery(); break;
     case "saveFavorite": saveFavorite(); break;
     case "waterAdd": addWater(Number(a.dataset.amount||300)); break;
     case "bodyWeightMinus": adjustBodyWeight(-0.1); break;

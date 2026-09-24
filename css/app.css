@@ -361,6 +361,18 @@ a{color:inherit;text-decoration:none}
 .daily-dash .dd .ico{font-size:20px}.daily-dash .dd b{display:block;font-family:var(--display);font-size:16px;margin-top:4px}.daily-dash .dd span{display:block;color:var(--muted);font-size:10.5px;margin-top:2px}
 .fast-progress{height:8px;background:var(--surface2);border-radius:99px;overflow:hidden;margin-top:12px}.fast-progress i{display:block;height:100%;background:var(--accent);width:0}
 .favorite-list{max-height:52vh;overflow:auto;margin-top:10px}.favorite-item{display:flex;align-items:center;gap:10px;padding:11px 2px;border-bottom:1px solid var(--hair)}.favorite-item:last-child{border-bottom:0}.favorite-item .fi{flex:1;min-width:0}.favorite-item b{display:block;font-size:14px}.favorite-item span{display:block;color:var(--muted);font-size:11.5px;margin-top:3px}.favorite-item button{background:var(--surface2);border:1px solid var(--hair);border-radius:9px;padding:8px 10px;font-size:12px}
+.grocery-sec-h{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin:16px 0 2px}
+.grocery-sec-h:first-of-type{margin-top:4px}
+.grocery-list{max-height:26vh;overflow:auto}
+.grocery-item{display:flex;align-items:center;gap:8px;padding:8px 2px;border-bottom:1px solid var(--hair)}
+.grocery-item:last-child{border-bottom:0}
+.grocery-item label{flex:1;min-width:0;display:flex;align-items:center;gap:9px;font-size:13.5px}
+.grocery-item label input{width:18px;height:18px;flex:0 0 auto}
+.grocery-item label span.done{color:var(--faint);text-decoration:line-through}
+.grocery-item .del{color:var(--faint);font-size:18px;padding:4px 6px;flex:0 0 auto}
+.grocery-add{display:flex;gap:8px;margin-top:14px}
+.grocery-add input{flex:1;background:var(--surface2);border:1px solid var(--hair);border-radius:12px;padding:11px 12px;color:var(--text);font-size:14px}
+.grocery-add button{width:44px;height:44px;border-radius:12px;background:var(--primary);color:#fff;font-size:22px;flex:0 0 auto}
 .food-search-results{max-height:40vh;overflow:auto;margin-top:8px}
 .food-search-results:empty{margin-top:0}
 .food-result{display:block;width:100%;text-align:left;padding:10px 12px;border:1px solid var(--hair);border-radius:11px;background:var(--surface2);margin-top:7px}
