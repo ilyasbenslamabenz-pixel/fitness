@@ -389,7 +389,7 @@ a{color:inherit;text-decoration:none}
 @media(min-width:520px){.lr-map{height:300px}}
 .lr-time{font-family:var(--display);font-weight:700;font-size:60px;line-height:1;text-align:center;letter-spacing:-.02em;margin-top:2px}
 .lr-sub{text-align:center;font-size:12.5px;color:var(--muted);margin-top:3px}
-.lr-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.lr-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:16px}
 .lr-stats>div{background:var(--surface);border:1px solid var(--hair);border-radius:14px;padding:13px 6px;text-align:center;box-shadow:var(--shadow-pop)}
 .lr-stats .v{font-family:var(--display);font-weight:700;font-size:25px}
 .lr-stats .l{font-size:10.5px;color:var(--muted);margin-top:3px}
