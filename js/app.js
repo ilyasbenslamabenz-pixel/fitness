@@ -2199,7 +2199,7 @@ document.addEventListener("click",function(e){
     case "fastClose": $("fastModal").classList.remove("on"); break;
     case "fastStart": toggleFasting(); break;
     case "scanOpen": openScanner(); break;
-    case "scanClose": closeScanner(); break;
+    case "scanClose": closeScanner(); $("mealModal").classList.add("on"); break;
     case "scanLookup": lookupBarcode(document.getElementById("manualBarcode").value); break;
     case "mClose": closeMeal(); break;
     case "mSave": saveMeal(); break;
