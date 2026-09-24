@@ -243,7 +243,8 @@ a{color:inherit;text-decoration:none}
 /* bottom nav */
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:50;background:rgba(18,20,26,.92);backdrop-filter:blur(14px);
   border-top:1px solid var(--hair);padding-bottom:var(--safe-bot)}
-.nav .in{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+.nav .in{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr)}
+.nav-spacer{pointer-events:none}
 .nav button{padding:9px 0 8px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;color:var(--faint);font-weight:500}
 .nav button .e{font-size:20px;line-height:1}
 .nav button.on{color:var(--text)}
@@ -738,6 +739,7 @@ body.has-snack .fab{bottom:calc(100px + var(--safe-bot))}
 <nav class="nav"><div class="in" id="navIn">
   <button data-page="today" class="on"><span class="e">🏠</span>Aujourd'hui</button>
   <button data-page="session"><span class="e">🏋️</span>Séance</button>
+  <div class="nav-spacer" aria-hidden="true"></div>
   <button data-page="progress"><span class="e">📈</span>Progrès</button>
   <button data-page="meals"><span class="e">🍽️</span>Repas</button>
   <button data-page="profile"><span class="e">⚙️</span>Profil</button>
