@@ -750,6 +750,7 @@ a{color:inherit;text-decoration:none}
         <div><div class="v num" id="stpDays">0</div><div class="l">jours suivis</div></div>
       </div>
       <div class="chartwrap" id="stepsChart"></div>
+      <div class="chartmeta"><span id="stpKcal"></span><span></span></div>
     </div>
 
     <div class="card">
@@ -1346,6 +1347,8 @@ function normalizeState(){
   if(!state.weightHistory.length)state.weightHistory=[{d:state.profile.startDate,w:Number(state.profile.start||103)}];
   if(!Array.isArray(state.bodyComp))state.bodyComp=[];
   state.bodyComp=state.bodyComp.filter(function(x){return x&&x.d&&(isFinite(Number(x.fat))||isFinite(Number(x.muscle)));}).map(function(x){return {d:x.d,fat:isFinite(Number(x.fat))?Number(x.fat):null,muscle:isFinite(Number(x.muscle))?Number(x.muscle):null};}).sort(function(a,b){return a.d.localeCompare(b.d);});
+  if(!Array.isArray(state.runs))state.runs=[];
+  state.runs.forEach(function(r){if(!isFinite(Number(r.kcal))||r.kcal<=0)r.kcal=estimateRunKcal(Number(r.dist||0),Number(r.dur||0));});
   if(!Array.isArray(state.meals))state.meals=[];
   if(!Array.isArray(state.mealHistory))state.mealHistory=[];
   if(!Array.isArray(state.foodFavorites))state.foodFavorites=[];
@@ -1391,6 +1394,23 @@ function activeExercises(p){
 }
 function lastWeight(name){var a=state.perf[name];return a&&a.length?Number(a[a.length-1].w):0;}
 function latestBody(){var a=state.weightHistory;return a.length?Number(a[a.length-1].w):Number(state.profile.start);}
+/* dépense énergétique estimée (kcal = MET × poids(kg) × durée(h)), méthode standard Compendium of Physical Activities */
+function estimateSessionKcal(cat,durMin){
+  var met=cat==="maison"?6.8:5.0; /* séances maison = souvent circuit/HIIT, plus intense que la musculation classique en salle */
+  return Math.max(1,Math.round(met*latestBody()*(durMin/60)));
+}
+function estimateRunKcal(distKm,durMin){
+  var w=latestBody();
+  if(distKm>0)return Math.max(1,Math.round(distKm*w*1.036)); /* coût énergétique de la course : ~1.036 kcal/kg/km, quasi indépendant de l'allure */
+  if(durMin>0)return Math.max(1,Math.round(7*w*(durMin/60))); /* repli si distance inconnue : MET 7 (course modérée) */
+  return 0;
+}
+/* marche : distance = pas × longueur de foulée moyenne (~0.762 m), coût ~0.5 kcal/kg/km (environ la moitié de la course) */
+function estimateStepsKcal(steps){
+  steps=Number(steps)||0;if(steps<=0)return 0;
+  var distKm=steps*0.000762;
+  return Math.max(0,Math.round(distKm*latestBody()*0.5));
+}
 function weekNo(){var s=new Date((state.profile.startDate||START_DATE)+"T12:00:00"),diff=Math.floor((Date.now()-s)/864e5);return Math.max(1,Math.floor(diff/7)+1);}
 
 /* charts */
@@ -1902,7 +1922,7 @@ function guidedFinishFlow(){
     });
   });
   var durMs=Date.now()-(guidedStartTimes[p.id]||Date.now()),durMin=Math.max(1,Math.round(durMs/60000));
-  var kcal=Math.round(durMin*6);
+  var kcal=estimateSessionKcal(p.cat,durMin);
   var doneExCount=active.filter(function(e){return isExDone(mk,e);}).length;
   var prevBestStreak=computeBestStreak(),sessionName=p.name,exCount=doneExCount;
   finishSession();
@@ -2066,12 +2086,13 @@ function renderCardio(){
   var paces=runs.filter(function(r){return r.dist>0&&r.dur>0;}).map(function(r){return r.dur/r.dist;});
   $("cdPace").textContent=paces.length?fmtPace(Math.min.apply(null,paces))+" /km":"—";
   $("cardioChart").innerHTML=lineChart(runs.map(function(r){return Number(r.dist);}),"#0a84ff"," km");
-  $("cdLast").textContent=runs.length?fmtDate(runs[runs.length-1].d):"";
+  var totalKcal=runs.reduce(function(s,r){return s+Number(r.kcal||0);},0);
+  $("cdLast").textContent=(runs.length?fmtDate(runs[runs.length-1].d):"")+(totalKcal?" · "+totalKcal.toLocaleString("fr-CH")+" kcal au total":"");
   var recent=state.runs.slice().sort(function(a,b){return b.d.localeCompare(a.d);}).slice(0,8);
   $("runList").innerHTML=recent.length?recent.map(function(r){
     var pace=(r.dist>0&&r.dur>0)?fmtPace(r.dur/r.dist)+" /km":"—";
     var hasRoute=Array.isArray(r.pts)&&r.pts.length>1;
-    return '<div class="runrow"><div class="ri"><b>'+num(r.dist)+' km</b><span>'+fmtDate(r.d)+' · '+num(r.dur)+' min</span></div><div class="rp">'+pace+'</div>'
+    return '<div class="runrow"><div class="ri"><b>'+num(r.dist)+' km</b><span>'+fmtDate(r.d)+' · '+num(r.dur)+' min'+(r.kcal?' · '+Math.round(r.kcal)+' kcal':'')+'</span></div><div class="rp">'+pace+'</div>'
       +(hasRoute?'<button class="mapbtn" data-act="viewRunMap" data-id="'+esc(r.id||"")+'"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="3,6 9,3 15,6 21,3 21,18 15,21 9,18 3,21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg></button>':'')
       +'<button class="del" data-act="delRun" data-id="'+esc(r.id||"")+'">×</button></div>';
   }).join(""):'<div class="empty">Aucune course. Ajoute-en une, ou branche Strava en étape 2.</div>';
@@ -2083,6 +2104,7 @@ function renderSteps(){
   $("stpAvg").textContent=a.length?Math.round(a.reduce(function(s,x){return s+Number(x.v);},0)/a.length).toLocaleString("fr-CH"):"—";
   $("stpDays").textContent=a.length;
   $("stepsChart").innerHTML=lineChart(a.slice(-14).map(function(x){return Number(x.v);}),"#30d98f"," pas");
+  var stpK=$("stpKcal");if(stpK)stpK.textContent=tv?estimateStepsKcal(tv).toLocaleString("fr-CH")+" kcal aujourd'hui (marche)":"";
 }
 function renderEnergy(){
   var a=state.energy.slice().sort(function(x,y){return x.d.localeCompare(y.d);});
@@ -2099,7 +2121,7 @@ function saveRun(){
   var di=Number(String($("runDist").value).replace(",",".")),du=Number(String($("runDur").value).replace(",","."));
   var d=$("runDate").value||today();
   if(!(di>0)||!(du>0)){toast("Distance et durée requises");return;}
-  state.runs.push({id:"r"+Date.now()+Math.floor(Math.random()*1000),d:d,dist:Math.round(di*100)/100,dur:Math.round(du*10)/10,src:"manual"});
+  state.runs.push({id:"r"+Date.now()+Math.floor(Math.random()*1000),d:d,dist:Math.round(di*100)/100,dur:Math.round(du*10)/10,src:"manual",kcal:estimateRunKcal(di,du)});
   save();closeRun();renderProgress();toast("Course ajoutée");
 }
 /* ===== live GPS run tracking ===== */
@@ -2122,7 +2144,7 @@ function recoverLiveRunIfAny(){
     var ageOk=ck.savedAt&&(Date.now()-ck.savedAt)<21600000; /* 6h max, sinon trop périmé pour être fiable */
     if(ageOk&&km>=0.05&&min>=0.2){
       if(confirm("Une course interrompue a été retrouvée (~"+num(km)+" km, "+fmtClock(ck.elapsedMs||0)+"). L'enregistrer ?")){
-        var runObj={id:"r"+Date.now()+Math.floor(Math.random()*1000),d:ck.d||today(),dist:km,dur:min,src:"gps"};
+        var runObj={id:"r"+Date.now()+Math.floor(Math.random()*1000),d:ck.d||today(),dist:km,dur:min,src:"gps",kcal:estimateRunKcal(km,min)};
         if(ck.pts&&ck.pts.length>1)runObj.pts=ck.pts;
         state.runs.push(runObj);save();toast("Course récupérée · "+num(km)+" km");
       }
@@ -2169,7 +2191,7 @@ function finishRun(){
   runActive=false;stopGeo();releaseWake();if(runTick){clearInterval(runTick);runTick=null;}runLastPt=null;runLastTime=0;runLastGeoTimestamp=0;
   var km=Math.round(runMeters/10)/100,min=Math.round(runElapsedMs/6000)/10;
   if(km<0.05||min<0.2){clearLiveRunCheckpoint();toast("Course trop courte, non enregistrée");closeLiveRun();return;}
-  var runObj={id:"r"+Date.now()+Math.floor(Math.random()*1000),d:runStartDate,dist:km,dur:min,src:"gps"};
+  var runObj={id:"r"+Date.now()+Math.floor(Math.random()*1000),d:runStartDate,dist:km,dur:min,src:"gps",kcal:estimateRunKcal(km,min)};
   if(runPts.length>1)runObj.pts=runPts.slice();
   state.runs.push(runObj);
   clearLiveRunCheckpoint();
@@ -2676,9 +2698,21 @@ var foodSearchCache=[],foodSearchBusy=false;
 function brandsStr(b){if(!b)return"";return Array.isArray(b)?b.join(", "):String(b);}
 function normText(s){return String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");}
 function searchLocalFoods(q){
-  var nq=normText(q);
-  return LOCAL_FOODS.filter(function(f){return normText(f.n).indexOf(nq)>=0;})
-    .map(function(f){return {name:f.n,kcal:f.kcal,protein:f.p,carbs:f.c,fat:f.f,local:true};});
+  var nq=normText(q).trim();if(!nq)return[];
+  var words=nq.split(/\s+/).filter(Boolean);
+  var scored=[];
+  LOCAL_FOODS.forEach(function(f){
+    var name=normText(f.n);
+    if(!words.every(function(w){return name.indexOf(w)>=0;}))return;
+    var score=0;
+    if(name===nq)score=100;
+    else if(name.indexOf(nq)===0)score=80;
+    else if(name.indexOf(nq)>=0)score=60;
+    else score=40-words.filter(function(w){return name.indexOf(" "+w)>=0||name.indexOf(w)===0;}).length;
+    scored.push({f:f,score:score});
+  });
+  scored.sort(function(a,b){return b.score-a.score||a.f.n.length-b.f.n.length;});
+  return scored.map(function(x){var f=x.f;return {name:f.n,kcal:f.kcal,protein:f.p,carbs:f.c,fat:f.f,local:true};});
 }
 function renderFoodResults(list,q){
   var box=$("foodSearchResults");
@@ -2696,16 +2730,21 @@ function scheduleFoodSearch(){
   if($("foodName").value.trim().length<2){$("foodSearchResults").innerHTML="";return;}
   foodSearchT=setTimeout(searchFoodOnline,400);
 }
+var offResultsCache={};
 async function fetchOffResults(q,swissOnly){
+  var cacheKey=normText(q)+"|"+(swissOnly?"ch":"all");
+  if(offResultsCache[cacheKey])return offResultsCache[cacheKey];
   var qs=swissOnly?(q+' countries_tags:"en:switzerland"'):q;
   var url="https://search.openfoodfacts.org/search?q="+encodeURIComponent(qs)+"&page_size=8&fields=product_name,brands,nutriments,code";
   var res=await fetch(url,{headers:{Accept:"application/json"}});
   if(!res.ok)throw new Error("HTTP "+res.status);
   var data=await res.json();
-  return (data.hits||data.products||[]).filter(function(p){return p.product_name;}).map(function(p){
+  var results=(data.hits||data.products||[]).filter(function(p){return p.product_name;}).map(function(p){
     var n=p.nutriments||{},br=brandsStr(p.brands);
     return {name:(br?br+" ":"")+p.product_name,kcal:offVal(n,["energy-kcal_100g","energy-kcal"]),protein:offVal(n,["proteins_100g","proteins"]),carbs:offVal(n,["carbohydrates_100g","carbohydrates"]),fat:offVal(n,["fat_100g","fat"]),local:false};
-  });
+  }).filter(function(r){return r.kcal>0;}); /* écarte les fiches OFF sans valeur calorique renseignée, peu exploitables */
+  offResultsCache[cacheKey]=results;
+  return results;
 }
 async function searchFoodOnline(){
   var q=$("foodName").value.trim();
