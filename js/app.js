@@ -1783,15 +1783,29 @@ function stopBarcode(){
   var v=$("scanVideo");if(v){try{v.pause();}catch(e){};v.srcObject=null;}
 }
 function closeScanner(){stopBarcode();$("scanModal").classList.remove("on");}
-/* produits Coop courants mal ou pas référencés sur OpenFoodFacts, vérifiés manuellement
-   (fiches produit Coop/OpenFoodFacts, valeurs pour 100 g) */
+/* produits Coop/Migros/Denner courants mal ou pas référencés sur OpenFoodFacts, vérifiés manuellement
+   (fiches produit Coop/Migros/Denner/OpenFoodFacts, valeurs pour 100 g/ml) */
 var SEED_BARCODES={
   "7610846871868":{name:"Qualité & Prix Thon rosé au naturel (Coop) 155 g",kcal:110,protein:26,carbs:0,fat:0.5},
   "7627534978501":{name:"Qualité & Prix Thon rosé à l'huile de tournesol (Coop)",kcal:186,protein:25,carbs:0,fat:9.5},
   "7610800036739":{name:"Coop Lifestyle Thon rosé au naturel 200 g",kcal:117,protein:26,carbs:1,fat:1},
   "7624841700177":{name:"Coop Prix Garantie Thon 120 g",kcal:341,protein:8.1,carbs:27,fat:22},
   "7624841548915":{name:"Coop Prix Garantie Thon sandwich 165 g",kcal:242,protein:9.6,carbs:23,fat:12},
-  "8004030096004":{name:"Rio Mare Thon au naturel",kcal:118,protein:27,carbs:0.3,fat:1}
+  "8004030096004":{name:"Rio Mare Thon au naturel",kcal:118,protein:27,carbs:0.3,fat:1},
+  "00118668":{name:"Skyr nature (Migros) 170 g",kcal:61,protein:11,carbs:4,fat:0.1},
+  "7624841842280":{name:"Skyr Nature (Coop) 400 g",kcal:57,protein:11,carbs:3.3,fat:0},
+  "7610029141528":{name:"Séré maigre / Magerquark (Denner) 500 g",kcal:59,protein:9,carbs:5.5,fat:0.5},
+  "7624841549578":{name:"Quark magro (Coop Prix Garantie) 500 g",kcal:62,protein:11,carbs:4,fat:0.2},
+  "7613404013526":{name:"Cottage cheese (M-Budget) 750 g",kcal:88,protein:10,carbs:3,fat:4},
+  "7613312403860":{name:"Flocons d'avoine complets fins (Migros Bio) 500 g",kcal:373,protein:13,carbs:61,fat:7},
+  "7613404536094":{name:"Lait écrémé M Classic (Migros) 1 L",kcal:35,protein:3.5,carbs:4.9,fat:0.1},
+  "7613404016183":{name:"Pain de seigle complet (Migros) 500 g",kcal:212,protein:6.8,carbs:36,fat:2.1},
+  "7610200010919":{name:"Riz complet bio (Migros) 1 kg, cru",kcal:347,protein:8,carbs:69,fat:3},
+  "7681735130342":{name:"High Protein Yoghurt banane (Coop) 150 g",kcal:87,protein:14,carbs:7.3,fat:0.33},
+  "7613269680451":{name:"Fromage râpé (M-Budget) 250 g",kcal:345,protein:34,carbs:0.5,fat:23},
+  "7613312320747":{name:"Whey protéines vanille (Migros) 750 g",kcal:382,protein:73,carbs:9,fat:6},
+  "7627536595119":{name:"Whey Protein Chocolate (Coop)",kcal:374,protein:72,carbs:6.8,fat:6},
+  "7610029155266":{name:"Toast complet intégrale (Denner) 500 g",kcal:242,protein:9.2,carbs:40,fat:3.6}
 };
 function offVal(n,keys){
   for(var i=0;i<keys.length;i++){var v=Number(n[keys[i]]);if(isFinite(v))return v;}
