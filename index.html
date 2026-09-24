@@ -248,8 +248,8 @@ a{color:inherit;text-decoration:none}
 /* bottom nav */
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:50;background:rgba(8,14,26,.78);backdrop-filter:blur(24px) saturate(1.8);-webkit-backdrop-filter:blur(24px) saturate(1.8);
   border-top:1px solid var(--hair);padding-bottom:var(--safe-bot)}
-.nav .in{max-width:520px;margin:0 auto;display:flex;align-items:flex-start;justify-content:space-between;padding:8px 4px 4px}
-.nav button{flex:1;min-width:0;padding:2px 0;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:var(--faint);font-weight:500;white-space:nowrap}
+.nav .in{max-width:520px;margin:0 auto;display:flex;align-items:flex-start;justify-content:space-between;padding:8px 2px 4px}
+.nav button{flex:1;min-width:0;max-width:64px;padding:2px 1px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9px;color:var(--faint);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .nav button .e{font-size:20px;line-height:1;width:34px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:10px;transition:background-color .18s ease,color .18s ease}
 .nav button.on{color:var(--text)}
 .nav button.on .e{background:rgba(10,132,255,.16);color:var(--primary)}
@@ -721,11 +721,6 @@ a{color:inherit;text-decoration:none}
     </div>
     <div class="section-title-row"><h2>Journal d'aujourd'hui</h2><span class="link" data-act="addMeal">＋ Ajouter</span></div>
     <div class="card" id="mealJournal"><div class="empty">Aucun aliment enregistré aujourd'hui.</div></div>
-    <div class="section-title-row water-title"><h2>Suivi de la consommation d'eau</h2></div>
-    <div class="water-card">
-      <div class="water-head"><span class="water-drop">💧</span><div><b>Eau</b><span>Objectif : <span id="waterGoalLabel">3.00 L</span></span><strong id="waterTotal">0.00 L</strong></div><button data-act="waterAdd" data-amount="300" class="water-add">＋</button></div>
-      <div class="glasses" id="waterGlasses"></div><div class="water-foot">+ Eau provenant de votre alimentation : 0 ml</div>
-    </div>
     <div class="section-title-row"><h2>Données corporelles</h2></div>
     <div class="body-card">
       <div class="body-card-top"><div><b>Dernière pesée</b><span>Objectif : <span id="bodyTarget">85.0 kg</span></span></div><button class="body-weigh-btn" data-act="weigh">＋ Pesée</button></div>
@@ -736,6 +731,22 @@ a{color:inherit;text-decoration:none}
     <div class="section-title-row"><h2>Activité</h2></div>
     <div class="activity-card"><div><span>👟</span><b id="mealSteps">—</b><small>pas aujourd'hui</small></div><div><span>🏃</span><b id="mealRuns">0</b><small>courses</small></div><div><span>🔥</span><b id="mealEnergy">—</b><small>forme / 5</small></div></div>
     <div class="section-title-row"><h2>Idées de la semaine</h2></div><div id="weeklyMenu"></div>
+  </section>
+
+  <!-- EAU -->
+  <section class="page" id="water">
+    <div class="meals-title"><h1>Hydratation</h1></div>
+    <div class="water-card">
+      <div class="water-head"><span class="water-drop">💧</span><div><b>Eau</b><span>Objectif : <span id="waterGoalLabel">3.00 L</span></span><strong id="waterTotal">0.00 L</strong></div><button data-act="waterAdd" data-amount="300" class="water-add">＋</button></div>
+      <div class="glasses" id="waterGlasses"></div><div class="water-foot">+ Eau provenant de votre alimentation : 0 ml</div>
+    </div>
+    <div class="section-title-row"><h2>Ajout rapide</h2></div>
+    <div class="water-quick">
+      <button data-act="waterAdd" data-amount="150">+150 ml</button>
+      <button data-act="waterAdd" data-amount="250">+250 ml</button>
+      <button data-act="waterAdd" data-amount="500">+500 ml</button>
+      <button class="water-undo" data-act="waterAdd" data-amount="-250">Annuler</button>
+    </div>
   </section>
 
   <!-- PROFIL -->
@@ -773,11 +784,12 @@ a{color:inherit;text-decoration:none}
 <nav class="nav"><div class="in" id="navIn">
   <button data-page="today" class="on"><span class="e">🏠</span>Aujourd'hui</button>
   <button data-page="session"><span class="e">🏋️</span>Séance</button>
+  <button data-page="progress"><span class="e">📈</span>Progrès</button>
   <button class="nav-add" data-act="quicklogOpen" aria-label="Ajouter">
     <span class="e"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
     Ajouter
   </button>
-  <button data-page="progress"><span class="e">📈</span>Progrès</button>
+  <button data-page="water"><span class="e">💧</span>Eau</button>
   <button data-page="meals"><span class="e">🍽️</span>Repas</button>
   <button data-page="profile"><span class="e">⚙️</span>Profil</button>
 </div></nav>
@@ -1328,6 +1340,7 @@ function renderAll(){
   safeRender(renderSession);
   safeRender(renderProgress);
   safeRender(renderMeals);
+  safeRender(renderWater);
   safeRender(renderProfile);
   safeRender(function(){var wn=weekNo();$("weekTag").textContent="Semaine "+wn+(wn<=12?"/12":"");});
 }
@@ -2282,15 +2295,18 @@ function renderMeals(){
   $("mCarbsBar").style.width=Math.min(100,carbs/carbGoal*100)+"%";$("mProtBar").style.width=Math.min(100,prot/protGoal*100)+"%";$("mFatBar").style.width=Math.min(100,fat/fatGoal*100)+"%";
   var limits={"Petit-déjeuner":Math.round(goal*0.25/10)*10,"Déjeuner":Math.round(goal*0.35/10)*10,"Dîner":Math.round(goal*0.30/10)*10,"Collation":Math.round(goal*0.10/10)*10},ids={"Petit-déjeuner":"breakfastKcal","Déjeuner":"lunchKcal","Dîner":"dinnerKcal","Collation":"snackKcal"};
   Object.keys(ids).forEach(function(type){var total=state.meals.filter(function(m){return m.type===type;}).reduce(function(s,m){return s+Number(m.kcal||0);},0);$(ids[type]).textContent=Math.round(total)+" / "+limits[type]+" kcal";});
+  $("bodyWeight").textContent=num(latestBody())+" kg";$("bodyTarget").textContent=num(state.profile.target||85)+" kg";
+  var tv=valToday(state.steps),ev=valToday(state.energy);$("mealSteps").textContent=tv?Number(tv).toLocaleString("fr-CH"):"—";$("mealRuns").textContent=state.runs.length;$("mealEnergy").textContent=ev||"—";
+  $("mealJournal").innerHTML=state.meals.length?state.meals.map(function(m,i){return '<div class="meal"><div class="mi"><b>'+esc(m.name)+'</b><div class="d">'+esc(m.type||"Repas")+' · '+num(m.qty||100)+' g · '+num(m.protein||0)+' g prot.</div></div><div class="kc">'+Math.round(Number(m.kcal||0))+' kcal</div><button class="del" data-act="delMeal" data-i="'+i+'">×</button></div>';}).join(""):'<div class="empty">Aucun aliment enregistré aujourd\'hui.</div>';
+  renderWeeklyMenuIfNeeded();
+}
+function renderWater(){
+  if(state.page!=="water")return;
   var wt=state.water||{date:today(),ml:0};if(wt.date!==today()){wt={date:today(),ml:0};state.water=wt;save();}
   var waterGoal=Number(state.waterGoal||3),waterStep=Math.max(100,Math.round(waterGoal*1000/10/50)*50);
   $("waterTotal").textContent=(Number(wt.ml||0)/1000).toFixed(2)+" L";
   $("waterGoalLabel").textContent=waterGoal.toFixed(2)+" L";
   var glasses=Math.min(10,Math.round(Number(wt.ml||0)/waterStep));$("waterGlasses").innerHTML=Array.from({length:10},function(_,i){return '<div class="glass"><button data-act="waterAdd" data-amount="'+(i<glasses?(-waterStep):waterStep)+'">'+(i<glasses?"✓":"＋")+'</button></div>';}).join("");
-  $("bodyWeight").textContent=num(latestBody())+" kg";$("bodyTarget").textContent=num(state.profile.target||85)+" kg";
-  var tv=valToday(state.steps),ev=valToday(state.energy);$("mealSteps").textContent=tv?Number(tv).toLocaleString("fr-CH"):"—";$("mealRuns").textContent=state.runs.length;$("mealEnergy").textContent=ev||"—";
-  $("mealJournal").innerHTML=state.meals.length?state.meals.map(function(m,i){return '<div class="meal"><div class="mi"><b>'+esc(m.name)+'</b><div class="d">'+esc(m.type||"Repas")+' · '+num(m.qty||100)+' g · '+num(m.protein||0)+' g prot.</div></div><div class="kc">'+Math.round(Number(m.kcal||0))+' kcal</div><button class="del" data-act="delMeal" data-i="'+i+'">×</button></div>';}).join(""):'<div class="empty">Aucun aliment enregistré aujourd\'hui.</div>';
-  renderWeeklyMenuIfNeeded();
 }
 function ring(svg,frac,color,center){
   var p=Math.max(0,Math.min(1,Number(frac)||0)),parts=String(center).split("\n");
@@ -2380,6 +2396,7 @@ function showPage(id){
   else if(id==="session")renderSession();
   else if(id==="progress")renderProgress();
   else if(id==="meals")renderMeals();
+  else if(id==="water")renderWater();
   else if(id==="profile")renderProfile();
   try{window.scrollTo({top:0,behavior:"smooth"});}catch(e){window.scrollTo(0,0);}
 }
@@ -2655,7 +2672,7 @@ function updateWaterUI(){
   if(state.page==="today"){
     renderToday();
   }
-  if(state.page==="meals"){
+  if(state.page==="water"){
     var waterGoal=Number(state.waterGoal||3),waterStep=Math.max(100,Math.round(waterGoal*1000/10/50)*50);
     $("waterTotal").textContent=(waterMl/1000).toFixed(2)+" L";
     $("waterGoalLabel").textContent=waterGoal.toFixed(2)+" L";
