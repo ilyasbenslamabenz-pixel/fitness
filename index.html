@@ -66,6 +66,8 @@ h1,h2,h3{margin:0;font-family:var(--display);font-weight:600;letter-spacing:-.01
 button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none}
 a{color:inherit;text-decoration:none}
 .num{font-family:var(--display);font-variant-numeric:tabular-nums}
+.ic-s{width:1em;height:1em;display:inline-block;vertical-align:-.15em;flex:none}
+.dot .ic-s,.ic .ic-s,.qa-btn .ic .ic-s,.tool-ico .ic-s,.meal-group-ico .ic-s,.fast-ico .ic-s,.water-drop .ic-s,.nav button .e .ic-s,.guided-ic .ic-s,#nIc .ic-s,#sesIc .ic-s,#gExIcon .ic-s,.badge .ic .ic-s{width:1em;height:1em;vertical-align:-.1em}
 
 .app{max-width:520px;margin:0 auto;padding:0 16px calc(120px + var(--safe-bot))}
 #session{padding-bottom:calc(110px + var(--safe-bot))}
@@ -545,9 +547,9 @@ a{color:inherit;text-decoration:none}
 <body>
 <div class="app">
   <div class="topbar">
-    <div class="brand"><span class="dot">💪</span>EVO Fit Coach</div>
+    <div class="brand"><span class="dot"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="3"/><circle cx="18.5" cy="12" r="3"/><line x1="8.5" y1="12" x2="15.5" y2="12"/></svg></span>EVO Fit Coach</div>
     <div style="display:flex;align-items:center;gap:8px">
-      <div class="streak" id="streakBadge"><span>🔥</span><b id="streakN">0</b></div>
+      <div class="streak" id="streakBadge"><span><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5a2.5 2.5 0 0 0 5 0c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7.5 7.5 0 1 1-15 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 1 2z"/></svg></span><b id="streakN">0</b></div>
       <div class="week" id="weekTag">Semaine 1</div>
     </div>
   </div>
@@ -570,7 +572,7 @@ a{color:inherit;text-decoration:none}
     <a href="#" class="next-cta" data-act="startNext">
       <div class="eyebrow">PROCHAINE SÉANCE</div>
       <div class="row">
-        <div class="ic" id="nIc">🔥</div>
+        <div class="ic" id="nIc"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5a2.5 2.5 0 0 0 5 0c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7.5 7.5 0 1 1-15 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 1 2z"/></svg></div>
         <div style="flex:1;min-width:0">
           <h3 id="nName">—</h3>
           <div class="sub" id="nFocus">—</div>
@@ -580,11 +582,11 @@ a{color:inherit;text-decoration:none}
     </a>
 
     <div class="quick-access">
-      <button class="qa-btn" data-act="weigh"><div class="ic">⚖️</div><span class="lab">Peser</span></button>
-      <button class="qa-btn" data-act="waterAdd" data-amount="250"><div class="ic">💧</div><span class="lab">Eau</span></button>
-      <button class="qa-btn" data-act="addMeal"><div class="ic">🍽️</div><span class="lab">Repas</span></button>
-      <button class="qa-btn" data-act="goRunning"><div class="ic">🏃</div><span class="lab">Course</span></button>
-      <button class="qa-btn" data-act="scanOpen"><div class="ic">▥</div><span class="lab">Scanner</span></button>
+      <button class="qa-btn" data-act="weigh"><div class="ic"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4.5"/><circle cx="12" cy="13" r="3.6"/><path d="M12 7.5v1.8"/></svg></div><span class="lab">Peser</span></button>
+      <button class="qa-btn" data-act="waterAdd" data-amount="250"><div class="ic"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5s7 8.2 7 13a7 7 0 0 1-14 0c0-4.8 7-13 7-13z"/></svg></div><span class="lab">Eau</span></button>
+      <button class="qa-btn" data-act="addMeal"><div class="ic"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2.5v7.5a1.8 1.8 0 0 0 1.8 1.8v9.7"/><path d="M7 2.5v4.3M9.3 2.5v4.3M11.6 2.5v4.3"/><path d="M17 2.5c-1.8 0-3.2 2-3.2 4.6s1.4 4.6 3.2 4.6v9.8"/></svg></div><span class="lab">Repas</span></button>
+      <button class="qa-btn" data-act="goRunning"><div class="ic"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22,12 18,12 15,20 9,4 6,12 2,12"/></svg></div><span class="lab">Course</span></button>
+      <button class="qa-btn" data-act="scanOpen"><div class="ic"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V4.5a1.5 1.5 0 0 1 1.5-1.5H7M17 3h2.5A1.5 1.5 0 0 1 21 4.5V7M21 17v2.5a1.5 1.5 0 0 1-1.5 1.5H17M7 21H4.5A1.5 1.5 0 0 1 3 19.5V17"/><line x1="7" y1="8" x2="7" y2="16"/><line x1="10.3" y1="8" x2="10.3" y2="16"/><line x1="13.6" y1="8" x2="13.6" y2="16"/><line x1="17" y1="8" x2="17" y2="16"/></svg></div><span class="lab">Scanner</span></button>
     </div>
 
     <div class="stats" style="margin-top:18px">
@@ -607,9 +609,9 @@ a{color:inherit;text-decoration:none}
   <section class="page" id="session">
     <div class="head"><h2>Séance</h2></div>
     <div class="sess-cat" id="sessCatTabs">
-      <button class="cat-tab" data-act="sessCat" data-cat="muscu">🏋️ Musculation</button>
-      <button class="cat-tab" data-act="sessCat" data-cat="maison">🏠 Séance maison</button>
-      <button class="cat-tab" data-act="sessCat" data-cat="running">🏃 Running</button>
+      <button class="cat-tab" data-act="sessCat" data-cat="muscu"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="3"/><circle cx="18.5" cy="12" r="3"/><line x1="8.5" y1="12" x2="15.5" y2="12"/></svg> Musculation</button>
+      <button class="cat-tab" data-act="sessCat" data-cat="maison"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9"/></svg> Séance maison</button>
+      <button class="cat-tab" data-act="sessCat" data-cat="running"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22,12 18,12 15,20 9,4 6,12 2,12"/></svg> Running</button>
     </div>
 
     <div id="sessExerciseView">
@@ -618,7 +620,7 @@ a{color:inherit;text-decoration:none}
 
       <div class="card sday-card">
         <div class="sday-top">
-          <div class="ic" id="sesIc" style="width:46px;height:46px;border-radius:12px;background:var(--surface2);display:grid;place-items:center;font-size:24px;flex:0 0 auto">🔥</div>
+          <div class="ic" id="sesIc" style="width:46px;height:46px;border-radius:12px;background:var(--surface2);display:grid;place-items:center;font-size:24px;flex:0 0 auto"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5a2.5 2.5 0 0 0 5 0c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7.5 7.5 0 1 1-15 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 1 2z"/></svg></div>
           <div class="sday-info"><h3 id="sesName">—</h3><div class="sub" id="sesFocus">—</div></div>
         </div>
         <div class="sday-meta" id="sesMeta">—</div>
@@ -651,7 +653,7 @@ a{color:inherit;text-decoration:none}
       </div>
       <div class="card" style="margin-top:12px">
         <div class="eyebrow">Lancer une course</div>
-        <button class="btn primary" style="margin-top:10px" data-act="liveStart">🛰️ Démarrer une course (GPS en direct)</button>
+        <button class="btn primary" style="margin-top:10px" data-act="liveStart"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 7 9 3 3 9l4 4"/><path d="M17 11l4 4-6 6-4-4"/><path d="M8 12l4 4"/><path d="M14.5 5.5 18 2"/><path d="M19 9.5 22 6.5"/></svg> Démarrer une course (GPS en direct)</button>
         <button class="btn ghost" style="margin-top:9px" data-act="openRun">Saisir une course manuellement</button>
         <div id="runProgInfo" style="font-size:12.5px;color:var(--muted);margin-top:11px;text-align:center">—</div>
       </div>
@@ -741,21 +743,21 @@ a{color:inherit;text-decoration:none}
     </div>
     <button class="meal-main-add" data-act="addMeal">＋ <span>Ajouter un repas</span></button>
     <div class="meal-tools">
-      <button data-act="scanOpen"><span class="tool-ico">▥</span>Scanner<br>un code-barres</button>
+      <button data-act="scanOpen"><span class="tool-ico"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V4.5a1.5 1.5 0 0 1 1.5-1.5H7M17 3h2.5A1.5 1.5 0 0 1 21 4.5V7M21 17v2.5a1.5 1.5 0 0 1-1.5 1.5H17M7 21H4.5A1.5 1.5 0 0 1 3 19.5V17"/><line x1="7" y1="8" x2="7" y2="16"/><line x1="10.3" y1="8" x2="10.3" y2="16"/><line x1="13.6" y1="8" x2="13.6" y2="16"/><line x1="17" y1="8" x2="17" y2="16"/></svg></span>Scanner<br>un code-barres</button>
       <button data-act="addMeal"><span class="tool-ico">⌕</span>Rechercher<br>un aliment</button>
-      <button data-act="openFavorites"><span class="tool-ico">⭐</span>Mes aliments</button>
+      <button data-act="openFavorites"><span class="tool-ico"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg></span>Mes aliments</button>
     </div>
     <div class="section-title-row"><h2>Mes repas</h2></div>
     <div class="meal-groups">
-      <div class="meal-group"><div class="meal-group-ico">⌛</div><div class="meal-group-info"><b>Petit déjeuner →</b><span id="breakfastKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Petit-déjeuner">＋</button></div>
-      <div class="meal-group"><div class="meal-group-ico">🍲</div><div class="meal-group-info"><b>Déjeuner →</b><span id="lunchKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Déjeuner">＋</button></div>
-      <div class="meal-group"><div class="meal-group-ico">🥗</div><div class="meal-group-info"><b>Dîner →</b><span id="dinnerKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Dîner">＋</button></div>
-      <div class="meal-group"><div class="meal-group-ico">⌛</div><div class="meal-group-info"><b>En-cas →</b><span id="snackKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Collation">＋</button></div>
+      <div class="meal-group"><div class="meal-group-ico"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12,7 12,12 16,14"/></svg></div><div class="meal-group-info"><b>Petit déjeuner →</b><span id="breakfastKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Petit-déjeuner">＋</button></div>
+      <div class="meal-group"><div class="meal-group-ico"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18a9 8 0 0 1-18 0z"/><path d="M12 12V4"/><path d="M8.5 5.5 12 4l3.5 1.5"/></svg></div><div class="meal-group-info"><b>Déjeuner →</b><span id="lunchKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Déjeuner">＋</button></div>
+      <div class="meal-group"><div class="meal-group-ico"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4C10 4 4 10 4 18v2h2c8 0 14-6 14-16V4z"/><path d="M6 20c4-4 8-8 14-14"/></svg></div><div class="meal-group-info"><b>Dîner →</b><span id="dinnerKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Dîner">＋</button></div>
+      <div class="meal-group"><div class="meal-group-ico"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12,7 12,12 16,14"/></svg></div><div class="meal-group-info"><b>En-cas →</b><span id="snackKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Collation">＋</button></div>
     </div>
     <div class="section-title-row"><h2>Journal d'aujourd'hui</h2><span class="link" data-act="addMeal">＋ Ajouter</span></div>
     <div class="card" id="mealJournal"><div class="empty">Aucun aliment enregistré aujourd'hui.</div></div>
     <div class="section-title-row"><h2>Jeûne</h2></div>
-    <div class="fast-card"><div class="fast-ico">⌛</div><div><b id="fastTitle">Routine 16:8</b><span id="fastText">Aucun jeûne en cours</span><div class="fast-progress"><i id="fastProgress"></i></div></div><button data-act="fasting" id="fastBtn">Démarrer</button></div>
+    <div class="fast-card"><div class="fast-ico"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12,7 12,12 16,14"/></svg></div><div><b id="fastTitle">Routine 16:8</b><span id="fastText">Aucun jeûne en cours</span><div class="fast-progress"><i id="fastProgress"></i></div></div><button data-act="fasting" id="fastBtn">Démarrer</button></div>
     <div class="section-title-row"><h2>Idées de la semaine</h2></div><div id="weeklyMenu"></div>
   </section>
 
@@ -763,7 +765,7 @@ a{color:inherit;text-decoration:none}
   <section class="page" id="water">
     <div class="meals-title"><h1>Hydratation</h1></div>
     <div class="water-card">
-      <div class="water-head"><span class="water-drop">💧</span><div><b>Eau</b><span>Objectif : <span id="waterGoalLabel">3.00 L</span></span><strong id="waterTotal">0.00 L</strong></div><button data-act="waterAdd" data-amount="300" class="water-add">＋</button></div>
+      <div class="water-head"><span class="water-drop"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5s7 8.2 7 13a7 7 0 0 1-14 0c0-4.8 7-13 7-13z"/></svg></span><div><b>Eau</b><span>Objectif : <span id="waterGoalLabel">3.00 L</span></span><strong id="waterTotal">0.00 L</strong></div><button data-act="waterAdd" data-amount="300" class="water-add">＋</button></div>
       <div class="glasses" id="waterGlasses"></div><div class="water-foot">+ Eau provenant de votre alimentation : 0 ml</div>
     </div>
     <div class="section-title-row"><h2>Ajout rapide</h2></div>
@@ -808,16 +810,16 @@ a{color:inherit;text-decoration:none}
 </div>
 
 <nav class="nav"><div class="in" id="navIn">
-  <button data-page="today" class="on"><span class="e">🏠</span>Aujourd'hui</button>
-  <button data-page="session"><span class="e">🏋️</span>Séance</button>
-  <button data-page="progress"><span class="e">📈</span>Progrès</button>
+  <button data-page="today" class="on"><span class="e"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9"/></svg></span>Aujourd'hui</button>
+  <button data-page="session"><span class="e"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="3"/><circle cx="18.5" cy="12" r="3"/><line x1="8.5" y1="12" x2="15.5" y2="12"/></svg></span>Séance</button>
+  <button data-page="progress"><span class="e"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,17 9,11 13,15 21,6"/><polyline points="15,6 21,6 21,12"/></svg></span>Progrès</button>
   <button class="nav-add" data-act="quicklogOpen" aria-label="Ajouter">
     <span class="e"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
     Ajouter
   </button>
-  <button data-page="water"><span class="e">💧</span>Eau</button>
-  <button data-page="meals"><span class="e">🍽️</span>Repas</button>
-  <button data-page="profile"><span class="e">⚙️</span>Profil</button>
+  <button data-page="water"><span class="e"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5s7 8.2 7 13a7 7 0 0 1-14 0c0-4.8 7-13 7-13z"/></svg></span>Eau</button>
+  <button data-page="meals"><span class="e"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2.5v7.5a1.8 1.8 0 0 0 1.8 1.8v9.7"/><path d="M7 2.5v4.3M9.3 2.5v4.3M11.6 2.5v4.3"/><path d="M17 2.5c-1.8 0-3.2 2-3.2 4.6s1.4 4.6 3.2 4.6v9.8"/></svg></span>Repas</button>
+  <button data-page="profile"><span class="e"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>Profil</button>
 </div></nav>
 
 <!-- sheet de log rapide (FAB) -->
@@ -825,12 +827,12 @@ a{color:inherit;text-decoration:none}
   <h3>Ajouter</h3>
   <div class="sub">Loggue une donnée en un tap, depuis n'importe où.</div>
   <div class="quicklog-grid">
-    <button class="ql-item" data-act="weigh"><div class="ic" style="background:rgba(10,132,255,.16)">⚖️</div><span class="lab">Pesée</span></button>
-    <button class="ql-item" data-act="waterAdd" data-amount="250"><div class="ic" style="background:rgba(107,184,255,.14)">💧</div><span class="lab">Eau +250ml</span></button>
-    <button class="ql-item" data-act="addMeal"><div class="ic" style="background:rgba(48,217,143,.16)">🍽️</div><span class="lab">Repas</span></button>
-    <button class="ql-item" data-act="scanOpen"><div class="ic" style="background:rgba(90,200,250,.16)">▥</div><span class="lab">Scanner</span></button>
-    <button class="ql-item" data-act="goRunning"><div class="ic" style="background:rgba(94,124,230,.16)">🏃</div><span class="lab">Course</span></button>
-    <button class="ql-item" data-act="openSteps"><div class="ic" style="background:rgba(168,179,193,.14)">👟</div><span class="lab">Pas</span></button>
+    <button class="ql-item" data-act="weigh"><div class="ic" style="background:rgba(10,132,255,.16)"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4.5"/><circle cx="12" cy="13" r="3.6"/><path d="M12 7.5v1.8"/></svg></div><span class="lab">Pesée</span></button>
+    <button class="ql-item" data-act="waterAdd" data-amount="250"><div class="ic" style="background:rgba(107,184,255,.14)"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5s7 8.2 7 13a7 7 0 0 1-14 0c0-4.8 7-13 7-13z"/></svg></div><span class="lab">Eau +250ml</span></button>
+    <button class="ql-item" data-act="addMeal"><div class="ic" style="background:rgba(48,217,143,.16)"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2.5v7.5a1.8 1.8 0 0 0 1.8 1.8v9.7"/><path d="M7 2.5v4.3M9.3 2.5v4.3M11.6 2.5v4.3"/><path d="M17 2.5c-1.8 0-3.2 2-3.2 4.6s1.4 4.6 3.2 4.6v9.8"/></svg></div><span class="lab">Repas</span></button>
+    <button class="ql-item" data-act="scanOpen"><div class="ic" style="background:rgba(90,200,250,.16)"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V4.5a1.5 1.5 0 0 1 1.5-1.5H7M17 3h2.5A1.5 1.5 0 0 1 21 4.5V7M21 17v2.5a1.5 1.5 0 0 1-1.5 1.5H17M7 21H4.5A1.5 1.5 0 0 1 3 19.5V17"/><line x1="7" y1="8" x2="7" y2="16"/><line x1="10.3" y1="8" x2="10.3" y2="16"/><line x1="13.6" y1="8" x2="13.6" y2="16"/><line x1="17" y1="8" x2="17" y2="16"/></svg></div><span class="lab">Scanner</span></button>
+    <button class="ql-item" data-act="goRunning"><div class="ic" style="background:rgba(94,124,230,.16)"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22,12 18,12 15,20 9,4 6,12 2,12"/></svg></div><span class="lab">Course</span></button>
+    <button class="ql-item" data-act="openSteps"><div class="ic" style="background:rgba(168,179,193,.14)"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="8" cy="6" rx="2.3" ry="3"/><ellipse cx="16" cy="15" rx="2.3" ry="3"/><path d="M6 10c0 2 .5 3 2 3s2-1 2-2-0.5-2-2-2-2 0-2 1z"/><path d="M14 19c0 2 .5 3 2 3s2-1 2-2-0.5-2-2-2-2 0-2 1z"/></svg></div><span class="lab">Pas</span></button>
   </div>
   <div class="acts"><button class="btn ghost" data-act="quicklogClose">Fermer</button></div>
 </div></div>
@@ -847,7 +849,7 @@ a{color:inherit;text-decoration:none}
     <h3 id="gExName">—</h3>
     <div class="sub" id="gExSub">—</div>
   </div>
-  <div class="guided-ic" id="gExIcon">💪</div>
+  <div class="guided-ic" id="gExIcon"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="3"/><circle cx="18.5" cy="12" r="3"/><line x1="8.5" y1="12" x2="15.5" y2="12"/></svg></div>
   <div class="guided-vals" id="gVals"></div>
   <div class="guided-sets" id="gSets"></div>
   <div style="flex:1"></div>
@@ -907,12 +909,12 @@ a{color:inherit;text-decoration:none}
   <div id="foodSearchResults" class="food-search-results"></div>
   <div class="row2"><div class="field"><label>Quantité (g / ml)</label><input id="foodQty" type="number" inputmode="decimal" step="1" placeholder="100"></div>
   <div class="field"><label>Calories</label><input id="foodKcal" type="number" inputmode="numeric" placeholder="500"></div></div>
-  <div id="foodRefHint" class="food-ref-hint" style="display:none">⚡ Valeurs recalculées automatiquement selon la quantité</div>
+  <div id="foodRefHint" class="food-ref-hint" style="display:none"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/></svg> Valeurs recalculées automatiquement selon la quantité</div>
   <div class="row2"><div class="field"><label>Protéines (g)</label><input id="foodProt" type="number" inputmode="numeric" placeholder="40"></div>
   <div class="field"><label>Glucides (g)</label><input id="foodCarbs" type="number" inputmode="decimal" placeholder="50"></div></div>
   <div class="row2"><div class="field"><label>Lipides (g)</label><input id="foodFat" type="number" inputmode="decimal" placeholder="15"></div><div></div></div>
   <div class="field"><label>Moment</label><select id="foodType"><option>Petit-déjeuner</option><option>Déjeuner</option><option>Dîner</option><option>Collation</option></select></div>
-  <div class="row2"><button class="btn" data-act="saveFavorite">⭐ Enregistrer aliment</button><button class="btn mint" data-act="scanOpen">📷 Scanner</button></div>
+  <div class="row2"><button class="btn" data-act="saveFavorite"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg> Enregistrer aliment</button><button class="btn mint" data-act="scanOpen"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4.5h-5L7.5 7.5h-3a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h15a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-3l-2-3z"/><circle cx="12" cy="13.5" r="3.5"/></svg> Scanner</button></div>
   <div class="acts"><button class="btn ghost" data-act="mClose">Annuler</button><button class="btn primary" data-act="mSave">Ajouter</button></div>
 </div></div>
 
@@ -926,13 +928,13 @@ a{color:inherit;text-decoration:none}
   </div>
   <div class="scan-status" id="scanStatus">Autorise l’accès à la caméra…</div>
   <div class="field"><label>Ou saisir le code manuellement</label><input id="manualBarcode" inputmode="numeric" autocomplete="off" placeholder="7612345678901"></div>
-  <button class="btn primary" data-act="scanLookup">🔎 Rechercher ce code</button>
+  <button class="btn primary" data-act="scanLookup"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="7"/><line x1="20.5" y1="20.5" x2="15.5" y2="15.5"/></svg> Rechercher ce code</button>
   <div class="scan-product" id="scanProduct"></div>
   <div class="acts"><button class="btn ghost" data-act="scanClose">Fermer</button></div>
 </div></div>
 
 <div class="modal" id="favoritesModal"><div class="sheet">
-  <h3>Mes aliments ⭐</h3>
+  <h3>Mes aliments <svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg></h3>
   <div class="sub">Tes aliments enregistrés pour les ajouter rapidement.</div>
   <div class="favorite-list" id="favoriteList"></div>
   <div class="acts"><button class="btn ghost" data-act="favoritesClose">Fermer</button></div>
@@ -947,7 +949,7 @@ a{color:inherit;text-decoration:none}
 
 <div class="modal" id="runModal"><div class="sheet">
   <h3>Ajouter une course</h3>
-  <button class="btn primary" data-act="liveStart" style="margin:6px 0 2px">🛰️ Suivi GPS en direct</button>
+  <button class="btn primary" data-act="liveStart" style="margin:6px 0 2px"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 7 9 3 3 9l4 4"/><path d="M17 11l4 4-6 6-4-4"/><path d="M8 12l4 4"/><path d="M14.5 5.5 18 2"/><path d="M19 9.5 22 6.5"/></svg> Suivi GPS en direct</button>
   <div class="or-sep"><span>ou saisir manuellement</span></div>
   <div class="row2"><div class="field"><label>Distance (km)</label><input id="runDist" type="number" inputmode="decimal" step="0.1" placeholder="8.5"></div>
   <div class="field"><label>Durée (min)</label><input id="runDur" type="number" inputmode="decimal" step="1" placeholder="48"></div></div>
@@ -1020,25 +1022,25 @@ var KEY="evoFitV3", OLDKEY="evoFitCoachV2", BACKUPKEY="evoFitV3_backup";
 var START_DATE="2026-09-21";
 
 var DEFAULT_PROGRAM=[
- {id:"push",name:"Poussée",short:"Push",icon:"🔥",focus:"Pecs · épaules · triceps",ex:[
+ {id:"push",name:"Poussée",short:"Push",icon:'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5a2.5 2.5 0 0 0 5 0c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7.5 7.5 0 1 1-15 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 1 2z"/></svg>',focus:"Pecs · épaules · triceps",ex:[
    {n:"Développé couché haltères",t:"4 × 8-10",w:true},
    {n:"Développé incliné machine",t:"3 × 10-12",w:true},
    {n:"Écarté poulie",t:"3 × 12-15",w:true},
    {n:"Élévations latérales",t:"4 × 12-15",w:true},
    {n:"Extension triceps corde",t:"3 × 12-15",w:true}]},
- {id:"pull",name:"Tirage",short:"Pull",icon:"🎯",focus:"Dos · biceps",ex:[
+ {id:"pull",name:"Tirage",short:"Pull",icon:'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5.2"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/></svg>',focus:"Dos · biceps",ex:[
    {n:"Tirage vertical",t:"4 × 8-10",w:true},
    {n:"Rowing machine",t:"4 × 10-12",w:true},
    {n:"Tirage horizontal poulie",t:"3 × 10-12",w:true},
    {n:"Face pull",t:"3 × 15",w:true},
    {n:"Curl biceps haltères",t:"3 × 10-12",w:true}]},
- {id:"legs",name:"Jambes",short:"Legs",icon:"🦵",focus:"Quadriceps · ischios · fessiers",ex:[
+ {id:"legs",name:"Jambes",short:"Legs",icon:'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h3l.5 8-2 5 .5 7H8l-1-7 1-5z"/><path d="M15 2h-3l-.3 8 2.3 5-.5 7H16l1-7-1-5z"/></svg>',focus:"Quadriceps · ischios · fessiers",ex:[
    {n:"Presse à cuisses",t:"4 × 10-12",w:true},
    {n:"Leg curl",t:"3 × 12-15",w:true},
    {n:"Leg extension",t:"3 × 12-15",w:true},
    {n:"Hip thrust machine",t:"3 × 10-12",w:true},
    {n:"Mollets debout",t:"4 × 15-20",w:true}]},
- {id:"full",name:"Full body + cardio",short:"Full",icon:"⚡",focus:"Corps entier · cardio",ex:[
+ {id:"full",name:"Full body + cardio",short:"Full",icon:'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/></svg>',focus:"Corps entier · cardio",ex:[
    {n:"Développé militaire machine",t:"3 × 10-12",w:true},
    {n:"Tirage vertical prise large",t:"3 × 10-12",w:true},
    {n:"Chest press",t:"3 × 10-12",w:true},
@@ -1048,25 +1050,25 @@ var DEFAULT_PROGRAM=[
 
 /* séance maison : force au poids du corps + cardio HIIT en alternance, sans matériel */
 var HOME_PROGRAM=[
- {id:"home-fb1",cat:"maison",name:"Full body 1",short:"FB1",icon:"🏠",focus:"Poids du corps · corps entier",ex:[
+ {id:"home-fb1",cat:"maison",name:"Full body 1",short:"FB1",icon:'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9"/></svg>',focus:"Poids du corps · corps entier",ex:[
    {n:"Pompes",t:"4 × 10-15",w:false},
    {n:"Squats",t:"4 × 15-20",w:false},
    {n:"Fentes avant",t:"3 × 12",w:false},
    {n:"Gainage (planche)",t:"3 × 30-45 s",w:false},
    {n:"Superman (lombaires)",t:"3 × 15",w:false}]},
- {id:"home-hiit1",cat:"maison",name:"HIIT cardio 1",short:"HIIT1",icon:"⚡",focus:"Cardio · circuit intense",ex:[
+ {id:"home-hiit1",cat:"maison",name:"HIIT cardio 1",short:"HIIT1",icon:'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/></svg>',focus:"Cardio · circuit intense",ex:[
    {n:"Jumping jacks",t:"4 × 30 s",w:false},
    {n:"Mountain climbers",t:"4 × 30 s",w:false},
    {n:"Burpees",t:"4 × 10",w:false},
    {n:"Squat jumps",t:"4 × 15",w:false},
    {n:"Corde à sauter (ou sur place)",t:"4 × 45 s",w:false}]},
- {id:"home-fb2",cat:"maison",name:"Full body 2",short:"FB2",icon:"🏠",focus:"Poids du corps · corps entier",ex:[
+ {id:"home-fb2",cat:"maison",name:"Full body 2",short:"FB2",icon:'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9"/></svg>',focus:"Poids du corps · corps entier",ex:[
    {n:"Pompes déclinées",t:"4 × 10-15",w:false},
    {n:"Squats sumo",t:"4 × 15",w:false},
    {n:"Fentes arrière",t:"3 × 12",w:false},
    {n:"Gainage latéral",t:"3 × 20-30 s",w:false},
    {n:"Dips sur chaise",t:"3 × 10-15",w:false}]},
- {id:"home-hiit2",cat:"maison",name:"HIIT cardio 2",short:"HIIT2",icon:"⚡",focus:"Cardio · circuit intense",ex:[
+ {id:"home-hiit2",cat:"maison",name:"HIIT cardio 2",short:"HIIT2",icon:'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/></svg>',focus:"Cardio · circuit intense",ex:[
    {n:"High knees",t:"4 × 30 s",w:false},
    {n:"Burpees",t:"4 × 12",w:false},
    {n:"Jumping lunges",t:"4 × 12",w:false},
@@ -1376,7 +1378,7 @@ function renderToday(){
   var w=latestBody(),start=Number(state.profile.start),target=Number(state.profile.target),lost=start-w;
 
   var mp=muscuProgram(),p=mp[state.suggest%mp.length];
-  $("nIc").textContent=p.icon;$("nName").textContent=p.name;$("nFocus").textContent=p.focus;
+  $("nIc").innerHTML=p.icon;$("nName").textContent=p.name;$("nFocus").textContent=p.focus;
   var hh=new Date().getHours(),greet=hh<12?"Bonjour":(hh<18?"Salut":"Bonsoir");
   $("greetHello").textContent=greet+" 👋";
   $("greetSub").textContent="Prêt pour "+p.name+" aujourd'hui ?";
@@ -1526,7 +1528,7 @@ function renderSession(){
   }).join("");
   var p=state.program[state.selDay];
   if(!p||(p.cat||"muscu")!==state.sessionCategory){p=dayList[0];state.selDay=state.program.indexOf(p);}
-  $("sesIc").textContent=p.icon;$("sesName").textContent=p.name;$("sesFocus").textContent=p.focus;
+  $("sesIc").innerHTML=p.icon;$("sesName").textContent=p.name;$("sesFocus").textContent=p.focus;
   var mk=marksFor(p.id),active=activeExercises(p),excl=excludedFor(p.id);
   $("exList").innerHTML=active.map(function(e){return exerciseRowHTML(e,mk);}).join("")
     +'<div class="exc-foot">'
@@ -1789,7 +1791,7 @@ function renderGuided(){
   $("gExName").textContent=e.n;
   var last=lastWeight(e.n);
   $("gExSub").textContent=e.t+(last>0?" · dernière fois "+num(last)+" kg":"");
-  $("gExIcon").textContent=p.icon||"💪";
+  $("gExIcon").innerHTML=p.icon||'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="3"/><circle cx="18.5" cy="12" r="3"/><line x1="8.5" y1="12" x2="15.5" y2="12"/></svg>';
 
   var st=mk[e.n]||{},wv=(st.w!=null?st.w:last),rt=repTarget(e),rv=repsFor(mk,e),vals="";
   if(e.w)vals+='<div class="val-group"><button data-act="w-" data-ex="'+esc(e.n)+'">−</button><div class="val"><b>'+num(wv)+'</b><span>KG</span></div><button data-act="w+" data-ex="'+esc(e.n)+'">＋</button></div>';
@@ -1937,11 +1939,11 @@ function renderWeekSummary(){
   var thisCount=counts.reduce(function(a,b){return a+b;},0),delta=thisCount-prevCount;
   $("weekDelta").textContent=delta===0?"":(delta>0?"+":"")+delta+" séance"+(Math.abs(delta)>1?"s":"")+" vs sem. dernière";
   var badges=[],streak=computeStreak();
-  if(streak>0)badges.push({ic:"🔥",lab:streak+" jour"+(streak>1?"s":"")+" d'affilée"});
-  var pr=latestPR();if(pr)badges.push({ic:"🏆",lab:"Record : "+esc(pr.n)});
+  if(streak>0)badges.push({ic:'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5a2.5 2.5 0 0 0 5 0c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7.5 7.5 0 1 1-15 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 1 2z"/></svg>',lab:streak+" jour"+(streak>1?"s":"")+" d'affilée"});
+  var pr=latestPR();if(pr)badges.push({ic:'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4H4.8A1.8 1.8 0 0 0 3 5.8v.4A3.8 3.8 0 0 0 6.8 10H7"/><path d="M17 4h2.2A1.8 1.8 0 0 1 21 5.8v.4A3.8 3.8 0 0 1 17.2 10H17"/><path d="M7 3h10v6.5a5 5 0 0 1-10 0V3z"/><path d="M9.5 15.5v1.3c0 .5-.35.9-.83 1.1C7.55 18.3 7 19.4 7 21"/><path d="M14.5 15.5v1.3c0 .5.35.9.83 1.1.62.4 1.17 1.5 1.17 3.1"/><line x1="5" y1="21" x2="19" y2="21"/></svg>',lab:"Record : "+esc(pr.n)});
   var wt=state.water||{ml:0},waterGoalMl=Math.max(500,Number(state.waterGoal||3)*1000);
-  if(Number(wt.ml||0)>=waterGoalMl)badges.push({ic:"💧",lab:"Objectif eau atteint"});
-  if(!badges.length)badges.push({ic:"💪",lab:"Continue comme ça"});
+  if(Number(wt.ml||0)>=waterGoalMl)badges.push({ic:'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5s7 8.2 7 13a7 7 0 0 1-14 0c0-4.8 7-13 7-13z"/></svg>',lab:"Objectif eau atteint"});
+  if(!badges.length)badges.push({ic:'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="3"/><circle cx="18.5" cy="12" r="3"/><line x1="8.5" y1="12" x2="15.5" y2="12"/></svg>',lab:"Continue comme ça"});
   $("badgeRow").innerHTML=badges.map(function(b){return '<div class="badge"><div class="ic">'+b.ic+'</div><div class="lab">'+b.lab+'</div></div>';}).join("");
 }
 function renderProgress(){
@@ -2000,7 +2002,7 @@ function renderCardio(){
     var pace=(r.dist>0&&r.dur>0)?fmtPace(r.dur/r.dist)+" /km":"—";
     var hasRoute=Array.isArray(r.pts)&&r.pts.length>1;
     return '<div class="runrow"><div class="ri"><b>'+num(r.dist)+' km</b><span>'+fmtDate(r.d)+' · '+num(r.dur)+' min</span></div><div class="rp">'+pace+'</div>'
-      +(hasRoute?'<button class="mapbtn" data-act="viewRunMap" data-id="'+esc(r.id||"")+'">🗺️</button>':'')
+      +(hasRoute?'<button class="mapbtn" data-act="viewRunMap" data-id="'+esc(r.id||"")+'"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="3,6 9,3 15,6 21,3 21,18 15,21 9,18 3,21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg></button>':'')
       +'<button class="del" data-act="delRun" data-id="'+esc(r.id||"")+'">×</button></div>';
   }).join(""):'<div class="empty">Aucune course. Ajoute-en une, ou branche Strava en étape 2.</div>';
 }
@@ -2560,7 +2562,7 @@ function renderFoodResults(list,q){
     return;
   }
   box.innerHTML=list.map(function(f,i){
-    return '<button class="food-result" type="button" data-act="foodPick" data-i="'+i+'"><b>'+(f.local?"🏠 ":"")+esc(f.name)+'</b><span>'+(f.kcal?Math.round(f.kcal)+" kcal / 100 g":"kcal inconnues")+'</span></button>';
+    return '<button class="food-result" type="button" data-act="foodPick" data-i="'+i+'"><b>'+(f.local?'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9"/></svg>'+" ":"")+esc(f.name)+'</b><span>'+(f.kcal?Math.round(f.kcal)+" kcal / 100 g":"kcal inconnues")+'</span></button>';
   }).join("");
 }
 var foodSearchT=null;
