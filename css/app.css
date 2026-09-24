@@ -150,7 +150,7 @@ a{color:inherit;text-decoration:none}
 .rpw-mid span{display:block;font-size:12.5px;color:var(--muted);margin-top:3px}
 .run-prog-sessions{display:flex;flex-direction:column;gap:8px;margin-top:14px}
 .run-prog-s{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:14px;background:var(--surface2);border:1px solid var(--hair);font-size:13.5px;font-weight:600}
-.run-prog-s .rs-check{flex:0 0 auto;width:24px;height:24px;border-radius:8px;border:2px solid var(--faint);display:grid;place-items:center;font-size:14px;color:transparent}
+.run-prog-s .rs-check{flex:0 0 auto;width:24px;height:24px;border-radius:50%;border:2px solid var(--faint);display:grid;place-items:center;font-size:14px;color:transparent}
 .run-prog-s.done .rs-check{background:var(--accent);border-color:var(--accent);color:#ffffff}
 .run-prog-s.done{opacity:.6}
 .run-prog-suggestion{margin-top:12px;padding:12px;border-radius:12px;background:var(--surface2);border:1px solid var(--hair)}
@@ -160,11 +160,11 @@ a{color:inherit;text-decoration:none}
 /* exercise rows */
 .ex{display:flex;align-items:center;gap:13px;padding:14px 4px;border-bottom:1px solid var(--hair)}
 .ex:last-child{border-bottom:0}
-.ex .check{width:30px;height:30px;border-radius:9px;border:2px solid var(--faint);flex:0 0 auto;display:grid;place-items:center;
+.ex .check{width:30px;height:30px;border-radius:50%;border:2px solid var(--faint);flex:0 0 auto;display:grid;place-items:center;
   font-size:16px;color:transparent;transition:.12s}
 .ex.done .check{background:var(--accent);border-color:var(--accent);color:#ffffff}
 .ex .info{flex:1;min-width:0}
-.ex .info h3{font-size:15.5px;font-weight:600;font-family:var(--font);letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ex .info h3{font-size:17px;font-weight:600;font-family:var(--font);letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ex .info .t{font-size:12.5px;color:var(--muted);margin-top:2px}
 .stepper{display:flex;align-items:center;gap:0;flex:0 0 auto;background:var(--surface2);border:1px solid var(--hair);border-radius:11px;overflow:hidden}
 .stepper button{width:34px;height:40px;font-size:20px;font-weight:600;color:var(--text);display:grid;place-items:center}
@@ -248,7 +248,7 @@ a{color:inherit;text-decoration:none}
 .meal-section-head{display:flex;align-items:center;gap:12px;padding:13px 14px;min-height:78px}
 .meal-group-ico{width:44px;height:44px;border-radius:12px;background:var(--surface);border:1px solid var(--hair);display:grid;place-items:center;font-size:22px;flex:0 0 auto}
 .meal-group-info{flex:1;min-width:0}
-.meal-group-info b{display:block;font-size:16px}
+.meal-group-info b{display:block;font-size:17px}
 .meal-group-info span{display:block;color:var(--muted);font-size:12px;margin-top:4px}
 .meal-plus{width:44px;height:44px;border-radius:50%;background:var(--surface2);border:1px solid var(--hair);color:var(--text);font-size:24px;flex:0 0 auto;display:flex;align-items:center;justify-content:center}
 .meal-section-items{padding:0 14px}
@@ -264,7 +264,7 @@ a{color:inherit;text-decoration:none}
 .ed-ex-row .ed-w{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);white-space:nowrap}
 .ed-ex-row .ed-rm{flex:0 0 auto;width:34px;height:34px;border-radius:10px;background:var(--surface2);color:var(--warn);font-size:16px}
 .field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px}
-.field input,.field select{width:100%;height:46px;background:var(--surface2);border:1px solid var(--hair);border-radius:11px;
+.field input,.field select{width:100%;height:46px;background:var(--surface2);border:0;border-radius:12px;
   color:var(--text);padding:0 14px;font-family:var(--font);font-size:16px}
 .pline{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--hair);font-size:14px}
 .pline:last-child{border-bottom:0}
@@ -435,7 +435,7 @@ a{color:inherit;text-decoration:none}
 .exc-name{flex:1;min-width:0}
 .exc-name h3{font-size:15.5px;font-weight:600;font-family:var(--font);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .exc-name .t{font-size:12.5px;color:var(--muted);margin-top:2px}
-.exc-badge{flex:0 0 auto;width:28px;height:28px;border-radius:9px;border:2px solid var(--faint);background:transparent;display:grid;place-items:center;font-size:15px;color:transparent}
+.exc-badge{flex:0 0 auto;width:28px;height:28px;border-radius:50%;border:2px solid var(--faint);background:transparent;display:grid;place-items:center;font-size:15px;color:transparent}
 .exc.done .exc-badge{background:var(--accent);border-color:var(--accent);color:#ffffff}
 .exc-x{flex:0 0 auto;width:24px;height:24px;margin-right:10px;border-radius:8px;background:transparent;color:var(--faint);font-size:12px;opacity:.6;display:grid;place-items:center}
 .sets{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
@@ -469,10 +469,10 @@ a{color:inherit;text-decoration:none}
 /* liste d'exercices simplifiée : aperçu + saut direct en mode guidé */
 .exrow{display:flex;align-items:center;gap:12px;padding:13px 4px;border-bottom:1px solid var(--hair)}
 .exrow:last-child{border-bottom:0}
-.exrow-check{flex:0 0 auto;width:28px;height:28px;border-radius:9px;border:2px solid var(--faint);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--muted)}
+.exrow-check{flex:0 0 auto;width:28px;height:28px;border-radius:50%;border:2px solid var(--faint);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--muted)}
 .exrow.done .exrow-check{background:var(--accent);border-color:var(--accent);color:#ffffff;font-size:15px}
 .exrow-info{flex:1;min-width:0}
-.exrow-info h3{font-size:15px;font-weight:600;font-family:var(--font);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.exrow-info h3{font-size:17px;font-weight:600;font-family:var(--font);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .exrow-info .t{font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .exrow-x{flex:0 0 auto;width:26px;height:26px;border-radius:8px;color:var(--faint);font-size:12px;opacity:.6}
 
@@ -576,3 +576,24 @@ a{color:inherit;text-decoration:none}
 .complete-bottom{position:relative;padding:0 22px calc(22px + var(--safe-bot))}
 .complete-home{display:block;padding:16px;border-radius:999px;background:linear-gradient(90deg,#4fb2ff,var(--primary),var(--accent));text-align:center;font-weight:700;font-size:15px;color:#ffffff;box-shadow:var(--shadow-pop);transition:transform .15s,filter .15s}
 .complete-home:active{transform:scale(.97);filter:brightness(1.1)}
+
+/* ===== contrôles iOS ===== */
+/* coches rondes façon Rappels : le pictogramme ✓ à 60 % de la pastille */
+.ex .check .ic-s,.exrow-check .ic-s,.exc-badge .ic-s,.run-prog-s .rs-check .ic-s{width:60%;height:60%}
+/* liste de courses : coche ronde iOS */
+.grocery-item label input{-webkit-appearance:none;appearance:none;width:24px;height:24px;margin:0;border-radius:50%;
+  border:2px solid var(--faint);flex:0 0 auto;display:grid;place-items:center;transition:background-color .15s,border-color .15s}
+.grocery-item label input:checked{background:var(--primary);border-color:var(--primary)}
+.grocery-item label input:checked::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:translateY(-1px) rotate(45deg)}
+/* interrupteurs iOS (options oui/non) */
+.chk-row{justify-content:space-between;font-size:17px;color:var(--text)}
+.chk-row input,.ed-w input{order:2}
+.chk-row input,.ed-w input{-webkit-appearance:none;appearance:none;position:relative;flex:0 0 auto;margin:0;
+  width:51px;height:31px;border-radius:999px;background:rgba(120,120,128,.32);transition:background-color .2s ease}
+.chk-row input::after,.ed-w input::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;
+  background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.15),0 3px 1px rgba(0,0,0,.06);transition:transform .2s ease}
+.chk-row input:checked,.ed-w input:checked{background:var(--accent)}
+.chk-row input:checked::after,.ed-w input:checked::after{transform:translateX(20px)}
+.ed-w input{width:44px;height:27px}
+.ed-w input::after{width:23px;height:23px}
+.ed-w input:checked::after{transform:translateX(17px)}
