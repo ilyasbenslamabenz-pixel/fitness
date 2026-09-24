@@ -1073,7 +1073,7 @@ function renderProgress(){
     if(lastBC){
       bcCard.style.display="";
       $("bcFat").textContent=lastBC.fat!=null?num(lastBC.fat)+" %":"—";
-      $("bcMuscle").textContent=lastBC.muscle!=null?num(lastBC.muscle)+" %":"—";
+      $("bcMuscle").textContent=lastBC.muscle!=null?num(lastBC.muscle)+" kg":"—";
     }else bcCard.style.display="none";
   }
 
@@ -1729,7 +1729,7 @@ function saveWeigh(){
   var fat=fatRaw?Number(String(fatRaw).replace(",",".")):null;
   var muscle=muscleRaw?Number(String(muscleRaw).replace(",",".")):null;
   if(fat!=null&&(!isFinite(fat)||fat<3||fat>60)){toast("Masse grasse invalide (3–60 %)");return;}
-  if(muscle!=null&&(!isFinite(muscle)||muscle<10||muscle>70)){toast("Masse musculaire invalide (10–70 %)");return;}
+  if(muscle!=null&&(!isFinite(muscle)||muscle<10||muscle>90)){toast("Masse musculaire invalide (10–90 kg)");return;}
   var d=today(),h=state.weightHistory,ix=h.findIndex(function(x){return x.d===d;});
   if(ix>=0)h[ix].w=n;else h.push({d:d,w:n});
   h.sort(function(a,b){return a.d.localeCompare(b.d);});
