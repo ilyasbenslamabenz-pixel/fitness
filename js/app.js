@@ -270,7 +270,8 @@ var state={
   macro:{carbs:240,protein:180,fat:80}, waterGoal:3,
   fast:{active:false,start:null,hours:16},
   groceryList:JSON.parse(JSON.stringify(DEFAULT_GROCERY)),
-  selEx:null
+  selEx:null,
+  customBarcodes:{}
 };
 var cloudUser=null, toastT=null, cloudBackupT=null, autoRestoreAttempted=false;
 var restEnd=0, restBeeped=false, undoBuf=null, snackCb=null, snackT=null;
@@ -346,6 +347,7 @@ function merge(p){
   if(isFinite(Number(p.waterGoal)))state.waterGoal=Number(p.waterGoal);
   if(p.fast&&typeof p.fast==="object")state.fast=Object.assign(state.fast,p.fast);
   if(p.groceryList&&typeof p.groceryList==="object"&&Array.isArray(p.groceryList.once)&&Array.isArray(p.groceryList.weekly))state.groceryList=p.groceryList;
+  if(p.customBarcodes&&typeof p.customBarcodes==="object")state.customBarcodes=p.customBarcodes;
   if(typeof p.groceryVersion==="number")state.groceryVersion=p.groceryVersion;
   if(typeof p.suggest==="number")state.suggest=p.suggest;
   if(p.session&&typeof p.session==="object")state.session=p.session;
@@ -1756,15 +1758,21 @@ function defaultMealTypeByHour(){
   return "Collation";
 }
 function openMeal(type){$("foodName").value="";$("foodQty").value="100";$("foodKcal").value="";$("foodProt").value="";$("foodCarbs").value="";$("foodFat").value="";$("foodType").value=type||defaultMealTypeByHour();clearFoodRef100();$("foodSearchResults").innerHTML="";$("mealModal").classList.add("on");setTimeout(function(){$("foodName").focus();},50);}
-function closeMeal(){$("mealModal").classList.remove("on");}
+function closeMeal(){$("mealModal").classList.remove("on");pendingBarcode=null;}
 function saveMeal(){
   var f=currentFoodFromForm();if(!f.name){toast("Indique l'aliment");return;}
+  if(pendingBarcode){
+    state.customBarcodes[pendingBarcode]={name:f.name,kcal:f.kcal,protein:f.protein,carbs:f.carbs,fat:f.fat};
+    pendingBarcode=null;
+    addMealObj(f);closeMeal();toast("Repas ajouté · produit mémorisé pour ce code-barres");
+    return;
+  }
   addMealObj(f);closeMeal();toast("Repas ajouté");
 }
 
 
 /* barcode scanner */
-var barcodeReader=null,barcodeControls=null,barcodeBusy=false,barcodeStream=null;
+var barcodeReader=null,barcodeControls=null,barcodeBusy=false,barcodeStream=null,pendingBarcode=null;
 function stopBarcode(){
   try{if(barcodeControls&&barcodeControls.stop)barcodeControls.stop();}catch(e){}
   barcodeControls=null;
@@ -1782,6 +1790,23 @@ function offVal(n,keys){
 async function lookupBarcode(code){
   code=String(code||"").replace(/\D/g,"");
   if(code.length<8){$("scanStatus").textContent="Code-barres invalide.";barcodeBusy=false;return;}
+  $("scanManualEntry").hidden=true;
+  var custom=state.customBarcodes[code];
+  if(custom){
+    $("scanStatus").textContent="Produit reconnu (mémorisé précédemment).";
+    $("scanProduct").innerHTML="<b>"+esc(custom.name)+"</b><div style=\"font-size:12px;color:var(--muted);margin-top:4px\">"+(custom.kcal?Math.round(custom.kcal):"—")+" kcal · "+(custom.protein?Math.round(custom.protein*10)/10:"—")+" g protéines / 100 g</div>";
+    $("scanProduct").classList.add("on");
+    $("foodName").value=custom.name;
+    $("foodKcal").value=custom.kcal?Math.round(custom.kcal):"";
+    $("foodProt").value=custom.protein?Math.round(custom.protein*10)/10:"";
+    $("foodCarbs").value=custom.carbs?Math.round(custom.carbs*10)/10:"";
+    $("foodQty").value="100";
+    $("foodFat").value=custom.fat?Math.round(custom.fat*10)/10:"";
+    setFoodRef100(custom.kcal,custom.protein,custom.carbs,custom.fat);
+    stopBarcode();
+    setTimeout(function(){closeScanner();$("mealModal").classList.add("on");},400);
+    return;
+  }
   $("scanStatus").textContent="Recherche du produit…";$("scanProduct").classList.remove("on");
   try{
     var url="https://world.openfoodfacts.org/api/v3/product/"+encodeURIComponent(code)+".json?fields=product_name,brands,nutriments,nutrition_data_per,nutriscore_grade";
@@ -1807,9 +1832,18 @@ async function lookupBarcode(code){
     stopBarcode();
     setTimeout(function(){closeScanner();$("mealModal").classList.add("on");},500);
   }catch(e){
-    $("scanStatus").textContent="Produit introuvable. Vérifie le code ou saisis l’aliment manuellement.";
+    $("scanStatus").textContent="Produit introuvable dans la base OpenFoodFacts. Saisis-le une fois manuellement : l'app s'en souviendra pour les prochains scans de ce code-barres.";
+    $("scanManualEntry").hidden=false;
+    $("scanManualEntry").onclick=function(){enterBarcodeManually(code);};
     barcodeBusy=false;
   }
+}
+function enterBarcodeManually(code){
+  pendingBarcode=code;
+  stopBarcode();
+  closeScanner();
+  openMeal();
+  toast("Renseigne ce produit — il sera reconnu au prochain scan");
 }
 /* food search — base locale (aliments bruts, instantané, hors ligne) + OpenFoodFacts en ligne
    (inclut de nombreux produits Migros/Coop/Denner ajoutés par des utilisateurs suisses) */
@@ -1903,6 +1937,7 @@ function openScanner(){
   $("scanStatus").textContent="Autorise l’accès à la caméra…";
   $("scanProduct").classList.remove("on");
   $("manualBarcode").value="";
+  $("scanManualEntry").hidden=true;
   barcodeBusy=false;
   stopBarcode();
   startCamera();
