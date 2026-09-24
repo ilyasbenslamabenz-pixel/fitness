@@ -15,6 +15,7 @@
   --nav-border:rgba(255,255,255,.16);
   --halo1:rgba(10,132,255,.32); --halo2:rgba(48,217,143,.24); --halo3:rgba(94,124,230,.20);
   --complete-top:#1a1220;
+  --ring-track:#3c4145;
 }
 :root[data-theme="light"]{
   --bg:#eef1f6; --surface:linear-gradient(165deg,rgba(255,255,255,.88),rgba(255,255,255,.62) 55%,rgba(255,255,255,.5)); --surface2:rgba(10,22,40,.05); --hair:rgba(10,22,40,.11);
@@ -28,6 +29,7 @@
   --nav-border:rgba(10,22,40,.10);
   --halo1:rgba(10,132,255,.16); --halo2:rgba(18,168,102,.14); --halo3:rgba(94,124,230,.12);
   --complete-top:#dce4f5;
+  --ring-track:#dde2ea;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :focus-visible{outline:2px solid var(--primary);outline-offset:2px;border-radius:8px}
@@ -40,7 +42,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   filter:blur(10px)}
 /* Liquid Glass material: translucent, refractive surfaces with a top specular highlight */
 .card,.stat,.exc,.next-cta,.daily-dash .dd,.lr-stats>div,.complete-stats div,.complete-streak,.menuday,.run-prog-s,
-.nutrition-card,.meal-groups,.water-card,.body-card,.fast-card,.activity-card>div,.sheet,.hero,.rest,
+.nutrition-card,.meal-section,.water-card,.body-card,.fast-card,.activity-card>div,.sheet,.hero,.rest,
 .guided-ic,.guided-sets .gs,.qa-btn .ic,.next-cta .ic,.finish .inner,.food-result,.favorite-item,
 .run-prog-suggestion,.today-water,.badge,.weekbar .bar{
   backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
@@ -237,7 +239,17 @@ a{color:inherit;text-decoration:none}
 .meals-title{display:flex;align-items:center;justify-content:space-between;margin:18px 2px}.meals-title h1{font-size:34px}.plus-pill{background:var(--surface2);border:1px solid var(--hair);color:var(--accent-text);font-weight:700;padding:10px 18px;border-radius:999px}
 .nutrition-card{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--hair);border-radius:24px;padding:16px 12px;min-height:184px;box-shadow:var(--shadow-card)}.cal-donut{width:48%;min-width:145px;text-align:center;align-self:center}.cal-donut .ringsvg{width:100%;height:auto;display:block;overflow:visible}.macro-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;flex:1;min-width:0}.macro-col>span{display:block;font-size:11px;margin-bottom:7px;white-space:nowrap}.macro-col>b{font-size:9px;white-space:nowrap}.mini-bar{height:7px;background:#22314d;border-radius:99px;overflow:hidden;margin-bottom:7px}.mini-bar i{display:block;height:100%;width:0;border-radius:99px;background:var(--accent)}.macro-col:nth-child(2) .mini-bar i{background:#4fb2ff}.macro-col:nth-child(3) .mini-bar i{background:#5ac8fa}
 .meal-main-add{width:100%;height:58px;margin-top:14px;border-radius:18px;background:var(--text);color:var(--bg);font-size:18px;font-weight:700}.meal-tools{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.meal-tools button{min-height:82px;border:1px solid var(--hair);border-radius:15px;background:var(--surface2);color:var(--text);font-size:12px;font-weight:600}.tool-ico{display:block;font-size:28px;margin-bottom:5px}
-.section-title-row{display:flex;align-items:center;justify-content:space-between;margin:26px 2px 12px}.section-title-row h2{font-size:24px}.meal-groups{border:1px solid var(--hair);border-radius:22px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow-card)}.meal-group{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:2px solid rgba(255,255,255,.10);min-height:78px}.meal-group:last-child{border-bottom:0}.meal-group-ico{width:52px;height:52px;border-radius:50%;background:#1b2942;display:grid;place-items:center;font-size:25px;flex:0 0 auto}.meal-group-info{flex:1}.meal-group-info b{display:block;font-size:16px}.meal-group-info span{display:block;color:#90a4c2;font-size:12px;margin-top:4px}.meal-plus{width:48px;height:48px;border-radius:50%;background:var(--text);color:var(--bg);font-size:30px}.meal-group:first-child .meal-plus,.meal-group:last-child .meal-plus{background:#22314d}
+.section-title-row{display:flex;align-items:center;justify-content:space-between;margin:26px 2px 12px}.section-title-row h2{font-size:24px}
+.meal-sections{display:flex;flex-direction:column;gap:12px}
+.meal-section{border:1px solid var(--hair);border-radius:22px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow-card)}
+.meal-section-head{display:flex;align-items:center;gap:12px;padding:13px 14px;min-height:78px}
+.meal-group-ico{width:52px;height:52px;border-radius:50%;background:var(--surface2);display:grid;place-items:center;font-size:25px;flex:0 0 auto}
+.meal-group-info{flex:1;min-width:0}
+.meal-group-info b{display:block;font-size:16px}
+.meal-group-info span{display:block;color:var(--muted);font-size:12px;margin-top:4px}
+.meal-plus{width:44px;height:44px;border-radius:50%;background:var(--surface2);border:1px solid var(--hair);color:var(--text);font-size:24px;flex:0 0 auto;display:flex;align-items:center;justify-content:center}
+.meal-section-items{padding:0 14px}
+.meal-section-items:not(:empty){border-top:1px solid var(--hair)}
 .water-title{margin-top:30px}.water-card{border:1px solid var(--hair);border-radius:22px;background:var(--surface);padding:16px 14px;text-align:center;box-shadow:var(--shadow-card)}.water-head{display:flex;align-items:center;gap:10px;text-align:left}.water-drop{font-size:30px}.water-head>div{flex:1}.water-head b,.water-head span,.water-head strong{display:block}.water-head span{font-size:12px;color:#90a4c2;margin-top:3px}.water-head strong{text-align:center;font-size:30px;margin-top:6px}.water-add{width:48px;height:48px;border-radius:50%;background:var(--surface2);color:var(--text);font-size:30px}.glasses{display:grid;grid-template-columns:repeat(7,1fr);gap:12px 8px;margin:18px 6px 12px}.glass{height:45px;background:linear-gradient(180deg,#d8f4ff,#a7e2ff);clip-path:polygon(10% 0,90% 0,82% 100%,18% 100%);position:relative}.glass button{position:absolute;inset:0;color:#111;font-size:20px;font-weight:800}.water-foot{font-size:12px;color:#90a4c2}.body-card{border:1px solid var(--hair);border-radius:22px;background:var(--surface);padding:18px;text-align:center;box-shadow:var(--shadow-card)}.body-card>b{display:block;font-size:17px}.body-card>span{display:block;color:#90a4c2;margin:7px}.body-weight{display:flex;align-items:center;justify-content:center;gap:28px}.body-weight strong{font-size:32px}.body-weight button{width:44px;height:44px;border:3px solid #eee;border-radius:50%;font-size:30px;color:#fff}.fast-card{display:flex;align-items:center;gap:12px;border:1px solid var(--hair);border-radius:22px;background:var(--surface);padding:18px;box-shadow:var(--shadow-card)}.fast-ico{font-size:42px}.fast-card>div:nth-child(2){flex:1}.fast-card b,.fast-card span{display:block}.fast-card b{font-size:16px}.fast-card span{font-size:12px;color:#90a4c2;margin-top:4px}.fast-card button{background:var(--text);color:var(--bg);border-radius:13px;padding:13px 18px;font-weight:700}.activity-card{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.activity-card>div{border:1px solid var(--hair);border-radius:18px;background:var(--surface);padding:14px;text-align:center;box-shadow:var(--shadow-pop)}.activity-card span,.activity-card b,.activity-card small{display:block}.activity-card span{font-size:24px}.activity-card b{font-size:20px;margin-top:5px}.activity-card small{color:#90a4c2;font-size:11px;margin-top:3px}
 @media(max-width:390px){.nutrition-card{padding:12px 7px;gap:7px;min-height:170px}.cal-donut{width:47%;min-width:132px}.macro-grid{gap:4px}.macro-col>span{font-size:9px}.macro-col>b{font-size:8px}.meal-tools button{font-size:10px}.glasses{gap:8px 5px}}
 

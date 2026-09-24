@@ -266,14 +266,24 @@
       <button data-act="openFavorites"><span class="tool-ico"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg></span>Mes aliments</button>
     </div>
     <div class="section-title-row"><h2>Mes repas</h2></div>
-    <div class="meal-groups">
-      <div class="meal-group"><div class="meal-group-ico"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12,7 12,12 16,14"/></svg></div><div class="meal-group-info"><b>Petit déjeuner →</b><span id="breakfastKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Petit-déjeuner">＋</button></div>
-      <div class="meal-group"><div class="meal-group-ico"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18a9 8 0 0 1-18 0z"/><path d="M12 12V4"/><path d="M8.5 5.5 12 4l3.5 1.5"/></svg></div><div class="meal-group-info"><b>Déjeuner →</b><span id="lunchKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Déjeuner">＋</button></div>
-      <div class="meal-group"><div class="meal-group-ico"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4C10 4 4 10 4 18v2h2c8 0 14-6 14-16V4z"/><path d="M6 20c4-4 8-8 14-14"/></svg></div><div class="meal-group-info"><b>Dîner →</b><span id="dinnerKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Dîner">＋</button></div>
-      <div class="meal-group"><div class="meal-group-ico"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12,7 12,12 16,14"/></svg></div><div class="meal-group-info"><b>En-cas →</b><span id="snackKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Collation">＋</button></div>
+    <div class="meal-sections">
+      <div class="meal-section">
+        <div class="meal-section-head"><div class="meal-group-ico"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12,7 12,12 16,14"/></svg></div><div class="meal-group-info"><b>Petit déjeuner</b><span id="breakfastKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Petit-déjeuner">＋</button></div>
+        <div class="meal-section-items" id="itemsBreakfast"></div>
+      </div>
+      <div class="meal-section">
+        <div class="meal-section-head"><div class="meal-group-ico"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18a9 8 0 0 1-18 0z"/><path d="M12 12V4"/><path d="M8.5 5.5 12 4l3.5 1.5"/></svg></div><div class="meal-group-info"><b>Déjeuner</b><span id="lunchKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Déjeuner">＋</button></div>
+        <div class="meal-section-items" id="itemsLunch"></div>
+      </div>
+      <div class="meal-section">
+        <div class="meal-section-head"><div class="meal-group-ico"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4C10 4 4 10 4 18v2h2c8 0 14-6 14-16V4z"/><path d="M6 20c4-4 8-8 14-14"/></svg></div><div class="meal-group-info"><b>Dîner</b><span id="dinnerKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Dîner">＋</button></div>
+        <div class="meal-section-items" id="itemsDinner"></div>
+      </div>
+      <div class="meal-section">
+        <div class="meal-section-head"><div class="meal-group-ico"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12,7 12,12 16,14"/></svg></div><div class="meal-group-info"><b>En-cas</b><span id="snackKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Collation">＋</button></div>
+        <div class="meal-section-items" id="itemsSnack"></div>
+      </div>
     </div>
-    <div class="section-title-row"><h2>Journal d'aujourd'hui</h2><span class="link" data-act="addMeal">＋ Ajouter</span></div>
-    <div class="card" id="mealJournal"><div class="empty">Aucun aliment enregistré aujourd'hui.</div></div>
     <div class="section-title-row"><h2>Jeûne</h2></div>
     <div class="fast-card"><div class="fast-ico"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12,7 12,12 16,14"/></svg></div><div><b id="fastTitle">Routine 16:8</b><span id="fastText">Aucun jeûne en cours</span><div class="fast-progress"><i id="fastProgress"></i></div></div><button data-act="fasting" id="fastBtn">Démarrer</button></div>
     <div class="section-title-row"><h2>Idées de la semaine</h2></div><div id="weeklyMenu"></div>
