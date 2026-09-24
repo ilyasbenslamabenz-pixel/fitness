@@ -400,6 +400,29 @@ a{color:inherit;text-decoration:none}
 .exc-wlab .last{color:var(--faint)}
 .exc-wlab .up{color:var(--accent-text);font-weight:600}
 
+/* jour : card compacte avec CTA unique (refonte onglet Séance) */
+.sday-card{margin-top:12px}
+.sday-top{display:flex;align-items:center;gap:12px}
+.sday-info{flex:1;min-width:0}
+.sday-info h3{font-size:18px}
+.sday-info .sub{font-size:12.5px;color:var(--muted);margin-top:2px}
+.sday-meta{font-size:12px;color:var(--muted);margin:10px 0 0}
+.sday-card .btn{margin-top:12px}
+.sday-prog{display:flex;align-items:center;gap:10px;margin-top:12px}
+.sprog-mini{flex:1;height:6px;border-radius:99px;background:var(--surface2);overflow:hidden}
+.sprog-mini i{display:block;height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:99px}
+.sday-prog-text{font-size:11.5px;color:var(--muted);white-space:nowrap}
+
+/* liste d'exercices simplifiée : aperçu + saut direct en mode guidé */
+.exrow{display:flex;align-items:center;gap:12px;padding:13px 4px;border-bottom:1px solid var(--hair)}
+.exrow:last-child{border-bottom:0}
+.exrow-check{flex:0 0 auto;width:28px;height:28px;border-radius:9px;border:2px solid var(--faint);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--muted)}
+.exrow.done .exrow-check{background:var(--accent);border-color:var(--accent);color:#2a0e24;font-size:15px}
+.exrow-info{flex:1;min-width:0}
+.exrow-info h3{font-size:15px;font-weight:600;font-family:var(--font);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.exrow-info .t{font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.exrow-x{flex:0 0 auto;width:26px;height:26px;border-radius:8px;color:var(--faint);font-size:12px;opacity:.6}
+
 /* ===== refonte ergonomie : accueil, FAB, séance guidée ===== */
 .topbar .streak{display:flex;align-items:center;gap:5px;background:var(--surface);border:1px solid var(--hair);padding:7px 11px;border-radius:999px}
 .topbar .streak b{font-size:13.5px;font-weight:700}
@@ -561,19 +584,26 @@ a{color:inherit;text-decoration:none}
     <div id="sessExerciseView">
       <div class="eyebrow" style="margin:12px 2px 6px">Jour</div>
       <div class="days" id="dayChips"></div>
-      <div class="card sess-head">
-        <div class="sess-top">
-          <div class="ic" id="sesIc" style="width:46px;height:46px;border-radius:12px;background:var(--surface2);display:grid;place-items:center;font-size:24px">🔥</div>
-          <div style="flex:1"><h3 id="sesName" style="font-size:17px">—</h3><div class="sub" id="sesFocus" style="font-size:12.5px;color:var(--muted)">—</div></div>
-          <div class="sess-count"><span class="num" id="sesDoneN">0</span><small id="sesTotN">/0</small></div>
+
+      <div class="card sday-card">
+        <div class="sday-top">
+          <div class="ic" id="sesIc" style="width:46px;height:46px;border-radius:12px;background:var(--surface2);display:grid;place-items:center;font-size:24px;flex:0 0 auto">🔥</div>
+          <div class="sday-info"><h3 id="sesName">—</h3><div class="sub" id="sesFocus">—</div></div>
         </div>
-        <div class="sprog"><i id="sesProg" style="width:0%"></i></div>
-        <div class="sess-progtext" id="sesProgText">0 / 0 séries complétées</div>
-        <button class="btn primary" style="margin-top:12px" data-act="guidedStart">▶ Mode guidé</button>
+        <div class="sday-meta" id="sesMeta">—</div>
+        <button class="btn primary" id="sesCta" data-act="guidedStart">Démarrer la séance</button>
+        <div class="sday-prog" id="sesProgWrap" style="display:none">
+          <div class="sprog-mini"><i id="sesProg" style="width:0%"></i></div>
+          <div class="sday-prog-text"><span id="sesDoneN">0</span><small id="sesTotN">/0</small> exos · <span id="sesProgText">0/0 séries</span></div>
+        </div>
       </div>
-      <div class="rest" id="restBar"><div class="rlabel" id="restLabel">Repos</div><button class="stop" id="restStop" data-act="restStop" style="display:none">Arrêter</button><div class="rbtns"><button data-act="rest" data-s="60">1:00</button><button data-act="rest" data-s="90">1:30</button><button data-act="rest" data-s="120">2:00</button></div></div>
-      <div id="exList"></div>
-      <p style="font-size:12px;color:var(--faint);text-align:center;margin:14px 4px">Tape chaque série pour la valider — le chrono de repos démarre tout seul. Ajuste le poids avec −/+ ou tape le chiffre. Une séance terminée peut s'annuler quelques secondes.</p>
+      <div id="restBar" style="display:none"><span id="restLabel"></span><button id="restStop" data-act="restStop" style="display:none"></button></div>
+
+      <div class="head" style="margin-top:22px"><h2 style="font-size:18px">Exercices</h2></div>
+      <div class="card" style="padding:4px 14px">
+        <div id="exList"></div>
+      </div>
+      <p style="font-size:12px;color:var(--faint);text-align:center;margin:14px 4px">Tape un exercice pour démarrer la séance guidée à partir de celui-ci.</p>
     </div>
 
     <div id="sessRunningView" style="display:none">
@@ -771,7 +801,7 @@ a{color:inherit;text-decoration:none}
   <div class="guided-top">
     <button class="guided-x" data-act="guidedClose">✕</button>
     <div class="guided-mid"><b id="gExN">1 / 1</b><span id="gSessName">—</span></div>
-    <div class="guided-timer" id="gTimer" style="visibility:hidden"><span>⏱</span><span id="gTimerT">0:00</span></div>
+    <button class="guided-timer" id="gTimer" data-act="restStop" style="visibility:hidden" title="Toucher pour passer le repos"><span>⏱</span><span id="gTimerT">0:00</span></button>
   </div>
   <div class="guided-name">
     <h3 id="gExName">—</h3>
@@ -784,7 +814,7 @@ a{color:inherit;text-decoration:none}
   <div class="guided-bottom">
     <button class="guided-next" id="gNextBtn" data-act="guidedNext">Valider la série</button>
     <div class="guided-skip" data-act="guidedSkip">Passer l'exercice</div>
-    <div class="guided-list-link" data-act="guidedList">Voir la liste complète</div>
+    <div class="guided-list-link"><span data-act="guidedList">Voir la liste</span> · <span data-act="guidedFinishNow">Terminer maintenant</span></div>
   </div>
 </div>
 
@@ -1401,31 +1431,22 @@ function doneSetCount(mk,e){return setsArrFor(mk,e).filter(function(s){return s.
 function isExDone(mk,e){var arr=setsArrFor(mk,e),cnt=setCount(e);for(var i=0;i<cnt;i++)if(!arr[i].done)return false;return true;}
 function exSets(mk,e){return doneSetCount(mk,e);} /* conservé pour compat : nombre total de séries validées (bonus incluses) */
 function repsFor(mk,e){var rt=repTarget(e);if(!rt)return null;var st=mk[e.n]||{};return st.reps!=null?st.reps:rt.max;}
-function exerciseCardHTML(e,mk){
-  var cnt=setCount(e),arr=setsArrFor(mk,e),isDone=isExDone(mk,e);
-  var st=mk[e.n]||{},last=lastWeight(e.n),wv=(st.w!=null?st.w:last),up=(e.w&&last>0&&Number(wv)>last);
-  var rt=repTarget(e),rv=repsFor(mk,e);
-  var pills='<div class="sets">'+arr.map(function(s,i){
-    var label=s.done?(rt?s.reps:"✓"):(rt?rt.max:(i+1));
-    return '<button class="setpill'+(s.done?" on":"")+'" data-act="setTick" data-ex="'+esc(e.n)+'" data-i="'+i+'">'+label+'</button>';
-  }).join("")
-    +'<button class="setpill add" data-act="addSet" data-ex="'+esc(e.n)+'" title="Ajouter une série">＋</button>'
-    +(arr.length>cnt&&!arr[arr.length-1].done?'<button class="setpill rm" data-act="removeSet" data-ex="'+esc(e.n)+'" title="Retirer la série bonus">−</button>':'')
-    +'</div>';
-  var rrow=rt
-    ? '<div class="exc-wrow"><div class="exc-wlab">Reps</div>'
-      +'<div class="stepper"><button data-act="r-" data-ex="'+esc(e.n)+'">−</button><div class="wv"><input class="rval" type="number" inputmode="numeric" step="1" value="'+rv+'" data-ex="'+esc(e.n)+'"><small>reps</small></div><button data-act="r+" data-ex="'+esc(e.n)+'">＋</button></div></div>'
-    : '';
-  var wrow=e.w
-    ? '<div class="exc-wrow"><div class="exc-wlab">Charge'+(last>0?' · <span class="last">dernier '+num(last)+' kg</span>':'')+(up?' · <span class="up">▲ progrès</span>':'')+'</div>'
-      +'<div class="stepper"><button data-act="w-" data-ex="'+esc(e.n)+'">−</button><div class="wv"><input class="wval" type="number" inputmode="decimal" step="0.5" value="'+num(wv)+'" data-ex="'+esc(e.n)+'"><small>kg</small></div><button data-act="w+" data-ex="'+esc(e.n)+'">＋</button></div></div>'
-    : '';
+function estimateDurationMin(p){
+  var active=activeExercises(p),totalSets=0;
+  active.forEach(function(e){totalSets+=setCount(e);});
+  return Math.max(15,Math.round(totalSets*2.5/5)*5);
+}
+function exerciseRowHTML(e,mk){
+  var arr=setsArrFor(mk,e),cnt=setCount(e),isDone=isExDone(mk,e);
+  var doneN=arr.filter(function(s){return s.done;}).length;
+  var last=lastWeight(e.n);
   var removeAct=e.extra?"removeExtraEx":"excludeEx";
-  return '<div class="exc '+(isDone?"done":"")+'" data-ex="'+esc(e.n)+'">'
-    +'<div class="exc-top"><div class="exc-name"><h3>'+esc(e.n)+'</h3><div class="t">'+esc(e.t)+'</div></div>'
-    +'<button class="exc-x" data-act="'+removeAct+'" data-ex="'+esc(e.n)+'" title="'+(e.extra?"Supprimer":"Retirer aujourd’hui")+'">✕</button>'
-    +'<button class="exc-badge" data-act="toggle" data-ex="'+esc(e.n)+'">✓</button></div>'
-    +pills+rrow+wrow+'</div>';
+  var meta=esc(e.t)+(last>0?" · dernier "+num(last)+" kg":"");
+  return '<div class="exrow'+(isDone?" done":"")+'" data-act="guidedJump" data-ex="'+esc(e.n)+'">'
+    +'<div class="exrow-check">'+(isDone?'✓':(doneN>0?doneN+"/"+cnt:''))+'</div>'
+    +'<div class="exrow-info"><h3>'+esc(e.n)+'</h3><div class="t">'+meta+'</div></div>'
+    +'<button class="exrow-x" data-act="'+removeAct+'" data-ex="'+esc(e.n)+'" title="'+(e.extra?"Supprimer":"Retirer aujourd’hui")+'">✕</button>'
+    +'</div>';
 }
 /* recalcule seulement les compteurs/la barre de progression — pas les cartes d'exercice */
 function updateSessionTotals(){
@@ -1434,29 +1455,25 @@ function updateSessionTotals(){
   active.forEach(function(e){var arr=setsArrFor(mk,e);totalSets+=arr.length;doneSets+=arr.filter(function(s){return s.done;}).length;if(isExDone(mk,e))doneEx++;});
   $("sesDoneN").textContent=doneEx;$("sesTotN").textContent="/"+active.length;
   $("sesProg").style.width=(totalSets?doneSets/totalSets*100:0)+"%";
-  $("sesProgText").textContent=doneSets+" / "+totalSets+" séries complétées";
-  var bar=$("finishBar");
-  if(bar)bar.querySelector(".inner .n").textContent=doneSets+" / "+totalSets;
+  $("sesProgText").textContent=doneSets+"/"+totalSets+" séries";
 }
-/* remplace uniquement la carte de l'exercice modifié — évite de reconstruire toute la liste
-   (et de perdre le focus/défiler) à chaque tap sur une pastille ou un stepper */
+/* remplace uniquement la ligne de l'exercice modifié — évite de reconstruire toute la liste
+   (et de perdre le focus/défiler) ; rafraîchit aussi le mode guidé s'il est ouvert */
 function refreshExerciseCard(exName){
   var p=state.program[state.selDay],mk=marksFor(p.id),e=findActiveEx(p,exName);if(!e)return;
-  var cards=$("exList").querySelectorAll(".exc");
-  for(var i=0;i<cards.length;i++){
-    if(cards[i].dataset.ex===exName){cards[i].outerHTML=exerciseCardHTML(e,mk);break;}
+  var rows=$("exList").querySelectorAll(".exrow");
+  for(var i=0;i<rows.length;i++){
+    if(rows[i].dataset.ex===exName){rows[i].outerHTML=exerciseRowHTML(e,mk);break;}
   }
   updateSessionTotals();
+  if(guidedOpen)renderGuided();
 }
 function renderSession(){
   document.querySelectorAll("#sessCatTabs .cat-tab").forEach(function(b){b.classList.toggle("on",b.dataset.cat===state.sessionCategory);});
   var isRunning=state.sessionCategory==="running";
   $("sessExerciseView").style.display=isRunning?"none":"";
   $("sessRunningView").style.display=isRunning?"":"none";
-  var bar=$("finishBar");
-  if(!bar){bar=document.createElement("div");bar.className="finish";bar.id="finishBar";document.body.appendChild(bar);}
   if(isRunning){
-    bar.style.display="none";
     renderRunningView();
     return;
   }
@@ -1470,13 +1487,16 @@ function renderSession(){
   if(!p||(p.cat||"muscu")!==state.sessionCategory){p=dayList[0];state.selDay=state.program.indexOf(p);}
   $("sesIc").textContent=p.icon;$("sesName").textContent=p.name;$("sesFocus").textContent=p.focus;
   var mk=marksFor(p.id),active=activeExercises(p),excl=excludedFor(p.id);
-  $("exList").innerHTML=active.map(function(e){return exerciseCardHTML(e,mk);}).join("")
+  $("exList").innerHTML=active.map(function(e){return exerciseRowHTML(e,mk);}).join("")
     +'<div class="exc-foot">'
     +'<button class="btn ghost" data-act="addExOpen">＋ Ajouter un exercice</button>'
     +(excl.length?'<button class="btn ghost" data-act="restoreEx">↺ Restaurer ('+excl.length+')</button>':'')
     +'</div>';
-  bar.innerHTML='<div class="inner"><div class="prog"><div class="n">0 / 0</div><div class="l">séries validées</div></div><button class="btn mint" data-act="finish">Terminer</button></div>';
-  bar.style.display=(state.page==="session")?"block":"none";
+  $("sesMeta").textContent=active.length+" exercice"+(active.length>1?"s":"")+" · ~"+estimateDurationMin(p)+" min";
+  var totalSets=0,doneSets=0;
+  active.forEach(function(e){var arr=setsArrFor(mk,e);totalSets+=arr.length;doneSets+=arr.filter(function(s){return s.done;}).length;});
+  $("sesCta").textContent=doneSets>0?"Continuer la séance":"Démarrer la séance";
+  $("sesProgWrap").style.display=doneSets>0?"":"none";
   updateSessionTotals();
 }
 function switchSessionCategory(cat){
@@ -1599,13 +1619,6 @@ function setRepsExact(exName,val){
   if(!mk[exName])mk[exName]={};mk[exName].reps=n;save();
   syncFieldValue("rval",exName,n);
 }
-function toggleEx(exName){
-  var p=state.program[state.selDay],mk=marksFor(p.id),e=findActiveEx(p,exName);if(!e)return;
-  var arr=setsArrFor(mk,e),nowDone=!isExDone(mk,e),cnt=setCount(e),rv=repsFor(mk,e);
-  for(var i=0;i<cnt;i++)arr[i]={done:nowDone,reps:nowDone?rv:null};
-  if(nowDone&&mk[exName].w==null&&e.w){var lw=lastWeight(exName);if(lw>0)mk[exName].w=lw;}
-  save();refreshExerciseCard(exName);
-}
 function setTick(exName,i){
   var p=state.program[state.selDay],mk=marksFor(p.id),e=findActiveEx(p,exName);if(!e)return;
   var arr=setsArrFor(mk,e);if(!arr[i])return;
@@ -1614,17 +1627,6 @@ function setTick(exName,i){
   if(nowDone&&mk[exName].w==null&&e.w){var lw=lastWeight(exName);if(lw>0)mk[exName].w=lw;}
   save();refreshExerciseCard(exName);
   if(nowDone&&!isExDone(mk,e))startRest(90);
-}
-function addSet(exName){
-  var p=state.program[state.selDay],mk=marksFor(p.id),e=findActiveEx(p,exName);if(!e)return;
-  setsArrFor(mk,e).push({done:false,reps:null});
-  save();refreshExerciseCard(exName);toast("Série bonus ajoutée");
-}
-function removeSet(exName){
-  var p=state.program[state.selDay],mk=marksFor(p.id),e=findActiveEx(p,exName);if(!e)return;
-  var arr=setsArrFor(mk,e),cnt=setCount(e);
-  if(arr.length>cnt&&!arr[arr.length-1].done)arr.pop();
-  save();refreshExerciseCard(exName);
 }
 function excludeEx(exName){
   var p=state.program[state.selDay];
@@ -1712,12 +1714,13 @@ function undoFinish(){
 function currentGuidedList(){var p=state.program[state.selDay];return activeExercises(p);}
 function findFirstUnfinishedIndex(list,mk){for(var i=0;i<list.length;i++)if(!isExDone(mk,list[i]))return i;return 0;}
 function findNextUnfinishedIndex(list,mk,fromIdx){var n=list.length;for(var k=0;k<n;k++){var idx=(fromIdx+k)%n;if(!isExDone(mk,list[idx]))return idx;}return -1;}
-function openGuidedSession(){
+function openGuidedSession(jumpToEx){
   var p=state.program[state.selDay];
   if(!p||!p.ex||!p.ex.length){toast("Aucun exercice pour ce jour");return;}
   var mk=marksFor(p.id),list=activeExercises(p);
   if(!list.length){toast("Aucun exercice actif");return;}
-  guidedIndex=findFirstUnfinishedIndex(list,mk);
+  var jumpIdx=jumpToEx?list.findIndex(function(e){return e.n===jumpToEx;}):-1;
+  guidedIndex=jumpIdx>=0?jumpIdx:findFirstUnfinishedIndex(list,mk);
   guidedOpen=true;
   if(guidedDayId!==p.id||!guidedStartTimes[p.id])guidedStartTimes[p.id]=Date.now();
   guidedDayId=p.id;
@@ -1782,6 +1785,11 @@ function guidedSkip(){
   if(guidedIndex<list.length-1)guidedIndex++;else toast("Dernier exercice");
   renderGuided();
 }
+function guidedFinishNow(){
+  var p=state.program[state.selDay],mk=marksFor(p.id),active=activeExercises(p);
+  if(!active.some(function(e){return isExDone(mk,e);})){toast("Termine au moins un exercice avant de conclure");return;}
+  guidedFinishFlow();
+}
 function guidedFinishFlow(){
   var p=state.program[state.selDay],mk=marksFor(p.id),active=activeExercises(p);
   var totalVolume=0;
@@ -1793,7 +1801,8 @@ function guidedFinishFlow(){
   });
   var durMs=Date.now()-(guidedStartTimes[p.id]||Date.now()),durMin=Math.max(1,Math.round(durMs/60000));
   var kcal=Math.round(durMin*6);
-  var prevBestStreak=computeBestStreak(),sessionName=p.name,exCount=active.length;
+  var doneExCount=active.filter(function(e){return isExDone(mk,e);}).length;
+  var prevBestStreak=computeBestStreak(),sessionName=p.name,exCount=doneExCount;
   finishSession();
   closeGuided();
   var lp=latestPR(),isNewPR=!!(lp&&lp.d===today());
@@ -1849,7 +1858,7 @@ function updateRest(){
   }
   if(onSession){
     var lab3=document.getElementById("restLabel"),stop3=document.getElementById("restStop");
-    var sc=Math.ceil(left/1000);lab3.textContent=Math.floor(sc/60)+":"+String(sc%60).padStart(2,"0");lab3.classList.add("run");if(stop3)stop3.style.display="";
+    if(lab3){var sc=Math.ceil(left/1000);lab3.textContent=Math.floor(sc/60)+":"+String(sc%60).padStart(2,"0");lab3.classList.add("run");if(stop3)stop3.style.display="";}
   }
   if(gt&&gtt){var sc2=Math.ceil(left/1000);gtt.textContent=Math.floor(sc2/60)+":"+String(sc2%60).padStart(2,"0");gt.style.visibility="visible";}
 }
@@ -2370,7 +2379,6 @@ function showPage(id){
   else if(id==="progress")renderProgress();
   else if(id==="meals")renderMeals();
   else if(id==="profile")renderProfile();
-  var bar=$("finishBar");if(bar)bar.style.display=(id==="session")?"block":"none";
   try{window.scrollTo({top:0,behavior:"smooth"});}catch(e){window.scrollTo(0,0);}
 }
 
@@ -2684,10 +2692,12 @@ document.addEventListener("click",function(e){
       openGuidedSession();
       break;
     case "guidedStart": openGuidedSession(); break;
+    case "guidedJump": openGuidedSession(ex); break;
     case "guidedClose": closeGuided(); showPage("today"); break;
-    case "guidedList": closeGuided(); break;
+    case "guidedList": closeGuided(); renderSession(); break;
     case "guidedNext": guidedAdvance(); break;
     case "guidedSkip": guidedSkip(); break;
+    case "guidedFinishNow": guidedFinishNow(); break;
     case "goRunning": showPage("session"); switchSessionCategory("running"); break;
     case "quicklogOpen": $("quicklogSheet").classList.add("on"); break;
     case "quicklogClose": $("quicklogSheet").classList.remove("on"); break;
@@ -2699,26 +2709,21 @@ document.addEventListener("click",function(e){
     case "runProgNext": runProgWeekShift(1); break;
     case "runProgSkip": runProgWeekShift(2); break;
     case "runProgRepeat": runProgRepeat(); break;
-    case "toggle": toggleEx(ex); break;
     case "setTick": setTick(ex,Number(a.dataset.i)); break;
     case "w-": setWeight(ex,-2.5); break;
     case "w+": setWeight(ex,2.5); break;
     case "r-": setReps(ex,-1); break;
     case "r+": setReps(ex,1); break;
-    case "addSet": addSet(ex); break;
-    case "removeSet": removeSet(ex); break;
     case "excludeEx": excludeEx(ex); break;
     case "restoreEx": restoreEx(); break;
     case "removeExtraEx": removeExtraEx(ex); break;
     case "addExOpen": openAddExercise(); break;
     case "addExClose": closeAddExercise(); break;
     case "addExSave": saveAddExercise(); break;
-    case "rest": startRest(Number(a.dataset.s)); break;
     case "restStop": stopRest(); break;
     case "snackAct": if(snackCb)snackCb(); document.getElementById("snack").classList.remove("on"); document.body.classList.remove("has-snack"); clearTimeout(snackT); snackCb=null; break;
     case "export": exportData(); break;
     case "import": document.getElementById("importFile").click(); break;
-    case "finish": finishSession(); break;
     case "selEx": state.selEx=ex; renderProgress(); break;
     case "addMeal": openMeal(a.dataset.mealType||""); break;
     case "openFavorites": openFavorites(); break;
