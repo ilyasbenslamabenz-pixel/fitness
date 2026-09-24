@@ -1673,7 +1673,7 @@ function renderEditDayList(){
     return '<div class="ed-ex-row">'
       +'<div class="ed-fields">'
       +'<input type="text" data-i="'+i+'" data-f="n" value="'+esc(e.n)+'" placeholder="Nom de l\'exercice">'
-      +'<input type="text" data-i="'+i+'" data-f="t" value="'+esc(e.t)+'" placeholder="ex : 4 × 8-10">'
+      +'<input type="text" data-i="'+i+'" data-f="t" value="'+esc(e.t)+'" placeholder="séries × répétitions">'
       +'</div>'
       +'<label class="ed-w"><input type="checkbox" data-i="'+i+'" data-f="w" '+(e.w?"checked":"")+'>Charge</label>'
       +'<button type="button" class="ed-rm" data-act="edRemoveEx" data-i="'+i+'"><svg class="ic-s" aria-hidden="true"><use href="#i-xmark"/></svg></button>'
@@ -1764,7 +1764,7 @@ function defaultMealTypeByHour(){
   if(h<21)return "Dîner";
   return "Collation";
 }
-function openMeal(type){$("foodName").value="";$("foodQty").value="100";$("foodKcal").value="";$("foodProt").value="";$("foodCarbs").value="";$("foodFat").value="";$("foodType").value=type||defaultMealTypeByHour();clearFoodRef100();$("foodSearchResults").innerHTML="";$("mealModal").classList.add("on");setTimeout(function(){$("foodName").focus();},50);}
+function openMeal(type){$("foodName").value="";$("foodQty").value="";$("foodKcal").value="";$("foodProt").value="";$("foodCarbs").value="";$("foodFat").value="";$("foodType").value=type||defaultMealTypeByHour();clearFoodRef100();$("foodSearchResults").innerHTML="";$("mealModal").classList.add("on");setTimeout(function(){$("foodName").focus();},50);}
 function closeMeal(){$("mealModal").classList.remove("on");pendingBarcode=null;}
 function saveMeal(){
   var f=currentFoodFromForm();if(!f.name){toast("Indique l'aliment");return;}
