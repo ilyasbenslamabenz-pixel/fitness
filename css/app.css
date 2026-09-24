@@ -523,7 +523,9 @@ a{color:inherit;text-decoration:none}
 .guided-name{text-align:center;margin-top:16px;padding:0 24px;flex:0 0 auto}
 .guided-name h3{font-size:24px;font-weight:800}
 .guided-name .sub{font-size:12.5px;color:var(--muted);margin-top:5px}
-.guided-ic{margin:18px 22px 0;height:120px;border-radius:20px;background:var(--surface);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;font-size:54px;flex:0 0 auto}
+.guided-ic{margin:18px 22px 0;height:120px;border-radius:20px;background:var(--surface);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;font-size:54px;flex:0 0 auto;overflow:hidden}
+.guided-ic.has-photo{width:180px;height:180px;margin-left:auto;margin-right:auto;padding:0}
+.guided-photo{width:100%;height:100%;object-fit:cover;display:block}
 .guided-vals{display:flex;align-items:center;justify-content:center;gap:20px;margin-top:20px;flex:0 0 auto}
 .val-group{display:flex;align-items:center;gap:12px}
 .guided-vals .val{text-align:center;min-width:56px}
