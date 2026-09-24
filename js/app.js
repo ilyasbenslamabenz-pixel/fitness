@@ -1221,13 +1221,16 @@ function updateLiveUI(){
   $("lrPace").textContent=(km>=0.10&&min>=0.5)?fmtPace(min/km):"—";
   var speedKmh=(ms>20000&&km>=0.05)?(km/(ms/3600000)):0;
   $("lrSpeed").textContent=speedKmh?num(Math.min(speedKmh,25)):"—";
+  $("lrKcal").textContent=km>=0.05?num(estimateRunKcal(km,0)):"0";
 }
 function initMap(){
   if(lrMap||!window.L)return;
   try{
     lrMap=L.map("lrMap",{zoomControl:false,attributionControl:true,dragging:true,preferCanvas:true});
     lrMap.setView([46.2044,6.1432],15);
-    var tiles=L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,subdomains:["a","b","c"],attribution:"© OpenStreetMap contributors"});
+    var isLight=document.documentElement.getAttribute("data-theme")==="light";
+    var tileStyle=isLight?"light_all":"dark_all";
+    var tiles=L.tileLayer("https://{s}.basemaps.cartocdn.com/"+tileStyle+"/{z}/{x}/{y}{r}.png",{maxZoom:19,subdomains:["a","b","c","d"],attribution:"© OpenStreetMap contributors © CARTO"});
     tiles.on("tileerror",function(){
       var g=$("lrGps");if(g&&!runActive)g.textContent="Carte indisponible";
     });
