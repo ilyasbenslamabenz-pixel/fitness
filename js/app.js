@@ -88,10 +88,10 @@ var DEFAULT_GROCERY={
  once:[
   {n:"Riz complet 1 kg",done:false},
   {n:"Flocons d'avoine 1 kg",done:false},
-  {n:"Lentilles corail 500 g",done:false},
-  {n:"Lentilles vertes 500 g",done:false},
   {n:"Pois chiches en boîte ×4",done:false},
   {n:"Haricots rouges en boîte ×3",done:false},
+  {n:"Haricots noirs en boîte ×2",done:false},
+  {n:"Haricots blancs en boîte ×2",done:false},
   {n:"Graines de chia 200 g",done:false},
   {n:"Huile de colza/tournesol 1 L",done:false},
   {n:"Beurre de cacahuète",done:false},
@@ -112,7 +112,7 @@ var DEFAULT_GROCERY={
   {n:"Fruits à faible IG (pommes, baies, ~1 kg)",done:false}
  ]
 };
-var GROCERY_VERSION=2;
+var GROCERY_VERSION=3;
 /* noms de tous les articles par défaut v1 (retirés ou renommés en v2) : jamais réinjectés
    comme "ajout personnel" lors de la migration, même s'ils n'ont plus de correspondance exacte
    dans DEFAULT_GROCERY */
