@@ -20,6 +20,9 @@ copie simplement ces fichiers dans un projet Xcode.
   générés à partir du monogramme "IB" blanc sur fond bleu nuit
   (`scripts/gen-ios-branding.js`, `npm run gen:ios-branding` pour
   régénérer si la marque change)
+- Plugin natif `@capacitor/haptics` (vibrations Taptic : série validée, coche,
+  fin de séance). Dans le navigateur, l'app retombe sur `navigator.vibrate`
+  quand il existe (ce n'est pas le cas de Safari sur iPhone)
 - Testé : le bundle généré (`ios/App/App/public/`) charge bien l'app,
   0 requête en échec, 0 erreur JS
 

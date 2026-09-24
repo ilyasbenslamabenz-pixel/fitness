@@ -5,25 +5,25 @@ var KEY="evoFitV3", OLDKEY="evoFitCoachV2", BACKUPKEY="evoFitV3_backup";
 var START_DATE="2026-09-21";
 
 var DEFAULT_PROGRAM=[
- {id:"push",name:"Poussée",short:"Push",icon:'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5a2.5 2.5 0 0 0 5 0c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7.5 7.5 0 1 1-15 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 1 2z"/></svg>',focus:"Pecs · épaules · triceps",ex:[
+ {id:"push",name:"Poussée",short:"Push",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-flame_fill"/></svg>',focus:"Pecs · épaules · triceps",ex:[
    {n:"Développé couché haltères",t:"4 × 8-10",w:true},
    {n:"Développé incliné machine",t:"3 × 10-12",w:true},
    {n:"Écarté poulie",t:"3 × 12-15",w:true},
    {n:"Élévations latérales",t:"4 × 12-15",w:true},
    {n:"Extension triceps corde",t:"3 × 12-15",w:true}]},
- {id:"pull",name:"Tirage",short:"Pull",icon:'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5.2"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/></svg>',focus:"Dos · biceps",ex:[
+ {id:"pull",name:"Tirage",short:"Pull",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-scope"/></svg>',focus:"Dos · biceps",ex:[
    {n:"Tirage vertical",t:"4 × 8-10",w:true},
    {n:"Rowing machine",t:"4 × 10-12",w:true},
    {n:"Tirage horizontal poulie",t:"3 × 10-12",w:true},
    {n:"Face pull",t:"3 × 15",w:true},
    {n:"Curl biceps haltères",t:"3 × 10-12",w:true}]},
- {id:"legs",name:"Jambes",short:"Legs",icon:'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h3l.5 8-2 5 .5 7H8l-1-7 1-5z"/><path d="M15 2h-3l-.3 8 2.3 5-.5 7H16l1-7-1-5z"/></svg>',focus:"Quadriceps · ischios · fessiers",ex:[
+ {id:"legs",name:"Jambes",short:"Legs",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-figure_walk"/></svg>',focus:"Quadriceps · ischios · fessiers",ex:[
    {n:"Presse à cuisses",t:"4 × 10-12",w:true},
    {n:"Leg curl",t:"3 × 12-15",w:true},
    {n:"Leg extension",t:"3 × 12-15",w:true},
    {n:"Hip thrust machine",t:"3 × 10-12",w:true},
    {n:"Mollets debout",t:"4 × 15-20",w:true}]},
- {id:"full",name:"Full body + cardio",short:"Full",icon:'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/></svg>',focus:"Corps entier · cardio",ex:[
+ {id:"full",name:"Full body + cardio",short:"Full",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg>',focus:"Corps entier · cardio",ex:[
    {n:"Développé militaire machine",t:"3 × 10-12",w:true},
    {n:"Tirage vertical prise large",t:"3 × 10-12",w:true},
    {n:"Chest press",t:"3 × 10-12",w:true},
@@ -33,25 +33,25 @@ var DEFAULT_PROGRAM=[
 
 /* séance maison : force au poids du corps + cardio HIIT en alternance, sans matériel */
 var HOME_PROGRAM=[
- {id:"home-fb1",cat:"maison",name:"Full body 1",short:"FB1",icon:'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9"/></svg>',focus:"Poids du corps · corps entier",ex:[
+ {id:"home-fb1",cat:"maison",name:"Full body 1",short:"FB1",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-house_fill"/></svg>',focus:"Poids du corps · corps entier",ex:[
    {n:"Pompes",t:"4 × 10-15",w:false},
    {n:"Squats",t:"4 × 15-20",w:false},
    {n:"Fentes avant",t:"3 × 12",w:false},
    {n:"Gainage (planche)",t:"3 × 30-45 s",w:false},
    {n:"Superman (lombaires)",t:"3 × 15",w:false}]},
- {id:"home-hiit1",cat:"maison",name:"HIIT cardio 1",short:"HIIT1",icon:'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/></svg>',focus:"Cardio · circuit intense",ex:[
+ {id:"home-hiit1",cat:"maison",name:"HIIT cardio 1",short:"HIIT1",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg>',focus:"Cardio · circuit intense",ex:[
    {n:"Jumping jacks",t:"4 × 30 s",w:false},
    {n:"Mountain climbers",t:"4 × 30 s",w:false},
    {n:"Burpees",t:"4 × 10",w:false},
    {n:"Squat jumps",t:"4 × 15",w:false},
    {n:"Corde à sauter (ou sur place)",t:"4 × 45 s",w:false}]},
- {id:"home-fb2",cat:"maison",name:"Full body 2",short:"FB2",icon:'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9"/></svg>',focus:"Poids du corps · corps entier",ex:[
+ {id:"home-fb2",cat:"maison",name:"Full body 2",short:"FB2",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-house_fill"/></svg>',focus:"Poids du corps · corps entier",ex:[
    {n:"Pompes déclinées",t:"4 × 10-15",w:false},
    {n:"Squats sumo",t:"4 × 15",w:false},
    {n:"Fentes arrière",t:"3 × 12",w:false},
    {n:"Gainage latéral",t:"3 × 20-30 s",w:false},
    {n:"Dips sur chaise",t:"3 × 10-15",w:false}]},
- {id:"home-hiit2",cat:"maison",name:"HIIT cardio 2",short:"HIIT2",icon:'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/></svg>',focus:"Cardio · circuit intense",ex:[
+ {id:"home-hiit2",cat:"maison",name:"HIIT cardio 2",short:"HIIT2",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg>',focus:"Cardio · circuit intense",ex:[
    {n:"High knees",t:"4 × 30 s",w:false},
    {n:"Burpees",t:"4 × 12",w:false},
    {n:"Jumping lunges",t:"4 × 12",w:false},
@@ -379,6 +379,10 @@ function normalizeState(){
   if(!state.program.some(function(p){return p.cat==="maison";})){
     state.program=state.program.concat(JSON.parse(JSON.stringify(HOME_PROGRAM)));
   }
+  /* les icônes des jours sont sauvegardées avec le programme : on reprend celles du code
+     pour que les anciennes sauvegardes suivent les changements d'icônes */
+  var defIcons={};DEFAULT_PROGRAM.concat(HOME_PROGRAM).forEach(function(d){defIcons[d.id]=d.icon;});
+  state.program.forEach(function(p){if(defIcons[p.id])p.icon=defIcons[p.id];});
   if(["muscu","maison","running"].indexOf(state.sessionCategory)<0)state.sessionCategory="muscu";
   if(state.selDay>=state.program.length||state.selDay<0)state.selDay=0;
   if((state.program[state.selDay].cat||"muscu")!==state.sessionCategory&&state.sessionCategory!=="running"){
@@ -587,7 +591,7 @@ function exerciseRowHTML(e,mk){
   return '<div class="exrow'+(isDone?" done":"")+'" data-act="guidedJump" data-ex="'+esc(e.n)+'">'
     +'<div class="exrow-check">'+(isDone?'✓':(doneN>0?doneN+"/"+cnt:''))+'</div>'
     +'<div class="exrow-info"><h3>'+esc(e.n)+'</h3><div class="t">'+meta+'</div></div>'
-    +'<button class="exrow-x" data-act="'+removeAct+'" data-ex="'+esc(e.n)+'" title="'+(e.extra?"Supprimer":"Retirer aujourd’hui")+'">✕</button>'
+    +'<button class="exrow-x" data-act="'+removeAct+'" data-ex="'+esc(e.n)+'" title="'+(e.extra?"Supprimer":"Retirer aujourd’hui")+'"><svg class="ic-s" aria-hidden="true"><use href="#i-xmark"/></svg></button>'
     +'</div>';
 }
 /* recalcule seulement les compteurs/la barre de progression — pas les cartes d'exercice */
@@ -695,7 +699,7 @@ function renderRunningView(){
   $("runProgGoal").textContent=wk.goal;
   $("runProgSessions").innerHTML=[0,1,2].map(function(i){
     var done=!!state.runProg.done[i];
-    return '<div class="run-prog-s '+(done?"done":"")+'" data-act="runProgToggle" data-i="'+i+'"><div class="rs-check">✓</div><span>Séance '+(i+1)+' / 3</span></div>';
+    return '<div class="run-prog-s '+(done?"done":"")+'" data-act="runProgToggle" data-i="'+i+'"><div class="rs-check"><svg class="ic-s" aria-hidden="true"><use href="#i-checkmark"/></svg></div><span>Séance '+(i+1)+' / 3</span></div>';
   }).join("");
   var sugg=computeRunSuggestion(),suggEl=$("runProgSuggestion");
   if(sugg){
@@ -765,6 +769,7 @@ function setTick(exName,i){
   var p=state.program[state.selDay],mk=marksFor(p.id),e=findActiveEx(p,exName);if(!e)return;
   var arr=setsArrFor(mk,e);if(!arr[i])return;
   var nowDone=!arr[i].done;
+  haptic(nowDone?"medium":"light");
   arr[i]={done:nowDone,reps:nowDone?repsFor(mk,e):null};
   if(nowDone&&mk[exName].w==null&&e.w){var lw=lastWeight(exName);if(lw>0)mk[exName].w=lw;}
   save();refreshExerciseCard(exName);
@@ -893,12 +898,12 @@ function renderGuided(){
   $("gExSub").textContent=e.t+(last>0?" · dernière fois "+num(last)+" kg":"");
   var exPhoto=EX_PHOTOS[e.n];
   $("gExIcon").classList.toggle("has-photo",!!exPhoto);
-  $("gExIcon").innerHTML=exPhoto?'<img src="/fitness/img/exercises/'+exPhoto+'.jpg" alt="" class="guided-photo">':(p.icon||'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="3"/><circle cx="18.5" cy="12" r="3"/><line x1="8.5" y1="12" x2="15.5" y2="12"/></svg>');
+  $("gExIcon").innerHTML=exPhoto?'<img src="/fitness/img/exercises/'+exPhoto+'.jpg" alt="" class="guided-photo">':(p.icon||'<svg class="ic-s" aria-hidden="true"><use href="#i-dumbbell"/></svg>');
 
   var st=mk[e.n]||{},wv=(st.w!=null?st.w:last),rt=repTarget(e),rv=repsFor(mk,e),vals="";
-  if(e.w)vals+='<div class="val-group"><button data-act="w-" data-ex="'+esc(e.n)+'">−</button><div class="val"><b>'+num(wv)+'</b><span>KG</span></div><button data-act="w+" data-ex="'+esc(e.n)+'">＋</button></div>';
+  if(e.w)vals+='<div class="val-group"><button data-act="w-" data-ex="'+esc(e.n)+'"><svg class="ic-s" aria-hidden="true"><use href="#i-minus"/></svg></button><div class="val"><b>'+num(wv)+'</b><span>KG</span></div><button data-act="w+" data-ex="'+esc(e.n)+'"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button></div>';
   if(e.w&&rt)vals+='<div class="guided-sep"></div>';
-  if(rt)vals+='<div class="val-group"><button data-act="r-" data-ex="'+esc(e.n)+'">−</button><div class="val"><b style="color:var(--accent-text)">'+rv+'</b><span>REPS</span></div><button data-act="r+" data-ex="'+esc(e.n)+'">＋</button></div>';
+  if(rt)vals+='<div class="val-group"><button data-act="r-" data-ex="'+esc(e.n)+'"><svg class="ic-s" aria-hidden="true"><use href="#i-minus"/></svg></button><div class="val"><b style="color:var(--accent-text)">'+rv+'</b><span>REPS</span></div><button data-act="r+" data-ex="'+esc(e.n)+'"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button></div>';
   if(!vals)vals='<div class="val"><b>'+arr.length+'</b><span>SÉRIES</span></div>';
   $("gVals").innerHTML=vals;
 
@@ -979,6 +984,7 @@ function openComplete(data){
   else{var remain=Math.max(0,data.bestStreak-data.streak);sub=remain>0?("Ton meilleur streak est à "+data.bestStreak+" — encore "+remain+" jour"+(remain>1?"s":"")):"Continue comme ça !";}
   $("cpStreakSub").textContent=sub;
   $("completeView").classList.add("on");
+  haptic("success");
 }
 function closeComplete(){var v=$("completeView");if(v)v.classList.remove("on");}
 
@@ -1058,11 +1064,11 @@ function renderWeekSummary(){
   var thisCount=counts.reduce(function(a,b){return a+b;},0),delta=thisCount-prevCount;
   $("weekDelta").textContent=delta===0?"":(delta>0?"+":"")+delta+" séance"+(Math.abs(delta)>1?"s":"")+" vs sem. dernière";
   var badges=[],streak=computeStreak();
-  if(streak>0)badges.push({ic:'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5a2.5 2.5 0 0 0 5 0c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7.5 7.5 0 1 1-15 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 1 2z"/></svg>',lab:streak+" jour"+(streak>1?"s":"")+" d'affilée"});
-  var pr=latestPR();if(pr)badges.push({ic:'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4H4.8A1.8 1.8 0 0 0 3 5.8v.4A3.8 3.8 0 0 0 6.8 10H7"/><path d="M17 4h2.2A1.8 1.8 0 0 1 21 5.8v.4A3.8 3.8 0 0 1 17.2 10H17"/><path d="M7 3h10v6.5a5 5 0 0 1-10 0V3z"/><path d="M9.5 15.5v1.3c0 .5-.35.9-.83 1.1C7.55 18.3 7 19.4 7 21"/><path d="M14.5 15.5v1.3c0 .5.35.9.83 1.1.62.4 1.17 1.5 1.17 3.1"/><line x1="5" y1="21" x2="19" y2="21"/></svg>',lab:"Record : "+esc(pr.n)});
+  if(streak>0)badges.push({ic:'<svg class="ic-s" aria-hidden="true"><use href="#i-flame_fill"/></svg>',lab:streak+" jour"+(streak>1?"s":"")+" d'affilée"});
+  var pr=latestPR();if(pr)badges.push({ic:'<svg class="ic-s" aria-hidden="true"><use href="#i-trophy_fill"/></svg>',lab:"Record : "+esc(pr.n)});
   var wt=state.water||{ml:0},waterGoalMl=Math.max(500,Number(state.waterGoal||3)*1000);
-  if(Number(wt.ml||0)>=waterGoalMl)badges.push({ic:'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5s7 8.2 7 13a7 7 0 0 1-14 0c0-4.8 7-13 7-13z"/></svg>',lab:"Objectif eau atteint"});
-  if(!badges.length)badges.push({ic:'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="3"/><circle cx="18.5" cy="12" r="3"/><line x1="8.5" y1="12" x2="15.5" y2="12"/></svg>',lab:"Continue comme ça"});
+  if(Number(wt.ml||0)>=waterGoalMl)badges.push({ic:'<svg class="ic-s" aria-hidden="true"><use href="#i-drop_fill"/></svg>',lab:"Objectif eau atteint"});
+  if(!badges.length)badges.push({ic:'<svg class="ic-s" aria-hidden="true"><use href="#i-dumbbell"/></svg>',lab:"Continue comme ça"});
   $("badgeRow").innerHTML=badges.map(function(b){return '<div class="badge"><div class="ic">'+b.ic+'</div><div class="lab">'+b.lab+'</div></div>';}).join("");
 }
 function renderProgress(){
@@ -1122,8 +1128,8 @@ function renderCardio(){
     var pace=(r.dist>0&&r.dur>0)?fmtPace(r.dur/r.dist)+" /km":"—";
     var hasRoute=Array.isArray(r.pts)&&r.pts.length>1;
     return '<div class="runrow"><div class="ri"><b>'+num(r.dist)+' km</b><span>'+fmtDate(r.d)+' · '+num(r.dur)+' min'+(r.kcal?' · '+Math.round(r.kcal)+' kcal':'')+'</span></div><div class="rp">'+pace+'</div>'
-      +(hasRoute?'<button class="mapbtn" data-act="viewRunMap" data-id="'+esc(r.id||"")+'"><svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="3,6 9,3 15,6 21,3 21,18 15,21 9,18 3,21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg></button>':'')
-      +'<button class="del" data-act="delRun" data-id="'+esc(r.id||"")+'">×</button></div>';
+      +(hasRoute?'<button class="mapbtn" data-act="viewRunMap" data-id="'+esc(r.id||"")+'"><svg class="ic-s" aria-hidden="true"><use href="#i-map_fill"/></svg></button>':'')
+      +'<button class="del" data-act="delRun" data-id="'+esc(r.id||"")+'"><svg class="ic-s" aria-hidden="true"><use href="#i-xmark"/></svg></button></div>';
   }).join(""):'<div class="empty">Aucune course. Ajoute-en une, ou branche Strava en étape 2.</div>';
 }
 function renderSteps(){
@@ -1520,7 +1526,7 @@ function renderMeals(){
   var byType={};Object.keys(itemIds).forEach(function(t){byType[t]=[];});
   state.meals.forEach(function(m,i){var t=byType[m.type]?m.type:"Collation";byType[t].push({m:m,i:i});});
   Object.keys(ids).forEach(function(type){var total=byType[type].reduce(function(s,x){return s+Number(x.m.kcal||0);},0);$(ids[type]).textContent=Math.round(total)+" / "+limits[type]+" kcal";
-    $(itemIds[type]).innerHTML=byType[type].map(function(x){var m=x.m;return '<div class="meal"><div class="mi"><b>'+esc(m.name)+'</b><div class="d">'+num(m.qty||100)+' g · '+num(m.protein||0)+' g prot.</div></div><div class="kc">'+Math.round(Number(m.kcal||0))+' kcal</div><button class="del" data-act="delMeal" data-i="'+x.i+'">×</button></div>';}).join("");
+    $(itemIds[type]).innerHTML=byType[type].map(function(x){var m=x.m;return '<div class="meal"><div class="mi"><b>'+esc(m.name)+'</b><div class="d">'+num(m.qty||100)+' g · '+num(m.protein||0)+' g prot.</div></div><div class="kc">'+Math.round(Number(m.kcal||0))+' kcal</div><button class="del" data-act="delMeal" data-i="'+x.i+'"><svg class="ic-s" aria-hidden="true"><use href="#i-xmark"/></svg></button></div>';}).join("");
   });
   renderWeeklyMenuIfNeeded();
   renderGrocerySummary();
@@ -1565,7 +1571,7 @@ function openFavorites(){
   var list=$("favoriteList");
   list.innerHTML=state.foodFavorites.length?state.foodFavorites.slice().reverse().map(function(f,i){
     var real=state.foodFavorites.length-1-i;
-    return '<div class="favorite-item"><div class="fi"><b>'+esc(f.name)+'</b><span>'+num(f.qty||100)+' g · '+num(f.kcal||0)+' kcal · '+num(f.protein||0)+' g prot.</span></div><button data-act="favUse" data-i="'+real+'">Ajouter</button><button data-act="favDelete" data-i="'+real+'">×</button></div>';
+    return '<div class="favorite-item"><div class="fi"><b>'+esc(f.name)+'</b><span>'+num(f.qty||100)+' g · '+num(f.kcal||0)+' kcal · '+num(f.protein||0)+' g prot.</span></div><button data-act="favUse" data-i="'+real+'">Ajouter</button><button data-act="favDelete" data-i="'+real+'"><svg class="ic-s" aria-hidden="true"><use href="#i-xmark"/></svg></button></div>';
   }).join(""):'<div class="empty">Aucun aliment enregistré. Ajoute-en un depuis le formulaire.</div>';
   $("favoritesModal").classList.add("on");
 }
@@ -1590,7 +1596,7 @@ function renderGrocerySummary(){
 }
 function groceryRowsHTML(list,key){
   return list.length?list.map(function(x,i){
-    return '<div class="grocery-item"><label><input type="checkbox" data-act="groceryToggle" data-list="'+key+'" data-i="'+i+'"'+(x.done?" checked":"")+'><span class="'+(x.done?"done":"")+'">'+esc(x.n)+'</span></label><button class="del" data-act="groceryDel" data-list="'+key+'" data-i="'+i+'">×</button></div>';
+    return '<div class="grocery-item"><label><input type="checkbox" data-act="groceryToggle" data-list="'+key+'" data-i="'+i+'"'+(x.done?" checked":"")+'><span class="'+(x.done?"done":"")+'">'+esc(x.n)+'</span></label><button class="del" data-act="groceryDel" data-list="'+key+'" data-i="'+i+'"><svg class="ic-s" aria-hidden="true"><use href="#i-xmark"/></svg></button></div>';
   }).join(""):'<div class="empty">Rien ici.</div>';
 }
 function openGrocery(){
@@ -1601,7 +1607,7 @@ function openGrocery(){
 function closeGrocery(){$("groceryModal").classList.remove("on");}
 function toggleGrocery(key,i){
   var item=state.groceryList[key]&&state.groceryList[key][i];if(!item)return;
-  item.done=!item.done;save();openGrocery();renderGrocerySummary();
+  item.done=!item.done;haptic("light");save();openGrocery();renderGrocerySummary();
 }
 function deleteGrocery(key,i){
   var list=state.groceryList[key];if(!list||!list[i])return;
@@ -1650,7 +1656,7 @@ function renderProfile(){
   $("fStartDate").value=state.profile.startDate||START_DATE;
   $("fStart").value=state.profile.start;$("fTarget").value=state.profile.target;$("fCal").value=state.profile.cal;
   $("fCarbs").value=state.macro.carbs;$("fProt").value=state.macro.protein;$("fFat").value=state.macro.fat;$("fWater").value=state.waterGoal;
-  $("progList").innerHTML=state.program.map(function(p){return '<div class="progline"><span class="e">'+p.icon+'</span><div class="n"><b>'+esc(p.name)+'</b><span>'+esc(p.focus)+' · '+p.ex.length+' exercices</span></div><button class="link" data-act="editDay" data-id="'+esc(p.id)+'">Modifier</button></div>';}).join("");
+  $("progList").innerHTML=state.program.map(function(p){return '<button class="lrow" data-act="editDay" data-id="'+esc(p.id)+'"><span class="lrow-ic">'+p.icon+'</span><span class="lrow-t"><b>'+esc(p.name)+'</b><small>'+esc(p.focus)+' · '+p.ex.length+' exercices</small></span><svg class="ic-s lrow-chev" aria-hidden="true"><use href="#i-chevron_right"/></svg></button>';}).join("");
 }
 
 /* édition du programme */
@@ -1670,7 +1676,7 @@ function renderEditDayList(){
       +'<input type="text" data-i="'+i+'" data-f="t" value="'+esc(e.t)+'" placeholder="ex : 4 × 8-10">'
       +'</div>'
       +'<label class="ed-w"><input type="checkbox" data-i="'+i+'" data-f="w" '+(e.w?"checked":"")+'>Charge</label>'
-      +'<button type="button" class="ed-rm" data-act="edRemoveEx" data-i="'+i+'">✕</button>'
+      +'<button type="button" class="ed-rm" data-act="edRemoveEx" data-i="'+i+'"><svg class="ic-s" aria-hidden="true"><use href="#i-xmark"/></svg></button>'
       +'</div>';
   }).join("")||'<div class="empty">Aucun exercice. Ajoutes-en un ci-dessous.</div>';
 }
@@ -1718,6 +1724,7 @@ function showPage(id){
   else if(id==="water")renderWater();
   else if(id==="profile")renderProfile();
   try{window.scrollTo({top:0,behavior:"smooth"});}catch(e){window.scrollTo(0,0);}
+  updateNavbar();
 }
 
 /* modals */
@@ -1899,7 +1906,7 @@ function renderFoodResults(list,q){
     return;
   }
   box.innerHTML=list.map(function(f,i){
-    return '<button class="food-result" type="button" data-act="foodPick" data-i="'+i+'"><b>'+(f.local?'<svg class="ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9"/></svg>'+" ":"")+esc(f.name)+'</b><span>'+(f.kcal?Math.round(f.kcal)+" kcal / 100 g":"kcal inconnues")+'</span></button>';
+    return '<button class="food-result" type="button" data-act="foodPick" data-i="'+i+'"><b>'+(f.local?'<svg class="ic-s" aria-hidden="true"><use href="#i-house_fill"/></svg>'+" ":"")+esc(f.name)+'</b><span>'+(f.kcal?Math.round(f.kcal)+" kcal / 100 g":"kcal inconnues")+'</span></button>';
   }).join("");
 }
 var foodSearchT=null;
@@ -2147,7 +2154,7 @@ document.addEventListener("click",function(e){
       break;
     case "guidedStart": openGuidedSession(); break;
     case "guidedJump": openGuidedSession(ex); break;
-    case "guidedClose": closeGuided(); showPage("today"); break;
+    case "guidedClose": closeGuided(); showPage(state.page||"today"); break;
     case "guidedList": closeGuided(); renderSession(); break;
     case "guidedNext": guidedAdvance(); break;
     case "guidedSkip": guidedSkip(); break;
@@ -2258,13 +2265,128 @@ document.addEventListener("change",function(e){var el=e.target;
   else if(el.id==="importFile"&&el.files&&el.files[0]){importData(el.files[0]);el.value="";}
 });
 document.querySelectorAll(".nav button").forEach(function(b){
-  function navGo(ev){if(ev)ev.preventDefault();showPage(b.dataset.page);}
+  function navGo(ev){if(ev)ev.preventDefault();if(state.page!==b.dataset.page)haptic("light");showPage(b.dataset.page);}
   b.addEventListener("click",navGo);
   b.addEventListener("touchend",navGo,{passive:false});
 });
-document.addEventListener("click",function(e){ // close modal on backdrop
-  if(e.target.classList&&e.target.classList.contains("modal"))e.target.classList.remove("on");
+/* Fermer une feuille passe par son bouton Fermer/Annuler, pour exécuter son nettoyage
+   (caméra du scanner, code-barres en attente…) comme un tap sur le bouton. */
+function dismissSheet(modal){
+  var b=modal.querySelector('[data-act$="Close"]');
+  if(b)b.click();else modal.classList.remove("on");
+}
+document.addEventListener("click",function(e){
+  if(e.target.classList&&e.target.classList.contains("modal"))dismissSheet(e.target);
 });
+
+/* Glisser une feuille vers le bas pour la fermer (comme les sheets iOS). Le geste ne
+   démarre que vers le bas, et pas si la zone touchée a déjà défilé. */
+(function(){
+  var sheet=null,modal=null,y0=0,x0=0,dy=0,t0=0,dragging=false,decided=false;
+  function scrolledUp(el,stop){for(;el&&el!==stop;el=el.parentElement){if(el.scrollTop>0)return true;}return !!stop&&stop.scrollTop>0;}
+  document.addEventListener("touchstart",function(e){
+    var s=e.target.closest&&e.target.closest(".modal.on .sheet");
+    if(!s||e.touches.length!==1||e.target.closest("input,textarea,select,video"))return;
+    sheet=s;modal=s.parentElement;y0=e.touches[0].clientY;x0=e.touches[0].clientX;dy=0;t0=Date.now();dragging=false;decided=false;
+  },{passive:true});
+  document.addEventListener("touchmove",function(e){
+    if(!sheet)return;
+    var ddy=e.touches[0].clientY-y0,ddx=e.touches[0].clientX-x0;
+    if(!decided){
+      if(Math.abs(ddy)<6&&Math.abs(ddx)<6)return;
+      decided=true;
+      dragging=ddy>0&&Math.abs(ddy)>Math.abs(ddx)&&!scrolledUp(e.target,sheet);
+      if(!dragging){sheet=null;return;}
+      sheet.style.transition="none";
+    }
+    dy=Math.max(0,ddy);
+    sheet.style.transform="translateY("+dy+"px)";
+    e.preventDefault();
+  },{passive:false});
+  function end(){
+    if(!sheet)return;
+    var s=sheet,m=modal,speed=dy/Math.max(1,Date.now()-t0);sheet=null;
+    if(!dragging)return;
+    s.style.transition="transform .22s ease";
+    if(dy>110||speed>.6){
+      s.style.transform="translateY(100%)";
+      setTimeout(function(){s.style.transition="";s.style.transform="";dismissSheet(m);},200);
+    }else{
+      s.style.transform="";
+      setTimeout(function(){s.style.transition="";},240);
+    }
+  }
+  document.addEventListener("touchend",end);
+  document.addEventListener("touchcancel",end);
+})();
+
+/* Glisser depuis le bord gauche pour revenir en arrière sur les écrans plein écran.
+   Pas sur la course GPS en direct : y revenir en arrière abandonne la course. */
+(function(){
+  var BACK={guidedView:"guidedClose",completeView:"completeClose"};
+  var view=null,x0=0,y0=0,dx=0,t0=0,dragging=false,decided=false;
+  document.addEventListener("touchstart",function(e){
+    var v=e.target.closest&&e.target.closest("#guidedView.on,#completeView.on");
+    if(!v||e.touches.length!==1||e.touches[0].clientX>28)return;
+    view=v;x0=e.touches[0].clientX;y0=e.touches[0].clientY;dx=0;t0=Date.now();dragging=false;decided=false;
+  },{passive:true});
+  document.addEventListener("touchmove",function(e){
+    if(!view)return;
+    var ddx=e.touches[0].clientX-x0,ddy=e.touches[0].clientY-y0;
+    if(!decided){
+      if(Math.abs(ddx)<6&&Math.abs(ddy)<6)return;
+      decided=true;dragging=ddx>0&&Math.abs(ddx)>Math.abs(ddy);
+      if(!dragging){view=null;return;}
+      view.style.transition="none";
+    }
+    dx=Math.max(0,ddx);
+    view.style.transform="translateX("+dx+"px)";
+    e.preventDefault();
+  },{passive:false});
+  function end(){
+    if(!view)return;
+    var v=view,speed=dx/Math.max(1,Date.now()-t0);view=null;
+    if(!dragging)return;
+    v.style.transition="transform .22s ease";
+    if(dx>window.innerWidth*.35||speed>.6){
+      v.style.transform="translateX(100%)";
+      setTimeout(function(){v.style.transition="";v.style.transform="";var b=v.querySelector('[data-act="'+BACK[v.id]+'"]');if(b)b.click();},200);
+    }else{
+      v.style.transform="";
+      setTimeout(function(){v.style.transition="";},240);
+    }
+  }
+  document.addEventListener("touchend",end);
+  document.addEventListener("touchcancel",end);
+})();
+
+/* Barre de titre compacte : quand le grand titre passe sous le haut de l'écran, il réapparaît
+   en petit au centre d'une barre floutée, comme dans Réglages. */
+var PAGE_TITLES={today:"Accueil",session:"Séance",progress:"Progrès",meals:"Alimentation",water:"Hydratation",profile:"Profil"};
+function updateNavbar(){
+  var bar=$("iosNavbar");if(!bar)return;
+  var page=document.querySelector(".page.on");if(!page)return;
+  var mark=page.querySelector(".meals-title h1")||document.querySelector(".topbar");
+  var show=!!mark&&mark.getBoundingClientRect().bottom<bar.offsetHeight;
+  $("iosNavTitle").textContent=PAGE_TITLES[page.id]||"";
+  bar.classList.toggle("on",show);
+}
+window.addEventListener("scroll",updateNavbar,{passive:true});
+
+/* Retour haptique : moteur Taptic via le plugin Capacitor dans l'app iOS,
+   vibration courte ailleurs quand le navigateur le permet (pas sur iPhone Safari). */
+function haptic(kind){
+  try{
+    var C=window.Capacitor;
+    var H=C&&C.isNativePlatform&&C.isNativePlatform()&&((C.Plugins&&C.Plugins.Haptics)||(C.registerPlugin&&C.registerPlugin("Haptics")));
+    if(H){
+      if(kind==="success")H.notification({type:"SUCCESS"});
+      else H.impact({style:kind==="medium"?"MEDIUM":"LIGHT"});
+      return;
+    }
+    if(navigator.vibrate)navigator.vibrate(kind==="success"?[20,40,20]:10);
+  }catch(e){}
+}
 
 var EVO_BOOTED=false;
 window.EVO_BOOT_OK=false;
