@@ -884,6 +884,7 @@ function renderGuided(){
   list.forEach(function(x){var a=setsArrFor(mk,x);totalSets+=a.length;doneSets+=a.filter(function(s){return s.done;}).length;});
   $("gProgBar").style.width=(totalSets?doneSets/totalSets*100:0)+"%";
   $("gExN").textContent=(guidedIndex+1)+" / "+list.length;
+  $("gPrevBtn").disabled=guidedIndex<=0;
   $("gSessName").textContent=p.name;
   $("gExName").textContent=e.n;
   var last=lastWeight(e.n);
@@ -925,6 +926,12 @@ function guidedSkip(){
   var list=currentGuidedList();
   if(!list.length)return;
   if(guidedIndex<list.length-1)guidedIndex++;else toast("Dernier exercice");
+  renderGuided();
+}
+function guidedPrev(){
+  var list=currentGuidedList();
+  if(!list.length)return;
+  if(guidedIndex>0)guidedIndex--;else toast("Premier exercice");
   renderGuided();
 }
 function guidedFinishNow(){
@@ -2084,6 +2091,7 @@ document.addEventListener("click",function(e){
     case "guidedList": closeGuided(); renderSession(); break;
     case "guidedNext": guidedAdvance(); break;
     case "guidedSkip": guidedSkip(); break;
+    case "guidedPrev": guidedPrev(); break;
     case "guidedFinishNow": guidedFinishNow(); break;
     case "goRunning": showPage("session"); switchSessionCategory("running"); break;
     case "quicklogOpen": $("quicklogSheet").classList.add("on"); break;
