@@ -23,6 +23,7 @@
   "homepage": "https://github.com/ilyasbenslamabenz-pixel/fitness#readme",
   "dependencies": {
     "@capacitor/core": "^8.5.2",
+    "@capacitor/haptics": "^8.0.2",
     "@capacitor/ios": "^8.5.2"
   },
   "devDependencies": {

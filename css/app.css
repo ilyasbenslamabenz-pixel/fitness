@@ -269,12 +269,28 @@ a{color:inherit;text-decoration:none}
 .pline{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--hair);font-size:14px}
 .pline:last-child{border-bottom:0}
 .pline .s{font-size:12.5px;color:var(--muted)}
-.progline{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--hair)}
-.progline:last-child{border-bottom:0}
-.progline .e{font-size:20px}
-.progline .n{flex:1}
-.progline .n b{font-size:14.5px}
-.progline .n span{font-size:12px;color:var(--muted);display:block}
+/* listes groupées façon Réglages : en-tête de section hors carte, lignes 17 pt,
+   séparateur qui commence après l'icône, chevron à droite */
+.group-h{font-size:17px;font-weight:700;color:var(--muted);margin:24px 16px 8px}
+.group-f{font-size:13px;color:var(--muted);line-height:1.35;margin:8px 16px 0}
+.card.list{padding:0 0 0 16px}
+.lrow{position:relative;display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:8px 16px 8px 0;
+  text-align:left;font-size:17px;color:var(--text);background:none;border:0}
+.lrow::after{content:"";position:absolute;left:42px;right:0;bottom:0;height:1px;background:var(--hair);transform:scaleY(.5)}
+.lrow:last-child::after{display:none}
+button.lrow:active{background:var(--surface2)}
+.lrow-ic{width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,.07);border:1px solid var(--hair);
+  display:grid;place-items:center;font-size:17px;flex:0 0 auto}
+.lrow-t{flex:1;min-width:0}
+.lrow-t b{display:block;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lrow-t small{display:block;font-size:13px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lrow-v{width:5.5em;flex:0 0 auto;background:none;border:0;padding:0;color:var(--muted);font-family:var(--font);font-size:17px;text-align:right}
+.lrow-v:focus{outline:none;color:var(--text)}
+.lrow-date{width:auto}
+.lrow-u{flex:0 0 auto;color:var(--muted)}
+.lrow-chev{color:var(--faint);font-size:14px;flex:0 0 auto}
+.lrow-danger{justify-content:center;color:var(--warn)}
+.lrow-danger::after{display:none}
 
 /* tab bar iOS 26 : capsule de verre flottante, l'onglet actif est posé sur une pastille */
 .nav{position:fixed;left:14px;right:14px;bottom:max(10px,calc(var(--safe-bot) - 8px));z-index:50;max-width:500px;margin:0 auto;
@@ -305,7 +321,7 @@ a{color:inherit;text-decoration:none}
 .wbig input{width:120px;text-align:center;font-family:var(--display);font-weight:700;font-size:40px;background:transparent;border:0;color:var(--text)}
 .wbig input:focus{outline:none}
 
-.toast{position:fixed;left:50%;bottom:calc(86px + var(--safe-bot));transform:translateX(-50%);background:var(--text);color:var(--bg);
+.toast{position:fixed;left:50%;bottom:calc(86px + var(--safe-bot));transform:translateX(-50%);background:var(--nav-bg);color:var(--text);border:1px solid var(--nav-border);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);
   font-weight:600;font-size:13.5px;padding:11px 18px;border-radius:999px;z-index:90;box-shadow:0 10px 30px -8px rgba(0,0,0,.6)}
 .toast[hidden]{display:none}
 .btn[hidden]{display:none}
@@ -335,10 +351,10 @@ a{color:inherit;text-decoration:none}
 .stepper input.wval.up{color:var(--accent-text)}
 .stepper small.upk{color:var(--accent-text)}
 /* snackbar with action */
-.snack{position:fixed;left:16px;right:16px;bottom:calc(82px + var(--safe-bot));max-width:488px;margin:0 auto;z-index:75;display:none;align-items:center;gap:12px;background:var(--text);color:var(--bg);border-radius:12px;padding:11px 11px 11px 16px;box-shadow:0 12px 30px -10px rgba(0,0,0,.6)}
+.snack{position:fixed;left:16px;right:16px;bottom:calc(82px + var(--safe-bot));max-width:488px;margin:0 auto;z-index:75;display:none;align-items:center;gap:12px;background:var(--nav-bg);color:var(--text);border:1px solid var(--nav-border);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);border-radius:18px;padding:8px 8px 8px 18px;box-shadow:0 12px 30px -10px rgba(0,0,0,.6)}
 .snack.on{display:flex}
-.snack .msg{flex:1;font-size:13.5px;font-weight:600}
-.snack button{background:var(--bg);color:var(--text);font-weight:600;font-size:13px;padding:9px 15px;border-radius:9px}
+.snack .msg{flex:1;font-size:15px;font-weight:600}
+.snack button{background:none;color:var(--primary);font-weight:600;font-size:17px;padding:10px 12px;border-radius:12px}
 
 /* quick log + energy + cardio */
 .qlog{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
@@ -574,7 +590,7 @@ a{color:inherit;text-decoration:none}
 .complete-streak b{font-size:14px;display:block}
 .complete-streak span{font-size:11.5px;color:var(--muted);margin-top:1px;display:block}
 .complete-bottom{position:relative;padding:0 22px calc(22px + var(--safe-bot))}
-.complete-home{display:block;padding:16px;border-radius:999px;background:linear-gradient(90deg,#4fb2ff,var(--primary),var(--accent));text-align:center;font-weight:700;font-size:15px;color:#ffffff;box-shadow:var(--shadow-pop);transition:transform .15s,filter .15s}
+.complete-home{display:block;width:100%;padding:16px;border-radius:999px;background:linear-gradient(90deg,#4fb2ff,var(--primary),var(--accent));text-align:center;font-weight:700;font-size:15px;color:#ffffff;box-shadow:var(--shadow-pop);transition:transform .15s,filter .15s}
 .complete-home:active{transform:scale(.97);filter:brightness(1.1)}
 
 /* ===== contrôles iOS ===== */
@@ -597,3 +613,9 @@ a{color:inherit;text-decoration:none}
 .ed-w input{width:44px;height:27px}
 .ed-w input::after{width:23px;height:23px}
 .ed-w input:checked::after{transform:translateX(17px)}
+/* barre de titre compacte (grand titre réduit au défilement) */
+.ios-navbar{position:fixed;top:0;left:0;right:0;z-index:40;height:calc(44px + var(--safe-top));padding-top:var(--safe-top);
+  display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:17px;font-weight:600;color:var(--text);
+  background:var(--nav-bg);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);
+  border-bottom:1px solid var(--nav-border);opacity:0;pointer-events:none;transition:opacity .2s ease}
+.ios-navbar.on{opacity:1}

@@ -769,6 +769,7 @@ function setTick(exName,i){
   var p=state.program[state.selDay],mk=marksFor(p.id),e=findActiveEx(p,exName);if(!e)return;
   var arr=setsArrFor(mk,e);if(!arr[i])return;
   var nowDone=!arr[i].done;
+  haptic(nowDone?"medium":"light");
   arr[i]={done:nowDone,reps:nowDone?repsFor(mk,e):null};
   if(nowDone&&mk[exName].w==null&&e.w){var lw=lastWeight(exName);if(lw>0)mk[exName].w=lw;}
   save();refreshExerciseCard(exName);
@@ -983,6 +984,7 @@ function openComplete(data){
   else{var remain=Math.max(0,data.bestStreak-data.streak);sub=remain>0?("Ton meilleur streak est à "+data.bestStreak+" — encore "+remain+" jour"+(remain>1?"s":"")):"Continue comme ça !";}
   $("cpStreakSub").textContent=sub;
   $("completeView").classList.add("on");
+  haptic("success");
 }
 function closeComplete(){var v=$("completeView");if(v)v.classList.remove("on");}
 
@@ -1605,7 +1607,7 @@ function openGrocery(){
 function closeGrocery(){$("groceryModal").classList.remove("on");}
 function toggleGrocery(key,i){
   var item=state.groceryList[key]&&state.groceryList[key][i];if(!item)return;
-  item.done=!item.done;save();openGrocery();renderGrocerySummary();
+  item.done=!item.done;haptic("light");save();openGrocery();renderGrocerySummary();
 }
 function deleteGrocery(key,i){
   var list=state.groceryList[key];if(!list||!list[i])return;
@@ -1654,7 +1656,7 @@ function renderProfile(){
   $("fStartDate").value=state.profile.startDate||START_DATE;
   $("fStart").value=state.profile.start;$("fTarget").value=state.profile.target;$("fCal").value=state.profile.cal;
   $("fCarbs").value=state.macro.carbs;$("fProt").value=state.macro.protein;$("fFat").value=state.macro.fat;$("fWater").value=state.waterGoal;
-  $("progList").innerHTML=state.program.map(function(p){return '<div class="progline"><span class="e">'+p.icon+'</span><div class="n"><b>'+esc(p.name)+'</b><span>'+esc(p.focus)+' · '+p.ex.length+' exercices</span></div><button class="link" data-act="editDay" data-id="'+esc(p.id)+'">Modifier</button></div>';}).join("");
+  $("progList").innerHTML=state.program.map(function(p){return '<button class="lrow" data-act="editDay" data-id="'+esc(p.id)+'"><span class="lrow-ic">'+p.icon+'</span><span class="lrow-t"><b>'+esc(p.name)+'</b><small>'+esc(p.focus)+' · '+p.ex.length+' exercices</small></span><svg class="ic-s lrow-chev" aria-hidden="true"><use href="#i-chevron_right"/></svg></button>';}).join("");
 }
 
 /* édition du programme */
@@ -1722,6 +1724,7 @@ function showPage(id){
   else if(id==="water")renderWater();
   else if(id==="profile")renderProfile();
   try{window.scrollTo({top:0,behavior:"smooth"});}catch(e){window.scrollTo(0,0);}
+  updateNavbar();
 }
 
 /* modals */
@@ -2151,7 +2154,7 @@ document.addEventListener("click",function(e){
       break;
     case "guidedStart": openGuidedSession(); break;
     case "guidedJump": openGuidedSession(ex); break;
-    case "guidedClose": closeGuided(); showPage("today"); break;
+    case "guidedClose": closeGuided(); showPage(state.page||"today"); break;
     case "guidedList": closeGuided(); renderSession(); break;
     case "guidedNext": guidedAdvance(); break;
     case "guidedSkip": guidedSkip(); break;
@@ -2262,13 +2265,128 @@ document.addEventListener("change",function(e){var el=e.target;
   else if(el.id==="importFile"&&el.files&&el.files[0]){importData(el.files[0]);el.value="";}
 });
 document.querySelectorAll(".nav button").forEach(function(b){
-  function navGo(ev){if(ev)ev.preventDefault();showPage(b.dataset.page);}
+  function navGo(ev){if(ev)ev.preventDefault();if(state.page!==b.dataset.page)haptic("light");showPage(b.dataset.page);}
   b.addEventListener("click",navGo);
   b.addEventListener("touchend",navGo,{passive:false});
 });
-document.addEventListener("click",function(e){ // close modal on backdrop
-  if(e.target.classList&&e.target.classList.contains("modal"))e.target.classList.remove("on");
+/* Fermer une feuille passe par son bouton Fermer/Annuler, pour exécuter son nettoyage
+   (caméra du scanner, code-barres en attente…) comme un tap sur le bouton. */
+function dismissSheet(modal){
+  var b=modal.querySelector('[data-act$="Close"]');
+  if(b)b.click();else modal.classList.remove("on");
+}
+document.addEventListener("click",function(e){
+  if(e.target.classList&&e.target.classList.contains("modal"))dismissSheet(e.target);
 });
+
+/* Glisser une feuille vers le bas pour la fermer (comme les sheets iOS). Le geste ne
+   démarre que vers le bas, et pas si la zone touchée a déjà défilé. */
+(function(){
+  var sheet=null,modal=null,y0=0,x0=0,dy=0,t0=0,dragging=false,decided=false;
+  function scrolledUp(el,stop){for(;el&&el!==stop;el=el.parentElement){if(el.scrollTop>0)return true;}return !!stop&&stop.scrollTop>0;}
+  document.addEventListener("touchstart",function(e){
+    var s=e.target.closest&&e.target.closest(".modal.on .sheet");
+    if(!s||e.touches.length!==1||e.target.closest("input,textarea,select,video"))return;
+    sheet=s;modal=s.parentElement;y0=e.touches[0].clientY;x0=e.touches[0].clientX;dy=0;t0=Date.now();dragging=false;decided=false;
+  },{passive:true});
+  document.addEventListener("touchmove",function(e){
+    if(!sheet)return;
+    var ddy=e.touches[0].clientY-y0,ddx=e.touches[0].clientX-x0;
+    if(!decided){
+      if(Math.abs(ddy)<6&&Math.abs(ddx)<6)return;
+      decided=true;
+      dragging=ddy>0&&Math.abs(ddy)>Math.abs(ddx)&&!scrolledUp(e.target,sheet);
+      if(!dragging){sheet=null;return;}
+      sheet.style.transition="none";
+    }
+    dy=Math.max(0,ddy);
+    sheet.style.transform="translateY("+dy+"px)";
+    e.preventDefault();
+  },{passive:false});
+  function end(){
+    if(!sheet)return;
+    var s=sheet,m=modal,speed=dy/Math.max(1,Date.now()-t0);sheet=null;
+    if(!dragging)return;
+    s.style.transition="transform .22s ease";
+    if(dy>110||speed>.6){
+      s.style.transform="translateY(100%)";
+      setTimeout(function(){s.style.transition="";s.style.transform="";dismissSheet(m);},200);
+    }else{
+      s.style.transform="";
+      setTimeout(function(){s.style.transition="";},240);
+    }
+  }
+  document.addEventListener("touchend",end);
+  document.addEventListener("touchcancel",end);
+})();
+
+/* Glisser depuis le bord gauche pour revenir en arrière sur les écrans plein écran.
+   Pas sur la course GPS en direct : y revenir en arrière abandonne la course. */
+(function(){
+  var BACK={guidedView:"guidedClose",completeView:"completeClose"};
+  var view=null,x0=0,y0=0,dx=0,t0=0,dragging=false,decided=false;
+  document.addEventListener("touchstart",function(e){
+    var v=e.target.closest&&e.target.closest("#guidedView.on,#completeView.on");
+    if(!v||e.touches.length!==1||e.touches[0].clientX>28)return;
+    view=v;x0=e.touches[0].clientX;y0=e.touches[0].clientY;dx=0;t0=Date.now();dragging=false;decided=false;
+  },{passive:true});
+  document.addEventListener("touchmove",function(e){
+    if(!view)return;
+    var ddx=e.touches[0].clientX-x0,ddy=e.touches[0].clientY-y0;
+    if(!decided){
+      if(Math.abs(ddx)<6&&Math.abs(ddy)<6)return;
+      decided=true;dragging=ddx>0&&Math.abs(ddx)>Math.abs(ddy);
+      if(!dragging){view=null;return;}
+      view.style.transition="none";
+    }
+    dx=Math.max(0,ddx);
+    view.style.transform="translateX("+dx+"px)";
+    e.preventDefault();
+  },{passive:false});
+  function end(){
+    if(!view)return;
+    var v=view,speed=dx/Math.max(1,Date.now()-t0);view=null;
+    if(!dragging)return;
+    v.style.transition="transform .22s ease";
+    if(dx>window.innerWidth*.35||speed>.6){
+      v.style.transform="translateX(100%)";
+      setTimeout(function(){v.style.transition="";v.style.transform="";var b=v.querySelector('[data-act="'+BACK[v.id]+'"]');if(b)b.click();},200);
+    }else{
+      v.style.transform="";
+      setTimeout(function(){v.style.transition="";},240);
+    }
+  }
+  document.addEventListener("touchend",end);
+  document.addEventListener("touchcancel",end);
+})();
+
+/* Barre de titre compacte : quand le grand titre passe sous le haut de l'écran, il réapparaît
+   en petit au centre d'une barre floutée, comme dans Réglages. */
+var PAGE_TITLES={today:"Accueil",session:"Séance",progress:"Progrès",meals:"Alimentation",water:"Hydratation",profile:"Profil"};
+function updateNavbar(){
+  var bar=$("iosNavbar");if(!bar)return;
+  var page=document.querySelector(".page.on");if(!page)return;
+  var mark=page.querySelector(".meals-title h1")||document.querySelector(".topbar");
+  var show=!!mark&&mark.getBoundingClientRect().bottom<bar.offsetHeight;
+  $("iosNavTitle").textContent=PAGE_TITLES[page.id]||"";
+  bar.classList.toggle("on",show);
+}
+window.addEventListener("scroll",updateNavbar,{passive:true});
+
+/* Retour haptique : moteur Taptic via le plugin Capacitor dans l'app iOS,
+   vibration courte ailleurs quand le navigateur le permet (pas sur iPhone Safari). */
+function haptic(kind){
+  try{
+    var C=window.Capacitor;
+    var H=C&&C.isNativePlatform&&C.isNativePlatform()&&((C.Plugins&&C.Plugins.Haptics)||(C.registerPlugin&&C.registerPlugin("Haptics")));
+    if(H){
+      if(kind==="success")H.notification({type:"SUCCESS"});
+      else H.impact({style:kind==="medium"?"MEDIUM":"LIGHT"});
+      return;
+    }
+    if(navigator.vibrate)navigator.vibrate(kind==="success"?[20,40,20]:10);
+  }catch(e){}
+}
 
 var EVO_BOOTED=false;
 window.EVO_BOOT_OK=false;
