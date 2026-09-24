@@ -1092,7 +1092,7 @@ function openLiveRun(){
   mapMode="svg";mapReady=false;
   $("lrMap").style.display="none";$("lrTrace").style.display="";$("lrMapEmpty").style.display="";
   $("liveRunModal").classList.add("on");
-  waitForMaplibre(20); /* la librairie (≈800 ko) peut encore être en cours de téléchargement sur mobile */
+  waitForMaplibre(45); /* laisse le temps au CDN de secours de prendre le relais si le premier échoue */
 }
 function waitForMaplibre(triesLeft){
   if(!$("liveRunModal").classList.contains("on"))return; /* course annulée entretemps */
@@ -1372,7 +1372,7 @@ function openRunMap(id){
   if(!r||!Array.isArray(r.pts)||r.pts.length<2){toast("Aucun tracé enregistré pour cette course");return;}
   $("runMapModal").classList.add("on");
   $("runMapEl").style.display="none";$("runMapSvg").style.display="";
-  setTimeout(function(){waitForMaplibreRunMap(r,20);},60);
+  setTimeout(function(){waitForMaplibreRunMap(r,45);},60);
 }
 function closeRunMap(){$("runMapModal").classList.remove("on");}
 function requestWake(){try{if("wakeLock"in navigator&&navigator.wakeLock)navigator.wakeLock.request("screen").then(function(w){wakeLock=w;}).catch(function(){});}catch(e){}}
