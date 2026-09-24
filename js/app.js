@@ -96,7 +96,7 @@ var DEFAULT_GROCERY={
   {n:"Bouillon de légumes",done:false},
   {n:"Thé vert",done:false},
   {n:"Épices (piment, paprika fumé)",done:false},
-  {n:"Poudre de protéine végétale",done:false},
+  {n:"Whey protéine (native/standard)",done:false},
   {n:"Boisson protéinée UHT ×2",done:false}
  ],
  weekly:[
@@ -110,7 +110,7 @@ var DEFAULT_GROCERY={
   {n:"Fruits à faible IG (pommes, baies, ~1 kg)",done:false}
  ]
 };
-var GROCERY_VERSION=4;
+var GROCERY_VERSION=5;
 /* noms de tous les articles par défaut v1 (retirés ou renommés en v2) : jamais réinjectés
    comme "ajout personnel" lors de la migration, même s'ils n'ont plus de correspondance exacte
    dans DEFAULT_GROCERY */
@@ -121,7 +121,7 @@ var GROCERY_RETIRED_V1={
  "Beurre de cacahuète":1,"Tomates pelées/passata ×4":1,"Bouillon de légumes":1,
  "Lait 2 L":1,"Skyr/yogourt protéiné 500 g ×2":1,"Fromage râpé 150 g":1,"Œufs (boîte de 12)":1,
  "Tofu nature 300 g ×2":1,"Cottage cheese 250 g":1,"Quark maigre 500 g":1,"Pain":1,"Beurre/margarine":1,
- "Légumes frais (~1.5 kg)":1,"Fruits (~1 kg)":1
+ "Légumes frais (~1.5 kg)":1,"Fruits (~1 kg)":1,"Poudre de protéine végétale":1
 };
 function migrateGrocerySection(defaultList,oldList){
   var doneByName={};
