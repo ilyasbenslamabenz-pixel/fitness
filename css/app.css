@@ -137,10 +137,12 @@ a{color:inherit;text-decoration:none}
 .chip.on{background:var(--text);color:var(--bg);border-color:transparent}
 .chip .e{font-size:15px}
 
-/* séance : bascule musculation / maison / running */
-.sess-cat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 14px}
-.cat-tab{padding:10px 6px;border-radius:999px;background:var(--surface);border:1px solid var(--hair);font-weight:600;font-size:12.5px;color:var(--muted)}
-.cat-tab.on{background:var(--text);color:var(--bg);border-color:transparent}
+/* séance : bascule musculation / maison / running — vrai segmented control iOS
+   (un seul rail, le segment actif se détache dedans, pas 3 pilules indépendantes) */
+.sess-cat{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin:10px 0 14px;
+  padding:3px;background:var(--surface2);border:1px solid var(--hair);border-radius:999px}
+.cat-tab{padding:9px 6px;border-radius:999px;background:transparent;font-weight:600;font-size:12.5px;color:var(--muted);transition:background-color .18s ease,color .18s ease}
+.cat-tab.on{background:var(--surface);color:var(--text);box-shadow:var(--shadow-pop)}
 .run-prog-week{display:flex;align-items:center;gap:12px;margin-top:6px}
 .run-prog-week button{flex:0 0 auto;width:44px;height:44px;border-radius:50%;background:var(--surface);border:1px solid var(--hair);font-size:18px;font-weight:700;box-shadow:var(--shadow-pop)}
 .rpw-mid{flex:1;text-align:center}
@@ -172,7 +174,7 @@ a{color:inherit;text-decoration:none}
 .ex .tag{flex:0 0 auto;font-size:12px;color:var(--muted);background:var(--surface2);border:1px solid var(--hair);padding:8px 12px;border-radius:11px}
 
 /* sticky finish */
-.finish{position:fixed;left:0;right:0;bottom:calc(70px + var(--safe-bot));padding:0 16px;max-width:520px;margin:0 auto;z-index:45}
+.finish{position:fixed;left:0;right:0;bottom:calc(58px + var(--safe-bot));padding:0 16px;max-width:520px;margin:0 auto;z-index:45}
 .finish .inner{display:flex;align-items:center;gap:12px;background:var(--nav-bg);border:1px solid var(--hair);
   border-radius:14px;padding:10px 10px 10px 16px}
 .finish .prog{flex:1}
@@ -274,13 +276,14 @@ a{color:inherit;text-decoration:none}
 .progline .n b{font-size:14.5px}
 .progline .n span{font-size:12px;color:var(--muted);display:block}
 
-/* bottom nav */
-.nav{position:fixed;left:12px;right:12px;bottom:calc(10px + var(--safe-bot));z-index:50;max-width:496px;margin:0 auto;
+/* bottom nav — vraie tab bar iOS : pleine largeur, ancrée au bord, pas de pilule flottante */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:50;
   background:var(--nav-bg);
   backdrop-filter:blur(34px) saturate(190%);-webkit-backdrop-filter:blur(34px) saturate(190%);
-  border:1px solid var(--nav-border);border-radius:30px;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 0 0 1px rgba(255,255,255,.04),0 20px 50px -14px rgba(0,0,0,.35)}
-.nav .in{display:flex;align-items:flex-start;justify-content:space-between;padding:9px 4px 7px}
+  border-top:1px solid var(--nav-border);
+  padding-bottom:var(--safe-bot);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 -4px 24px -8px rgba(0,0,0,.3)}
+.nav .in{display:flex;align-items:flex-start;justify-content:space-between;padding:8px 4px 4px;max-width:520px;margin:0 auto}
 .nav button{flex:1;min-width:0;max-width:64px;padding:2px 1px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9px;color:var(--faint);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .nav button .e{font-size:20px;line-height:1;width:34px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:10px;transition:background-color .18s ease,color .18s ease}
 .nav button.on{color:var(--text)}
@@ -293,7 +296,8 @@ a{color:inherit;text-decoration:none}
 .modal{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.55);display:none;align-items:flex-end;justify-content:center}
 .modal.on{display:flex}
 .sheet{background:var(--surface);border:1px solid var(--hair);border-radius:24px 24px 0 0;width:100%;max-width:520px;box-shadow:0 -10px 40px -10px rgba(0,0,0,.5);
-  padding:20px 18px calc(20px + var(--safe-bot));animation:up .22s ease}
+  padding:28px 18px calc(20px + var(--safe-bot));animation:up .22s ease;position:relative}
+.sheet::before{content:"";position:absolute;top:9px;left:50%;transform:translateX(-50%);width:36px;height:5px;border-radius:99px;background:var(--hair)}
 @keyframes up{from{transform:translateY(30px)}to{transform:none}}
 .sheet h3{font-size:18px;margin-bottom:6px}
 .sheet .sub{font-size:13px;color:var(--muted);margin-bottom:14px}
@@ -304,7 +308,7 @@ a{color:inherit;text-decoration:none}
 .wbig input{width:120px;text-align:center;font-family:var(--display);font-weight:700;font-size:40px;background:transparent;border:0;color:var(--text)}
 .wbig input:focus{outline:none}
 
-.toast{position:fixed;left:50%;bottom:88px;transform:translateX(-50%);background:var(--text);color:var(--bg);
+.toast{position:fixed;left:50%;bottom:calc(70px + var(--safe-bot));transform:translateX(-50%);background:var(--text);color:var(--bg);
   font-weight:600;font-size:13.5px;padding:11px 18px;border-radius:999px;z-index:90;box-shadow:0 10px 30px -8px rgba(0,0,0,.6)}
 .toast[hidden]{display:none}
 .btn[hidden]{display:none}
@@ -334,7 +338,7 @@ a{color:inherit;text-decoration:none}
 .stepper input.wval.up{color:var(--accent-text)}
 .stepper small.upk{color:var(--accent-text)}
 /* snackbar with action */
-.snack{position:fixed;left:16px;right:16px;bottom:calc(76px + var(--safe-bot));max-width:488px;margin:0 auto;z-index:75;display:none;align-items:center;gap:12px;background:var(--text);color:var(--bg);border-radius:12px;padding:11px 11px 11px 16px;box-shadow:0 12px 30px -10px rgba(0,0,0,.6)}
+.snack{position:fixed;left:16px;right:16px;bottom:calc(64px + var(--safe-bot));max-width:488px;margin:0 auto;z-index:75;display:none;align-items:center;gap:12px;background:var(--text);color:var(--bg);border-radius:12px;padding:11px 11px 11px 16px;box-shadow:0 12px 30px -10px rgba(0,0,0,.6)}
 .snack.on{display:flex}
 .snack .msg{flex:1;font-size:13.5px;font-weight:600}
 .snack button{background:var(--bg);color:var(--text);font-weight:600;font-size:13px;padding:9px 15px;border-radius:9px}
