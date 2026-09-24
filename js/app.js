@@ -1783,6 +1783,16 @@ function stopBarcode(){
   var v=$("scanVideo");if(v){try{v.pause();}catch(e){};v.srcObject=null;}
 }
 function closeScanner(){stopBarcode();$("scanModal").classList.remove("on");}
+/* produits Coop courants mal ou pas référencés sur OpenFoodFacts, vérifiés manuellement
+   (fiches produit Coop/OpenFoodFacts, valeurs pour 100 g) */
+var SEED_BARCODES={
+  "7610846871868":{name:"Qualité & Prix Thon rosé au naturel (Coop) 155 g",kcal:110,protein:26,carbs:0,fat:0.5},
+  "7627534978501":{name:"Qualité & Prix Thon rosé à l'huile de tournesol (Coop)",kcal:186,protein:25,carbs:0,fat:9.5},
+  "7610800036739":{name:"Coop Lifestyle Thon rosé au naturel 200 g",kcal:117,protein:26,carbs:1,fat:1},
+  "7624841700177":{name:"Coop Prix Garantie Thon 120 g",kcal:341,protein:8.1,carbs:27,fat:22},
+  "7624841548915":{name:"Coop Prix Garantie Thon sandwich 165 g",kcal:242,protein:9.6,carbs:23,fat:12},
+  "8004030096004":{name:"Rio Mare Thon au naturel",kcal:118,protein:27,carbs:0.3,fat:1}
+};
 function offVal(n,keys){
   for(var i=0;i<keys.length;i++){var v=Number(n[keys[i]]);if(isFinite(v))return v;}
   return 0;
@@ -1791,9 +1801,10 @@ async function lookupBarcode(code){
   code=String(code||"").replace(/\D/g,"");
   if(code.length<8){$("scanStatus").textContent="Code-barres invalide.";barcodeBusy=false;return;}
   $("scanManualEntry").hidden=true;
-  var custom=state.customBarcodes[code];
+  var fromUser=state.customBarcodes[code];
+  var custom=fromUser||SEED_BARCODES[code];
   if(custom){
-    $("scanStatus").textContent="Produit reconnu (mémorisé précédemment).";
+    $("scanStatus").textContent=fromUser?"Produit reconnu (mémorisé précédemment).":"Produit reconnu (base intégrée à l'app).";
     $("scanProduct").innerHTML="<b>"+esc(custom.name)+"</b><div style=\"font-size:12px;color:var(--muted);margin-top:4px\">"+(custom.kcal?Math.round(custom.kcal):"—")+" kcal · "+(custom.protein?Math.round(custom.protein*10)/10:"—")+" g protéines / 100 g</div>";
     $("scanProduct").classList.add("on");
     $("foodName").value=custom.name;
