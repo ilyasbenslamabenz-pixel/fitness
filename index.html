@@ -486,14 +486,14 @@
   <div class="sub">Estime au plus proche, la régularité prime sur la précision.</div>
   <div class="field"><label>Aliment</label><input id="foodName" placeholder="Poulet + riz, ou nom d'un produit" autocomplete="off"></div>
   <div id="foodSearchResults" class="food-search-results"></div>
-  <div class="row2"><div class="field"><label>Quantité (g / ml)</label><input id="foodQty" type="number" inputmode="decimal" step="1" placeholder="100"></div>
-  <div class="field"><label>Calories</label><input id="foodKcal" type="number" inputmode="numeric" placeholder="500"></div></div>
+  <div class="row2"><div class="field"><label>Quantité (g / ml)</label><input id="foodQty" type="number" inputmode="decimal" step="1"></div>
+  <div class="field"><label>Calories</label><input id="foodKcal" type="number" inputmode="numeric"></div></div>
   <div id="foodRefHint" class="food-ref-hint" style="display:none"><svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg> Valeurs recalculées automatiquement selon la quantité</div>
-  <div class="row2"><div class="field"><label>Protéines (g)</label><input id="foodProt" type="number" inputmode="numeric" placeholder="40"></div>
-  <div class="field"><label>Glucides (g)</label><input id="foodCarbs" type="number" inputmode="decimal" placeholder="50"></div></div>
-  <div class="row2"><div class="field"><label>Lipides (g)</label><input id="foodFat" type="number" inputmode="decimal" placeholder="15"></div><div></div></div>
+  <div class="row2"><div class="field"><label>Protéines (g)</label><input id="foodProt" type="number" inputmode="numeric"></div>
+  <div class="field"><label>Glucides (g)</label><input id="foodCarbs" type="number" inputmode="decimal"></div></div>
+  <div class="row2"><div class="field"><label>Lipides (g)</label><input id="foodFat" type="number" inputmode="decimal"></div><div></div></div>
   <div class="field"><label>Moment</label><select id="foodType"><option>Petit-déjeuner</option><option>Déjeuner</option><option>Dîner</option><option>Collation</option></select></div>
-  <div class="row2"><button class="btn" data-act="saveFavorite"><svg class="ic-s" aria-hidden="true"><use href="#i-star_fill"/></svg> Enregistrer aliment</button><button class="btn mint" data-act="scanOpen"><svg class="ic-s" aria-hidden="true"><use href="#i-camera_fill"/></svg> Scanner</button></div>
+  <div class="row2" style="margin-top:16px"><button class="btn" data-act="saveFavorite"><svg class="ic-s" aria-hidden="true"><use href="#i-star_fill"/></svg> Favori</button><button class="btn mint" data-act="scanOpen"><svg class="ic-s" aria-hidden="true"><use href="#i-camera_fill"/></svg> Scanner</button></div>
   <div class="acts"><button class="btn ghost" data-act="mClose">Annuler</button><button class="btn primary" data-act="mSave">Ajouter</button></div>
 </div></div>
 
@@ -506,7 +506,7 @@
     <div class="scan-frame"></div>
   </div>
   <div class="scan-status" id="scanStatus">Autorise l’accès à la caméra…</div>
-  <div class="field"><label>Ou saisir le code manuellement</label><input id="manualBarcode" inputmode="numeric" autocomplete="off" placeholder="7612345678901"></div>
+  <div class="field"><label>Ou saisir le code manuellement</label><input id="manualBarcode" inputmode="numeric" autocomplete="off" placeholder="Code à 8 ou 13 chiffres"></div>
   <button class="btn primary" data-act="scanLookup"><svg class="ic-s" aria-hidden="true"><use href="#i-search"/></svg> Rechercher ce code</button>
   <button class="btn ghost" id="scanManualEntry" hidden style="margin-top:8px">Saisir ce produit moi-même</button>
   <div class="scan-product" id="scanProduct"></div>
@@ -542,8 +542,8 @@
   <h3>Ajouter une course</h3>
   <button class="btn primary" data-act="liveStart" style="margin:6px 0 2px"><svg class="ic-s" aria-hidden="true"><use href="#i-location_fill"/></svg> Suivi GPS en direct</button>
   <div class="or-sep"><span>ou saisir manuellement</span></div>
-  <div class="row2"><div class="field"><label>Distance (km)</label><input id="runDist" type="number" inputmode="decimal" step="0.1" placeholder="8.5"></div>
-  <div class="field"><label>Durée (min)</label><input id="runDur" type="number" inputmode="decimal" step="1" placeholder="48"></div></div>
+  <div class="row2"><div class="field"><label>Distance (km)</label><input id="runDist" type="number" inputmode="decimal" step="0.1"></div>
+  <div class="field"><label>Durée (min)</label><input id="runDur" type="number" inputmode="decimal" step="1"></div></div>
   <div class="field"><label>Date</label><input id="runDate" type="date"></div>
   <div id="runPace" class="date" style="text-align:center;margin-top:8px;min-height:16px"></div>
   <div class="acts"><button class="btn ghost" data-act="runClose">Annuler</button><button class="btn primary" data-act="runSave">Ajouter</button></div>
@@ -589,7 +589,7 @@
 <div class="modal" id="stepsModal"><div class="sheet">
   <h3>Pas du jour</h3>
   <div class="sub">Recopie le compteur de ton téléphone.</div>
-  <div class="wbig"><input id="stepsInput" type="number" inputmode="numeric" step="100" placeholder="8000"></div>
+  <div class="wbig"><input id="stepsInput" type="number" inputmode="numeric" step="100"></div>
   <div class="acts"><button class="btn ghost" data-act="stepsClose">Annuler</button><button class="btn primary" data-act="stepsSave">Enregistrer</button></div>
 </div></div>
 
@@ -598,7 +598,7 @@
   <div class="sub">Ajouté uniquement à la séance d'aujourd'hui.</div>
   <div class="field"><label>Nom</label><input id="addExName" placeholder="Élévations latérales"></div>
   <div class="row2"><div class="field"><label>Séries</label><input id="addExSets" type="number" inputmode="numeric" step="1" value="3"></div>
-  <div class="field"><label>Répétitions (optionnel)</label><input id="addExReps" placeholder="8-10"></div></div>
+  <div class="field"><label>Répétitions (optionnel)</label><input id="addExReps" placeholder="optionnel"></div></div>
   <label class="chk-row"><input id="addExWeighted" type="checkbox" checked> Exercice avec charge</label>
   <div class="acts"><button class="btn ghost" data-act="addExClose">Annuler</button><button class="btn primary" data-act="addExSave">Ajouter</button></div>
 </div></div>
