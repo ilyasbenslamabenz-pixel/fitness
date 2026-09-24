@@ -1089,15 +1089,21 @@ function openLiveRun(){
   $("lrToggle").textContent="Démarrer";$("lrToggle").style.display="";$("lrFinish").style.display="none";$("lrDiscard").style.display="";$("lrDiscard").textContent="Annuler";
   $("lrGps").textContent="GPS prêt";$("lrTrace").innerHTML="";$("lrMapEmpty").style.display="";
   resetMapLayers();
+  mapMode="svg";mapReady=false;
+  $("lrMap").style.display="none";$("lrTrace").style.display="";$("lrMapEmpty").style.display="";
+  $("liveRunModal").classList.add("on");
+  waitForMaplibre(20); /* la librairie (≈800 ko) peut encore être en cours de téléchargement sur mobile */
+}
+function waitForMaplibre(triesLeft){
+  if(!$("liveRunModal").classList.contains("on"))return; /* course annulée entretemps */
   if(window.maplibregl){
     mapMode="maplibre";
     $("lrMap").style.display="";$("lrTrace").style.display="none";$("lrMapEmpty").style.display="none";
-    setTimeout(function(){initMap();if(lrMap){try{lrMap.resize();}catch(e){}}},180);
-  }else{
-    mapMode="svg";mapReady=false;
-    $("lrMap").style.display="none";$("lrTrace").style.display="";$("lrMapEmpty").style.display="";
+    setTimeout(function(){initMap();if(lrMap){try{lrMap.resize();}catch(e){}}},60);
+    return;
   }
-  $("liveRunModal").classList.add("on");
+  if(triesLeft<=0)return; /* reste en repli SVG */
+  setTimeout(function(){waitForMaplibre(triesLeft-1);},200);
 }
 function closeLiveRun(){stopGeo();releaseWake();if(runTick){clearInterval(runTick);runTick=null;}runActive=false;runPaused=false;runLastPt=null;runLastTime=0;runLastGeoTimestamp=0;$("liveRunModal").classList.remove("on");}
 function toggleRun(){if(!runActive)startRun();else if(!runPaused)pauseRun();else resumeRun();}
@@ -1326,37 +1332,47 @@ function drawRunMapPts(pts){
     rmEnd=new maplibregl.Marker({element:mlCircleEl("#0a84ff"),anchor:"center"}).setLngLat(coords[coords.length-1]).addTo(rmMap);
   }catch(e){}
 }
-function openRunMap(id){
-  var r=state.runs.find(function(x){return x.id===id;});
-  if(!r||!Array.isArray(r.pts)||r.pts.length<2){toast("Aucun tracé enregistré pour cette course");return;}
-  $("runMapModal").classList.add("on");
-  if(window.maplibregl){
-    $("runMapEl").style.display="";$("runMapSvg").style.display="none";
-    setTimeout(function(){
-      if(!rmMap){
+function initRunMapWithMaplibre(r){
+  if(!rmMap){
+    try{
+      rmMap=new maplibregl.Map({container:"runMapEl",style:mapStyleUrl(),center:[6.1432,46.2044],zoom:13,attributionControl:true,dragRotate:false,pitchWithRotate:false,touchPitch:false});
+      rmMap.on("load",function(){
         try{
-          rmMap=new maplibregl.Map({container:"runMapEl",style:mapStyleUrl(),center:[6.1432,46.2044],zoom:13,attributionControl:true,dragRotate:false,pitchWithRotate:false,touchPitch:false});
-          rmMap.on("load",function(){
-            try{
-              rmMap.addSource("rm-route",{type:"geojson",data:{type:"Feature",geometry:{type:"LineString",coordinates:[]}}});
-              rmMap.addLayer({id:"rm-route-line",type:"line",source:"rm-route",layout:{"line-cap":"round","line-join":"round"},paint:{"line-color":"#0a84ff","line-width":5,"line-opacity":.95}});
-              rmReady=true;
-              if(rmPendingPts){drawRunMapPts(rmPendingPts);rmPendingPts=null;}
-            }catch(e){}
-          });
-        }catch(e){rmMap=null;rmReady=false;}
-      }
-      if(rmMap){
-        if(rmReady)drawRunMapPts(r.pts);else rmPendingPts=r.pts;
-      }else{
-        $("runMapEl").style.display="none";$("runMapSvg").style.display="";
-        drawTraceInto($("runMapSvg"),r.pts);
-      }
-    },60);
+          rmMap.addSource("rm-route",{type:"geojson",data:{type:"Feature",geometry:{type:"LineString",coordinates:[]}}});
+          rmMap.addLayer({id:"rm-route-line",type:"line",source:"rm-route",layout:{"line-cap":"round","line-join":"round"},paint:{"line-color":"#0a84ff","line-width":5,"line-opacity":.95}});
+          rmReady=true;
+          if(rmPendingPts){drawRunMapPts(rmPendingPts);rmPendingPts=null;}
+        }catch(e){}
+      });
+    }catch(e){rmMap=null;rmReady=false;}
+  }
+  if(rmMap){
+    if(rmReady)drawRunMapPts(r.pts);else rmPendingPts=r.pts;
   }else{
     $("runMapEl").style.display="none";$("runMapSvg").style.display="";
     drawTraceInto($("runMapSvg"),r.pts);
   }
+}
+function waitForMaplibreRunMap(r,triesLeft){
+  if(!$("runMapModal").classList.contains("on"))return; /* fermé entretemps */
+  if(window.maplibregl){
+    $("runMapEl").style.display="";$("runMapSvg").style.display="none";
+    initRunMapWithMaplibre(r);
+    return;
+  }
+  if(triesLeft<=0){
+    $("runMapEl").style.display="none";$("runMapSvg").style.display="";
+    drawTraceInto($("runMapSvg"),r.pts);
+    return;
+  }
+  setTimeout(function(){waitForMaplibreRunMap(r,triesLeft-1);},200);
+}
+function openRunMap(id){
+  var r=state.runs.find(function(x){return x.id===id;});
+  if(!r||!Array.isArray(r.pts)||r.pts.length<2){toast("Aucun tracé enregistré pour cette course");return;}
+  $("runMapModal").classList.add("on");
+  $("runMapEl").style.display="none";$("runMapSvg").style.display="";
+  setTimeout(function(){waitForMaplibreRunMap(r,20);},60);
 }
 function closeRunMap(){$("runMapModal").classList.remove("on");}
 function requestWake(){try{if("wakeLock"in navigator&&navigator.wakeLock)navigator.wakeLock.request("screen").then(function(w){wakeLock=w;}).catch(function(){});}catch(e){}}
