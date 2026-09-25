@@ -652,3 +652,16 @@ button.lrow:active{background:var(--surface2)}
 .brand-logo{width:28px;height:28px;border-radius:8px;flex:0 0 auto;display:block;box-shadow:0 2px 8px rgba(0,0,0,.35)}
 .run-seg{grid-template-columns:repeat(2,1fr);margin:10px 0 4px}
 .complete-tread{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;margin-bottom:10px;border-radius:999px;background:var(--surface2);border:1px solid var(--hair);color:var(--text);font-weight:600;font-size:14.5px}
+.pick-search{display:flex;align-items:center;gap:8px;margin:12px 0 10px;padding:0 12px;border-radius:12px;background:var(--surface2);border:1px solid var(--hair);color:var(--muted)}
+.pick-search input{flex:1;border:0;background:transparent;padding:12px 0;font-size:16px;color:var(--text);outline:0}
+.pick-zones{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.pick-zones::-webkit-scrollbar{display:none}
+.pick-zones .pchip{flex:0 0 auto}
+.pick-list{max-height:48vh;overflow-y:auto;margin-top:8px;-webkit-overflow-scrolling:touch}
+.pick-row{display:flex;align-items:center;gap:12px;width:100%;padding:9px 2px;border-bottom:1px solid var(--hair);text-align:left;background:transparent;color:var(--text)}
+.pick-row:active{background:var(--surface2)}
+.pick-t{flex:1;min-width:0}
+.pick-t b{display:block;font-size:15px;font-weight:600}
+.pick-t small{display:block;font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pick-add{flex:0 0 auto;width:30px;height:30px;border-radius:50%;background:var(--primary);color:var(--on-primary);display:flex;align-items:center;justify-content:center;font-size:14px}
+.pick-noimg{display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:18px}
