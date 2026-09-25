@@ -68,6 +68,7 @@
       <div style="font-size:12.5px;color:var(--muted);margin-top:2px" id="greetSub">—</div>
     </div>
 
+    <div id="backupNag"></div>
     <div class="card ring-card">
       <div class="ring-wrap" id="ringWrap"></div>
       <div class="ring-rows">
@@ -117,10 +118,6 @@
       <div class="eyebrow">Forme du jour</div>
       <div class="energy" style="margin-top:2px"><span class="elab">Comment tu te sens ?</span><div class="efaces" id="efaces"></div></div>
     </div>
-    <div class="card" style="margin-top:12px" id="prCard">
-      <div class="head" style="margin:0 0 4px"><h2 style="font-size:16px">Dernier record</h2><span class="link" data-act="go" data-page="progress">Voir les progrès</span></div>
-      <div id="lastPR" style="font-size:14px;color:var(--muted)">Loggue une séance pour établir tes premiers records.</div>
-    </div>
   </section>
 
   <!-- SÉANCE -->
@@ -156,6 +153,8 @@
         <div id="exList"></div>
       </div>
       <p style="font-size:12px;color:var(--faint);text-align:center;margin:14px 4px">Tape un exercice pour démarrer la séance guidée à partir de celui-ci.</p>
+    <div class="group-h">Mon programme · modifier une séance</div>
+    <div class="card list" id="progList"></div>
     </div>
 
     <div id="sessRunningView" style="display:none">
@@ -196,8 +195,8 @@
     </div>
 
     <div class="card" data-ptab="week">
-      <div class="head" style="margin:0 0 2px"><div class="eyebrow">Calories · 7 derniers jours</div><span class="link" data-act="go" data-page="meals">Repas</span></div>
-      <div id="calWeek"></div>
+      <div class="head" style="margin:0 0 2px"><div class="eyebrow">Bilan calorique de la semaine</div><span class="link" data-act="nutGo" data-t="week">Détail</span></div>
+      <div class="trend-line" id="calSum" style="margin-top:6px"></div>
     </div>
 
     <div class="card" data-ptab="week">
@@ -250,6 +249,7 @@
 
     <div class="card" data-ptab="cardio">
       <div class="head" style="margin:0 0 4px"><h2 style="font-size:16px">Cardio</h2><span class="link" data-act="openRun">＋ Course</span></div>
+      <button class="today-link" style="margin:2px 0 8px" data-act="goRunProg">Programme course 0 → 10 km ›</button>
       <div class="big3">
         <div><div class="v ember num" id="cdRuns">0</div><div class="l">courses</div></div>
         <div><div class="v num" id="cdKm">0</div><div class="l">km total</div></div>
@@ -281,7 +281,13 @@
 
   <!-- REPAS -->
   <section class="page" id="meals">
-    <div class="meals-title"><h1>Alimentation</h1></div>
+    <div class="meals-title"><h1>Nutrition</h1></div>
+    <div class="sess-cat prog-seg nut-seg" id="nutSeg">
+      <button class="cat-tab" data-act="nutTab" data-t="day">Aujourd'hui</button>
+      <button class="cat-tab" data-act="nutTab" data-t="week">Semaine</button>
+      <button class="cat-tab" data-act="nutTab" data-t="menu">Menu</button>
+    </div>
+    <div data-ntab="day">
     <div class="nutrition-card">
       <div class="cal-donut"><svg class="ringsvg" viewBox="0 0 100 100" id="calRing"></svg><div class="cal-left" id="calLeft"></div></div>
       <div class="macro-list">
@@ -316,41 +322,55 @@
         <div class="meal-section-items" id="itemsSnack"></div>
       </div>
     </div>
-    <div class="tool-tiles">
-      <button class="tool-tile" data-act="groceryOpen"><span class="tt-ico"><svg class="ic-s" aria-hidden="true"><use href="#i-cart_fill"/></svg></span><b>Courses</b><span id="groceryText">—</span></button>
-      <button class="tool-tile" data-act="fasting"><span class="tt-ico"><svg class="ic-s" aria-hidden="true"><use href="#i-timer_fill"/></svg></span><b id="fastTitle">Routine 16:8</b><span id="fastText">Aucun jeûne en cours</span><div class="fast-progress"><i id="fastProgress"></i></div><span id="fastBtn" hidden></span></button>
-    </div>
-    <div class="section-title-row"><h2>Menu de la semaine</h2></div>
-    <div class="card menu-card" id="weeklyMenu"></div>
-  </section>
-
-  <!-- EAU -->
-  <section class="page" id="water">
-    <div class="meals-title"><h1>Hydratation</h1></div>
+    <div class="section-title-row" id="waterSec"><h2>Hydratation</h2></div>
     <div class="water-card2">
       <div class="wring" id="waterRing"></div>
       <div class="winfo"><span>Objectif</span><b id="waterGoalLabel">3 L</b><em id="waterLeft">—</em><small id="waterHint"></small></div>
     </div>
-    <div class="card" style="margin-top:12px">
-      <div class="glasses" id="waterGlasses"></div>
-      <div class="chartmeta" style="justify-content:center"><span id="waterStepLab"></span></div>
-    </div>
-    <div class="section-title-row"><h2>Ajout rapide</h2></div>
     <div class="water-quick">
       <button data-act="waterAdd" data-amount="150">+150 ml</button>
       <button data-act="waterAdd" data-amount="250">+250 ml</button>
       <button data-act="waterAdd" data-amount="500">+500 ml</button>
       <button class="water-undo" data-act="waterAdd" data-amount="-250">−250 ml</button>
     </div>
-    <div class="card" style="margin-top:16px">
-      <div class="eyebrow">7 derniers jours</div>
+    <div class="card" style="margin-top:12px">
+      <div class="glasses" id="waterGlasses"></div>
+      <div class="chartmeta" style="justify-content:center"><span id="waterStepLab"></span></div>
+    </div>
+    </div>
+    <div data-ntab="week">
+    <div class="card" style="margin-top:6px">
+      <div class="eyebrow">Calories · 7 derniers jours</div>
+      <div id="calWeek"></div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <div class="eyebrow">Eau · 7 derniers jours</div>
       <div id="waterWeek"></div>
     </div>
+    </div>
+    <div data-ntab="menu">
+    <div class="tool-tiles">
+      <button class="tool-tile" data-act="groceryOpen"><span class="tt-ico"><svg class="ic-s" aria-hidden="true"><use href="#i-cart_fill"/></svg></span><b>Courses</b><span id="groceryText">—</span></button>
+      <button class="tool-tile" data-act="fasting"><span class="tt-ico"><svg class="ic-s" aria-hidden="true"><use href="#i-timer_fill"/></svg></span><b id="fastTitle">Routine 16:8</b><span id="fastText">Aucun jeûne en cours</span><div class="fast-progress"><i id="fastProgress"></i></div><span id="fastBtn" hidden></span></button>
+    </div>
+    <div class="section-title-row"><h2>Menu de la semaine</h2></div>
+    <div class="card menu-card" id="weeklyMenu"></div>
+    </div>
   </section>
+
 
   <!-- PROFIL -->
   <section class="page" id="profile">
     <div class="meals-title"><h1>Profil</h1></div>
+    <div class="group-h">Calcul automatique</div>
+    <div class="card list">
+      <label class="lrow"><span class="lrow-ic" style="color:#7db4f5"><svg class="ic-s" aria-hidden="true"><use href="#i-ruler"/></svg></span><span class="lrow-t">Taille</span><input class="lrow-v" id="fHeight" type="number" inputmode="numeric"><span class="lrow-u">cm</span></label>
+      <label class="lrow"><span class="lrow-ic" style="color:#e3ae4a"><svg class="ic-s" aria-hidden="true"><use href="#i-calendar"/></svg></span><span class="lrow-t">Âge</span><input class="lrow-v" id="fAge" type="number" inputmode="numeric"><span class="lrow-u">ans</span></label>
+      <div class="lrow"><span class="lrow-ic" style="color:#d0875a"><svg class="ic-s" aria-hidden="true"><use href="#i-person_fill"/></svg></span><span class="lrow-t">Sexe</span><div class="sess-cat mini-seg" id="fSex"><button class="cat-tab" data-act="calcSex" data-v="M">Homme</button><button class="cat-tab" data-act="calcSex" data-v="F">Femme</button></div></div>
+      <label class="lrow"><span class="lrow-ic" style="color:#4f8fe6"><svg class="ic-s" aria-hidden="true"><use href="#i-figure_run"/></svg></span><span class="lrow-t">Activité</span><select class="lrow-v lrow-sel" id="fAct"><option value="1.2">Sédentaire</option><option value="1.375">Légère (1-3 séances)</option><option value="1.55">Modérée (3-5 séances)</option><option value="1.725">Élevée (6-7 séances)</option></select></label>
+    </div>
+    <button class="btn" style="margin-top:12px;width:100%" data-act="calcGoals">Calculer mes objectifs</button>
+    <div class="group-f" id="calcInfo">Calcule tes calories et tes macros pour perdre du gras en gardant ton muscle (déficit de 20 %).</div>
     <div class="group-h">Objectifs</div>
     <div class="card list">
       <label class="lrow"><span class="lrow-ic" style="color:#ff453a"><svg class="ic-s" aria-hidden="true"><use href="#i-calendar"/></svg></span><span class="lrow-t">Début</span><input class="lrow-v lrow-date" id="fStartDate" type="date"></label>
@@ -362,32 +382,9 @@
       <label class="lrow"><span class="lrow-ic" style="color:#ffd60a"><svg class="ic-s" aria-hidden="true"><use href="#i-drop_triangle_fill"/></svg></span><span class="lrow-t">Lipides</span><input class="lrow-v" id="fFat" type="number" inputmode="decimal"><span class="lrow-u">g</span></label>
       <label class="lrow"><span class="lrow-ic" style="color:#7db4f5"><svg class="ic-s" aria-hidden="true"><use href="#i-drop_fill"/></svg></span><span class="lrow-t">Eau</span><input class="lrow-v" id="fWater" type="number" inputmode="decimal" step="0.1"><span class="lrow-u">L</span></label>
     </div>
-    <div class="group-h">Calcul automatique</div>
-    <div class="card list">
-      <label class="lrow"><span class="lrow-ic" style="color:#7db4f5"><svg class="ic-s" aria-hidden="true"><use href="#i-ruler"/></svg></span><span class="lrow-t">Taille</span><input class="lrow-v" id="fHeight" type="number" inputmode="numeric"><span class="lrow-u">cm</span></label>
-      <label class="lrow"><span class="lrow-ic" style="color:#e3ae4a"><svg class="ic-s" aria-hidden="true"><use href="#i-calendar"/></svg></span><span class="lrow-t">Âge</span><input class="lrow-v" id="fAge" type="number" inputmode="numeric"><span class="lrow-u">ans</span></label>
-      <div class="lrow"><span class="lrow-ic" style="color:#d0875a"><svg class="ic-s" aria-hidden="true"><use href="#i-person_fill"/></svg></span><span class="lrow-t">Sexe</span><div class="sess-cat mini-seg" id="fSex"><button class="cat-tab" data-act="calcSex" data-v="M">Homme</button><button class="cat-tab" data-act="calcSex" data-v="F">Femme</button></div></div>
-      <label class="lrow"><span class="lrow-ic" style="color:#4f8fe6"><svg class="ic-s" aria-hidden="true"><use href="#i-figure_run"/></svg></span><span class="lrow-t">Activité</span><select class="lrow-v lrow-sel" id="fAct"><option value="1.2">Sédentaire</option><option value="1.375">Légère (1-3 séances)</option><option value="1.55">Modérée (3-5 séances)</option><option value="1.725">Élevée (6-7 séances)</option></select></label>
-    </div>
-    <button class="btn" style="margin-top:12px;width:100%" data-act="calcGoals">Calculer mes objectifs</button>
-    <div class="group-f" id="calcInfo">Calcule tes calories et tes macros pour perdre du gras en gardant ton muscle (déficit de 20 %).</div>
     <button class="btn primary" style="margin-top:14px" data-act="saveProfile">Enregistrer les objectifs</button>
-    <div class="group-h">Séance</div>
-    <div class="card list">
-      <label class="lrow chk-row" style="margin:0"><span class="lrow-ic" style="color:#e3ae4a"><svg class="ic-s" aria-hidden="true"><use href="#i-speaker_on"/></svg></span><span class="lrow-t">Son du minuteur</span><input type="checkbox" id="fSound"></label>
-    </div>
-    <div class="group-f">Bips à 3-2-1 puis signal de fin de repos. L'écran reste allumé pendant la séance guidée.</div>
-    <div class="group-h">Apparence</div>
-    <div class="card">
-      <div class="sess-cat" id="themePicker" style="margin:0">
-        <button class="cat-tab" data-act="setTheme" data-theme="system">Système</button>
-        <button class="cat-tab" data-act="setTheme" data-theme="light">Clair</button>
-        <button class="cat-tab" data-act="setTheme" data-theme="dark">Sombre</button>
-      </div>
-    </div>
-    <div class="group-h">Mon programme</div>
-    <div class="card list" id="progList"></div>
-    <div class="group-h">Sauvegarde cloud</div>
+    <div class="group-h">Sauvegarde</div>
+    <div class="backup-status" id="backupStatus"></div>
     <div class="card list">
       <div class="lrow"><span class="lrow-ic" style="color:#7db4f5"><svg class="ic-s" aria-hidden="true"><use href="#i-cloud_fill"/></svg></span><span class="lrow-t" id="authStatus">Non connecté</span></div>
     </div>
@@ -410,6 +407,19 @@
       <button class="lrow" data-act="import"><span class="lrow-ic" style="color:#a8b3c1"><svg class="ic-s" aria-hidden="true"><use href="#i-square_arrow_down"/></svg></span><span class="lrow-t">Importer</span><svg class="ic-s lrow-chev" aria-hidden="true"><use href="#i-chevron_right"/></svg></button>
     </div>
     <input type="file" id="importFile" accept="application/json,.json" style="display:none">
+    <div class="group-h">Séance</div>
+    <div class="card list">
+      <label class="lrow chk-row" style="margin:0"><span class="lrow-ic" style="color:#e3ae4a"><svg class="ic-s" aria-hidden="true"><use href="#i-speaker_on"/></svg></span><span class="lrow-t">Son du minuteur</span><input type="checkbox" id="fSound"></label>
+    </div>
+    <div class="group-f">Bips à 3-2-1 puis signal de fin de repos. L'écran reste allumé pendant la séance guidée.</div>
+    <div class="group-h">Apparence</div>
+    <div class="card">
+      <div class="sess-cat" id="themePicker" style="margin:0">
+        <button class="cat-tab" data-act="setTheme" data-theme="system">Système</button>
+        <button class="cat-tab" data-act="setTheme" data-theme="light">Clair</button>
+        <button class="cat-tab" data-act="setTheme" data-theme="dark">Sombre</button>
+      </div>
+    </div>
     <div class="card list" style="margin-top:14px">
       <button class="lrow lrow-danger" data-act="reset">Réinitialiser les données</button>
     </div>
@@ -421,8 +431,7 @@
   <button data-page="today" class="on"><span class="e"><svg class="ic-s" aria-hidden="true"><use href="#i-house_fill"/></svg></span>Accueil</button>
   <button data-page="session"><span class="e"><svg class="ic-s" aria-hidden="true"><use href="#i-dumbbell"/></svg></span>Séance</button>
   <button data-page="progress"><span class="e"><svg class="ic-s" aria-hidden="true"><use href="#i-chart_bar_alt_fill"/></svg></span>Progrès</button>
-  <button data-page="water"><span class="e"><svg class="ic-s" aria-hidden="true"><use href="#i-drop_fill"/></svg></span>Eau</button>
-  <button data-page="meals"><span class="e"><svg class="ic-s" aria-hidden="true"><use href="#i-fork_knife"/></svg></span>Repas</button>
+  <button data-page="meals"><span class="e"><svg class="ic-s" aria-hidden="true"><use href="#i-fork_knife"/></svg></span>Nutrition</button>
   <button data-page="profile"><span class="e"><svg class="ic-s" aria-hidden="true"><use href="#i-gear_alt_fill"/></svg></span>Profil</button>
 </div></nav>
 
@@ -669,7 +678,7 @@
 <div class="snack" id="snack"><div class="msg" id="snackMsg"></div><button data-act="snackAct" id="snackBtn">Annuler</button></div>
 <div class="toast" id="toast" hidden></div>
 
-<script src="/fitness/js/app.js?v=25"></script>
+<script src="/fitness/js/app.js?v=26"></script>
 <script src="/fitness/js/boot.js?v=3"></script>
 </body>
 </html>
