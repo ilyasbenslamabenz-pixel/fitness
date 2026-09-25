@@ -587,6 +587,7 @@ function planDoneOn(d){
   if(state.sessions.some(function(s){return localDay(s.date)===d;}))return true;
   return state.runs.some(function(r){return r.d===d;});
 }
+var planListOpen=false;
 function renderPlan(){
   var box=$("planCard");if(!box)return;
   var ti=dowIdx(),i=planSel==null?ti:planSel,d=dateOfWeekday(i),pl=planFor(i),done=planDoneOn(d);
@@ -616,8 +617,11 @@ function renderPlan(){
   box.innerHTML='<div class="plan-week">'+week+'</div>'
     +'<div class="eyebrow">'+eyebrow+'</div>'
     +'<div class="row"><div class="ic">'+icon+'</div><div style="flex:1;min-width:0"><h3>'+esc(title)+'</h3><div class="sub">'+esc(sub)+'</div></div></div>'
-    +'<ul class="plan-list">'+lines.map(function(l){return '<li>'+(pl.kind==="walk"?esc(l):l)+'</li>';}).join("")+'</ul>'
     +go
+    +(pl.kind==="walk"||lines.length<=2||planListOpen
+      ?'<ul class="plan-list">'+lines.map(function(l){return '<li>'+(pl.kind==="walk"?esc(l):l)+'</li>';}).join("")+'</ul>'
+        +(pl.kind!=="walk"&&lines.length>2?'<button class="plan-more" data-act="planList">Masquer les exercices ▴</button>':'')
+      :'<button class="plan-more" data-act="planList">Voir les '+act.length+' exercices ▾</button>')
     +'<div class="plan-foot">'+alt+(pl.kind==="gym"?'<button class="plan-alt" data-act="planTread"><svg class="ic-s" aria-hidden="true"><use href="#i-figure_walk"/></svg>+ Tapis</button>':'')+(pl.kind==="walk"&&!done?'<button class="plan-alt" data-act="planDone"><svg class="ic-s" aria-hidden="true"><use href="#i-checkmark"/></svg>C\'est fait</button>':'')+'</div>'
     +'<button class="plan-steps" data-act="openSteps"><span>Pas '+(i===ti?"aujourd'hui":"ce jour")+'</span><b>'+st.toLocaleString("fr-CH")+' / '+STEP_GOAL.toLocaleString("fr-CH")+'</b><i><em style="width:'+stepPct+'%"></em></i></button>';
 }
@@ -889,6 +893,15 @@ function renderSession(){
   var p=state.program[state.selDay];
   if(!p||(p.cat||"muscu")!==state.sessionCategory){p=dayList[0];state.selDay=state.program.indexOf(p);}
   $("sesIc").innerHTML=p.icon;$("sesName").textContent=p.name;$("sesFocus").textContent=p.focus;
+  /* la puce choisie reste visible (la liste défile horizontalement) */
+  var onChip=chips.querySelector(".chip.on");
+  if(onChip){var cr=chips.getBoundingClientRect(),br=onChip.getBoundingClientRect();if(br.left<cr.left||br.right>cr.right)chips.scrollLeft+=br.left-cr.left-(cr.width-br.width)/2;}
+  var tag=$("sesTodayTag");
+  if(tag){
+    if(p.id===plannedId)tag.innerHTML='<span class="today-tag">Prévu aujourd\'hui</span>';
+    else if(plannedId)tag.innerHTML='<button class="today-link" data-act="sessToday">↩ Séance du jour : '+esc(plToday.p.short)+'</button>';
+    else tag.innerHTML='<span class="today-tag rest">Aujourd\'hui : '+esc(plToday.walk.title.toLowerCase())+'</span>';
+  }
   var mk=marksFor(p.id),active=activeExercises(p),excl=excludedFor(p.id);
   $("exList").innerHTML=active.map(function(e){return exerciseRowHTML(e,mk);}).join("")
     +'<div class="exc-foot">'
@@ -1449,7 +1462,15 @@ function renderWeekSummary(){
   if(!badges.length)badges.push({ic:'<svg class="ic-s" aria-hidden="true"><use href="#i-dumbbell"/></svg>',lab:"Continue comme ça"});
   $("badgeRow").innerHTML=badges.map(function(b){return '<div class="badge"><div class="ic">'+b.ic+'</div><div class="lab">'+b.lab+'</div></div>';}).join("");
 }
-var progTab="week";
+var progTab=(function(){var t=lsGet("evoProgTab");return ["week","body","strength","cardio"].indexOf(t)>=0?t:"week";})();
+var PROG_TABS=["week","body","strength","cardio"];
+function setProgTab(t,dir){
+  if(PROG_TABS.indexOf(t)<0||t===progTab)return;
+  progTab=t;lsSet("evoProgTab",t);renderProgress();
+  var seg=$("progSeg");try{if(seg&&window.scrollY>seg.offsetTop)window.scrollTo(0,Math.max(0,seg.offsetTop-60));}catch(e){}
+  if(dir){var pg=$("progress");pg.classList.remove("slide-l","slide-r");void pg.offsetWidth;pg.classList.add(dir>0?"slide-l":"slide-r");}
+  haptic("light");
+}
 function applyProgTab(){
   document.querySelectorAll("#progSeg .cat-tab").forEach(function(b){b.classList.toggle("on",b.dataset.t===progTab);});
   document.querySelectorAll("#progress [data-ptab]").forEach(function(el){el.classList.toggle("ptab-off",el.dataset.ptab!==progTab);});
@@ -2793,7 +2814,7 @@ document.addEventListener("click",function(e){
   if(a.tagName==="A")e.preventDefault();
   var act=a.dataset.act, ex=a.dataset.ex;
   switch(act){
-    case "go": if(a.dataset.ptab)progTab=a.dataset.ptab; showPage(a.dataset.page); break;
+    case "go": if(a.dataset.ptab){progTab=a.dataset.ptab;lsSet("evoProgTab",progTab);} showPage(a.dataset.page); break;
     case "weigh": openWeigh(a.dataset.mode); break;
     case "wMinus": stepWeigh(-0.1); break;
     case "wPlus": stepWeigh(0.1); break;
@@ -2807,6 +2828,8 @@ document.addEventListener("click",function(e){
       openGuidedSession();
       break;
     case "guidedStart": openGuidedSession(); break;
+    case "planList": planListOpen=!planListOpen; renderPlan(); break;
+    case "sessToday": var tp=planFor(dowIdx()); if(tp.kind!=="walk"){state.sessionCategory=tp.p.cat||"muscu";state.selDay=state.program.indexOf(tp.p);save();renderSession();} break;
     case "planDay": var pd=Number(a.dataset.i); planSel=(pd===dowIdx())?null:pd; renderPlan(); break;
     case "planGo": planGo(); break;
     case "planSwap": planSwap(); break;
@@ -2849,8 +2872,8 @@ document.addEventListener("click",function(e){
     case "snackAct": if(snackCb)snackCb(); document.getElementById("snack").classList.remove("on"); document.body.classList.remove("has-snack"); clearTimeout(snackT); snackCb=null; break;
     case "export": exportData(); break;
     case "import": document.getElementById("importFile").click(); break;
-    case "selEx": state.selEx=ex; progTab="strength"; renderProgress(); break;
-    case "progTab": progTab=a.dataset.t; renderProgress(); try{window.scrollTo(0,0);}catch(e){} break;
+    case "selEx": state.selEx=ex; progTab="strength"; lsSet("evoProgTab","strength"); renderProgress(); break;
+    case "progTab": setProgTab(a.dataset.t); break;
     case "addMeal": openMeal(a.dataset.mealType||""); break;
     case "openFavorites": openFavorites(); break;
     case "favoritesClose": closeFavorites(); break;
@@ -2920,6 +2943,22 @@ document.addEventListener("click",function(e){
     case "setTheme": setTheme(a.dataset.theme); break;
   }
 });
+/* Progrès : glisser horizontalement pour passer d'un onglet à l'autre (hors listes qui défilent déjà de côté) */
+(function(){
+  var pg=$("progress"),x0=0,y0=0,t0=0,ok=false;
+  if(!pg)return;
+  pg.addEventListener("touchstart",function(e){
+    var t=e.touches[0];ok=e.touches.length===1&&!e.target.closest(".pchips,#exPicker,.badge-row,.days,input,select,textarea");
+    x0=t.clientX;y0=t.clientY;t0=Date.now();
+  },{passive:true});
+  pg.addEventListener("touchend",function(e){
+    if(!ok)return;ok=false;
+    var t=e.changedTouches[0],dx=t.clientX-x0,dy=t.clientY-y0;
+    if(Math.abs(dx)<70||Math.abs(dy)>Math.abs(dx)*0.6||Date.now()-t0>700)return;
+    var i=PROG_TABS.indexOf(progTab)+(dx<0?1:-1);
+    if(i>=0&&i<PROG_TABS.length)setProgTab(PROG_TABS[i],dx<0?1:-1);
+  },{passive:true});
+})();
 /* mise à jour automatique : iOS garde l'app en mémoire pendant des heures, les nouvelles versions n'apparaissaient
    qu'après l'avoir fermée à la main. Au retour au premier plan, on compare la version en ligne avec celle chargée
    et on recharge, sauf pendant une séance guidée, une course ou une saisie en cours. */
