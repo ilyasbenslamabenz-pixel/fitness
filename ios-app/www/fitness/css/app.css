@@ -705,3 +705,87 @@ button.lrow:active{background:var(--surface2)}
 .menu-t small em{font-style:normal;text-transform:uppercase;letter-spacing:.03em;color:var(--primary)}
 .menu-t span{display:block;font-size:13.5px;margin-top:2px}
 .menu-add{flex:0 0 auto;width:32px;height:32px;border-radius:50%;background:var(--surface2);border:1px solid var(--hair);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:14px}
+/* accueil : tuiles cliquables */
+button.stat{width:100%;text-align:center;color:var(--text)}
+button.stat:active{transform:scale(.97)}
+/* séance : jour prévu aujourd'hui */
+.chip.planned{position:relative}
+.chip.planned::after{content:"";position:absolute;top:5px;right:7px;width:6px;height:6px;border-radius:50%;background:var(--primary)}
+/* minuteur de repos hors séance guidée */
+.rest-pill{position:fixed;left:14px;right:14px;bottom:calc(max(10px,var(--safe-bot) - 8px) + 74px);z-index:40;display:flex;align-items:center;gap:8px;padding:8px 8px 8px 14px;border-radius:999px;background:rgba(5,10,23,.92);border:1px solid rgba(255,255,255,.16);color:#fff;box-shadow:0 10px 26px -8px rgba(0,0,0,.6);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.rest-pill[hidden]{display:none}
+.rest-pill>span{font-size:13px;color:#e3ae4a;font-weight:700}
+.rest-pill b{font-size:20px;font-variant-numeric:tabular-nums;flex:1}
+.rest-pill button{padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;font-weight:700;font-size:13px}
+.rest-pill button.skip{background:#e3ae4a;color:#1c1405}
+/* progrès : onglets */
+.prog-seg{grid-template-columns:repeat(4,1fr);margin:6px 0 4px}
+.ptab-off{display:none!important}
+.trend-line{font-size:12.5px;color:var(--accent-text);margin-top:10px;line-height:1.4}
+.trend-line:empty{display:none}
+.big3 .v small{font-size:13px;font-weight:600;color:var(--muted)}
+.big3 .l .good{color:var(--accent-text);font-weight:700}
+.big3 .l .bad{color:var(--warn);font-weight:700}
+.calbars{position:relative;display:grid;grid-template-columns:repeat(7,1fr);gap:6px;height:96px;margin:12px 0 14px;align-items:end}
+.calbars .goal{position:absolute;left:0;right:0;height:0;border-top:1.5px dashed var(--primary);opacity:.7;z-index:1;pointer-events:none}
+.calbars .cb{display:flex;flex-direction:column;align-items:center;gap:4px;height:100%}
+.calbars .bar{flex:1;margin:0;width:16px;display:flex;align-items:flex-end;border-radius:6px;background:var(--surface2);overflow:hidden}
+.calbars .bar i{display:block;width:100%;border-radius:6px;background:var(--accent)}
+.calbars .bar i.over{background:#d0875a}
+.calbars .bar i.under{background:var(--faint)}
+.calbars span{font-size:10px;line-height:14px;height:14px;color:var(--faint);font-weight:700}
+.calbars .cb.today span{color:var(--text)}
+.hist-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--hair)}
+.hist-row:first-child{border-top:0}
+.hist-row b{display:block;font-size:14px}
+.hist-row span{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.hist-row em{font-style:normal;font-size:12px;color:var(--muted);text-align:right;white-space:nowrap}
+.rec-row{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;padding:10px 0;border-top:1px solid var(--hair);text-align:left;color:var(--text)}
+.rec-row:first-child{border-top:0}
+.rec-row b{display:block;font-size:14px}
+.rec-row small{display:block;font-size:11.5px;color:var(--muted);margin-top:2px}
+.rec-row em{font-style:normal;font-weight:800;color:var(--primary);white-space:nowrap}
+/* eau */
+.water-card2{display:flex;align-items:center;gap:18px;padding:18px;border-radius:24px;background:var(--surface);border:1px solid var(--hair);box-shadow:var(--shadow-card)}
+.wring{position:relative;width:132px;height:132px;flex:0 0 auto}
+.wring svg{width:100%;height:100%;display:block}
+.wr-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.wr-center b{font-size:26px;font-weight:800;font-family:var(--display)}
+.wr-center span{font-size:12px;color:var(--muted);font-weight:700}
+.winfo{display:flex;flex-direction:column;gap:3px;min-width:0}
+.winfo span{font-size:12px;color:var(--muted)}
+.winfo b{font-size:22px;font-family:var(--display)}
+.winfo em{font-style:normal;font-size:15px;font-weight:700;color:var(--accent-text);margin-top:6px}
+.winfo small{font-size:12px;color:var(--muted)}
+.glass.full{opacity:.95}
+.calbars .bar i.ok{background:var(--accent)}
+/* repas : calories restantes + macros lisibles */
+.cal-left{font-size:13px;color:var(--muted);margin-top:4px}
+.cal-left b{color:var(--text)}
+.cal-left .over{color:#d0875a;font-weight:700}
+.macro-list{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px}
+.macro-r .mr-top{display:flex;justify-content:space-between;align-items:baseline;gap:6px;font-size:13px;margin-bottom:5px}
+.macro-r .mr-top span{color:var(--muted);font-weight:600}
+.macro-r .mr-top b{font-size:13px;white-space:nowrap}
+.macro-r .mini-bar{margin-bottom:3px}
+.macro-r small{font-size:11px;color:var(--faint)}
+.macro-r:nth-child(1) .mini-bar i{background:#e3ae4a}
+.macro-r:nth-child(2) .mini-bar i{background:var(--accent)}
+.macro-r:nth-child(3) .mini-bar i{background:#d0875a}
+.meal-main-add{background:var(--gold-grad)!important;color:var(--on-primary)!important;box-shadow:0 10px 24px -12px rgba(227,174,74,.6)}
+/* profil */
+.mini-seg{margin:0;grid-template-columns:repeat(2,1fr);width:170px;padding:2px}
+.mini-seg .cat-tab{padding:6px 4px;font-size:12.5px}
+.lrow-sel{max-width:190px;background:transparent;border:0;color:var(--muted);font-size:15px;text-align:right;text-align-last:right;-webkit-appearance:none;appearance:none}
+/* thème clair : pistes des barres visibles (étaient bleu nuit / blanc transparent) */
+:root[data-theme="light"] .mini-bar{background:#dde2ea}
+:root[data-theme="light"] .weekbar .bar{background:#e3e7ee}
+.wtip{font-size:12px;line-height:1.4;color:var(--muted);margin:2px 2px 0}
+/* petits écrans (≤ 359 px, iPhone SE 1re génération) : légende des anneaux et humeurs sans débordement */
+@media (max-width:359px){
+  .ring-card{gap:12px;padding:14px}
+  .ring-row-ic{display:none}
+  .ring-row-top{flex-wrap:wrap;row-gap:1px}
+  .efaces{gap:4px}
+  .efaces button{width:34px;height:34px;font-size:17px}
+}
