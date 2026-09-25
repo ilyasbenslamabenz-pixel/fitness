@@ -541,6 +541,45 @@ function estimateRunKcal(distKm,durMin){
   if(durMin>0)return Math.max(1,Math.round(7*w*(durMin/60))); /* repli si distance inconnue : MET 7 (course modérée) */
   return 0;
 }
+/* ===== dépense du jour =====
+   base = métabolisme de repos (Mifflin-St Jeor, taille/âge/sexe du Profil) × 1,2 (vie quotidienne, ~3 000 pas compris)
+   + pas au-delà de 3 000 + séances + cardio. Les séances et courses sont comptées en « net » (on retire la dépense
+   de repos pendant l'effort, déjà dans la base). Une marche GPS ou tapis n'est pas recomptée si les pas du jour sont saisis. */
+function bmrNow(){
+  var pr=state.profile||{},w=latestBody(),h=Number(pr.height)||178,a=Number(pr.age)||30;
+  return Math.round(10*w+6.25*h-5*a+(pr.sex==="F"?-161:5));
+}
+function dayBurn(d){
+  var w=latestBody(),bmr=bmrNow(),base=Math.round(bmr*1.2);
+  var st=stepsOn(d),stepsK=st>3000?estimateStepsKcal(st-3000):0;
+  var sessK=0,cardioK=0;
+  state.sessions.forEach(function(x){
+    if(localDay(x.date)!==d)return;
+    var q=state.program.find(function(pp){return pp.id===x.dayId;}),cat=(q&&q.cat)||"muscu";
+    var dur=Number(x.dur)||(q?estimateDurationMin(q):45);
+    var gross=Number(x.kcal)||estimateSessionKcal(cat,dur);
+    sessK+=Math.max(0,Math.round(gross-w*dur/60));
+  });
+  state.runs.forEach(function(r){
+    if(r.d!==d||(r.walk&&st>0))return;
+    var dur=Number(r.dur)||0,gross=Number(r.kcal)||(r.walk?estimateWalkDistKcal(Number(r.dist)||0):estimateRunKcal(Number(r.dist)||0,dur));
+    cardioK+=Math.max(0,Math.round(gross-w*dur/60));
+  });
+  return {bmr:bmr,base:base,steps:stepsK,sess:sessK,cardio:cardioK,total:base+stepsK+sessK+cardioK};
+}
+function kfmt(n){return Math.round(n).toLocaleString("fr-CH");}
+function renderBurn(){
+  var box=$("burnCard");if(!box)return;
+  var d=today(),b=dayBurn(d),eaten=state.meals.reduce(function(s2,m){return s2+Number(m.kcal||0);},0),bal=Math.round(eaten-b.total);
+  var parts=['base '+kfmt(b.base)];
+  if(b.steps)parts.push('pas '+kfmt(b.steps));
+  if(b.sess)parts.push('séance '+kfmt(b.sess));
+  if(b.cardio)parts.push('cardio '+kfmt(b.cardio));
+  box.innerHTML='<div class="head" style="margin:0 0 8px"><div class="eyebrow">Bilan calorique du jour</div><span class="link" data-act="go" data-page="meals">Repas</span></div>'
+    +'<div class="burn3"><div><b>'+kfmt(eaten)+'</b><span>mangé</span></div><div><b>'+kfmt(b.total)+'</b><span>dépensé</span></div>'
+    +'<div class="'+(bal<=0?"good":"bad")+'"><b>'+(bal<=0?"−":"+")+kfmt(Math.abs(bal))+'</b><span>'+(bal<=0?"déficit":"surplus")+'</span></div></div>'
+    +'<div class="burn-detail">Dépense estimée : '+parts.join(' + ')+' kcal'+(state.profile.height&&state.profile.age?'':' · <u data-act="go" data-page="profile">indique ta taille et ton âge</u> pour plus de précision')+'</div>';
+}
 /* marche : distance = pas × longueur de foulée moyenne (~0.762 m), coût ~0.5 kcal/kg/km (environ la moitié de la course) */
 function estimateStepsKcal(steps){
   steps=Number(steps)||0;if(steps<=0)return 0;
@@ -711,6 +750,7 @@ function renderToday(){
   $("legRepas").textContent=rings.repasTxt;
   $("legRepasBar").style.width=Math.max(0,Math.min(100,rings.repas))+"%";
   $("streakN").textContent=computeStreak();
+  renderBurn();
 
   var lp=latestPR();
   $("lastPR").innerHTML=lp?('<b style="color:var(--text);font-size:15px">'+esc(lp.n)+'</b> — <span style="color:var(--accent-text);font-weight:600">'+fr(lp.w)+' kg</span><br><span style="font-size:12.5px">le '+fmtDate(lp.d)+'</span>')
@@ -1573,11 +1613,14 @@ function renderCalWeek(){
   var past=withData.filter(function(x){return x.d!==today();}),avgList=past.length?past:withData;
   var avg=Math.round(avgList.reduce(function(s,x){return s+x.v.kcal;},0)/avgList.length),avgP=Math.round(avgList.reduce(function(s,x){return s+x.v.prot;},0)/avgList.length);
   var ok=past.filter(function(x){return x.v.kcal<=goal*1.05&&x.v.kcal>=goal*0.75;}).length;
+  var defs=avgList.map(function(x){return dayBurn(x.d).total-x.v.kcal;}),avgDef=Math.round(defs.reduce(function(a2,b2){return a2+b2;},0)/defs.length);
+  var defTxt=avgDef>0?'Déficit moyen ≈ '+kfmt(avgDef)+' kcal/jour, soit environ −'+fr(avgDef*7/7700)+' kg de graisse par semaine (estimation).':'Pas de déficit en moyenne ('+kfmt(-avgDef)+' kcal/jour au-dessus de ta dépense) : réduis un peu les portions.';
   box.innerHTML='<div class="calbars">'+goalLine(goal/mx)+days.map(function(x){
       var h=x.v?Math.max(4,x.v.kcal/mx*100):0,cls=!x.v?"":(x.v.kcal>goal*1.05?"over":(x.v.kcal<goal*0.75&&x.d!==today()?"under":"ok"));
       return '<div class="cb'+(x.d===today()?" today":"")+'"><div class="bar"><i class="'+cls+'" style="height:'+h+'%"></i></div><span>'+x.lab+'</span></div>';
     }).join("")+'</div>'
-    +'<div class="big3" style="margin-bottom:0"><div><div class="v num">'+avg.toLocaleString("fr-CH")+'</div><div class="l">kcal / jour (moy.)</div></div><div><div class="v num">'+avgP+' g</div><div class="l">protéines (moy.)</div></div><div><div class="v num">'+ok+'/'+past.length+'</div><div class="l">jours dans l\'objectif</div></div></div>';
+    +'<div class="big3" style="margin-bottom:0"><div><div class="v num">'+avg.toLocaleString("fr-CH")+'</div><div class="l">kcal / jour (moy.)</div></div><div><div class="v num">'+avgP+' g</div><div class="l">protéines (moy.)</div></div><div><div class="v num">'+ok+'/'+past.length+'</div><div class="l">jours dans l\'objectif</div></div></div>'
+    +'<div class="trend-line">'+defTxt+'</div>';
 }
 /* historique des séances */
 function renderSessionHistory(){
@@ -2126,6 +2169,8 @@ function renderMeals(){
   var goal=Number(state.profile.cal||2400),carbGoal=fnum(state.macro.carbs,265),protGoal=fnum(state.macro.protein,155),fatGoal=fnum(state.macro.fat,80);
   ring($("calRing"),Math.min(1,kcal/goal),kcal>goal*1.05?"#d0875a":"#e3ae4a",Math.round(kcal).toLocaleString("fr-CH")+"\n/ "+goal.toLocaleString("fr-CH")+" kcal");
   var kLeft=Math.round(goal-kcal);
+  var brn=dayBurn(today()),bal2=Math.round(kcal-brn.total);
+  var bl=$("mealBurn");if(bl)bl.innerHTML='Dépense estimée aujourd\'hui : <b>'+kfmt(brn.total)+' kcal</b> · '+(bal2<=0?'<span class="good">déficit '+kfmt(-bal2)+' kcal</span>':'<span class="bad">surplus '+kfmt(bal2)+' kcal</span>');
   $("calLeft").innerHTML=kLeft>=0?'Reste <b>'+kLeft.toLocaleString("fr-CH")+'</b> kcal':'<span class="over">+'+(-kLeft).toLocaleString("fr-CH")+' kcal</span> au-dessus';
   $("mCarbsGoal").textContent=Math.round(carbGoal);$("mProtGoal").textContent=Math.round(protGoal);$("mFatGoal").textContent=Math.round(fatGoal);
   $("mCarbs").textContent=Math.round(carbs);$("mProt").textContent=Math.round(prot);$("mFat").textContent=Math.round(fat);
