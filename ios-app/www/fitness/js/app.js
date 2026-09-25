@@ -86,19 +86,23 @@ var RUNNING_PROGRAM=[
 ];
 
 var MENU=[
- ["Lundi",[["Petit-déjeuner","Avoine 50 g + skyr 200 g + banane","≈ 400 kcal · 25 g prot."],["Déjeuner","Riz 70 g + crevettes 180 g (airfryer) + poivrons + curry","≈ 550 kcal · 42 g prot."],["Dîner","Pommes de terre 300 g (airfryer) + 3 œufs + haricots verts","≈ 560 kcal · 28 g prot."],["Collation","Skyr 150 g + pomme","≈ 160 kcal · 16 g prot."]]],
- ["Mardi",[["Petit-déjeuner","2 œufs + pommes de terre 200 g (airfryer) + fruit","≈ 430 kcal · 20 g prot."],["Déjeuner","Riz 70 g + thon 120 g + courgette (airfryer) + tomate","≈ 520 kcal · 38 g prot."],["Dîner","Lentilles 220 g + riz 50 g + 2 œufs + légumes (airfryer)","≈ 620 kcal · 34 g prot."],["Collation","Fromage blanc 200 g + banane","≈ 180 kcal · 18 g prot."]]],
- ["Mercredi",[["Petit-déjeuner","Avoine 50 g + lait + skyr 150 g + pomme","≈ 430 kcal · 28 g prot."],["Déjeuner","Pommes de terre 350 g (airfryer) + thon 120 g + crudités","≈ 500 kcal · 35 g prot."],["Dîner","Riz 70 g + pois chiches 180 g croustillants (airfryer) + sauce tomate","≈ 600 kcal · 20 g prot."],["Collation","Skyr 200 g","≈ 130 kcal · 22 g prot."]]],
- ["Jeudi",[["Petit-déjeuner","3 œufs + banane + skyr 100 g","≈ 430 kcal · 32 g prot."],["Déjeuner","Riz 70 g + crevettes 180 g (airfryer) + courgettes + curry","≈ 540 kcal · 43 g prot."],["Dîner","Pommes de terre 300 g (airfryer) + lentilles 200 g + 2 œufs","≈ 610 kcal · 33 g prot."],["Collation","Fromage blanc 200 g + pomme","≈ 170 kcal · 17 g prot."]]],
- ["Vendredi",[["Petit-déjeuner","Avoine 50 g + skyr 200 g + banane","≈ 400 kcal · 25 g prot."],["Déjeuner","Riz 70 g + thon 120 g + poivrons (airfryer) + tomate","≈ 530 kcal · 38 g prot."],["Dîner","Pommes de terre 300 g (airfryer) + 3 œufs + brocolis","≈ 560 kcal · 30 g prot."],["Collation","Skyr 150 g + fruit","≈ 160 kcal · 16 g prot."]]],
- ["Samedi",[["Petit-déjeuner","2 œufs + avoine 40 g + banane","≈ 410 kcal · 21 g prot."],["Déjeuner","Riz 70 g + crevettes 180 g (airfryer) + lait de coco léger","≈ 590 kcal · 42 g prot."],["Dîner","Pois chiches 200 g croustillants (airfryer) + pommes de terre 250 g (airfryer) + 2 œufs","≈ 650 kcal · 30 g prot."],["Collation","Fromage blanc 200 g + pomme","≈ 170 kcal · 17 g prot."]]],
- ["Dimanche",[["Petit-déjeuner","Avoine 50 g + lait + skyr 150 g + banane","≈ 450 kcal · 28 g prot."],["Déjeuner","Pommes de terre 350 g (airfryer) + thon 120 g + haricots verts","≈ 500 kcal · 37 g prot."],["Dîner","Riz 70 g + lentilles 200 g + 2 œufs + courgettes (airfryer)","≈ 620 kcal · 34 g prot."],["Collation","Skyr 150 g + fruit","≈ 150 kcal · 16 g prot."]]]
+ ["Lundi",[["Petit-déjeuner","Avoine 50 g + skyr 200 g + banane","≈ 400 kcal · 25 g prot."],["Déjeuner","Riz 70 g + crevettes 180 g (airfryer) + poivrons + curry","≈ 550 kcal · 42 g prot."],["Dîner","Pommes de terre 300 g (airfryer) + 3 œufs + haricots verts","≈ 560 kcal · 28 g prot."],["Collation","Skyr 150 g + pomme + shake whey 30 g","≈ 280 kcal · 40 g prot."]]],
+ ["Mardi",[["Petit-déjeuner","2 œufs + pommes de terre 200 g (airfryer) + fruit","≈ 430 kcal · 20 g prot."],["Déjeuner","Riz 70 g + thon 120 g + courgette (airfryer) + tomate","≈ 520 kcal · 38 g prot."],["Dîner","Lentilles 220 g + riz 50 g + 2 œufs + légumes (airfryer)","≈ 620 kcal · 34 g prot."],["Collation","Fromage blanc 200 g + banane + shake whey 30 g","≈ 300 kcal · 42 g prot."]]],
+ ["Mercredi",[["Petit-déjeuner","Avoine 50 g + lait + skyr 150 g + pomme","≈ 430 kcal · 28 g prot."],["Déjeuner","Pommes de terre 350 g (airfryer) + thon 120 g + crudités","≈ 500 kcal · 35 g prot."],["Dîner","Riz 70 g + tofu 200 g (airfryer) + pois chiches 100 g + sauce tomate","≈ 610 kcal · 31 g prot."],["Collation","Skyr 200 g + shake whey 30 g","≈ 250 kcal · 46 g prot."]]],
+ ["Jeudi",[["Petit-déjeuner","3 œufs + banane + skyr 100 g","≈ 430 kcal · 32 g prot."],["Déjeuner","Riz 70 g + crevettes 180 g (airfryer) + courgettes + curry","≈ 540 kcal · 43 g prot."],["Dîner","Pommes de terre 300 g (airfryer) + lentilles 200 g + 2 œufs","≈ 610 kcal · 33 g prot."],["Collation","Fromage blanc 200 g + pomme + shake whey 30 g","≈ 290 kcal · 41 g prot."]]],
+ ["Vendredi",[["Petit-déjeuner","Avoine 50 g + skyr 200 g + banane","≈ 400 kcal · 25 g prot."],["Déjeuner","Riz 70 g + thon 120 g + poivrons (airfryer) + tomate","≈ 530 kcal · 38 g prot."],["Dîner","Pommes de terre 300 g (airfryer) + 3 œufs + brocolis","≈ 560 kcal · 30 g prot."],["Collation","Skyr 150 g + fruit + shake whey 30 g","≈ 280 kcal · 40 g prot."]]],
+ ["Samedi",[["Petit-déjeuner","2 œufs + avoine 40 g + banane","≈ 410 kcal · 21 g prot."],["Déjeuner","Riz 70 g + crevettes 180 g (airfryer) + lait de coco léger","≈ 590 kcal · 42 g prot."],["Dîner","Pois chiches 200 g croustillants (airfryer) + pommes de terre 250 g (airfryer) + 2 œufs","≈ 650 kcal · 30 g prot."],["Collation","Fromage blanc 200 g + pomme + shake whey 30 g","≈ 290 kcal · 41 g prot."]]],
+ ["Dimanche",[["Petit-déjeuner","Avoine 50 g + lait + skyr 150 g + banane","≈ 450 kcal · 28 g prot."],["Déjeuner","Pommes de terre 350 g (airfryer) + thon 120 g + haricots verts","≈ 500 kcal · 37 g prot."],["Dîner","Riz 70 g + lentilles 200 g + 2 œufs + courgettes (airfryer)","≈ 620 kcal · 34 g prot."],["Collation","Skyr 150 g + fruit + shake whey 30 g","≈ 270 kcal · 40 g prot."]]]
 ];
 
-/* liste de courses Migros par défaut : végétarien, orienté protéines, ~150.-/mois */
+/* liste de courses Migros par défaut : sans viande (œufs, laitiers, poisson), orientée protéines,
+   alignée sur le menu de la semaine */
 var DEFAULT_GROCERY={
  once:[
   {n:"Riz complet 1 kg",done:false},
+  {n:"Lentilles vertes 500 g",done:false},
+  {n:"Pois chiches en boîte ×4",done:false},
+  {n:"Thon au naturel en boîte ×6",done:false},
   {n:"Flocons d'avoine 1 kg",done:false},
   {n:"Graines de chia 200 g",done:false},
   {n:"Graines de tournesol/courge 200 g",done:false},
@@ -112,6 +116,10 @@ var DEFAULT_GROCERY={
   {n:"Boisson protéinée UHT ×2",done:false}
  ],
  weekly:[
+  {n:"Œufs (boîte de 12) ×2",done:false},
+  {n:"Crevettes surgelées 500 g",done:false},
+  {n:"Tofu nature 300 g ×2",done:false},
+  {n:"Pommes de terre 2.5 kg",done:false},
   {n:"Lait écrémé 2 L",done:false},
   {n:"Skyr/yogourt protéiné 500 g ×2",done:false},
   {n:"Cottage cheese 250 g ×2",done:false},
@@ -122,7 +130,7 @@ var DEFAULT_GROCERY={
   {n:"Fruits à faible IG (pommes, baies, ~1 kg)",done:false}
  ]
 };
-var GROCERY_VERSION=5;
+var GROCERY_VERSION=6;
 /* noms de tous les articles par défaut v1 (retirés ou renommés en v2) : jamais réinjectés
    comme "ajout personnel" lors de la migration, même s'ils n'ont plus de correspondance exacte
    dans DEFAULT_GROCERY */
@@ -160,17 +168,6 @@ function migrateGroceryList(old){
 /* base locale d'aliments bruts courants (kcal/protéines/glucides/lipides pour 100 g) —
    consultable instantanément sans réseau, complète OpenFoodFacts qui couvre mal le non-transformé */
 var LOCAL_FOODS=[
- {n:"Poulet (blanc, grillé)",kcal:165,p:31,c:0,f:3.6},
- {n:"Poulet (cuisse, grillée)",kcal:209,p:26,c:0,f:11},
- {n:"Bœuf (steak grillé, maigre)",kcal:217,p:26,c:0,f:12},
- {n:"Bœuf haché 5% MG (cuit)",kcal:137,p:21,c:0,f:5},
- {n:"Bœuf haché 15% MG (cuit)",kcal:230,p:20,c:0,f:16},
- {n:"Porc (filet grillé)",kcal:143,p:26,c:0,f:4},
- {n:"Dinde (blanc, grillé)",kcal:135,p:30,c:0,f:1},
- {n:"Agneau (grillé)",kcal:258,p:25,c:0,f:17},
- {n:"Jambon blanc",kcal:107,p:18,c:1,f:3},
- {n:"Lard / bacon (cuit)",kcal:541,p:37,c:1.4,f:42},
- {n:"Saucisse de veau (cuite)",kcal:220,p:14,c:1,f:18},
  {n:"Truite (cuite)",kcal:168,p:24,c:0,f:7.5},
  {n:"Saumon (cuit)",kcal:208,p:20,c:0,f:13},
  {n:"Thon (au naturel, égoutté)",kcal:116,p:26,c:0,f:1},
@@ -194,6 +191,13 @@ var LOCAL_FOODS=[
  {n:"Pois chiches (cuits)",kcal:164,p:9,c:27,f:2.6},
  {n:"Haricots rouges (cuits)",kcal:127,p:8.7,c:23,f:0.5},
  {n:"Tofu nature",kcal:76,p:8,c:1.9,f:4.8},
+ {n:"Tofu fumé",kcal:150,p:16,c:1.5,f:9},
+ {n:"Tempeh",kcal:192,p:20,c:7.6,f:11},
+ {n:"Seitan",kcal:370,p:75,c:14,f:1.9},
+ {n:"Edamame (cuits)",kcal:121,p:12,c:9,f:5},
+ {n:"Protéines de soja texturées (sèches)",kcal:330,p:50,c:30,f:1},
+ {n:"Haricots noirs (cuits)",kcal:132,p:8.9,c:24,f:0.5},
+ {n:"Lentilles corail (cuites)",kcal:116,p:9,c:20,f:0.4},
  {n:"Brocoli (cuit)",kcal:35,p:2.4,c:7,f:0.4},
  {n:"Carotte (crue)",kcal:41,p:0.9,c:10,f:0.2},
  {n:"Courgette (cuite)",kcal:17,p:1.2,c:3.1,f:0.3},
@@ -226,6 +230,9 @@ var LOCAL_FOODS=[
  {n:"Skyr",kcal:63,p:11,c:4,f:0.2},
  {n:"Fromage blanc 20%",kcal:90,p:8,c:4,f:4.5},
  {n:"Œuf (cuit)",kcal:155,p:13,c:1.1,f:11},
+ {n:"Blanc d'œuf",kcal:52,p:11,c:0.7,f:0.2},
+ {n:"Quark / séré maigre",kcal:67,p:12,c:4,f:0.2},
+ {n:"Whey protéine (poudre)",kcal:380,p:75,c:8,f:6},
  {n:"Emmental",kcal:380,p:28,c:0,f:30},
  {n:"Mozzarella",kcal:280,p:22,c:2.2,f:21},
  {n:"Feta",kcal:264,p:14,c:4,f:21},
