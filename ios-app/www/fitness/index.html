@@ -588,10 +588,20 @@
   <div class="acts"><button class="btn ghost" data-act="addExClose">Annuler</button><button class="btn primary" data-act="addExSave">Ajouter</button></div>
 </div></div>
 
+<div class="modal" id="exPickModal"><div class="sheet pick-sheet">
+  <h3>Choisir un exercice</h3>
+  <div class="sub">Machines et zones d'une salle EVO (Technogym), poids libres, cardio, playground, mobilité et poids du corps.</div>
+  <div class="pick-search"><svg class="ic-s" aria-hidden="true"><use href="#i-search"/></svg><input id="pickSearch" type="search" placeholder="Rechercher (pecs, poulie, tapis…)"></div>
+  <div class="pick-zones" id="pickZones"></div>
+  <div class="pick-list" id="pickList"></div>
+  <button class="btn ghost" data-act="pickCustom" style="width:100%;margin-top:10px">Exercice introuvable ? Le créer</button>
+  <div class="acts"><button class="btn ghost" data-act="pickClose">Fermer</button></div>
+</div></div>
+
 <div class="snack" id="snack"><div class="msg" id="snackMsg"></div><button data-act="snackAct" id="snackBtn">Annuler</button></div>
 <div class="toast" id="toast" hidden></div>
 
-<script src="/fitness/js/app.js?v=18"></script>
+<script src="/fitness/js/app.js?v=19"></script>
 <script src="/fitness/js/boot.js?v=3"></script>
 </body>
 </html>
