@@ -2920,7 +2920,22 @@ document.addEventListener("click",function(e){
     case "setTheme": setTheme(a.dataset.theme); break;
   }
 });
-document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible"){checkDayRollover();if((runActive&&!runPaused)||guidedOpen)requestWake();fixLiveMapSize();}else{cloudAutoBackup(true);}});
+/* mise à jour automatique : iOS garde l'app en mémoire pendant des heures, les nouvelles versions n'apparaissaient
+   qu'après l'avoir fermée à la main. Au retour au premier plan, on compare la version en ligne avec celle chargée
+   et on recharge, sauf pendant une séance guidée, une course ou une saisie en cours. */
+var APP_V=(function(){var sc=document.querySelector('script[src*="js/app.js"]'),m=sc&&(sc.getAttribute("src")||"").match(/[?&]v=(\d+)/);return m?m[1]:"";})(),lastUpdCheck=0;
+function checkAppUpdate(){
+  if(!APP_V||navigator.onLine===false||Date.now()-lastUpdCheck<60000)return;
+  lastUpdCheck=Date.now();
+  fetch("/fitness/index.html?u="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(html){
+    var m=String(html||"").match(/js\/app\.js\?v=(\d+)/);
+    if(!m||m[1]===APP_V)return;
+    if(guidedOpen||runActive||document.querySelector(".modal.on")||document.visibilityState!=="visible")return;
+    location.reload();
+  }).catch(function(){});
+}
+window.addEventListener("pageshow",function(e){if(e.persisted)checkAppUpdate();});
+document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible"){checkDayRollover();if((runActive&&!runPaused)||guidedOpen)requestWake();fixLiveMapSize();checkAppUpdate();}else{cloudAutoBackup(true);}});
 document.addEventListener("input",function(e){
   var id=e.target.id;
   if(id==="runDist"){runDistTouched=!!e.target.value;updateRunPace();}
