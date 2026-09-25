@@ -274,7 +274,7 @@ var state={
   perf:{},
   meals:[], mealHistory:[], foodFavorites:[], lastDay:today(),
   runs:[], steps:[], energy:[], water:{date:today(),ml:0},
-  macro:{carbs:240,protein:180,fat:80}, waterGoal:3,
+  macro:{carbs:265,protein:155,fat:80}, waterGoal:3,
   fast:{active:false,start:null,hours:16},
   groceryList:JSON.parse(JSON.stringify(DEFAULT_GROCERY)),
   selEx:null,
@@ -357,6 +357,7 @@ function merge(p){
   if(p.customBarcodes&&typeof p.customBarcodes==="object")state.customBarcodes=p.customBarcodes;
   if(typeof p.groceryVersion==="number")state.groceryVersion=p.groceryVersion;
   if(typeof p.programVersion==="number")state.programVersion=p.programVersion;
+  if(typeof p.macroVersion==="number")state.macroVersion=p.macroVersion;
   if(typeof p.suggest==="number")state.suggest=p.suggest;
   if(p.session&&typeof p.session==="object")state.session=p.session;
   if(p.lastDay)state.lastDay=p.lastDay;
@@ -375,8 +376,14 @@ function normalizeState(){
   if(!Array.isArray(state.meals))state.meals=[];
   if(!Array.isArray(state.mealHistory))state.mealHistory=[];
   if(!Array.isArray(state.foodFavorites))state.foodFavorites=[];
-  if(!state.macro)state.macro={carbs:240,protein:180,fat:80};
-  state.macro={carbs:fnum(state.macro.carbs,240),protein:fnum(state.macro.protein,180),fat:fnum(state.macro.fat,80)};
+  if(!state.macro)state.macro={carbs:265,protein:155,fat:80};
+  state.macro={carbs:fnum(state.macro.carbs,265),protein:fnum(state.macro.protein,155),fat:fnum(state.macro.fat,80)};
+  /* objectif protéines ramené à 155 g (alimentation sans viande, réaliste et suffisant pour
+     garder le muscle en perte de poids) ; les 25 g retirés passent en glucides (même énergie) */
+  if(state.macroVersion!==2){
+    if(state.macro.protein>155){state.macro.carbs+=Math.round((state.macro.protein-155));state.macro.protein=155;}
+    state.macroVersion=2;save();
+  }
   state.waterGoal=Number(state.waterGoal||3);if(state.waterGoal<0.5||state.waterGoal>8)state.waterGoal=3;
   if(!state.fast)state.fast={active:false,start:null,hours:16};
   state.fast.hours=Number(state.fast.hours||16);
@@ -1627,7 +1634,7 @@ function renderWeeklyMenuIfNeeded(){
 function renderMeals(){
   if(state.page!=="meals")return; /* repeinte automatiquement par showPage() à la prochaine visite */
   var kcal=state.meals.reduce(function(s,m){return s+Number(m.kcal||0);},0),prot=state.meals.reduce(function(s,m){return s+Number(m.protein||0);},0),carbs=state.meals.reduce(function(s,m){return s+Number(m.carbs||0);},0),fat=state.meals.reduce(function(s,m){return s+Number(m.fat||0);},0);
-  var goal=Number(state.profile.cal||2400),carbGoal=fnum(state.macro.carbs,240),protGoal=fnum(state.macro.protein,180),fatGoal=fnum(state.macro.fat,80);
+  var goal=Number(state.profile.cal||2400),carbGoal=fnum(state.macro.carbs,265),protGoal=fnum(state.macro.protein,155),fatGoal=fnum(state.macro.fat,80);
   ring($("calRing"),Math.min(1,kcal/goal),"#0a84ff",Math.round(kcal)+"\n/ "+goal+" kcal");
   $("mCarbs").textContent=Math.round(carbs*10)/10;$("mProt").textContent=Math.round(prot*10)/10;$("mFat").textContent=Math.round(fat*10)/10;
   $("mCarbsBar").style.width=Math.min(100,carbs/carbGoal*100)+"%";$("mProtBar").style.width=Math.min(100,prot/protGoal*100)+"%";$("mFatBar").style.width=Math.min(100,fat/fatGoal*100)+"%";
