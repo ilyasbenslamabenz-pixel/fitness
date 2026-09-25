@@ -817,3 +817,23 @@ button.stat:active{transform:scale(.97)}
 .meal-burn{font-size:12.5px;color:var(--muted);margin:10px 4px 0;text-align:center}
 .meal-burn .good{color:var(--accent-text);font-weight:700}
 .meal-burn .bad{color:#d0875a;font-weight:700}
+/* Nutrition : 3 onglets (Aujourd'hui / Semaine / Menu) */
+.nut-seg{grid-template-columns:repeat(3,1fr)}
+#meals.slide-l>[data-ntab]:not(.ptab-off){animation:ptabL .22s ease}
+#meals.slide-r>[data-ntab]:not(.ptab-off){animation:ptabR .22s ease}
+@media (prefers-reduced-motion:reduce){#meals.slide-l>[data-ntab],#meals.slide-r>[data-ntab]{animation:none}}
+#waterSec{margin-top:26px}
+/* bilan calorique : les pas remplacent « mangé » (déjà dans l'anneau Repas) */
+.burn-steps{display:flex;flex-direction:column;align-items:center;color:var(--text);padding:0}
+.burn-steps i{display:block;width:70%;height:4px;border-radius:2px;background:var(--surface2);margin-top:5px;overflow:hidden}
+.burn-steps em{display:block;height:100%;background:var(--accent);border-radius:2px}
+/* rappel de sauvegarde */
+
+.backup-nag{display:flex;align-items:center;gap:8px;margin:10px 0 0;padding:7px 8px 7px 14px;border-radius:999px;background:var(--primary-dim);border:1px solid rgba(227,174,74,.35)}
+.backup-nag span{flex:1;min-width:0;font-size:12.5px;font-weight:600;line-height:1.3}
+.backup-nag button{padding:6px 12px;border-radius:999px;background:var(--gold-grad);color:var(--on-primary);font-weight:700;font-size:12.5px;flex:0 0 auto}
+.backup-nag button.later{background:transparent;color:var(--muted);padding:6px 8px}
+.backup-status{font-size:13px;color:var(--muted);margin:0 4px 8px}
+.backup-status .good{color:var(--accent-text)}
+.backup-status .bad{color:#d0875a}
+#meals .water-quick{margin-top:12px}
