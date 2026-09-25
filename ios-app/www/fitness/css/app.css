@@ -896,3 +896,10 @@ input[type=search]::-webkit-search-decoration{-webkit-appearance:none}
 #mealModal.search-top .sheet{border-radius:0 0 24px 24px;overflow-y:auto;padding-top:calc(var(--safe-top) + 10px);-webkit-overflow-scrolling:touch}
 #mealModal.search-top .sheet h3{display:none}
 #mealModal.search-top .sheet{background:var(--bg)}
+/* recherche : 3 choix + liste déroulante */
+.fr-list .food-result:first-child{border-top:0}
+.fr-rest{border-top:1px solid var(--hair);max-height:40vh;overflow-y:auto}
+.fr-rest .food-result:first-child{border-top:0}
+.fr-n em{display:inline-block;margin-left:6px;font-style:normal;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--accent-text);background:var(--accent-dim);padding:1px 6px;border-radius:6px;vertical-align:2px}
+.fr-bar{margin:8px 2px 0}
+.fr-bar .fr-more{color:var(--text);background:var(--surface2);border:1px solid var(--hair);border-radius:999px;padding:7px 14px}
