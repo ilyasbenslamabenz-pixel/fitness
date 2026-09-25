@@ -1,8 +1,8 @@
-const CACHE='evo-fit-coach-v40';
+const CACHE='evo-fit-coach-v41';
 
 self.addEventListener('install',e=>e.waitUntil(
   caches.open(CACHE)
-    .then(c=>c.addAll(['./','./index.html','./manifest.json','./icon-180.jpg?v=3','./icon-512.jpg?v=3']))
+    .then(c=>c.addAll(['./','./index.html','./manifest.json','./apple-touch-icon.png?v=5','./icon-512.jpg?v=4']))
     .then(()=>self.skipWaiting())
 ));
 

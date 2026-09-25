@@ -36,6 +36,9 @@ async function main() {
   await sharp(icon).resize(512, 512, { kernel: "lanczos3" }).jpeg({ quality: 92, mozjpeg: true }).toFile(path.join(ROOT, "icon-512.jpg"));
   await sharp(icon).resize(192, 192, { kernel: "lanczos3" }).jpeg({ quality: 92, mozjpeg: true }).toFile(path.join(ROOT, "icon-192.jpg"));
   await sharp(icon).resize(180, 180, { kernel: "lanczos3" }).jpeg({ quality: 92, mozjpeg: true }).toFile(path.join(ROOT, "icon-180.jpg"));
+  /* Safari iOS n'accepte que le PNG pour l'icône de l'écran d'accueil */
+  await sharp(icon).resize(180, 180, { kernel: "lanczos3" }).png({ compressionLevel: 9 }).toFile(path.join(ROOT, "apple-touch-icon.png"));
+  await sharp(icon).resize(64, 64, { kernel: "lanczos3" }).png({ compressionLevel: 9 }).toFile(path.join(ROOT, "favicon.png"));
 
   /* écran de lancement iOS : l'icône arrondie au centre sur le fond de l'app */
   const L = 2732, I = 640;
