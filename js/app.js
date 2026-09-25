@@ -589,7 +589,8 @@ function clSummary(){
   return "Date : "+td+" ("+new Date().toLocaleDateString("fr-CH",{weekday:"long"})+"), heure "+new Date().getHours()+" h\n"
     +"Repas du jour :\n"+(lines.join("\n")||"(aucun)")+"\n"
     +"Totaux : "+Math.round(t.k)+" / "+Number(state.profile.cal||2400)+" kcal · protéines "+Math.round(t.p)+" / "+fnum(state.macro.protein,155)+" g · glucides "+Math.round(t.c)+" / "+fnum(state.macro.carbs,0)+" g · lipides "+Math.round(t.f)+" / "+fnum(state.macro.fat,0)+" g\n"
-    +"Eau : "+wml+" / "+Math.round(Number(state.waterGoal||3)*1000)+" ml · Pas : "+stepsOn(td)+" · Dépense estimée : "+dayBurn(td)+" kcal\n"
+    +"Reste : "+Math.max(0,Math.round(Number(state.profile.cal||2400)-t.k))+" kcal · "+Math.max(0,Math.round(fnum(state.macro.protein,155)-t.p))+" g de protéines\n"
+    +"Eau bue : "+wml+" / "+Math.round(Number(state.waterGoal||3)*1000)+" ml (reste "+Math.max(0,Math.round(Number(state.waterGoal||3)*1000)-wml)+" ml) · Pas : "+stepsOn(td)+" · Dépense estimée : "+dayBurn(td).total+" kcal\n"
     +"Poids actuel : "+fr(latestBody())+" kg (départ "+fr(state.profile.start)+", objectif "+fr(state.profile.target)+")\n"
     +"Programme du jour : "+(pl.kind==="walk"?pl.walk.title:pl.p.name)+(planDoneOn(td)?" (fait)":"");
 }
@@ -601,22 +602,22 @@ function clRunTool(name,inp){
       if(!inp.name||!(q>0&&q<=5000)||!(k>=0&&k<=5000))return "Erreur : valeurs invalides, rien ajouté.";
       var ty=CL_TYPES.indexOf(inp.type)>=0?inp.type:defaultMealTypeByHour();
       addMealObj({name:String(inp.name).slice(0,60),qty:Math.round(q),kcal:Math.round(k),protein:Math.round(fnum(inp.protein,0)*10)/10,carbs:Math.round(fnum(inp.carbs,0)*10)/10,fat:Math.round(fnum(inp.fat,0)*10)/10,type:ty});
-      return "Ajouté en "+ty+". "+clSummary();
+      return "Ajouté en "+ty+" (déjà compté dans ces totaux à jour, ne l'ajoute pas une 2e fois) :\n"+clSummary();
     case "delete_last_meal":
       if(!state.meals.length)return "Aucun repas à supprimer aujourd'hui.";
       var rm=state.meals.pop();save();renderMeals();renderToday();
-      return "Supprimé : "+rm.name+".";
+      return "Supprimé : "+rm.name+". Totaux à jour (fais foi) :\n"+clSummary();
     case "add_water":
       var ml=Math.round(Number(inp.ml));if(!ml||Math.abs(ml)>5000)return "Erreur : quantité invalide.";
-      addWater(ml);return "Eau enregistrée.";
+      addWater(ml);return "Eau enregistrée (+"+ml+" ml, déjà compté dans ces totaux à jour, ne l'ajoute pas une 2e fois) :\n"+clSummary();
     case "log_weight":
       var kg=Number(inp.kg);if(!(kg>=30&&kg<=350))return "Erreur : poids invalide.";
       kg=Math.round(kg*10)/10;var h=state.weightHistory,ix=h.findIndex(function(x){return x.d===td;});
       if(ix>=0)h[ix].w=kg;else h.push({d:td,w:kg});h.sort(function(a,b){return a.d.localeCompare(b.d);});
-      save();renderToday();return "Pesée enregistrée : "+kg+" kg.";
+      save();renderToday();return "Pesée enregistrée : "+kg+" kg. Totaux à jour :\n"+clSummary();
     case "log_steps":
       var st=Math.round(Number(inp.steps));if(!(st>=0&&st<=100000))return "Erreur : nombre de pas invalide.";
-      upsertV(state.steps,td,st);save();renderToday();return "Pas enregistrés : "+st+".";
+      upsertV(state.steps,td,st);save();renderToday();return "Pas enregistrés : "+st+". Totaux à jour :\n"+clSummary();
     case "log_measures":
       function cmv(v){v=Number(v);return v>=40&&v<=220?Math.round(v*10)/10:null;}
       var wa=cmv(inp.waist_cm),hi=cmv(inp.hips_cm);if(wa==null&&hi==null)return "Erreur : mesures invalides (40–220 cm).";
@@ -635,7 +636,7 @@ function clSystem(){
     +"Quand il décrit ce qu'il a mangé, bu, pesé ou marché, enregistre-le directement avec les outils, sans demander de confirmation. "
     +"Estime les portions de façon réaliste (valeurs des produits suisses courants) si la quantité manque, et dis-le. "
     +"Réponds en français, tutoiement, en 1 à 3 phrases courtes : ce que tu as noté (kcal et protéines) puis ce qu'il reste pour la journée. Pas de markdown, pas de listes. "
-    +"Ne propose jamais de viande.\n\nDonnées actuelles de l'app :\n"+clSummary();
+    +"Ne propose jamais de viande. Pour les chiffres (eau, kcal, protéines, reste), recopie les totaux renvoyés par le dernier outil appelé : ils incluent déjà ce qui vient d'être ajouté, ne refais aucune addition.\n\nDonnées de l'app avant ce message :\n"+clSummary();
 }
 function clLoadSdk(){
   if(clSdk)return Promise.resolve(clSdk);
@@ -662,9 +663,9 @@ async function clSend(){
     /* contexte : les 8 derniers messages texte, en commençant par un message de l'utilisateur */
     var ctx=hist.slice(-8);while(ctx.length&&ctx[0].r!=="me")ctx.shift();
     var msgs=ctx.map(function(x){return {role:x.r==="me"?"user":"assistant",content:x.t};});
-    var reply="";
+    var reply="",sys=clSystem(); /* figé au début : sinon Claude recompte ce qu'il vient d'ajouter */
     for(var it=0;it<6;it++){
-      var res=await client.messages.create({model:CL_MODEL,max_tokens:1024,system:clSystem(),tools:CL_TOOLS,messages:msgs});
+      var res=await client.messages.create({model:CL_MODEL,max_tokens:1024,system:sys,tools:CL_TOOLS,messages:msgs});
       clAddCost(res.usage);
       var txt=res.content.filter(function(b){return b.type==="text";}).map(function(b){return b.text;}).join(" ").trim();
       if(txt)reply=txt;
