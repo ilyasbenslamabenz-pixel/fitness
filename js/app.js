@@ -759,7 +759,6 @@ function renderToday(){
   $("legEauBar").style.width=Math.max(0,Math.min(100,rings.eau))+"%";
   $("legRepas").textContent=rings.repasTxt;
   $("legRepasBar").style.width=Math.max(0,Math.min(100,rings.repas))+"%";
-  $("streakN").textContent=computeStreak();
   renderBurn();
 
   renderBackupNag();
@@ -1373,10 +1372,9 @@ function openComplete(data){
   $("cpDur").textContent=data.durMin+"min";
   $("cpVolume").textContent=data.volume?data.volume.toLocaleString("fr-CH"):"—";
   $("cpKcal").textContent=data.kcal;
-  $("cpStreakN").textContent=data.streak+" jour"+(data.streak>1?"s":"")+" d'affilée 🔥";
-  var sub;
-  if(data.streak>0&&data.streak>=data.bestStreak)sub="Nouveau record de série personnel !";
-  else{var remain=Math.max(0,data.bestStreak-data.streak);sub=remain>0?("Ton meilleur streak est à "+data.bestStreak+" — encore "+remain+" jour"+(remain>1?"s":"")):"Continue comme ça !";}
+  var wk=weekStats();
+  $("cpStreakN").textContent=wk.thisCount+" activité"+(wk.thisCount>1?"s":"")+" cette semaine";
+  var sub=wk.prevTotal?"Semaine dernière : "+wk.prevTotal+" au total":"Continue comme ça !";
   $("cpStreakSub").textContent=sub;
   var cpT=$("cpTread");if(cpT)cpT.style.display=data.gym?"":"none";
   $("completeView").classList.add("on");
@@ -1483,28 +1481,33 @@ function importData(file){
   r.onerror=function(){toast("Lecture impossible");};r.readAsText(file);
 }
 
-function renderWeekSummary(){
-  var days=["L","M","M","J","V","S","D"];
+/* activités par jour (séances + courses/marches ; un jour « C'est fait » ne compte que s'il n'y a rien d'autre ce jour-là) */
+function weekStats(){
   var now=new Date(),dow=(now.getDay()+6)%7;
   var monday=new Date(now);monday.setDate(now.getDate()-dow);monday.setHours(0,0,0,0);
-  var counts=[0,0,0,0,0,0,0];
-  function dayDiff(d,from){return Math.floor((d-from)/86400000);}
-  var acts=state.sessions.map(function(s){return new Date(s.date);}).concat(state.runs.map(function(r){return new Date(r.d+"T12:00:00");}))
-    .concat(Object.keys(state.planDone||{}).filter(function(d){return state.planDone[d];}).map(function(d){return new Date(d+"T12:00:00");}));
-  acts.forEach(function(d){var diff=dayDiff(d,monday);if(diff>=0&&diff<7)counts[diff]++;});
+  var prevMonday=new Date(monday);prevMonday.setDate(monday.getDate()-7);
+  var acts=state.sessions.map(function(x){return localDay(x.date);}).concat(state.runs.map(function(r){return r.d;}));
+  Object.keys(state.planDone||{}).forEach(function(d){if(state.planDone[d]&&acts.indexOf(d)<0)acts.push(d);});
+  function diffFrom(d,from){return Math.round((new Date(d+"T12:00:00")-from)/864e5-0.5);}
+  var counts=[0,0,0,0,0,0,0],prevCount=0,prevTotal=0;
+  acts.forEach(function(d){
+    var k=diffFrom(d,monday);if(k>=0&&k<7)counts[k]++;
+    var j=diffFrom(d,prevMonday);if(j>=0&&j<7){prevTotal++;if(j<=dow)prevCount++;}
+  });
+  return {dow:dow,counts:counts,thisCount:counts.reduce(function(a,b){return a+b;},0),prevCount:prevCount,prevTotal:prevTotal};
+}
+function renderWeekSummary(){
+  var days=["L","M","M","J","V","S","D"];
+  var ws=weekStats(),dow=ws.dow,counts=ws.counts;
   var maxC=Math.max(1,Math.max.apply(null,counts));
   $("weekBar").innerHTML=days.map(function(lab,i){
     var h=counts[i]?Math.round(22+counts[i]/maxC*78):0;
     var col=counts[i]?(i===5?"linear-gradient(180deg,#4f8fe6,#a9cbf5)":"linear-gradient(180deg,#e3ae4a,#d0875a)"):"transparent";
     return '<div class="wb'+(i===dow?" today":"")+'"><div class="bar"><i style="height:'+h+'%;background:'+col+'"></i></div><span class="lab">'+lab+'</span></div>';
   }).join("");
-  var prevMonday=new Date(monday);prevMonday.setDate(monday.getDate()-7);var prevCount=0;
-  var prevTotal=0;
-  acts.forEach(function(d){var diff=dayDiff(d,prevMonday);if(diff>=0&&diff<7){prevTotal++;if(diff<=dow)prevCount++;}});
-  var thisCount=counts.reduce(function(a,b){return a+b;},0),delta=thisCount-prevCount;
+  var thisCount=ws.thisCount,prevTotal=ws.prevTotal,delta=thisCount-ws.prevCount;
   $("weekDelta").textContent=thisCount+" activité"+(thisCount>1?"s":"")+(delta===0?" · comme la sem. dernière":(delta>0?" · +"+delta+" vs sem. dernière":" · sem. dernière : "+prevTotal));
-  var badges=[],streak=computeStreak();
-  if(streak>0)badges.push({ic:'<svg class="ic-s" aria-hidden="true"><use href="#i-flame_fill"/></svg>',lab:streak+" jour"+(streak>1?"s":"")+" d'affilée"});
+  var badges=[];
   var pr=latestPR();if(pr)badges.push({ic:'<svg class="ic-s" aria-hidden="true"><use href="#i-trophy_fill"/></svg>',lab:"Record : "+esc(pr.n)});
   var wt=(state.water&&state.water.date===today())?state.water:{ml:0},waterGoalMl=Math.max(500,Number(state.waterGoal||3)*1000);
   if(Number(wt.ml||0)>=waterGoalMl)badges.push({ic:'<svg class="ic-s" aria-hidden="true"><use href="#i-drop_fill"/></svg>',lab:"Objectif eau atteint"});
