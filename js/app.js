@@ -2372,9 +2372,19 @@ function toggleFasting(){if(state.fast&&state.fast.active)stopFasting();else sta
    pour perdre du gras sans fondre le muscle ; protéines 1,8 g/kg du poids cible */
 var calcSex="M";
 function setCalcSex(v){calcSex=v==="F"?"F":"M";document.querySelectorAll("#fSex .cat-tab").forEach(function(b){b.classList.toggle("on",b.dataset.v===calcSex);});}
+/* taille, âge, sexe, activité : enregistrés dès la saisie (avant, seulement via « Enregistrer les objectifs ») */
+function saveCalcFields(){
+  var h=fnum($("fHeight").value,0),a=fnum($("fAge").value,0),pr=state.profile;
+  if(h>=120&&h<=230)pr.height=Math.round(h);
+  if(a>=14&&a<=99)pr.age=Math.round(a);
+  pr.sex=calcSex;pr.activity=Number($("fAct").value)||1.375;
+  save();
+  if(state.page==="today")renderToday();
+}
 function calcGoals(){
   var w=latestBody(),h=fnum($("fHeight").value,0),a=fnum($("fAge").value,0),act=Number($("fAct").value)||1.375,tw=fnum($("fTarget").value,0)||Number(state.profile.target)||w;
   if(!(h>=120&&h<=230)||!(a>=14&&a<=99)){toast("Indique ta taille (cm) et ton âge");return;}
+  saveCalcFields();
   var bmr=10*w+6.25*h-5*a+(calcSex==="F"?-161:5),tdee=bmr*act;
   var cal=Math.max(calcSex==="F"?1300:1600,Math.round(tdee*0.8/50)*50);
   var prot=Math.round(1.8*Math.min(w,tw)/5)*5,fat=Math.min(Math.round(0.8*w/5)*5,Math.round(cal*0.3/9/5)*5),carbs=Math.max(80,Math.round((cal-prot*4-fat*9)/4/5)*5);
@@ -2388,7 +2398,9 @@ function renderProgList(){
   pl.innerHTML=state.program.map(function(p){return '<button class="lrow" data-act="editDay" data-id="'+esc(p.id)+'"><span class="lrow-ic">'+p.icon+'</span><span class="lrow-t"><b>'+esc(p.name)+'</b><small>'+esc(p.focus)+' · '+p.ex.length+' exercices</small></span><svg class="ic-s lrow-chev" aria-hidden="true"><use href="#i-chevron_right"/></svg></button>';}).join("");
 }
 function renderProfile(){
-  $("fHeight").value=state.profile.height||"";$("fAge").value=state.profile.age||"";$("fAct").value=String(state.profile.activity||1.375);setCalcSex(state.profile.sex||"M");
+  /* ne pas écraser un champ en cours de saisie si l'app se redessine (synchro cloud, changement de jour) */
+  if(document.activeElement!==$("fHeight"))$("fHeight").value=state.profile.height||"";
+  if(document.activeElement!==$("fAge"))$("fAge").value=state.profile.age||"";$("fAct").value=String(state.profile.activity||1.375);setCalcSex(state.profile.sex||"M");
   $("fSound").checked=soundOn();
   $("fStartDate").value=state.profile.startDate||START_DATE;
   $("fStart").value=state.profile.start;$("fTarget").value=state.profile.target;$("fCal").value=state.profile.cal;
@@ -3046,7 +3058,7 @@ document.addEventListener("click",function(e){
       addMealObj({name:mm.desc,kcal:mKcal,protein:mProt,carbs:mCarbs,fat:mFat,qty:100,type:mm.type,menu:true}); toast("Ajouté au journal · "+mKcal+" kcal"); break;
     case "saveProfile": saveProfile(); break;
     case "calcGoals": calcGoals(); break;
-    case "calcSex": setCalcSex(a.dataset.v); break;
+    case "calcSex": setCalcSex(a.dataset.v); saveCalcFields(); break;
     case "login": login(); break;
     case "loginApple": loginApple(); break;
     case "logout": logout(); break;
@@ -3111,7 +3123,9 @@ document.addEventListener("change",function(e){var el=e.target;
   else if(el.classList&&el.classList.contains("rval")&&el.dataset.ex){setRepsExact(el.dataset.ex,el.value);}
   else if(el.id==="importFile"&&el.files&&el.files[0]){importData(el.files[0]);el.value="";}
   else if(el.id==="fSound"){state.soundOn=el.checked;save();if(el.checked)beepTick();}
+  else if(el.id==="fHeight"||el.id==="fAge"||el.id==="fAct"){saveCalcFields();}
 });
+document.addEventListener("input",function(e){var id=e.target&&e.target.id;if(id==="fHeight"||id==="fAge")saveCalcFields();});
 document.querySelectorAll(".nav button").forEach(function(b){
   function navGo(ev){if(ev)ev.preventDefault();if(state.page!==b.dataset.page)haptic("light");showPage(b.dataset.page);}
   b.addEventListener("click",navGo);
