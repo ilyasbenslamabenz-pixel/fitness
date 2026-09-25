@@ -322,7 +322,27 @@
         <div class="meal-section-items" id="itemsSnack"></div>
       </div>
     </div>
-    <div class="section-title-row" id="waterSec"><h2>Hydratation</h2></div>
+    </div>
+    <div data-ntab="week">
+    <div class="card" style="margin-top:6px">
+      <div class="eyebrow">Calories · 7 derniers jours</div>
+      <div id="calWeek"></div>
+    </div>
+    </div>
+    <div data-ntab="menu">
+    <div class="tool-tiles">
+      <button class="tool-tile" data-act="groceryOpen"><span class="tt-ico"><svg class="ic-s" aria-hidden="true"><use href="#i-cart_fill"/></svg></span><b>Courses</b><span id="groceryText">—</span></button>
+      <button class="tool-tile" data-act="fasting"><span class="tt-ico"><svg class="ic-s" aria-hidden="true"><use href="#i-timer_fill"/></svg></span><b id="fastTitle">Routine 16:8</b><span id="fastText">Aucun jeûne en cours</span><div class="fast-progress"><i id="fastProgress"></i></div><span id="fastBtn" hidden></span></button>
+    </div>
+    <div class="section-title-row"><h2>Menu de la semaine</h2></div>
+    <div class="card menu-card" id="weeklyMenu"></div>
+    </div>
+  </section>
+
+
+  <!-- EAU -->
+  <section class="page" id="water">
+    <div class="meals-title"><h1>Hydratation</h1></div>
     <div class="water-card2">
       <div class="wring" id="waterRing"></div>
       <div class="winfo"><span>Objectif</span><b id="waterGoalLabel">3 L</b><em id="waterLeft">—</em><small id="waterHint"></small></div>
@@ -337,27 +357,11 @@
       <div class="glasses" id="waterGlasses"></div>
       <div class="chartmeta" style="justify-content:center"><span id="waterStepLab"></span></div>
     </div>
-    </div>
-    <div data-ntab="week">
-    <div class="card" style="margin-top:6px">
-      <div class="eyebrow">Calories · 7 derniers jours</div>
-      <div id="calWeek"></div>
-    </div>
-    <div class="card" style="margin-top:12px">
-      <div class="eyebrow">Eau · 7 derniers jours</div>
+    <div class="card" style="margin-top:16px">
+      <div class="eyebrow">7 derniers jours</div>
       <div id="waterWeek"></div>
     </div>
-    </div>
-    <div data-ntab="menu">
-    <div class="tool-tiles">
-      <button class="tool-tile" data-act="groceryOpen"><span class="tt-ico"><svg class="ic-s" aria-hidden="true"><use href="#i-cart_fill"/></svg></span><b>Courses</b><span id="groceryText">—</span></button>
-      <button class="tool-tile" data-act="fasting"><span class="tt-ico"><svg class="ic-s" aria-hidden="true"><use href="#i-timer_fill"/></svg></span><b id="fastTitle">Routine 16:8</b><span id="fastText">Aucun jeûne en cours</span><div class="fast-progress"><i id="fastProgress"></i></div><span id="fastBtn" hidden></span></button>
-    </div>
-    <div class="section-title-row"><h2>Menu de la semaine</h2></div>
-    <div class="card menu-card" id="weeklyMenu"></div>
-    </div>
   </section>
-
 
   <!-- PROFIL -->
   <section class="page" id="profile">
@@ -431,7 +435,8 @@
   <button data-page="today" class="on"><span class="e"><svg class="ic-s" aria-hidden="true"><use href="#i-house_fill"/></svg></span>Accueil</button>
   <button data-page="session"><span class="e"><svg class="ic-s" aria-hidden="true"><use href="#i-dumbbell"/></svg></span>Séance</button>
   <button data-page="progress"><span class="e"><svg class="ic-s" aria-hidden="true"><use href="#i-chart_bar_alt_fill"/></svg></span>Progrès</button>
-  <button data-page="meals"><span class="e"><svg class="ic-s" aria-hidden="true"><use href="#i-fork_knife"/></svg></span>Nutrition</button>
+  <button data-page="water"><span class="e"><svg class="ic-s" aria-hidden="true"><use href="#i-drop_fill"/></svg></span>Eau</button>
+  <button data-page="meals"><span class="e"><svg class="ic-s" aria-hidden="true"><use href="#i-fork_knife"/></svg></span>Repas</button>
   <button data-page="profile"><span class="e"><svg class="ic-s" aria-hidden="true"><use href="#i-gear_alt_fill"/></svg></span>Profil</button>
 </div></nav>
 
@@ -678,7 +683,7 @@
 <div class="snack" id="snack"><div class="msg" id="snackMsg"></div><button data-act="snackAct" id="snackBtn">Annuler</button></div>
 <div class="toast" id="toast" hidden></div>
 
-<script src="/fitness/js/app.js?v=26"></script>
+<script src="/fitness/js/app.js?v=27"></script>
 <script src="/fitness/js/boot.js?v=3"></script>
 </body>
 </html>
