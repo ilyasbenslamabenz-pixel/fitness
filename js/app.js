@@ -559,6 +559,29 @@ function estimateRunKcal(distKm,durMin){
   if(durMin>0)return Math.max(1,Math.round(7*w*(durMin/60))); /* repli si distance inconnue : MET 7 (course modérée) */
   return 0;
 }
+/* ===== « À faire maintenant » : 1 à 3 actions concrètes selon l'heure et les données du jour ===== */
+function renderCoach(){
+  var box=$("coachCard");if(!box)return;
+  var h=new Date().getHours(),td=today(),items=[];
+  var pl=planFor(dowIdx()),done=planDoneOn(td);
+  var protGoal=fnum(state.macro.protein,155),prot=state.meals.reduce(function(a,m){return a+Number(m.protein||0);},0);
+  var kcal=state.meals.reduce(function(a,m){return a+Number(m.kcal||0);},0),goal=Number(state.profile.cal||2400);
+  var wml=(state.water&&state.water.date===td)?Number(state.water.ml||0):0,wgoal=Math.max(500,Number(state.waterGoal||3)*1000);
+  var st=stepsOn(td),lastW=state.weightHistory.length?state.weightHistory[state.weightHistory.length-1].d:null;
+  var daysW=lastW?Math.round((new Date(td+"T12:00:00")-new Date(lastW+"T12:00:00"))/864e5):99;
+  if(daysW>=3&&h<12)items.push({ic:"scalemass_fill",c:"#e3ae4a",t:"Pèse-toi ce matin",s:"à jeun, avant de manger · dernière pesée il y a "+daysW+" j",act:'data-act="weigh"'});
+  /* la séance du jour est déjà dans la carte du dessus : pas de doublon ici */
+  var pl2=Math.round(protGoal-prot);
+  if(pl2>30&&h>=11)items.push({ic:"bolt_fill",c:"#d0875a",t:"Encore "+pl2+" g de protéines",s:pl2>60?"ex. skyr 200 g (22 g) + thon 120 g (31 g)":"ex. skyr 200 g (22 g) ou 3 œufs (19 g)",act:'data-act="addMeal"'});
+  var wl=wgoal-wml;
+  if(wl>=500&&h>=10)items.push({ic:"drop_fill",c:"#7db4f5",t:"Bois encore "+fmtL(wl),s:"touche pour ajouter un verre de 25 cl",act:'data-act="waterAdd" data-amount="250"'});
+  if(st<7000&&h>=16)items.push({ic:"figure_walk",c:"#4f8fe6",t:(st?kfmt(st)+" pas":"Pas encore de pas")+" : marche 20 min",s:"≈ +2 500 pas · touche pour saisir tes pas",act:'data-act="openSteps"'});
+  if(kcal>goal*1.05)items.push({ic:"fork_knife",c:"#d0875a",t:"+"+kfmt(kcal-goal)+" kcal au-dessus de l'objectif",s:"repas léger ce soir : légumes + protéines",act:'data-act="go" data-page="meals"'});
+  items=items.slice(0,3);
+  box.innerHTML='<div class="eyebrow">À faire maintenant</div>'+(items.length?items.map(function(x){
+    return '<button class="coach-row" '+x.act+'><span class="cr-ic" style="color:'+x.c+'"><svg class="ic-s" aria-hidden="true"><use href="#i-'+x.ic+'"/></svg></span><span class="cr-t"><b>'+esc(x.t)+'</b><small>'+esc(x.s)+'</small></span><svg class="ic-s cr-go" aria-hidden="true"><use href="#i-chevron_right"/></svg></button>';
+  }).join(""):'<div class="coach-ok">Tout est au vert pour aujourd\'hui 👌 Repose-toi bien.</div>');
+}
 /* ===== dépense du jour =====
    base = métabolisme de repos (Mifflin-St Jeor, taille/âge/sexe du Profil) × 1,2 (vie quotidienne, ~3 000 pas compris)
    + pas au-delà de 3 000 + séances + cardio. Les séances et courses sont comptées en « net » (on retire la dépense
@@ -674,6 +697,7 @@ function renderPlan(){
     +'<div class="eyebrow">'+eyebrow+'</div>'
     +'<div class="row"><div class="ic">'+icon+'</div><div style="flex:1;min-width:0"><h3>'+esc(title)+'</h3><div class="sub">'+esc(sub)+'</div></div></div>'
     +go
+    +(pl.kind!=="walk"?'<div class="plan-thumbs">'+act.map(function(e){var x=exPhotos(e.n);return x?'<img src="'+photoUrl(x[x.length-1])+'" alt="" loading="lazy">':'';}).join("")+'</div>':'')
     +(pl.kind==="walk"||lines.length<=2||planListOpen
       ?'<ul class="plan-list">'+lines.map(function(l){return '<li>'+(pl.kind==="walk"?esc(l):l)+'</li>';}).join("")+'</ul>'
         +(pl.kind!=="walk"&&lines.length>2?'<button class="plan-more" data-act="planList">Masquer les exercices ▴</button>':'')
@@ -750,7 +774,9 @@ function renderToday(){
   var hh=new Date().getHours(),greet=hh<12?"Bonjour":(hh<18?"Salut":"Bonsoir");
   var todayPl=planFor(dowIdx()),todayTitle=todayPl.kind==="walk"?todayPl.walk.title:todayPl.p.name;
   $("greetHello").textContent=greet+" 👋";
-  $("greetSub").textContent=planDoneOn(today())?"Programme du jour fait, bravo ! 💪":"Au programme : "+todayTitle;
+  var dstr=new Date().toLocaleDateString("fr-CH",{weekday:"long",day:"numeric",month:"long"});
+  $("greetSub").textContent=dstr.charAt(0).toUpperCase()+dstr.slice(1)+" · "+(planDoneOn(today())?"programme du jour fait 💪":"au programme : "+todayTitle);
+  renderCoach();
   renderPlan();
 
   $("sLost").textContent=fr(Math.max(0,lost));
@@ -939,13 +965,20 @@ function renderSession(){
   var dayList=state.program.filter(function(p){return (p.cat||"muscu")===state.sessionCategory;});
   var chips=$("dayChips");
   var plToday=planFor(dowIdx()),plannedId=plToday.kind==="walk"?null:plToday.p.id;
+  /* toutes les séances de la catégorie en cartes : nom complet, durée, dernière fois, jour prévu */
   chips.innerHTML=state.program.map(function(p,i){
     if((p.cat||"muscu")!==state.sessionCategory)return "";
-    return '<button class="chip '+(i===state.selDay?"on":"")+(p.id===plannedId?" planned":"")+'" data-act="selDay" data-i="'+i+'"'+(p.id===plannedId?' title="Prévu aujourd\'hui"':'')+'><span class="e">'+p.icon+'</span>'+esc(p.short)+'</button>';
+    var ls=state.sessions.find(function(x){return x.dayId===p.id;}),st2;
+    if(p.id===plannedId)st2='<i class="pc-tag today">Aujourd\'hui</i>';
+    else if(ls){var dd=Math.round((new Date(today()+"T12:00:00")-new Date(localDay(ls.date)+"T12:00:00"))/864e5);st2='<i class="pc-tag">'+(dd<=0?"fait aujourd'hui":(dd===1?"fait hier":"il y a "+dd+" j"))+'</i>';}
+    else st2='<i class="pc-tag new">Jamais faite</i>';
+    return '<button class="chip pcard '+(i===state.selDay?"on":"")+(p.id===plannedId?" planned":"")+'" data-act="selDay" data-i="'+i+'"><span class="e">'+p.icon+'</span><b>'+esc(p.name)+'</b><small>'+activeExercises(p).length+' exos · ~'+estimateDurationMin(p)+' min</small>'+st2+'</button>';
   }).join("");
   var p=state.program[state.selDay];
   if(!p||(p.cat||"muscu")!==state.sessionCategory){p=dayList[0];state.selDay=state.program.indexOf(p);}
   $("sesIc").innerHTML=p.icon;$("sesName").textContent=p.name;$("sesFocus").textContent=p.focus;
+  var ban=$("sesBanner");if(ban){var ph=activeExercises(p).map(function(e){var x=exPhotos(e.n);return x?photoUrl(x[x.length-1]):null;}).filter(Boolean).slice(0,3);
+    ban.innerHTML=ph.map(function(u){return '<img src="'+u+'" alt="" loading="lazy">';}).join("");ban.hidden=!ph.length;}
   /* la puce choisie reste visible (la liste défile horizontalement) */
   var onChip=chips.querySelector(".chip.on");
   if(onChip){var cr=chips.getBoundingClientRect(),br=onChip.getBoundingClientRect();if(br.left<cr.left||br.right>cr.right)chips.scrollLeft+=br.left-cr.left-(cr.width-br.width)/2;}
@@ -3076,7 +3109,7 @@ document.addEventListener("click",function(e){
     case "guidedFinishNow": guidedFinishNow(); break;
     case "goRunning": showPage("session"); switchSessionCategory("running"); break;
     case "completeClose": closeComplete(); showPage("today"); break;
-    case "selDay": state.selDay=Number(a.dataset.i); renderSession(); break;
+    case "selDay": state.selDay=Number(a.dataset.i); renderSession(); try{window.scrollTo({top:0,behavior:"smooth"});}catch(e){} haptic("light"); break;
     case "sessCat": switchSessionCategory(a.dataset.cat); break;
     case "runProgToggle": runProgToggle(Number(a.dataset.i)); break;
     case "runProgPrev": runProgWeekShift(-1); break;
