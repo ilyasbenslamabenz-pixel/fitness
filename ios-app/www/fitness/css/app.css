@@ -397,8 +397,6 @@ button.lrow:active{background:var(--surface2)}
 .food-search-results{max-height:40vh;overflow:auto;margin-top:8px}
 .food-search-results:empty{margin-top:0}
 .food-result{display:block;width:100%;text-align:left;padding:10px 12px;border:1px solid var(--hair);border-radius:11px;background:var(--surface2);margin-top:7px}
-.food-result b{display:block;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.food-result span{display:block;color:var(--muted);font-size:11.5px;margin-top:3px}
 .food-search-status{font-size:13px;color:var(--muted);text-align:center;margin-top:9px}
 .food-ref-hint{font-size:11.5px;color:var(--accent-text);margin-top:-8px;margin-bottom:4px}
 @media(max-width:390px){.daily-dash{grid-template-columns:repeat(2,1fr)}}
@@ -871,3 +869,16 @@ button.stat:active{transform:scale(.97)}
 .burn-inline{margin-top:14px;padding-top:12px;border-top:1px solid var(--hair)}
 .plan-card{margin-top:12px}
 .sday-last{font-size:12px;color:var(--accent-text);margin-top:4px}
+/* résultats de recherche d'aliments : une liste nette (plus de cartes floutées) */
+.food-search-results{max-height:46vh}
+.fr-list{border:1px solid var(--hair);border-radius:14px;background:var(--surface2);overflow:hidden}
+.fr-h{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);padding:9px 12px 4px}
+.food-result{display:flex;align-items:center;gap:10px;margin:0;border:0;border-top:1px solid var(--hair);border-radius:0;background:transparent;padding:10px 12px;-webkit-backdrop-filter:none;backdrop-filter:none;color:var(--text)}
+.fr-h+.food-result{border-top:0}
+.food-result:active{background:var(--surface)}
+.fr-n{flex:1;min-width:0;font-size:14px;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.fr-v{flex:0 0 auto;text-align:right;font-size:12px;color:var(--muted);line-height:1.25}
+.fr-v b{font-size:15px;color:var(--text)}
+.fr-v small{display:block;font-size:11px;color:var(--faint)}
+.fr-foot{font-size:10.5px;color:var(--faint);text-align:center;padding:6px;border-top:1px solid var(--hair)}
+input[type=search]::-webkit-search-decoration{-webkit-appearance:none}

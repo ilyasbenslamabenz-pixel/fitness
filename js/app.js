@@ -241,8 +241,8 @@ var LOCAL_FOODS=[
  {n:"Perche du lac (cuite)",kcal:100,p:21,c:0,f:1.3},
  {n:"Filet de perche pané (cuit)",kcal:220,p:16,c:15,f:11},
  {n:"Pomme de terre (cuite, nature)",kcal:87,p:2,c:20,f:0.1},
- {n:"Pommes de terre crues (poids cru, sans huile)",kcal:77,p:2,c:17,f:0.1,a:"patate patates pdt cru crue crues airfryer airfrayer air fryer vapeur four"},
- {n:"Pommes de terre crues + 1 c. à café d'huile (poids cru, airfryer)",kcal:90,p:2,c:17,f:1.5,a:"patate patates pdt cru crue crues airfryer airfrayer air fryer huile"},
+ {n:"Pommes de terre crues (poids cru, sans huile)",kcal:77,p:2,c:17,f:0.1,o:3,a:"patate patates pdt cru crue crues airfryer airfrayer air fryer vapeur four"},
+ {n:"Pommes de terre crues + 1 c. à café d'huile (poids cru, airfryer)",kcal:90,p:2,c:17,f:1.5,o:2,a:"patate patates pdt cru crue crues airfryer airfrayer air fryer huile"},
  {n:"Patate douce crue (poids cru)",kcal:86,p:1.6,c:20,f:0.1,a:"patate douce cru crue crues airfryer airfrayer"},
  {n:"Pommes de terre au airfryer (sans huile)",kcal:100,p:2.5,c:22,f:0.1,a:"patate patates pdt airfryer airfrayer air fryer friteuse sans huile quartiers"},
  {n:"Pommes de terre au airfryer (1 c. à café d'huile)",kcal:118,p:2.5,c:22,f:2,a:"patate patates pdt airfryer airfrayer air fryer friteuse huile quartiers rissolees"},
@@ -2769,7 +2769,9 @@ function searchLocalFoods(q){
     if(name===nq)score=100;
     else if(name.indexOf(nq)===0)score=80;
     else if(name.indexOf(nq)>=0)score=60;
+    else if(f.a&&words.every(function(w){return normText(f.a).indexOf(w)>=0;}))score=60+(f.o||0); /* trouvé par synonyme (« patate ») */
     else score=40-words.filter(function(w){return name.indexOf(" "+w)>=0||name.indexOf(w)===0;}).length;
+    if(name.indexOf("douce")>=0&&nq.indexOf("douce")<0)score-=30; /* « patate » = pomme de terre, pas patate douce */
     scored.push({f:f,score:score});
   });
   scored.sort(function(a,b){return b.score-a.score||a.f.n.length-b.f.n.length;});
@@ -2781,9 +2783,15 @@ function renderFoodResults(list,q){
     box.innerHTML='<div class="food-search-status">Aucun résultat pour « '+esc(q||"")+' ». Essaie un autre nom, ou saisis les valeurs manuellement.</div>';
     return;
   }
-  box.innerHTML=list.map(function(f,i){
-    return '<button class="food-result" type="button" data-act="foodPick" data-i="'+i+'"><b>'+(f.local?'<svg class="ic-s" aria-hidden="true"><use href="#i-house_fill"/></svg>'+" ":"")+esc(f.name)+'</b><span>'+(f.kcal?Math.round(f.kcal)+" kcal / 100 g":"kcal inconnues")+'</span></button>';
-  }).join("");
+  /* une seule liste propre : base intégrée d'abord, puis produits OpenFoodFacts ; nom sur 2 lignes, valeurs /100 g à droite */
+  var html="",lastGroup=null;
+  list.forEach(function(f,i){
+    var g=f.local?"local":"off";
+    if(g!==lastGroup){html+='<div class="fr-h">'+(g==="local"?"Aliments de base":"Produits du commerce")+'</div>';lastGroup=g;}
+    html+='<button class="food-result" type="button" data-act="foodPick" data-i="'+i+'"><span class="fr-n">'+esc(f.name)+'</span>'
+      +'<span class="fr-v"><b>'+(f.kcal?Math.round(f.kcal):"—")+'</b> kcal<small>'+(f.protein!=null?fr(Math.round(f.protein*10)/10)+' g prot.':'')+'</small></span></button>';
+  });
+  box.innerHTML='<div class="fr-list">'+html+'<div class="fr-foot">Valeurs pour 100 g</div></div>';
 }
 var foodSearchT=null;
 function scheduleFoodSearch(){

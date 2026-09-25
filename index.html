@@ -545,7 +545,7 @@
 <div class="modal" id="mealModal"><div class="sheet">
   <h3>Ajouter un repas</h3>
   <div class="sub">Estime au plus proche, la régularité prime sur la précision.</div>
-  <div class="field"><label>Aliment</label><input id="foodName" placeholder="Ex. : patates airfryer, skyr, thon…" autocomplete="off"></div>
+  <div class="field"><label>Aliment</label><input id="foodName" name="aliment-recherche" type="search" enterkeyhint="search" placeholder="Ex. : patates airfryer, skyr, thon…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other"></div>
   <div id="foodSearchResults" class="food-search-results"></div>
   <div class="row2"><div class="field"><label>Quantité (g / ml)</label><input id="foodQty" type="number" inputmode="decimal" step="1"></div>
   <div class="field"><label>Calories</label><input id="foodKcal" type="number" inputmode="numeric"></div></div>
@@ -690,7 +690,7 @@
 <div class="snack" id="snack"><div class="msg" id="snackMsg"></div><button data-act="snackAct" id="snackBtn">Annuler</button></div>
 <div class="toast" id="toast" hidden></div>
 
-<script src="/fitness/js/app.js?v=36"></script>
+<script src="/fitness/js/app.js?v=37"></script>
 <script src="/fitness/js/boot.js?v=3"></script>
 </body>
 </html>
