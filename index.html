@@ -75,24 +75,24 @@
       <div class="ring-wrap" id="ringWrap"></div>
       <div class="ring-rows">
         <div class="ring-row">
-          <div class="ring-row-ic" style="color:var(--primary);background:rgba(10,132,255,.14)"><svg class="ic-s" aria-hidden="true"><use href="#i-dumbbell"/></svg></div>
+          <div class="ring-row-ic" style="color:var(--primary);background:rgba(227,174,74,.14)"><svg class="ic-s" aria-hidden="true"><use href="#i-dumbbell"/></svg></div>
           <div class="ring-row-main">
             <div class="ring-row-top"><span class="ring-row-lab">Séance</span><span class="ring-row-val" id="legSeance">0%</span></div>
             <div class="ring-row-bar"><div class="ring-row-fill" id="legSeanceBar" style="width:0%;background:var(--primary)"></div></div>
           </div>
         </div>
         <div class="ring-row">
-          <div class="ring-row-ic" style="color:var(--accent);background:rgba(48,217,143,.14)"><svg class="ic-s" aria-hidden="true"><use href="#i-drop_fill"/></svg></div>
+          <div class="ring-row-ic" style="color:var(--accent);background:rgba(79,143,230,.14)"><svg class="ic-s" aria-hidden="true"><use href="#i-drop_fill"/></svg></div>
           <div class="ring-row-main">
             <div class="ring-row-top"><span class="ring-row-lab">Eau</span><span class="ring-row-val" id="legEau">0%</span></div>
             <div class="ring-row-bar"><div class="ring-row-fill" id="legEauBar" style="width:0%;background:var(--accent)"></div></div>
           </div>
         </div>
         <div class="ring-row">
-          <div class="ring-row-ic" style="color:#5e7ce6;background:rgba(94,124,230,.14)"><svg class="ic-s" aria-hidden="true"><use href="#i-fork_knife"/></svg></div>
+          <div class="ring-row-ic" style="color:#d0875a;background:rgba(208,135,90,.14)"><svg class="ic-s" aria-hidden="true"><use href="#i-fork_knife"/></svg></div>
           <div class="ring-row-main">
             <div class="ring-row-top"><span class="ring-row-lab">Repas</span><span class="ring-row-val" id="legRepas">0%</span></div>
-            <div class="ring-row-bar"><div class="ring-row-fill" id="legRepasBar" style="width:0%;background:#5e7ce6"></div></div>
+            <div class="ring-row-bar"><div class="ring-row-fill" id="legRepasBar" style="width:0%;background:#d0875a"></div></div>
           </div>
         </div>
       </div>
@@ -101,11 +101,11 @@
     <div class="next-cta plan-card" id="planCard"></div>
 
     <div class="quick-access">
-      <button class="qa-btn" data-act="weigh"><div class="ic" style="color:#0a84ff"><svg class="ic-s" aria-hidden="true"><use href="#i-scalemass_fill"/></svg></div><span class="lab">Peser</span></button>
-      <button class="qa-btn" data-act="waterAdd" data-amount="250"><div class="ic" style="color:#6bb8ff"><svg class="ic-s" aria-hidden="true"><use href="#i-drop_fill"/></svg></div><span class="lab">Eau</span></button>
-      <button class="qa-btn" data-act="addMeal"><div class="ic" style="color:#30d158"><svg class="ic-s" aria-hidden="true"><use href="#i-fork_knife"/></svg></div><span class="lab">Repas</span></button>
-      <button class="qa-btn" data-act="goRunning"><div class="ic" style="color:#5e7ce6"><svg class="ic-s" aria-hidden="true"><use href="#i-figure_run"/></svg></div><span class="lab">Course</span></button>
-      <button class="qa-btn" data-act="scanOpen"><div class="ic" style="color:#5ac8fa"><svg class="ic-s" aria-hidden="true"><use href="#i-barcode_viewfinder"/></svg></div><span class="lab">Scanner</span></button>
+      <button class="qa-btn" data-act="weigh"><div class="ic" style="color:#e3ae4a"><svg class="ic-s" aria-hidden="true"><use href="#i-scalemass_fill"/></svg></div><span class="lab">Peser</span></button>
+      <button class="qa-btn" data-act="waterAdd" data-amount="250"><div class="ic" style="color:#7db4f5"><svg class="ic-s" aria-hidden="true"><use href="#i-drop_fill"/></svg></div><span class="lab">Eau</span></button>
+      <button class="qa-btn" data-act="addMeal"><div class="ic" style="color:#d0875a"><svg class="ic-s" aria-hidden="true"><use href="#i-fork_knife"/></svg></div><span class="lab">Repas</span></button>
+      <button class="qa-btn" data-act="goRunning"><div class="ic" style="color:#4f8fe6"><svg class="ic-s" aria-hidden="true"><use href="#i-figure_run"/></svg></div><span class="lab">Course</span></button>
+      <button class="qa-btn" data-act="scanOpen"><div class="ic" style="color:#7db4f5"><svg class="ic-s" aria-hidden="true"><use href="#i-barcode_viewfinder"/></svg></div><span class="lab">Scanner</span></button>
     </div>
 
     <div class="stats" style="margin-top:18px">
@@ -256,9 +256,9 @@
     <div class="nutrition-card">
       <div class="cal-donut"><svg class="ringsvg" viewBox="0 0 100 100" id="calRing"></svg></div>
       <div class="macro-grid">
-        <div class="macro-col"><span>Glucides</span><div class="mini-bar"><i id="mCarbsBar"></i></div><b><span id="mCarbs">0</span> / 240 g</b></div>
-        <div class="macro-col"><span>Protéines</span><div class="mini-bar"><i id="mProtBar"></i></div><b><span id="mProt">0</span> / 180 g</b></div>
-        <div class="macro-col"><span>Lipides</span><div class="mini-bar"><i id="mFatBar"></i></div><b><span id="mFat">0</span> / 80 g</b></div>
+        <div class="macro-col"><span>Glucides</span><div class="mini-bar"><i id="mCarbsBar"></i></div><b><span id="mCarbs">0</span> / <span id="mCarbsGoal">240</span> g</b></div>
+        <div class="macro-col"><span>Protéines</span><div class="mini-bar"><i id="mProtBar"></i></div><b><span id="mProt">0</span> / <span id="mProtGoal">180</span> g</b></div>
+        <div class="macro-col"><span>Lipides</span><div class="mini-bar"><i id="mFatBar"></i></div><b><span id="mFat">0</span> / <span id="mFatGoal">80</span> g</b></div>
       </div>
     </div>
     <button class="meal-main-add" data-act="addMeal">＋ <span>Ajouter un repas</span></button>
@@ -270,19 +270,19 @@
     <div class="section-title-row"><h2>Mes repas</h2></div>
     <div class="meal-sections">
       <div class="meal-section">
-        <div class="meal-section-head"><div class="meal-group-ico" style="color:#5ac8fa"><svg class="ic-s" aria-hidden="true"><use href="#i-sunrise_fill"/></svg></div><div class="meal-group-info"><b>Petit déjeuner</b><span id="breakfastKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Petit-déjeuner"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button></div>
+        <div class="meal-section-head"><div class="meal-group-ico" style="color:#7db4f5"><svg class="ic-s" aria-hidden="true"><use href="#i-sunrise_fill"/></svg></div><div class="meal-group-info"><b>Petit déjeuner</b><span id="breakfastKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Petit-déjeuner"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button></div>
         <div class="meal-section-items" id="itemsBreakfast"></div>
       </div>
       <div class="meal-section">
-        <div class="meal-section-head"><div class="meal-group-ico" style="color:#30d158"><svg class="ic-s" aria-hidden="true"><use href="#i-sun_max_fill"/></svg></div><div class="meal-group-info"><b>Déjeuner</b><span id="lunchKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Déjeuner"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button></div>
+        <div class="meal-section-head"><div class="meal-group-ico" style="color:#d0875a"><svg class="ic-s" aria-hidden="true"><use href="#i-sun_max_fill"/></svg></div><div class="meal-group-info"><b>Déjeuner</b><span id="lunchKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Déjeuner"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button></div>
         <div class="meal-section-items" id="itemsLunch"></div>
       </div>
       <div class="meal-section">
-        <div class="meal-section-head"><div class="meal-group-ico" style="color:#5e7ce6"><svg class="ic-s" aria-hidden="true"><use href="#i-moon_fill"/></svg></div><div class="meal-group-info"><b>Dîner</b><span id="dinnerKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Dîner"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button></div>
+        <div class="meal-section-head"><div class="meal-group-ico" style="color:#d0875a"><svg class="ic-s" aria-hidden="true"><use href="#i-moon_fill"/></svg></div><div class="meal-group-info"><b>Dîner</b><span id="dinnerKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Dîner"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button></div>
         <div class="meal-section-items" id="itemsDinner"></div>
       </div>
       <div class="meal-section">
-        <div class="meal-section-head"><div class="meal-group-ico" style="color:#6bb8ff"><svg class="ic-s" aria-hidden="true"><use href="#i-clock_fill"/></svg></div><div class="meal-group-info"><b>En-cas</b><span id="snackKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Collation"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button></div>
+        <div class="meal-section-head"><div class="meal-group-ico" style="color:#7db4f5"><svg class="ic-s" aria-hidden="true"><use href="#i-clock_fill"/></svg></div><div class="meal-group-info"><b>En-cas</b><span id="snackKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Collation"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button></div>
         <div class="meal-section-items" id="itemsSnack"></div>
       </div>
     </div>
@@ -315,13 +315,13 @@
     <div class="group-h">Objectifs</div>
     <div class="card list">
       <label class="lrow"><span class="lrow-ic" style="color:#ff453a"><svg class="ic-s" aria-hidden="true"><use href="#i-calendar"/></svg></span><span class="lrow-t">Début</span><input class="lrow-v lrow-date" id="fStartDate" type="date"></label>
-      <label class="lrow"><span class="lrow-ic" style="color:#0a84ff"><svg class="ic-s" aria-hidden="true"><use href="#i-scalemass_fill"/></svg></span><span class="lrow-t">Poids de départ</span><input class="lrow-v" id="fStart" type="number" inputmode="decimal"><span class="lrow-u">kg</span></label>
-      <label class="lrow"><span class="lrow-ic" style="color:#30d158"><svg class="ic-s" aria-hidden="true"><use href="#i-flag_fill"/></svg></span><span class="lrow-t">Poids cible</span><input class="lrow-v" id="fTarget" type="number" inputmode="decimal"><span class="lrow-u">kg</span></label>
+      <label class="lrow"><span class="lrow-ic" style="color:#e3ae4a"><svg class="ic-s" aria-hidden="true"><use href="#i-scalemass_fill"/></svg></span><span class="lrow-t">Poids de départ</span><input class="lrow-v" id="fStart" type="number" inputmode="decimal"><span class="lrow-u">kg</span></label>
+      <label class="lrow"><span class="lrow-ic" style="color:#d0875a"><svg class="ic-s" aria-hidden="true"><use href="#i-flag_fill"/></svg></span><span class="lrow-t">Poids cible</span><input class="lrow-v" id="fTarget" type="number" inputmode="decimal"><span class="lrow-u">kg</span></label>
       <label class="lrow"><span class="lrow-ic" style="color:#ff9f0a"><svg class="ic-s" aria-hidden="true"><use href="#i-flame_fill"/></svg></span><span class="lrow-t">Calories</span><input class="lrow-v" id="fCal" type="number" inputmode="numeric"><span class="lrow-u">kcal</span></label>
-      <label class="lrow"><span class="lrow-ic" style="color:#5ac8fa"><svg class="ic-s" aria-hidden="true"><use href="#i-chart_pie_fill"/></svg></span><span class="lrow-t">Glucides</span><input class="lrow-v" id="fCarbs" type="number" inputmode="decimal"><span class="lrow-u">g</span></label>
-      <label class="lrow"><span class="lrow-ic" style="color:#5e7ce6"><svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg></span><span class="lrow-t">Protéines</span><input class="lrow-v" id="fProt" type="number" inputmode="decimal"><span class="lrow-u">g</span></label>
+      <label class="lrow"><span class="lrow-ic" style="color:#7db4f5"><svg class="ic-s" aria-hidden="true"><use href="#i-chart_pie_fill"/></svg></span><span class="lrow-t">Glucides</span><input class="lrow-v" id="fCarbs" type="number" inputmode="decimal"><span class="lrow-u">g</span></label>
+      <label class="lrow"><span class="lrow-ic" style="color:#d0875a"><svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg></span><span class="lrow-t">Protéines</span><input class="lrow-v" id="fProt" type="number" inputmode="decimal"><span class="lrow-u">g</span></label>
       <label class="lrow"><span class="lrow-ic" style="color:#ffd60a"><svg class="ic-s" aria-hidden="true"><use href="#i-drop_triangle_fill"/></svg></span><span class="lrow-t">Lipides</span><input class="lrow-v" id="fFat" type="number" inputmode="decimal"><span class="lrow-u">g</span></label>
-      <label class="lrow"><span class="lrow-ic" style="color:#6bb8ff"><svg class="ic-s" aria-hidden="true"><use href="#i-drop_fill"/></svg></span><span class="lrow-t">Eau</span><input class="lrow-v" id="fWater" type="number" inputmode="decimal" step="0.1"><span class="lrow-u">L</span></label>
+      <label class="lrow"><span class="lrow-ic" style="color:#7db4f5"><svg class="ic-s" aria-hidden="true"><use href="#i-drop_fill"/></svg></span><span class="lrow-t">Eau</span><input class="lrow-v" id="fWater" type="number" inputmode="decimal" step="0.1"><span class="lrow-u">L</span></label>
     </div>
     <button class="btn primary" style="margin-top:14px" data-act="saveProfile">Enregistrer les objectifs</button>
     <div class="group-h">Apparence</div>
@@ -336,7 +336,7 @@
     <div class="card list" id="progList"></div>
     <div class="group-h">Sauvegarde cloud</div>
     <div class="card list">
-      <div class="lrow"><span class="lrow-ic" style="color:#5ac8fa"><svg class="ic-s" aria-hidden="true"><use href="#i-cloud_fill"/></svg></span><span class="lrow-t" id="authStatus">Non connecté</span></div>
+      <div class="lrow"><span class="lrow-ic" style="color:#7db4f5"><svg class="ic-s" aria-hidden="true"><use href="#i-cloud_fill"/></svg></span><span class="lrow-t" id="authStatus">Non connecté</span></div>
     </div>
     <div class="group-f">Une fois connecté, tes données sont sauvegardées automatiquement dans le cloud à chaque modification.</div>
     <div class="row2" id="loginBtns" style="margin-top:12px">
@@ -351,9 +351,9 @@
     </div>
     <button class="btn ghost" id="logoutBtn" data-act="logout" style="margin-top:10px;display:none">Se déconnecter</button>
     <div class="card list" style="margin-top:14px">
-      <button class="lrow" data-act="backup"><span class="lrow-ic" style="color:#0a84ff"><svg class="ic-s" aria-hidden="true"><use href="#i-cloud_upload_fill"/></svg></span><span class="lrow-t">Sauvegarder maintenant</span><svg class="ic-s lrow-chev" aria-hidden="true"><use href="#i-chevron_right"/></svg></button>
-      <button class="lrow" data-act="restore"><span class="lrow-ic" style="color:#30d158"><svg class="ic-s" aria-hidden="true"><use href="#i-cloud_download_fill"/></svg></span><span class="lrow-t">Restaurer</span><svg class="ic-s lrow-chev" aria-hidden="true"><use href="#i-chevron_right"/></svg></button>
-      <button class="lrow" data-act="export"><span class="lrow-ic" style="color:#5e7ce6"><svg class="ic-s" aria-hidden="true"><use href="#i-square_arrow_up"/></svg></span><span class="lrow-t">Exporter (JSON)</span><svg class="ic-s lrow-chev" aria-hidden="true"><use href="#i-chevron_right"/></svg></button>
+      <button class="lrow" data-act="backup"><span class="lrow-ic" style="color:#e3ae4a"><svg class="ic-s" aria-hidden="true"><use href="#i-cloud_upload_fill"/></svg></span><span class="lrow-t">Sauvegarder maintenant</span><svg class="ic-s lrow-chev" aria-hidden="true"><use href="#i-chevron_right"/></svg></button>
+      <button class="lrow" data-act="restore"><span class="lrow-ic" style="color:#d0875a"><svg class="ic-s" aria-hidden="true"><use href="#i-cloud_download_fill"/></svg></span><span class="lrow-t">Restaurer</span><svg class="ic-s lrow-chev" aria-hidden="true"><use href="#i-chevron_right"/></svg></button>
+      <button class="lrow" data-act="export"><span class="lrow-ic" style="color:#d0875a"><svg class="ic-s" aria-hidden="true"><use href="#i-square_arrow_up"/></svg></span><span class="lrow-t">Exporter (JSON)</span><svg class="ic-s lrow-chev" aria-hidden="true"><use href="#i-chevron_right"/></svg></button>
       <button class="lrow" data-act="import"><span class="lrow-ic" style="color:#a8b3c1"><svg class="ic-s" aria-hidden="true"><use href="#i-square_arrow_down"/></svg></span><span class="lrow-t">Importer</span><svg class="ic-s lrow-chev" aria-hidden="true"><use href="#i-chevron_right"/></svg></button>
     </div>
     <input type="file" id="importFile" accept="application/json,.json" style="display:none">
@@ -578,7 +578,7 @@
 <div class="snack" id="snack"><div class="msg" id="snackMsg"></div><button data-act="snackAct" id="snackBtn">Annuler</button></div>
 <div class="toast" id="toast" hidden></div>
 
-<script src="/fitness/js/app.js?v=14"></script>
+<script src="/fitness/js/app.js?v=15"></script>
 <script src="/fitness/js/boot.js?v=3"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-const CACHE='evo-fit-coach-v41';
+const CACHE='evo-fit-coach-v42';
 
 self.addEventListener('install',e=>e.waitUntil(
   caches.open(CACHE)
