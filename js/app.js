@@ -586,8 +586,7 @@ function renderBurn(){
   if(b.steps)parts.push('pas '+kfmt(b.steps));
   if(b.sess)parts.push('séance '+kfmt(b.sess));
   if(b.cardio)parts.push('cardio '+kfmt(b.cardio));
-  box.innerHTML='<div class="head" style="margin:0 0 8px"><div class="eyebrow">Bilan calorique du jour</div><span class="link" data-act="go" data-page="meals">Repas</span></div>'
-    +'<div class="burn3"><div><b>'+kfmt(b.total)+'</b><span>dépensé</span></div>'
+  box.innerHTML='<div class="burn3"><div><b>'+kfmt(b.total)+'</b><span>dépensé</span></div>'
     +'<div class="'+(bal<=0?"good":"bad")+'"><b>'+(bal<=0?"−":"+")+kfmt(Math.abs(bal))+'</b><span>'+(bal<=0?"déficit":"surplus")+'</span></div>'
     +'<button class="burn-steps" data-act="openSteps"><b>'+kfmt(st)+'</b><span>pas / '+kfmt(STEP_GOAL)+'</span><i><em style="width:'+Math.min(100,Math.round(st/STEP_GOAL*100))+'%"></em></i></button></div>'
     +'<div class="burn-detail">Dépense estimée : '+parts.join(' + ')+' kcal'+(state.profile.height&&state.profile.age?'':' · <u data-act="go" data-page="profile">indique ta taille et ton âge</u> pour plus de précision')+'</div>';
@@ -956,7 +955,11 @@ function renderSession(){
     +(excl.length?'<button class="btn ghost" data-act="restoreEx">↺ Restaurer ('+excl.length+')</button>':'')
     +'</div>';
   renderProgList();
-  $("sesMeta").textContent=active.length+" exercice"+(active.length>1?"s":"")+" · ~"+estimateDurationMin(p)+" min";
+  var nSets=active.reduce(function(t,e){return t+setCount(e);},0);
+  $("sesMeta").textContent=active.length+" exercice"+(active.length>1?"s":"")+" · "+nSets+" séries · ~"+estimateDurationMin(p)+" min";
+  /* dernière fois que cette séance a été faite */
+  var lastS=state.sessions.find(function(x){return x.dayId===p.id;}),sl=$("sesLast");
+  if(sl){if(lastS){var ld=new Date(lastS.date),parts=[ld.toLocaleDateString("fr-CH",{weekday:"short",day:"numeric",month:"short"})];if(lastS.dur)parts.push(lastS.dur+" min");if(lastS.vol)parts.push(lastS.vol.toLocaleString("fr-CH")+" kg soulevés");sl.textContent="Dernière fois : "+parts.join(" · ");}else sl.textContent="Première fois : prends des charges légères pour apprendre le mouvement.";}
   var totalSets=0,doneSets=0;
   active.forEach(function(e){var arr=setsArrFor(mk,e);totalSets+=arr.length;doneSets+=arr.filter(function(s){return s.done;}).length;});
   $("sesCta").textContent=doneSets>0?"Continuer la séance":"Démarrer la séance";
@@ -1236,7 +1239,15 @@ function renderGuided(){
   var totalSets=0,doneSets=0;
   list.forEach(function(x){var a=setsArrFor(mk,x);totalSets+=a.length;doneSets+=a.filter(function(s){return s.done;}).length;});
   $("gProgBar").style.width=(totalSets?doneSets/totalSets*100:0)+"%";
-  $("gExN").textContent=(guidedIndex+1)+" / "+list.length;
+  $("gExN").textContent="Exercice "+(guidedIndex+1)+" / "+list.length;
+  guidedDoneSets=doneSets;guidedTotalSets=totalSets;updateGuidedClock();
+  /* bandeau des exercices : un appui pour sauter à n'importe lequel */
+  $("gStrip").innerHTML=list.map(function(x,i){var done=isExDone(mk,x),part=!done&&setsArrFor(mk,x).some(function(z){return z.done;});
+    return '<button class="gst'+(i===guidedIndex?" cur":"")+(done?" done":"")+(part?" part":"")+'" data-act="gJump" data-i="'+i+'" aria-label="'+esc(x.n)+'">'+(done?'✓':(i+1))+'</button>';}).join("");
+  var cur=$("gStrip").querySelector(".gst.cur");if(cur){var sr=$("gStrip").getBoundingClientRect(),cr=cur.getBoundingClientRect();if(cr.left<sr.left||cr.right>sr.right)$("gStrip").scrollLeft+=cr.left-sr.left-(sr.width-cr.width)/2;}
+  /* à suivre */
+  var nxt=null;for(var k=1;k<=list.length;k++){var cand=list[(guidedIndex+k)%list.length];if(cand!==e&&!isExDone(mk,cand)){nxt=cand;break;}}
+  $("gUpNext").innerHTML=nxt?'<span>À suivre</span><b>'+esc(nxt.n)+'</b><em>'+esc(nxt.t)+'</em>':(isExDone(mk,e)?'<span>Dernier exercice terminé</span><b>Tu peux conclure la séance</b>':'<span>Dernier exercice</span><b>Plus que celui-ci !</b>');
   $("gPrevBtn").disabled=guidedIndex<=0;
   $("gSessName").textContent=p.name;
   $("gExName").textContent=e.n;
@@ -1279,7 +1290,19 @@ function renderGuided(){
   nb.classList.toggle("work",!!(workEnd&&workEx===e.n));
   if(isExDone(mk,e))nb.textContent="Exercice suivant";
   else if(workEnd&&workEx===e.n)updateWork();
-  else nb.textContent=dur?"Lancer le chrono · "+fmtSec(dur):"Valider la série";
+  else{var fu=arr.findIndex(function(z){return !z.done;});nb.textContent=dur?"Lancer le chrono · "+fmtSec(dur):"Valider la série "+(fu+1)+"/"+arr.length;}
+  /* pendant le repos : ce qui vient ensuite */
+  var rn=$("gRestNext");if(rn){var fu2=arr.findIndex(function(z){return !z.done;});
+    rn.textContent=fu2>=0?"Ensuite : série "+(fu2+1)+"/"+arr.length+(e.w?" · "+fr(wv)+" kg":"")+(rt?" × "+rv:""):(nxt?"Ensuite : "+nxt.n:"Séance presque finie !");}
+}
+/* chrono de la séance (depuis la 1re série, gardé même si l'app est fermée) + séries faites */
+var guidedDoneSets=0,guidedTotalSets=0;
+function updateGuidedClock(){
+  var el=$("gClock");if(!el||!guidedOpen)return;
+  var p=state.program[state.selDay];if(!p)return;
+  var first=(state.session.start||{})[p.id],t0=first?first-60000:guidedStartTimes[p.id];
+  var sec=t0?Math.max(0,Math.floor((Date.now()-t0)/1000)):0;
+  el.textContent=guidedDoneSets+"/"+guidedTotalSets+" séries · "+Math.floor(sec/60)+":"+pad(sec%60);
 }
 /* chrono des exercices en secondes (gainage, HIIT…) : la série est validée à la fin */
 var workEnd=0,workEx=null,workTickSec=0;
@@ -3010,6 +3033,7 @@ document.addEventListener("click",function(e){
     case "guidedList": closeGuided(); renderSession(); break;
     case "guidedNext": guidedAdvance(); break;
     case "guidedSkip": guidedSkip(); break;
+    case "gJump": cancelWork(); guidedIndex=Number(a.dataset.i)||0; renderGuided(); haptic("light"); break;
     case "guidedPrev": guidedPrev(); break;
     case "guidedFinishNow": guidedFinishNow(); break;
     case "goRunning": showPage("session"); switchSessionCategory("running"); break;
@@ -3306,7 +3330,7 @@ function evoBoot(){
     showPage("today");
     recoverLiveRunIfAny();
     setupFirebase();
-    setInterval(function(){updateRest();updateWork();},300);
+    setInterval(function(){updateRest();updateWork();updateGuidedClock();},300);
     setInterval(renderFasting,1000);
     setInterval(checkDayRollover,60000);
     window.EVO_BOOT_OK=true;

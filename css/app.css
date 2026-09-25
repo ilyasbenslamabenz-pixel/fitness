@@ -844,3 +844,30 @@ button.stat:active{transform:scale(.97)}
 .edit-list[open] summary::after{content:" ▴"}
 .hist-row .del{color:var(--faint);padding:4px 2px 4px 6px;flex:0 0 auto}
 .hist-row em{margin-left:auto}
+/* séance guidée : chrono, bandeau d'exercices, « à suivre » */
+.guided-mid em{display:block;font-style:normal;font-size:11.5px;font-weight:700;color:var(--primary);margin-top:2px;font-variant-numeric:tabular-nums}
+.g-strip{display:flex;gap:6px;overflow-x:auto;padding:6px 18px 2px;scrollbar-width:none;flex:0 0 auto}
+.g-strip::-webkit-scrollbar{display:none}
+.gst{flex:0 0 auto;width:34px;height:34px;border-radius:50%;background:var(--surface2);border:1px solid var(--hair);color:var(--muted);font-size:13px;font-weight:700}
+.gst.part{border-color:var(--primary);color:var(--primary)}
+.gst.done{background:rgba(79,143,230,.22);border-color:transparent;color:var(--accent-text)}
+.gst.cur{background:var(--gold-grad);color:var(--on-primary);border-color:transparent;transform:scale(1.08)}
+.guided-name{margin-top:8px}
+.guided-name h3{font-size:22px}
+.guided-ic.has-photo{aspect-ratio:16/9;max-height:190px}
+.guided-ic{margin-top:12px}
+.g-rest-next{font-size:12.5px;color:rgba(255,255,255,.85);margin-top:8px;font-weight:600}
+.g-upnext{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:12px;font-size:12.5px;color:var(--muted)}
+.g-upnext span{text-transform:uppercase;font-size:10.5px;letter-spacing:.06em;color:var(--faint);font-weight:700}
+.g-upnext b{color:var(--text);font-weight:700}
+.g-upnext em{font-style:normal}
+.g-strip{justify-content:safe center}
+.guided-ic.has-photo{max-height:215px}
+.g-rest{top:12px;gap:4px}
+.g-rest-time{font-size:50px}
+/* Accueil : « Ta journée » = anneaux + bilan calorique dans une seule carte */
+.day-card{margin-top:12px}
+.day-card .ring-card{margin:0;padding:6px 0 0;background:none;border:0;box-shadow:none}
+.burn-inline{margin-top:14px;padding-top:12px;border-top:1px solid var(--hair)}
+.plan-card{margin-top:12px}
+.sday-last{font-size:12px;color:var(--accent-text);margin-top:4px}
