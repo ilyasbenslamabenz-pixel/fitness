@@ -6,7 +6,7 @@ var START_DATE="2026-09-21";
 
 /* programme perte de poids : pecs 2×/semaine (haut et intérieur), dos pour la posture,
    fessiers et gainage pour les hanches ; la graisse part via le déficit et le cardio */
-var PROGRAM_VERSION=3;
+var PROGRAM_VERSION=4;
 var DEFAULT_PROGRAM=[
  {id:"push",name:"Pectoraux & épaules",short:"Pecs",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-flame_fill"/></svg>',focus:"Pecs (haut et intérieur) · épaules · triceps",ex:[
    {n:"Développé couché haltères",t:"4 × 8-10",w:true},
@@ -29,7 +29,7 @@ var DEFAULT_PROGRAM=[
    {n:"Fentes marchées haltères",t:"3 × 12 / jambe",w:true},
    {n:"Abducteurs machine",t:"3 × 15-20",w:true},
    {n:"Gainage",t:"3 × 45 s",w:false}]},
- {id:"full",name:"Pecs + cardio",short:"Cardio",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg>',focus:"Pecs · haut du corps · cardio brûle-graisse",ex:[
+ {id:"full",name:"Pecs + cardio",short:"Pecs 2",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg>',focus:"Pecs · haut du corps · cardio brûle-graisse",ex:[
    {n:"Chest press",t:"4 × 10-12",w:true},
    {n:"Pompes",t:"3 × max",w:false},
    {n:"Développé militaire machine",t:"3 × 10-12",w:true},
@@ -39,7 +39,7 @@ var DEFAULT_PROGRAM=[
 
 /* séance maison : force au poids du corps + cardio HIIT en alternance, sans matériel */
 var HOME_PROGRAM=[
- {id:"home-fb1",cat:"maison",name:"Haut du corps & hanches",short:"FB1",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-house_fill"/></svg>',focus:"Pecs · fessiers · gainage",ex:[
+ {id:"home-fb1",cat:"maison",name:"Haut du corps & hanches",short:"Haut",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-house_fill"/></svg>',focus:"Pecs · fessiers · gainage",ex:[
    {n:"Pompes",t:"4 × 10-15",w:false},
    {n:"Pompes larges",t:"3 × 10-12",w:false},
    {n:"Hip thrust au sol",t:"4 × 15-20",w:false},
@@ -52,19 +52,19 @@ var HOME_PROGRAM=[
    {n:"Curl biceps haltères",t:"4 × 12-15",w:true},
    {n:"Pompes larges",t:"3 × 10-12",w:false},
    {n:"Gainage (planche)",t:"3 × 30-45 s",w:false}]},
- {id:"home-hiit1",cat:"maison",name:"HIIT cardio 1",short:"HIIT1",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg>',focus:"Cardio · circuit brûle-graisse",ex:[
+ {id:"home-hiit1",cat:"maison",name:"HIIT cardio 1",short:"HIIT 1",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg>',focus:"Cardio · circuit brûle-graisse",ex:[
    {n:"Jumping jacks",t:"4 × 30 s",w:false},
    {n:"Mountain climbers",t:"4 × 30 s",w:false},
    {n:"Burpees",t:"4 × 10",w:false},
    {n:"Squat jumps",t:"4 × 15",w:false},
    {n:"Corde à sauter (ou sur place)",t:"4 × 45 s",w:false}]},
- {id:"home-fb2",cat:"maison",name:"Pecs & jambes",short:"FB2",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-house_fill"/></svg>',focus:"Pecs · triceps · jambes · taille",ex:[
+ {id:"home-fb2",cat:"maison",name:"Pecs & jambes",short:"Jambes",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-house_fill"/></svg>',focus:"Pecs · triceps · jambes · taille",ex:[
    {n:"Pompes déclinées",t:"4 × 8-12",w:false},
    {n:"Dips sur chaise",t:"3 × 10-15",w:false},
    {n:"Fentes arrière",t:"3 × 12 / jambe",w:false},
    {n:"Squats sumo",t:"3 × 15",w:false},
    {n:"Gainage latéral",t:"3 × 20-30 s",w:false}]},
- {id:"home-hiit2",cat:"maison",name:"HIIT cardio 2",short:"HIIT2",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg>',focus:"Cardio · circuit brûle-graisse",ex:[
+ {id:"home-hiit2",cat:"maison",name:"HIIT cardio 2",short:"HIIT 2",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg>',focus:"Cardio · circuit brûle-graisse",ex:[
    {n:"High knees",t:"4 × 30 s",w:false},
    {n:"Burpees",t:"4 × 12",w:false},
    {n:"Jumping lunges",t:"4 × 12",w:false},
@@ -373,6 +373,7 @@ function merge(p){
   if(p.session&&typeof p.session==="object")state.session=p.session;
   if(p.lastDay)state.lastDay=p.lastDay;
   if(typeof p.sessionCategory==="string")state.sessionCategory=p.sessionCategory;
+  if(typeof p.sessionAutoDay==="string")state.sessionAutoDay=p.sessionAutoDay;
   if(p.runProg&&typeof p.runProg==="object")state.runProg=p.runProg;
 }
 function normalizeState(){
@@ -454,6 +455,7 @@ function trainingDays(){
   var days={};
   state.sessions.forEach(function(s){if(s.date)days[localDay(s.date)]=true;});
   state.runs.forEach(function(r){if(r.d)days[r.d]=true;});
+  for(var pd in (state.planDone||{}))if(state.planDone[pd])days[pd]=true;
   return days;
 }
 function marksFor(id){if(!state.session.marks[id])state.session.marks[id]={};return state.session.marks[id];}
@@ -616,7 +618,7 @@ function renderAll(){
   safeRender(renderMeals);
   safeRender(renderWater);
   safeRender(renderProfile);
-  safeRender(function(){var wn=weekNo();$("weekTag").textContent="Semaine "+wn+(wn<=12?"/12":"");});
+  safeRender(function(){var wn=weekNo();$("weekTag").textContent="Sem. "+wn;});
 }
 
 function renderToday(){
@@ -658,7 +660,7 @@ function todayRings(p){
     activeExercises(q).forEach(function(e){var arr=setsArrFor(mk,e);totalSets+=arr.length;doneSets+=arr.filter(function(s){return s.done;}).length;});
     if(doneSets)seance=Math.max(seance,Math.round(doneSets/totalSets*100));
   });
-  if(state.sessions.some(function(s){return localDay(s.date)===td;})||state.runs.some(function(r){return r.d===td;}))seance=100;
+  if(state.sessions.some(function(s){return localDay(s.date)===td;})||state.runs.some(function(r){return r.d===td;})||(state.planDone&&state.planDone[td]))seance=100;
   var dk=state.meals.reduce(function(s,m){return s+Number(m.kcal||0);},0);
   var repas=Math.round(Math.min(100,dk/Number(state.profile.cal||2400)*100));
   var wt=(state.water&&state.water.date===td)?state.water:{ml:0},waterGoalMl=Math.max(500,Number(state.waterGoal||3)*1000);
@@ -888,10 +890,11 @@ function renderRunningView(){
     suggEl.style.display="";
   }else{suggEl.style.display="none";}
   var info=$("runProgInfo");
-  if(state.runs&&state.runs.length){
-    var lastRun=state.runs.slice().sort(function(a,b){return b.d.localeCompare(a.d);})[0];
+  var onlyRuns=(state.runs||[]).filter(function(r){return !r.walk;});
+  if(onlyRuns.length){
+    var lastRun=onlyRuns.slice().sort(function(a,b){return b.d.localeCompare(a.d);})[0];
     var pc=(lastRun.dist>0&&lastRun.dur>0)?" · "+fmtPace(lastRun.dur/lastRun.dist)+" /km":"";
-    info.textContent="Dernière course : "+num(lastRun.dist)+" km"+pc+" · "+state.runs.length+" au total";
+    info.textContent="Dernière course : "+num(lastRun.dist)+" km"+pc+" · "+onlyRuns.length+" au total";
   }else{info.textContent="Aucune course enregistrée — lance-toi !";}
 }
 function autoTickRunProg(d){
@@ -958,6 +961,7 @@ function setTick(exName,i){
   haptic(nowDone?"medium":"light");
   arr[i]={done:nowDone,reps:nowDone?repsFor(mk,e):null};
   if(nowDone&&mk[exName].w==null&&e.w){var lw=defaultWeight(e);if(lw>0)mk[exName].w=lw;}
+  if(nowDone&&e.w&&!(Number(mk[exName].w)>0))toast("Pense à indiquer la charge (kg) pour suivre tes progrès");
   save();refreshExerciseCard(exName);
   if(nowDone&&!isExDone(mk,e))startRest(restFor(p,e));
 }
@@ -1276,7 +1280,8 @@ function renderWeekSummary(){
   var monday=new Date(now);monday.setDate(now.getDate()-dow);monday.setHours(0,0,0,0);
   var counts=[0,0,0,0,0,0,0];
   function dayDiff(d,from){return Math.floor((d-from)/86400000);}
-  var acts=state.sessions.map(function(s){return new Date(s.date);}).concat(state.runs.map(function(r){return new Date(r.d+"T12:00:00");}));
+  var acts=state.sessions.map(function(s){return new Date(s.date);}).concat(state.runs.map(function(r){return new Date(r.d+"T12:00:00");}))
+    .concat(Object.keys(state.planDone||{}).filter(function(d){return state.planDone[d];}).map(function(d){return new Date(d+"T12:00:00");}));
   acts.forEach(function(d){var diff=dayDiff(d,monday);if(diff>=0&&diff<7)counts[diff]++;});
   var maxC=Math.max(1,Math.max.apply(null,counts));
   $("weekBar").innerHTML=days.map(function(lab,i){
@@ -1287,7 +1292,7 @@ function renderWeekSummary(){
   var prevMonday=new Date(monday);prevMonday.setDate(monday.getDate()-7);var prevCount=0;
   acts.forEach(function(d){var diff=dayDiff(d,prevMonday);if(diff>=0&&diff<7)prevCount++;});
   var thisCount=counts.reduce(function(a,b){return a+b;},0),delta=thisCount-prevCount;
-  $("weekDelta").textContent=delta===0?"":(delta>0?"+":"")+delta+" séance"+(Math.abs(delta)>1?"s":"")+" vs sem. dernière";
+  $("weekDelta").textContent=delta===0?"":(delta>0?"+":"")+delta+" activité"+(Math.abs(delta)>1?"s":"")+" vs sem. dernière";
   var badges=[],streak=computeStreak();
   if(streak>0)badges.push({ic:'<svg class="ic-s" aria-hidden="true"><use href="#i-flame_fill"/></svg>',lab:streak+" jour"+(streak>1?"s":"")+" d'affilée"});
   var pr=latestPR();if(pr)badges.push({ic:'<svg class="ic-s" aria-hidden="true"><use href="#i-trophy_fill"/></svg>',lab:"Record : "+esc(pr.n)});
@@ -1340,14 +1345,16 @@ function fmtPace(mpk){if(!isFinite(mpk)||mpk<=0)return "—";var m=Math.floor(mp
 function valToday(arr){var d=today();for(var i=0;i<arr.length;i++)if(arr[i].d===d)return Number(arr[i].v);return 0;}
 function upsertV(arr,d,v){var i=arr.findIndex(function(x){return x.d===d;});if(i>=0)arr[i].v=v;else arr.push({d:d,v:v});arr.sort(function(a,b){return a.d.localeCompare(b.d);});}
 function renderCardio(){
-  var runs=state.runs.slice().sort(function(a,b){return a.d.localeCompare(b.d);});
+  var walks=state.runs.filter(function(r){return r.walk;});
+  var runs=state.runs.filter(function(r){return !r.walk;}).sort(function(a,b){return a.d.localeCompare(b.d);});
   $("cdRuns").textContent=runs.length;
   var km=runs.reduce(function(s,r){return s+Number(r.dist||0);},0);$("cdKm").textContent=num(Math.round(km*10)/10);
   var paces=runs.filter(function(r){return !r.walk&&r.dist>0&&r.dur>0;}).map(function(r){return r.dur/r.dist;});
   $("cdPace").textContent=paces.length?fmtPace(Math.min.apply(null,paces))+" /km":"—";
   $("cardioChart").innerHTML=lineChart(runs.map(function(r){return Number(r.dist);}),"#e3ae4a"," km");
   var totalKcal=runs.reduce(function(s,r){return s+Number(r.kcal||0);},0);
-  $("cdLast").textContent=(runs.length?fmtDate(runs[runs.length-1].d):"")+(totalKcal?" · "+totalKcal.toLocaleString("fr-CH")+" kcal au total":"");
+  var wKm=walks.reduce(function(s,r){return s+Number(r.dist||0);},0);
+  $("cdLast").textContent=(runs.length?fmtDate(runs[runs.length-1].d):"")+(totalKcal?" · "+totalKcal.toLocaleString("fr-CH")+" kcal au total":"")+(walks.length?" · marche : "+walks.length+" sortie"+(walks.length>1?"s":"")+", "+num(Math.round(wKm*10)/10)+" km":"");
   var recent=state.runs.slice().sort(function(a,b){return b.d.localeCompare(a.d);}).slice(0,8);
   $("runList").innerHTML=recent.length?recent.map(function(r){
     var pace=(r.dist>0&&r.dur>0)?fmtPace(r.dur/r.dist)+" /km":"—";
@@ -1953,7 +1960,14 @@ function showPage(id){
   document.querySelectorAll(".page").forEach(function(s){s.classList.toggle("on",s.id===id);});
   document.querySelectorAll(".nav button").forEach(function(b){b.classList.toggle("on",b.dataset.page===id);});
   if(id==="today")renderToday();
-  else if(id==="session")renderSession();
+  else if(id==="session"){
+    if(state.sessionAutoDay!==today()&&!guidedOpen){
+      var pl=planFor(dowIdx());
+      if(pl.kind!=="walk"){state.sessionCategory=pl.p.cat||"muscu";state.selDay=state.program.indexOf(pl.p);}
+      state.sessionAutoDay=today();
+    }
+    renderSession();
+  }
   else if(id==="progress")renderProgress();
   else if(id==="meals")renderMeals();
   else if(id==="water")renderWater();
