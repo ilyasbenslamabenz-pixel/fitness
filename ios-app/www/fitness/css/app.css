@@ -882,3 +882,12 @@ button.stat:active{transform:scale(.97)}
 .fr-v small{display:block;font-size:11px;color:var(--faint)}
 .fr-foot{font-size:10.5px;color:var(--faint);text-align:center;padding:6px;border-top:1px solid var(--hair)}
 input[type=search]::-webkit-search-decoration{-webkit-appearance:none}
+/* recherche d'aliments en plein écran dans la fenêtre Repas */
+#mealModal .sheet.searching .food-search-results{max-height:none}
+#mealModal .sheet.searching .food-search-results~.row2:not(:nth-last-child(2)),#mealModal .sheet.searching .food-search-results~.field,#mealModal .sheet.searching .food-search-results~.food-ref-hint{display:none!important}
+#mealModal .sheet.searching .sub{display:none}
+.fr-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 2px 8px;font-size:12px;color:var(--muted)}
+.fr-bar button{font-size:12.5px;font-weight:700;color:var(--accent-text);padding:6px 4px}
+.fr-list{background:var(--bg);border-color:var(--hair)}
+.food-result{min-height:56px}
+.food-ref-hint{margin:2px 2px 12px!important;line-height:1.35}
