@@ -789,3 +789,19 @@ button.stat:active{transform:scale(.97)}
   .efaces{gap:4px}
   .efaces button{width:34px;height:34px;font-size:17px}
 }
+/* Accueil : liste d'exercices repliable sous le bouton principal */
+.plan-more{display:block;width:100%;margin-top:10px;padding:8px;border-radius:12px;background:var(--surface2);border:1px solid var(--hair);color:var(--muted);font-size:13px;font-weight:600}
+.plan-card .plan-list{margin-top:10px}
+/* Séance : repère du jour prévu */
+.sday-today{margin-top:8px}
+.sday-today:empty{display:none}
+.today-tag{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;color:var(--primary);background:var(--primary-dim)}
+.today-tag.rest{color:var(--accent-text);background:var(--accent-dim)}
+.today-link{padding:6px 12px;border-radius:999px;font-size:12.5px;font-weight:700;color:var(--primary);background:var(--primary-dim);border:1px solid rgba(227,174,74,.35)}
+/* Progrès : onglets toujours accessibles en haut */
+.prog-seg{position:sticky;top:calc(var(--safe-top) + 50px);z-index:30;background:var(--nav-bg);-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);box-shadow:0 6px 16px -10px rgba(0,0,0,.5)}
+#progress.slide-l>.card:not(.ptab-off){animation:ptabL .22s ease}
+#progress.slide-r>.card:not(.ptab-off){animation:ptabR .22s ease}
+@keyframes ptabL{from{opacity:.3;transform:translateX(24px)}to{opacity:1;transform:none}}
+@keyframes ptabR{from{opacity:.3;transform:translateX(-24px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){#progress.slide-l>.card,#progress.slide-r>.card{animation:none}}
