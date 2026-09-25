@@ -36,7 +36,7 @@
   },2500);
 })();
 </script>
-<link rel="stylesheet" href="/fitness/css/app.css?v=4">
+<link rel="stylesheet" href="/fitness/css/app.css?v=5">
 <script>
 (function(){
   try{
@@ -70,6 +70,12 @@
     <div id="backupNag"></div>
     <div class="next-cta plan-card" id="planCard"></div>
     <div class="card coach-card" id="coachCard"></div>
+    <div class="card cl-card" id="claudeCard">
+      <div class="head" style="margin:0 0 8px"><div class="eyebrow">Coach Claude</div><span class="link" id="clClearBtn" data-act="clClear" hidden>Effacer</span></div>
+      <div class="cl-log" id="clLog" aria-live="polite"></div>
+      <div class="cl-row"><input id="clInput" type="text" enterkeyhint="send" autocomplete="off" autocorrect="on" placeholder="Ex. 150 g de saumon et du riz" aria-label="Message pour le coach Claude"><button class="cl-send" id="clSendBtn" data-act="clSend" aria-label="Envoyer"><svg class="ic-s" aria-hidden="true"><use href="#i-chevron_right"/></svg></button></div>
+      <div class="cl-cost" id="clCost"></div>
+    </div>
     <div class="card day-card">
       <div class="head" style="margin:0 0 4px"><div class="eyebrow">Ta journée</div><span class="link" data-act="go" data-page="meals">Repas ›</span></div>
       <div class="ring-card">
@@ -392,6 +398,13 @@
       <label class="lrow"><span class="lrow-ic" style="color:#7db4f5"><svg class="ic-s" aria-hidden="true"><use href="#i-drop_fill"/></svg></span><span class="lrow-t">Eau</span><input class="lrow-v" id="fWater" type="number" inputmode="decimal" step="0.1"><span class="lrow-u">L</span></label>
     </div>
     <button class="btn primary" style="margin-top:14px" data-act="saveProfile">Enregistrer les objectifs</button>
+    <div class="group-h">Coach Claude</div>
+    <div class="card list">
+      <label class="lrow"><span class="lrow-ic" style="color:#d0875a"><svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg></span><span class="lrow-t">Clé API</span><input class="lrow-v" id="fClaudeKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="sk-ant-…"></label>
+    </div>
+    <button class="btn" style="margin-top:12px;width:100%" data-act="clSaveKey">Enregistrer la clé</button>
+    <div class="group-f" id="clKeyStatus"></div>
+    <div class="group-f">Clé créée sur platform.claude.com. Elle reste uniquement sur ce téléphone (ni export, ni cloud). Mets une limite de dépenses sur ton compte Anthropic. Laisse vide et enregistre pour la supprimer.</div>
     <div class="group-h">Sauvegarde</div>
     <div class="backup-status" id="backupStatus"></div>
     <div class="card list">
@@ -691,7 +704,7 @@
 <div class="snack" id="snack"><div class="msg" id="snackMsg"></div><button data-act="snackAct" id="snackBtn">Annuler</button></div>
 <div class="toast" id="toast" hidden></div>
 
-<script src="/fitness/js/app.js?v=42"></script>
+<script src="/fitness/js/app.js?v=43"></script>
 <script src="/fitness/js/boot.js?v=3"></script>
 </body>
 </html>

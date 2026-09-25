@@ -933,3 +933,24 @@ input[type=search]::-webkit-search-decoration{-webkit-appearance:none}
 .plan-thumbs::-webkit-scrollbar{display:none}
 .plan-thumbs img{width:64px;height:44px;border-radius:9px;object-fit:cover;flex:0 0 auto;border:1px solid var(--hair)}
 .plan-thumbs:empty{display:none}
+/* coach Claude (Accueil) */
+.cl-card{margin-top:12px;padding:14px}
+.cl-log{display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto;-webkit-overflow-scrolling:touch;margin-bottom:10px}
+.cl-msg{max-width:85%;padding:8px 12px;border-radius:16px;font-size:14px;line-height:1.4;white-space:pre-wrap;word-wrap:break-word}
+.cl-msg.me{align-self:flex-end;background:var(--primary);color:var(--on-primary);border-bottom-right-radius:5px}
+.cl-msg.ai{align-self:flex-start;background:var(--surface2);color:var(--text);border-bottom-left-radius:5px}
+.cl-msg.err{color:var(--warn)}
+.cl-msg.typing{display:flex;gap:4px;padding:12px 14px}
+.cl-msg.typing i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:clDot 1s infinite ease-in-out}
+.cl-msg.typing i:nth-child(2){animation-delay:.15s}.cl-msg.typing i:nth-child(3){animation-delay:.3s}
+@keyframes clDot{0%,80%,100%{opacity:.3;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+.cl-empty{font-size:13.5px;color:var(--muted);line-height:1.45}
+.cl-empty .btn{margin-top:10px;width:100%}
+.cl-sugg{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.cl-sugg button{font-size:13px;padding:7px 11px;border-radius:999px;background:var(--surface2);color:var(--text)}
+.cl-row{display:flex;gap:8px;align-items:center}
+.cl-row input{flex:1;min-width:0;font-size:16px;padding:11px 14px;border-radius:999px;border:1px solid var(--hair);background:var(--surface2);color:var(--text)}
+.cl-send{flex:none;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--primary);color:var(--on-primary)}
+.cl-send:disabled{opacity:.45}
+.cl-cost{font-size:11.5px;color:var(--faint);margin-top:6px;text-align:right}
+.cl-cost:empty{display:none}

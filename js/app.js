@@ -559,6 +559,148 @@ function estimateRunKcal(distKm,durMin){
   if(durMin>0)return Math.max(1,Math.round(7*w*(durMin/60))); /* repli si distance inconnue : MET 7 (course modérée) */
   return 0;
 }
+/* ===== Coach Claude : discussion sur l'Accueil pour noter repas, eau, poids, pas =====
+   Modèle léger (Haiku 4.5, ~0,1 centime par message). La clé API reste sur ce téléphone (evoClaudeKey),
+   elle n'est ni exportée ni synchronisée. Le SDK officiel n'est chargé qu'au premier message. */
+var CL_MODEL="claude-haiku-4-5",clBusy=false,clSdk=null;
+function clKey(){return lsGet("evoClaudeKey")||"";}
+function clHist(){try{var a=JSON.parse(lsGet("evoClaudeChat")||"[]");return Array.isArray(a)?a:[];}catch(e){return [];}}
+function clSaveHist(a){lsSet("evoClaudeChat",JSON.stringify(a.slice(-40)));}
+function clMonth(){return today().slice(0,7);}
+function clCost(){try{var c=JSON.parse(lsGet("evoClaudeCost")||"{}");return c.m===clMonth()?Number(c.usd)||0:0;}catch(e){return 0;}}
+function clAddCost(u){if(!u)return;var usd=clCost()+(Number(u.input_tokens||0)*1+Number(u.output_tokens||0)*5)/1e6;lsSet("evoClaudeCost",JSON.stringify({m:clMonth(),usd:usd}));}
+var CL_TYPES=["Petit-déjeuner","Déjeuner","Dîner","Collation"];
+var CL_TOOLS=[
+  {name:"add_meal",description:"Ajoute un aliment ou un repas au journal du jour. Estime les valeurs nutritionnelles pour la quantité réellement mangée (pas pour 100 g). Un appel par aliment distinct.",
+    input_schema:{type:"object",properties:{name:{type:"string",description:"Nom court en français, ex. « Skyr nature Migros »"},qty_g:{type:"number",description:"Quantité mangée en grammes"},kcal:{type:"number"},protein:{type:"number",description:"Protéines en g"},carbs:{type:"number",description:"Glucides en g"},fat:{type:"number",description:"Lipides en g"},type:{type:"string",enum:CL_TYPES,description:"Omettre pour choisir selon l'heure"}},required:["name","qty_g","kcal","protein","carbs","fat"]}},
+  {name:"delete_last_meal",description:"Supprime le dernier aliment ajouté aujourd'hui (correction d'une erreur).",input_schema:{type:"object",properties:{}}},
+  {name:"add_water",description:"Ajoute de l'eau bue (ou en retire avec une valeur négative).",input_schema:{type:"object",properties:{ml:{type:"number"}},required:["ml"]}},
+  {name:"log_weight",description:"Enregistre la pesée du jour.",input_schema:{type:"object",properties:{kg:{type:"number"}},required:["kg"]}},
+  {name:"log_steps",description:"Enregistre le nombre total de pas du jour (remplace la valeur existante).",input_schema:{type:"object",properties:{steps:{type:"integer"}},required:["steps"]}},
+  {name:"log_measures",description:"Enregistre le tour de taille et/ou de hanches du jour, en cm.",input_schema:{type:"object",properties:{waist_cm:{type:"number"},hips_cm:{type:"number"}}}},
+  {name:"get_day_summary",description:"Relit le bilan à jour de la journée (repas, totaux, eau, pas, poids).",input_schema:{type:"object",properties:{}}}
+];
+function clSummary(){
+  var td=today(),t={k:0,p:0,c:0,f:0};
+  state.meals.forEach(function(m){t.k+=Number(m.kcal||0);t.p+=Number(m.protein||0);t.c+=Number(m.carbs||0);t.f+=Number(m.fat||0);});
+  var wml=(state.water&&state.water.date===td)?Number(state.water.ml||0):0;
+  var lines=state.meals.map(function(m){return "- "+(m.type||"")+" : "+m.name+(m.menu?"":" "+Math.round(m.qty||100)+" g")+" · "+Math.round(m.kcal||0)+" kcal · "+Math.round(m.protein||0)+" g prot.";});
+  var pl=planFor(dowIdx());
+  return "Date : "+td+" ("+new Date().toLocaleDateString("fr-CH",{weekday:"long"})+"), heure "+new Date().getHours()+" h\n"
+    +"Repas du jour :\n"+(lines.join("\n")||"(aucun)")+"\n"
+    +"Totaux : "+Math.round(t.k)+" / "+Number(state.profile.cal||2400)+" kcal · protéines "+Math.round(t.p)+" / "+fnum(state.macro.protein,155)+" g · glucides "+Math.round(t.c)+" / "+fnum(state.macro.carbs,0)+" g · lipides "+Math.round(t.f)+" / "+fnum(state.macro.fat,0)+" g\n"
+    +"Eau : "+wml+" / "+Math.round(Number(state.waterGoal||3)*1000)+" ml · Pas : "+stepsOn(td)+" · Dépense estimée : "+dayBurn(td)+" kcal\n"
+    +"Poids actuel : "+fr(latestBody())+" kg (départ "+fr(state.profile.start)+", objectif "+fr(state.profile.target)+")\n"
+    +"Programme du jour : "+(pl.kind==="walk"?pl.walk.title:pl.p.name)+(planDoneOn(td)?" (fait)":"");
+}
+function clRunTool(name,inp){
+  inp=inp||{};var td=today();
+  switch(name){
+    case "add_meal":
+      var q=Number(inp.qty_g),k=Number(inp.kcal);
+      if(!inp.name||!(q>0&&q<=5000)||!(k>=0&&k<=5000))return "Erreur : valeurs invalides, rien ajouté.";
+      var ty=CL_TYPES.indexOf(inp.type)>=0?inp.type:defaultMealTypeByHour();
+      addMealObj({name:String(inp.name).slice(0,60),qty:Math.round(q),kcal:Math.round(k),protein:Math.round(fnum(inp.protein,0)*10)/10,carbs:Math.round(fnum(inp.carbs,0)*10)/10,fat:Math.round(fnum(inp.fat,0)*10)/10,type:ty});
+      return "Ajouté en "+ty+". "+clSummary();
+    case "delete_last_meal":
+      if(!state.meals.length)return "Aucun repas à supprimer aujourd'hui.";
+      var rm=state.meals.pop();save();renderMeals();renderToday();
+      return "Supprimé : "+rm.name+".";
+    case "add_water":
+      var ml=Math.round(Number(inp.ml));if(!ml||Math.abs(ml)>5000)return "Erreur : quantité invalide.";
+      addWater(ml);return "Eau enregistrée.";
+    case "log_weight":
+      var kg=Number(inp.kg);if(!(kg>=30&&kg<=350))return "Erreur : poids invalide.";
+      kg=Math.round(kg*10)/10;var h=state.weightHistory,ix=h.findIndex(function(x){return x.d===td;});
+      if(ix>=0)h[ix].w=kg;else h.push({d:td,w:kg});h.sort(function(a,b){return a.d.localeCompare(b.d);});
+      save();renderToday();return "Pesée enregistrée : "+kg+" kg.";
+    case "log_steps":
+      var st=Math.round(Number(inp.steps));if(!(st>=0&&st<=100000))return "Erreur : nombre de pas invalide.";
+      upsertV(state.steps,td,st);save();renderToday();return "Pas enregistrés : "+st+".";
+    case "log_measures":
+      function cmv(v){v=Number(v);return v>=40&&v<=220?Math.round(v*10)/10:null;}
+      var wa=cmv(inp.waist_cm),hi=cmv(inp.hips_cm);if(wa==null&&hi==null)return "Erreur : mesures invalides (40–220 cm).";
+      if(!state.measures)state.measures=[];
+      var mi=state.measures.findIndex(function(x){return x.d===td;}),old=mi>=0?state.measures[mi]:{};
+      var me={d:td,waist:wa!=null?wa:(old.waist!=null?old.waist:null),hips:hi!=null?hi:(old.hips!=null?old.hips:null)};
+      if(mi>=0)state.measures[mi]=me;else state.measures.push(me);
+      state.measures.sort(function(a,b){return a.d.localeCompare(b.d);});save();return "Mesures enregistrées.";
+    case "get_day_summary": return clSummary();
+  }
+  return "Outil inconnu.";
+}
+function clSystem(){
+  return "Tu es le coach intégré à l'app EVO Fit Coach d'un homme qui veut passer d'environ 100 kg à 85 kg en gardant son muscle (salle EVO Fitness à Genève, Suisse). "
+    +"Il ne mange pas de viande, mais mange poisson, crevettes, œufs et produits laitiers. Il achète surtout à la Migros et à la Coop. "
+    +"Quand il décrit ce qu'il a mangé, bu, pesé ou marché, enregistre-le directement avec les outils, sans demander de confirmation. "
+    +"Estime les portions de façon réaliste (valeurs des produits suisses courants) si la quantité manque, et dis-le. "
+    +"Réponds en français, tutoiement, en 1 à 3 phrases courtes : ce que tu as noté (kcal et protéines) puis ce qu'il reste pour la journée. Pas de markdown, pas de listes. "
+    +"Ne propose jamais de viande.\n\nDonnées actuelles de l'app :\n"+clSummary();
+}
+function clLoadSdk(){
+  if(clSdk)return Promise.resolve(clSdk);
+  return import("/fitness/js/vendor/anthropic-sdk.mjs?v=1").then(function(m){clSdk=m.default;return clSdk;});
+}
+function clErrMsg(e){
+  var s=e&&e.status,msg=String((e&&e.message)||"");
+  if(s===401)return "Clé API refusée. Vérifie-la dans Profil › Coach Claude.";
+  if(s===429)return "Trop de messages d'un coup, réessaie dans une minute.";
+  if(s===400&&/credit/i.test(msg))return "Crédit Anthropic épuisé. Recharge-le sur platform.claude.com (Billing).";
+  if(s===529||s===503)return "Claude est surchargé, réessaie dans un instant.";
+  if(!s)return "Pas de connexion. Vérifie ton réseau et réessaie.";
+  return "Erreur ("+s+"). Réessaie.";
+}
+async function clSend(){
+  var inp=$("clInput");if(!inp||clBusy)return;
+  var text=inp.value.trim();if(!text)return;
+  if(!clKey()){toast("Ajoute ta clé dans Profil");showPage("profile");return;}
+  var hist=clHist();hist.push({r:"me",t:text});clSaveHist(hist);inp.value="";
+  clBusy=true;renderClaude(true);
+  try{
+    var Anthropic=await clLoadSdk();
+    var client=new Anthropic({apiKey:clKey(),dangerouslyAllowBrowser:true,maxRetries:1});
+    /* contexte : les 8 derniers messages texte, en commençant par un message de l'utilisateur */
+    var ctx=hist.slice(-8);while(ctx.length&&ctx[0].r!=="me")ctx.shift();
+    var msgs=ctx.map(function(x){return {role:x.r==="me"?"user":"assistant",content:x.t};});
+    var reply="";
+    for(var it=0;it<6;it++){
+      var res=await client.messages.create({model:CL_MODEL,max_tokens:1024,system:clSystem(),tools:CL_TOOLS,messages:msgs});
+      clAddCost(res.usage);
+      var txt=res.content.filter(function(b){return b.type==="text";}).map(function(b){return b.text;}).join(" ").trim();
+      if(txt)reply=txt;
+      if(res.stop_reason!=="tool_use")break;
+      msgs.push({role:"assistant",content:res.content});
+      var results=res.content.filter(function(b){return b.type==="tool_use";}).map(function(b){
+        var out;try{out=clRunTool(b.name,b.input);}catch(err){out="Erreur : "+err.message;}
+        return {type:"tool_result",tool_use_id:b.id,content:out};
+      });
+      msgs.push({role:"user",content:results});
+    }
+    hist=clHist();hist.push({r:"ai",t:reply||"C'est noté."});clSaveHist(hist);
+  }catch(e){
+    hist=clHist();hist.push({r:"ai",t:clErrMsg(e),err:1});clSaveHist(hist);
+  }
+  clBusy=false;renderClaude(false);
+}
+function renderClaude(thinking){
+  var box=$("clLog");if(!box)return;
+  var hist=clHist(),key=clKey();
+  if(!key){
+    box.innerHTML='<div class="cl-empty">Écris-moi ce que tu manges, bois ou pèses, je le note pour toi.<br><button class="btn ghost" data-act="go" data-page="profile">Ajouter ma clé Anthropic</button></div>';
+  }else if(!hist.length&&!thinking){
+    box.innerHTML='<div class="cl-empty">Ex. « 200 g de skyr nature et une banane » ou « j\'ai bu 50 cl ».<div class="cl-sugg"><button data-act="clSugg">200 g de skyr nature et une banane</button><button data-act="clSugg">Il me reste combien de protéines ?</button></div></div>';
+  }else{
+    box.innerHTML=hist.slice(-12).map(function(x){return '<div class="cl-msg '+(x.r==="me"?"me":"ai")+(x.err?" err":"")+'">'+esc(x.t)+'</div>';}).join("")
+      +(thinking?'<div class="cl-msg ai typing"><i></i><i></i><i></i></div>':'');
+    box.scrollTop=box.scrollHeight;
+  }
+  var b=$("clSendBtn");if(b)b.disabled=!!thinking;
+  var c=$("clCost");if(c)c.textContent=key?"Coût ce mois : ≈ "+clCost().toFixed(2).replace(".",",")+" $":"";
+  var cl=$("clClearBtn");if(cl)cl.hidden=!hist.length;
+}
+document.addEventListener("keydown",function(e){
+  if(e.target&&e.target.id==="clInput"&&e.key==="Enter"&&!e.isComposing){e.preventDefault();clSend();}
+});
 /* ===== « À faire maintenant » : 1 à 3 actions concrètes selon l'heure et les données du jour ===== */
 function renderCoach(){
   var box=$("coachCard");if(!box)return;
@@ -777,6 +919,7 @@ function renderToday(){
   var dstr=new Date().toLocaleDateString("fr-CH",{weekday:"long",day:"numeric",month:"long"});
   $("greetSub").textContent=dstr.charAt(0).toUpperCase()+dstr.slice(1)+" · "+(planDoneOn(today())?"programme du jour fait 💪":"au programme : "+todayTitle);
   renderCoach();
+  if(!clBusy)renderClaude(false);
   renderPlan();
 
   $("sLost").textContent=fr(Math.max(0,lost));
@@ -2507,6 +2650,7 @@ function renderProfile(){
   $("fStart").value=state.profile.start;$("fTarget").value=state.profile.target;$("fCal").value=state.profile.cal;
   $("fCarbs").value=state.macro.carbs;$("fProt").value=state.macro.protein;$("fFat").value=state.macro.fat;$("fWater").value=state.waterGoal;
   renderProgList();
+  var ks=$("clKeyStatus");if(ks){var kk=clKey();ks.innerHTML=kk?'Clé enregistrée sur ce téléphone : <b class="good">…'+esc(kk.slice(-4))+'</b>':'Aucune clé : le coach Claude de l\'Accueil est désactivé.';}
   var bs=$("backupStatus");if(bs){var dn=daysSinceBackup();bs.innerHTML='Dernière sauvegarde : <b class="'+(dn==null||dn>=7?"bad":"good")+'">'+backupLabel()+'</b>'+(cloudUser?" · automatique (cloud)":" · connecte-toi ou exporte régulièrement");}
 }
 
@@ -3165,7 +3309,15 @@ document.addEventListener("click",function(e){
     case "mSave": saveMeal(); break;
     case "foodPick": pickFoodResult(Number(a.dataset.i)); break;
     case "foodMore": foodMoreOpen=!foodMoreOpen; var fr0=document.querySelector("#foodSearchResults .fr-rest");if(fr0)fr0.hidden=!foodMoreOpen; a.textContent=foodMoreOpen?"Moins de choix ▴":"Voir "+(document.querySelectorAll("#foodSearchResults .fr-rest .food-result").length)+" autres choix ▾"; fitSearchSheet(); break;
-    case "foodSearchClose": clearTimeout(foodSearchT); foodSearchSeq++; $("foodSearchResults").innerHTML="";syncFoodSearchMode(); break;
+    case "clSend": clSend(); break;
+    case "clSugg": $("clInput").value=a.textContent; clSend(); break;
+    case "clClear": clSaveHist([]); renderClaude(false); break;
+    case "clSaveKey": var kv=$("fClaudeKey").value.trim();
+      if(!kv){try{localStorage.removeItem("evoClaudeKey");}catch(e){}toast("Clé supprimée");}
+      else if(!/^sk-ant-[\w-]{20,}$/.test(kv)){toast("Clé invalide (elle commence par sk-ant-)");break;}
+      else{lsSet("evoClaudeKey",kv);toast("Clé enregistrée");}
+      $("fClaudeKey").value="";renderProfile();renderClaude(false); break;
+    case "foodSearchClose":clearTimeout(foodSearchT); foodSearchSeq++; $("foodSearchResults").innerHTML="";syncFoodSearchMode(); break;
     case "delMeal": delMealConfirm(Number(a.dataset.i)); break;
     case "openRun": openRun(); break;
     case "liveStart": openLiveRun(); break;
