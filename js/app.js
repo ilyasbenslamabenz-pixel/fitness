@@ -2329,7 +2329,7 @@ function ring(svg,frac,color,center){
   svg.innerHTML='<path d="M 8 50 A 42 42 0 0 1 92 50" fill="none" stroke="var(--ring-track)" stroke-width="9" stroke-linecap="round"/><path d="M 8 50 A 42 42 0 0 1 92 50" fill="none" stroke="'+color+'" stroke-width="9" stroke-linecap="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="'+(100-p*100)+'"/><text x="50" y="35" text-anchor="middle" fill="var(--text)" style="font-family:var(--display)" font-weight="700" font-size="18">'+parts[0]+'</text>'+(parts[1]?'<text x="50" y="48" text-anchor="middle" fill="var(--muted)" style="font-family:var(--font)" font-size="8.5">'+parts[1]+'</text>':'');
 }
 function addMealObj(o){o.date=today();o.qty=Number(o.qty||100);state.meals.push(o);save();renderMeals();renderToday();}
-function currentFoodFromForm(){return {name:$("foodName").value.trim(),kcal:fnum($("foodKcal").value,0),protein:fnum($("foodProt").value,0),carbs:fnum($("foodCarbs").value,0),fat:fnum($("foodFat").value,0),qty:fnum($("foodQty").value,100),type:$("foodType").value};}
+function currentFoodFromForm(){return {name:$("foodQ").value.trim(),kcal:fnum($("foodKcal").value,0),protein:fnum($("foodProt").value,0),carbs:fnum($("foodCarbs").value,0),fat:fnum($("foodFat").value,0),qty:fnum($("foodQty").value,100),type:$("foodType").value};}
 /* per-100g reference: once a product is scanned or searched, recompute kcal/macros live as the quantity changes */
 var foodRef100=null;
 function setFoodRef100(kcal,protein,carbs,fat){
@@ -2615,7 +2615,7 @@ function defaultMealTypeByHour(){
   if(h<21)return "Dîner";
   return "Collation";
 }
-function openMeal(type){$("foodName").value="";$("foodQty").value="";$("foodKcal").value="";$("foodProt").value="";$("foodCarbs").value="";$("foodFat").value="";$("foodType").value=type||defaultMealTypeByHour();clearFoodRef100();$("foodSearchResults").innerHTML="";$("mealModal").classList.add("on");setTimeout(function(){$("foodName").focus();},50);}
+function openMeal(type){$("foodQ").value="";$("foodQty").value="";$("foodKcal").value="";$("foodProt").value="";$("foodCarbs").value="";$("foodFat").value="";$("foodType").value=type||defaultMealTypeByHour();clearFoodRef100();$("foodSearchResults").innerHTML="";syncFoodSearchMode();$("mealModal").classList.add("on");setTimeout(function(){$("foodQ").focus();},50);}
 function closeMeal(){$("mealModal").classList.remove("on");pendingBarcode=null;}
 function saveMeal(){
   var f=currentFoodFromForm();if(!f.name){toast("Indique l'aliment");return;}
@@ -2680,7 +2680,7 @@ async function lookupBarcode(code){
     $("scanStatus").textContent=fromUser?"Produit reconnu (mémorisé précédemment).":"Produit reconnu (base intégrée à l'app).";
     $("scanProduct").innerHTML="<b>"+esc(custom.name)+"</b><div style=\"font-size:12px;color:var(--muted);margin-top:4px\">"+(custom.kcal?Math.round(custom.kcal):"—")+" kcal · "+(custom.protein?Math.round(custom.protein*10)/10:"—")+" g protéines / 100 g</div>";
     $("scanProduct").classList.add("on");
-    $("foodName").value=custom.name;
+    $("foodQ").value=custom.name;
     $("foodKcal").value=custom.kcal?Math.round(custom.kcal):"";
     $("foodProt").value=custom.protein?Math.round(custom.protein*10)/10:"";
     $("foodCarbs").value=custom.carbs?Math.round(custom.carbs*10)/10:"";
@@ -2703,7 +2703,7 @@ async function lookupBarcode(code){
     var name=(p.brands?p.brands+" ":"")+(p.product_name||"Produit");
     $("scanProduct").innerHTML="<b>"+esc(name)+"</b><div style=\"font-size:12px;color:var(--muted);margin-top:4px\">"+(kcal?Math.round(kcal):"—")+" kcal · "+(prot?Math.round(prot*10)/10:"—")+" g protéines / 100 g</div>";
     $("scanProduct").classList.add("on");
-    $("foodName").value=name;
+    $("foodQ").value=name;
     $("foodKcal").value=kcal?Math.round(kcal):"";
     $("foodProt").value=prot?Math.round(prot*10)/10:"";
     $("foodCarbs").value=carbs?Math.round(carbs*10)/10:"";
@@ -2781,7 +2781,7 @@ function renderFoodResults(list,q){
   var box=$("foodSearchResults");
   if(!list.length){
     box.innerHTML='<div class="food-search-status">Aucun résultat pour « '+esc(q||"")+' ». Essaie un autre nom, ou saisis les valeurs manuellement.</div>';
-    return;
+    syncFoodSearchMode();return;
   }
   /* une seule liste propre : base intégrée d'abord, puis produits OpenFoodFacts ; nom sur 2 lignes, valeurs /100 g à droite */
   var html="",lastGroup=null;
@@ -2792,14 +2792,16 @@ function renderFoodResults(list,q){
       +'<span class="fr-v"><b>'+(f.kcal?Math.round(f.kcal):"—")+'</b> kcal<small>'+(f.protein!=null?fr(Math.round(f.protein*10)/10)+' g prot.':'')+'</small></span></button>';
   });
   box.innerHTML='<div class="fr-bar"><span>'+list.length+' résultat'+(list.length>1?"s":"")+' · valeurs pour 100 g</span><button type="button" data-act="foodSearchClose">Saisir moi-même</button></div><div class="fr-list">'+html+'</div>';
+  syncFoodSearchMode();
 }
 var foodSearchT=null;
+function syncFoodSearchMode(){var box=$("foodSearchResults"),sh=box&&box.closest(".sheet");if(sh)sh.classList.toggle("searching",box.innerHTML.trim()!=="");}
 /* mode recherche : tant que des résultats s'affichent, ils prennent toute la fenêtre (les champs réapparaissent au choix d'un aliment) */
 (function(){var box=document.getElementById("foodSearchResults");if(!box||!window.MutationObserver)return;
   new MutationObserver(function(){var sh=box.closest(".sheet");if(sh)sh.classList.toggle("searching",box.innerHTML.trim()!=="");}).observe(box,{childList:true});})();
 function scheduleFoodSearch(){
   clearTimeout(foodSearchT);
-  if($("foodName").value.trim().length<2){$("foodSearchResults").innerHTML="";return;}
+  if($("foodQ").value.trim().length<2){$("foodSearchResults").innerHTML="";syncFoodSearchMode();return;}
   foodSearchT=setTimeout(searchFoodOnline,400);
 }
 var offResultsCache={};
@@ -2819,13 +2821,13 @@ async function fetchOffResults(q,swissOnly){
   return results;
 }
 async function searchFoodOnline(){
-  var q=$("foodName").value.trim();
-  if(q.length<2){$("foodSearchResults").innerHTML="";return;}
+  var q=$("foodQ").value.trim();
+  if(q.length<2){$("foodSearchResults").innerHTML="";syncFoodSearchMode();return;}
   var seq=++foodSearchSeq;
   var local=searchLocalFoods(q);
   foodSearchCache=local.slice();
   if(local.length){renderFoodResults(foodSearchCache,q);$("foodSearchResults").insertAdjacentHTML("beforeend",'<div class="food-search-status" id="foodOnlineStatus">Recherche en ligne…</div>');}
-  else{$("foodSearchResults").innerHTML='<div class="food-search-status">Recherche en ligne…</div>';}
+  else{$("foodSearchResults").innerHTML='<div class="food-search-status">Recherche en ligne…</div>';syncFoodSearchMode();}
   try{
     var online=await fetchOffResults(q,true);
     if(seq!==foodSearchSeq)return;
@@ -2836,19 +2838,19 @@ async function searchFoodOnline(){
   }catch(e){
     if(seq!==foodSearchSeq)return;
     if(local.length){var st=$("foodOnlineStatus");if(st)st.textContent="Recherche en ligne indisponible (résultats locaux ci-dessus).";}
-    else $("foodSearchResults").innerHTML='<div class="food-search-status">Recherche indisponible. Vérifie ta connexion, ou saisis les valeurs manuellement.</div>';
+    else $("foodSearchResults").innerHTML='<div class="food-search-status">Recherche indisponible. Vérifie ta connexion, ou saisis les valeurs manuellement.</div>';syncFoodSearchMode();
   }
 }
 function pickFoodResult(i){
   var f=foodSearchCache[i];if(!f)return;
-  $("foodName").value=f.name;
+  $("foodQ").value=f.name;
   $("foodQty").value="100";
   $("foodKcal").value=f.kcal?Math.round(f.kcal):"";
   $("foodProt").value=f.protein?Math.round(f.protein*10)/10:"";
   $("foodCarbs").value=f.carbs?Math.round(f.carbs*10)/10:"";
   $("foodFat").value=f.fat?Math.round(f.fat*10)/10:"";
   setFoodRef100(f.kcal,f.protein,f.carbs,f.fat);
-  $("foodSearchResults").innerHTML="";
+  $("foodSearchResults").innerHTML="";syncFoodSearchMode();
   /* on passe directement à la quantité */
   setTimeout(function(){try{var q=$("foodQty");q.focus();q.select();}catch(e){}},60);
 
@@ -3115,7 +3117,7 @@ document.addEventListener("click",function(e){
     case "mClose": closeMeal(); break;
     case "mSave": saveMeal(); break;
     case "foodPick": pickFoodResult(Number(a.dataset.i)); break;
-    case "foodSearchClose": clearTimeout(foodSearchT); foodSearchSeq++; $("foodSearchResults").innerHTML=""; break;
+    case "foodSearchClose": clearTimeout(foodSearchT); foodSearchSeq++; $("foodSearchResults").innerHTML="";syncFoodSearchMode(); break;
     case "delMeal": delMealConfirm(Number(a.dataset.i)); break;
     case "openRun": openRun(); break;
     case "liveStart": openLiveRun(); break;
@@ -3203,7 +3205,7 @@ document.addEventListener("input",function(e){
   else if(id==="runDur"||id==="runIncline"||id==="runKcal")updateRunPace();
   else if(id==="foodQty")applyFoodRef100ToQty();
   else if(id==="foodKcal"||id==="foodProt"||id==="foodCarbs"||id==="foodFat")clearFoodRef100();
-  else if(id==="foodName")scheduleFoodSearch();
+  else if(id==="foodQ")scheduleFoodSearch();
   else if(id==="pickSearch")renderExPicker();
 });
 document.addEventListener("change",function(e){var el=e.target;
