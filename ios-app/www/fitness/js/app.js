@@ -2791,9 +2791,12 @@ function renderFoodResults(list,q){
     html+='<button class="food-result" type="button" data-act="foodPick" data-i="'+i+'"><span class="fr-n">'+esc(f.name)+'</span>'
       +'<span class="fr-v"><b>'+(f.kcal?Math.round(f.kcal):"—")+'</b> kcal<small>'+(f.protein!=null?fr(Math.round(f.protein*10)/10)+' g prot.':'')+'</small></span></button>';
   });
-  box.innerHTML='<div class="fr-list">'+html+'<div class="fr-foot">Valeurs pour 100 g</div></div>';
+  box.innerHTML='<div class="fr-bar"><span>'+list.length+' résultat'+(list.length>1?"s":"")+' · valeurs pour 100 g</span><button type="button" data-act="foodSearchClose">Saisir moi-même</button></div><div class="fr-list">'+html+'</div>';
 }
 var foodSearchT=null;
+/* mode recherche : tant que des résultats s'affichent, ils prennent toute la fenêtre (les champs réapparaissent au choix d'un aliment) */
+(function(){var box=document.getElementById("foodSearchResults");if(!box||!window.MutationObserver)return;
+  new MutationObserver(function(){var sh=box.closest(".sheet");if(sh)sh.classList.toggle("searching",box.innerHTML.trim()!=="");}).observe(box,{childList:true});})();
 function scheduleFoodSearch(){
   clearTimeout(foodSearchT);
   if($("foodName").value.trim().length<2){$("foodSearchResults").innerHTML="";return;}
@@ -2846,7 +2849,9 @@ function pickFoodResult(i){
   $("foodFat").value=f.fat?Math.round(f.fat*10)/10:"";
   setFoodRef100(f.kcal,f.protein,f.carbs,f.fat);
   $("foodSearchResults").innerHTML="";
-  toast("Aliment sélectionné · valeurs pour 100 g");
+  /* on passe directement à la quantité */
+  setTimeout(function(){try{var q=$("foodQty");q.focus();q.select();}catch(e){}},60);
+
 }
 function openScanner(){
   $("mealModal").classList.remove("on");
@@ -3110,6 +3115,7 @@ document.addEventListener("click",function(e){
     case "mClose": closeMeal(); break;
     case "mSave": saveMeal(); break;
     case "foodPick": pickFoodResult(Number(a.dataset.i)); break;
+    case "foodSearchClose": clearTimeout(foodSearchT); foodSearchSeq++; $("foodSearchResults").innerHTML=""; break;
     case "delMeal": delMealConfirm(Number(a.dataset.i)); break;
     case "openRun": openRun(); break;
     case "liveStart": openLiveRun(); break;
