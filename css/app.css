@@ -822,7 +822,6 @@ button.stat:active{transform:scale(.97)}
 #meals.slide-l>[data-ntab]:not(.ptab-off){animation:ptabL .22s ease}
 #meals.slide-r>[data-ntab]:not(.ptab-off){animation:ptabR .22s ease}
 @media (prefers-reduced-motion:reduce){#meals.slide-l>[data-ntab],#meals.slide-r>[data-ntab]{animation:none}}
-#waterSec{margin-top:26px}
 /* bilan calorique : les pas remplacent « mangé » (déjà dans l'anneau Repas) */
 .burn-steps{display:flex;flex-direction:column;align-items:center;color:var(--text);padding:0}
 .burn-steps i{display:block;width:70%;height:4px;border-radius:2px;background:var(--surface2);margin-top:5px;overflow:hidden}
@@ -836,4 +835,4 @@ button.stat:active{transform:scale(.97)}
 .backup-status{font-size:13px;color:var(--muted);margin:0 4px 8px}
 .backup-status .good{color:var(--accent-text)}
 .backup-status .bad{color:#d0875a}
-#meals .water-quick{margin-top:12px}
+#water .water-quick{margin-top:12px}

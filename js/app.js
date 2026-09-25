@@ -586,7 +586,7 @@ function renderBurn(){
   if(b.steps)parts.push('pas '+kfmt(b.steps));
   if(b.sess)parts.push('séance '+kfmt(b.sess));
   if(b.cardio)parts.push('cardio '+kfmt(b.cardio));
-  box.innerHTML='<div class="head" style="margin:0 0 8px"><div class="eyebrow">Bilan calorique du jour</div><span class="link" data-act="go" data-page="meals">Nutrition</span></div>'
+  box.innerHTML='<div class="head" style="margin:0 0 8px"><div class="eyebrow">Bilan calorique du jour</div><span class="link" data-act="go" data-page="meals">Repas</span></div>'
     +'<div class="burn3"><div><b>'+kfmt(b.total)+'</b><span>dépensé</span></div>'
     +'<div class="'+(bal<=0?"good":"bad")+'"><b>'+(bal<=0?"−":"+")+kfmt(Math.abs(bal))+'</b><span>'+(bal<=0?"déficit":"surplus")+'</span></div>'
     +'<button class="burn-steps" data-act="openSteps"><b>'+kfmt(st)+'</b><span>pas / '+kfmt(STEP_GOAL)+'</span><i><em style="width:'+Math.min(100,Math.round(st/STEP_GOAL*100))+'%"></em></i></button></div>'
@@ -2201,7 +2201,7 @@ function setNutTab(t,dir){
 }
 function renderMeals(){
   if(state.page!=="meals")return; /* repeinte automatiquement par showPage() à la prochaine visite */
-  applyNutTab();renderWater();renderCalWeek();
+  applyNutTab();renderCalWeek();
   var kcal=state.meals.reduce(function(s,m){return s+Number(m.kcal||0);},0),prot=state.meals.reduce(function(s,m){return s+Number(m.protein||0);},0),carbs=state.meals.reduce(function(s,m){return s+Number(m.carbs||0);},0),fat=state.meals.reduce(function(s,m){return s+Number(m.fat||0);},0);
   var goal=Number(state.profile.cal||2400),carbGoal=fnum(state.macro.carbs,265),protGoal=fnum(state.macro.protein,155),fatGoal=fnum(state.macro.fat,80);
   ring($("calRing"),Math.min(1,kcal/goal),kcal>goal*1.05?"#d0875a":"#e3ae4a",Math.round(kcal).toLocaleString("fr-CH")+"\n/ "+goal.toLocaleString("fr-CH")+" kcal");
@@ -2226,7 +2226,7 @@ function renderMeals(){
 }
 function fmtL(ml){return String(Math.round(ml/100)/10).replace(".",",")+" L";}
 function renderWater(){
-  if(state.page!=="meals")return;
+  if(state.page!=="water")return;
   if(rollWater())save();var wt=state.water;
   var ml=Number(wt.ml||0),goalMl=Math.max(500,Number(state.waterGoal||3)*1000),pct=Math.min(1,ml/goalMl);
   var waterStep=Math.max(100,Math.round(goalMl/10/50)*50),r=52,c=2*Math.PI*r;
@@ -2448,8 +2448,6 @@ function edSave(){
 
 /* nav / pages */
 function showPage(id){
-  var toWater=id==="water"; /* l'eau fait maintenant partie de Nutrition */
-  if(toWater){id="meals";nutTab="day";}
   if(!$(id))id="today";
   if(id!=="session"){closeGuided();closeComplete();}
   state.page=id;
@@ -2466,9 +2464,9 @@ function showPage(id){
   }
   else if(id==="progress")renderProgress();
   else if(id==="meals")renderMeals();
+  else if(id==="water")renderWater();
   else if(id==="profile")renderProfile();
-  if(toWater){var ws=$("waterSec");setTimeout(function(){try{window.scrollTo({top:Math.max(0,ws.getBoundingClientRect().top+window.scrollY-110),behavior:"smooth"});}catch(e){}},60);}
-  else{try{window.scrollTo({top:0,behavior:"smooth"});}catch(e){window.scrollTo(0,0);}}
+  try{window.scrollTo({top:0,behavior:"smooth"});}catch(e){window.scrollTo(0,0);}
   updateNavbar();
 }
 
@@ -2882,7 +2880,7 @@ function initTheme(){
 
 function updateWaterUI(){
   if(state.page==="today")renderToday();
-  if(state.page==="meals")renderWater();
+  if(state.page==="water")renderWater();
 }
 function addWater(amount){rollWater();var wt=state.water;var goalMl=Math.max(500,Number(state.waterGoal||3)*1000);wt.ml=Math.max(0,Math.min(Math.max(goalMl*2,8000),Number(wt.ml||0)+Number(amount||300)));state.water=wt;save();updateWaterUI();toast(amount>=0?"+"+amount+" ml d’eau":"−"+(-amount)+" ml retirés");}
 function adjustBodyWeight(delta){var n=Math.round((latestBody()+delta)*10)/10;if(n<30||n>350)return;var d=today(),h=state.weightHistory,ix=h.findIndex(function(x){return x.d===d;});if(ix>=0)h[ix].w=n;else h.push({d:d,w:n});h.sort(function(a,b){return a.d.localeCompare(b.d);});save();renderMeals();renderToday();toast("Poids : "+num(n)+" kg");}
