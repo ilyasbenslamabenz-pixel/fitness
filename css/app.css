@@ -805,3 +805,15 @@ button.stat:active{transform:scale(.97)}
 @keyframes ptabL{from{opacity:.3;transform:translateX(24px)}to{opacity:1;transform:none}}
 @keyframes ptabR{from{opacity:.3;transform:translateX(-24px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){#progress.slide-l>.card,#progress.slide-r>.card{animation:none}}
+/* bilan calorique du jour */
+.burn-card{margin-top:12px}
+.burn3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.burn3 b{display:block;font-family:var(--display);font-size:20px;font-variant-numeric:tabular-nums}
+.burn3 span{font-size:11.5px;color:var(--muted)}
+.burn3 .good b{color:var(--accent-text)}
+.burn3 .bad b{color:#d0875a}
+.burn-detail{font-size:11.5px;color:var(--faint);margin-top:8px;line-height:1.4}
+.burn-detail u{color:var(--accent-text);text-decoration:none;cursor:pointer}
+.meal-burn{font-size:12.5px;color:var(--muted);margin:10px 4px 0;text-align:center}
+.meal-burn .good{color:var(--accent-text);font-weight:700}
+.meal-burn .bad{color:#d0875a;font-weight:700}
