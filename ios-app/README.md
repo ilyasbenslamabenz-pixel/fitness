@@ -16,10 +16,9 @@ copie simplement ces fichiers dans un projet Xcode.
 - Permissions iOS ajoutées dans `ios/App/App/Info.plist` : accès caméra
   (scanner de code-barres) et position (suivi GPS des courses) — sans ça,
   l'app plante dès qu'on utilise ces fonctions
-- Icône App Store (1024×1024, sans transparence) et écran de lancement
-  générés à partir du monogramme "IB" blanc sur fond bleu nuit
-  (`scripts/gen-ios-branding.js`, `npm run gen:ios-branding` pour
-  régénérer si la marque change)
+- Icône App Store (1024×1024, sans transparence), icônes de l'écran
+  d'accueil et écran de lancement générés depuis le logo "IB" doré
+  (`branding/icon-source.png`, `npm run gen:icon` pour régénérer)
 - Plugin natif `@capacitor/haptics` (vibrations Taptic : série validée, coche,
   fin de séance). Dans le navigateur, l'app retombe sur `navigator.vibrate`
   quand il existe (ce n'est pas le cas de Safari sur iPhone)
