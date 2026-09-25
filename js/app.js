@@ -675,9 +675,9 @@ function ringSVG(seancePct,eauPct,repasPct,score){
       +'<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="'+sw+'" stroke-linecap="round" stroke-dasharray="'+dash+' '+c.toFixed(1)+'"/>';
   }
   return '<svg width="128" height="128" viewBox="0 0 128 128">'
-    +arc(seancePct,r1,c1,'var(--primary)','rgba(10,132,255,.16)')
-    +arc(eauPct,r2,c2,'var(--accent)','rgba(48,217,143,.16)')
-    +arc(repasPct,r3,c3,'#5e7ce6','rgba(94,124,230,.16)')
+    +arc(seancePct,r1,c1,'var(--primary)','rgba(227,174,74,.16)')
+    +arc(eauPct,r2,c2,'var(--accent)','rgba(79,143,230,.16)')
+    +arc(repasPct,r3,c3,'#d0875a','rgba(208,135,90,.16)')
     +'</svg>'
     +'<div class="ring-center"><div class="score">'+(isFinite(score)?score:0)+'</div><div class="lab">SCORE DU JOUR</div></div>';
 }
@@ -1281,7 +1281,7 @@ function renderWeekSummary(){
   var maxC=Math.max(1,Math.max.apply(null,counts));
   $("weekBar").innerHTML=days.map(function(lab,i){
     var h=counts[i]?Math.round(22+counts[i]/maxC*78):0;
-    var col=counts[i]?(i===5?"linear-gradient(180deg,#30d98f,#7ee8c4)":"linear-gradient(180deg,#0a84ff,#5e7ce6)"):"transparent";
+    var col=counts[i]?(i===5?"linear-gradient(180deg,#4f8fe6,#a9cbf5)":"linear-gradient(180deg,#e3ae4a,#d0875a)"):"transparent";
     return '<div class="wb'+(i===dow?" today":"")+'"><div class="bar"><i style="height:'+h+'%;background:'+col+'"></i></div><span class="lab">'+lab+'</span></div>';
   }).join("");
   var prevMonday=new Date(monday);prevMonday.setDate(monday.getDate()-7);var prevCount=0;
@@ -1304,7 +1304,7 @@ function renderProgress(){
   $("pwLost").textContent=num(Math.max(0,start-w));
   $("pwLeft").textContent=num(Math.max(0,w-target));
   var wh=state.weightHistory.slice(-12);
-  $("weightChart").innerHTML=lineChart(wh.map(function(x){return Number(x.w);}),"#30d98f"," kg");
+  $("weightChart").innerHTML=lineChart(wh.map(function(x){return Number(x.w);}),"#4f8fe6"," kg");
   $("wcFrom").textContent=wh.length?fmtDate(wh[0].d):"";
   $("wcTo").textContent=wh.length?fmtDate(wh[wh.length-1].d):"";
 
@@ -1325,7 +1325,7 @@ function renderProgress(){
 
   var arr=(state.selEx&&state.perf[state.selEx])||[];
   var vals=arr.map(function(x){return Number(x.w);});
-  $("strengthChart").innerHTML=lineChart(vals,"#0a84ff"," kg");
+  $("strengthChart").innerHTML=lineChart(vals,"#e3ae4a"," kg");
   $("stNow").textContent=vals.length?num(vals[vals.length-1]):"—";
   $("stPR").textContent=vals.length?num(Math.max.apply(null,vals)):"—";
   var gain=vals.length>1?(vals[vals.length-1]-vals[0]):0;
@@ -1345,7 +1345,7 @@ function renderCardio(){
   var km=runs.reduce(function(s,r){return s+Number(r.dist||0);},0);$("cdKm").textContent=num(Math.round(km*10)/10);
   var paces=runs.filter(function(r){return !r.walk&&r.dist>0&&r.dur>0;}).map(function(r){return r.dur/r.dist;});
   $("cdPace").textContent=paces.length?fmtPace(Math.min.apply(null,paces))+" /km":"—";
-  $("cardioChart").innerHTML=lineChart(runs.map(function(r){return Number(r.dist);}),"#0a84ff"," km");
+  $("cardioChart").innerHTML=lineChart(runs.map(function(r){return Number(r.dist);}),"#e3ae4a"," km");
   var totalKcal=runs.reduce(function(s,r){return s+Number(r.kcal||0);},0);
   $("cdLast").textContent=(runs.length?fmtDate(runs[runs.length-1].d):"")+(totalKcal?" · "+totalKcal.toLocaleString("fr-CH")+" kcal au total":"");
   var recent=state.runs.slice().sort(function(a,b){return b.d.localeCompare(a.d);}).slice(0,8);
@@ -1363,12 +1363,12 @@ function renderSteps(){
   $("stpToday").textContent=tv?tv.toLocaleString("fr-CH"):"—";
   $("stpAvg").textContent=a.length?Math.round(a.reduce(function(s,x){return s+Number(x.v);},0)/a.length).toLocaleString("fr-CH"):"—";
   $("stpDays").textContent=a.length;
-  $("stepsChart").innerHTML=lineChart(a.slice(-14).map(function(x){return Number(x.v);}),"#30d98f"," pas");
+  $("stepsChart").innerHTML=lineChart(a.slice(-14).map(function(x){return Number(x.v);}),"#4f8fe6"," pas");
   var stpK=$("stpKcal");if(stpK)stpK.textContent=tv?estimateStepsKcal(tv).toLocaleString("fr-CH")+" kcal aujourd'hui (marche)":"";
 }
 function renderEnergy(){
   var a=state.energy.slice().sort(function(x,y){return x.d.localeCompare(y.d);});
-  $("energyChart").innerHTML=lineChart(a.slice(-14).map(function(x){return Number(x.v);}),"#0a84ff","");
+  $("energyChart").innerHTML=lineChart(a.slice(-14).map(function(x){return Number(x.v);}),"#e3ae4a","");
   $("enLast").textContent=a.length?fmtDate(a[a.length-1].d):"";
   var faces=["😫","😕","😐","🙂","🔥"],cur=valToday(state.energy),el=$("efaces");
   if(el)el.innerHTML=faces.map(function(f,i){return '<button class="'+(cur===i+1?"on":"")+'" data-act="energy" data-v="'+(i+1)+'">'+f+'</button>';}).join("");
@@ -1588,7 +1588,7 @@ function initMap(){
       if(!lrMap)return;
       try{
         lrMap.addSource("lr-route",{type:"geojson",data:{type:"Feature",geometry:{type:"LineString",coordinates:[]}}});
-        lrMap.addLayer({id:"lr-route-line",type:"line",source:"lr-route",layout:{"line-cap":"round","line-join":"round"},paint:{"line-color":"#0a84ff","line-width":5,"line-opacity":.95}});
+        lrMap.addLayer({id:"lr-route-line",type:"line",source:"lr-route",layout:{"line-cap":"round","line-join":"round"},paint:{"line-color":"#e3ae4a","line-width":5,"line-opacity":.95}});
         mapReady=true;
         updateMap();
       }catch(e){}
@@ -1616,7 +1616,7 @@ function updateMap(){
     if(src)src.setData({type:"Feature",geometry:{type:"LineString",coordinates:runPts.map(function(p){return [p.lng,p.lat];})}});
   }catch(e){}
   var last=runPts[runPts.length-1];
-  if(!lrStart){try{lrStart=new maplibregl.Marker({element:mlCircleEl("#30d98f"),anchor:"center"}).setLngLat([runPts[0].lng,runPts[0].lat]).addTo(lrMap);}catch(e){}}
+  if(!lrStart){try{lrStart=new maplibregl.Marker({element:mlCircleEl("#4f8fe6"),anchor:"center"}).setLngLat([runPts[0].lng,runPts[0].lat]).addTo(lrMap);}catch(e){}}
   if(!lrHead){
     try{
       var headEl=document.createElement("div");headEl.className="lr-headwrap";headEl.innerHTML='<div class="lr-dot"></div>';
@@ -1653,9 +1653,9 @@ function drawTraceInto(svg,pts){
   var Y=function(lat){return (pad+(0.5-(lat-cLat)/span)*sz).toFixed(1);};
   var dd=pts.map(function(p,i){return (i?"L":"M")+X(p.lng)+" "+Y(p.lat);}).join(" ");
   var f=pts[0],l=pts[pts.length-1];
-  svg.innerHTML='<path d="'+dd+'" fill="none" stroke="#0a84ff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>'
-    +'<circle cx="'+X(f.lng)+'" cy="'+Y(f.lat)+'" r="3" fill="#30d98f"/>'
-    +'<circle cx="'+X(l.lng)+'" cy="'+Y(l.lat)+'" r="3.4" fill="#0a84ff"/>';
+  svg.innerHTML='<path d="'+dd+'" fill="none" stroke="#e3ae4a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>'
+    +'<circle cx="'+X(f.lng)+'" cy="'+Y(f.lat)+'" r="3" fill="#4f8fe6"/>'
+    +'<circle cx="'+X(l.lng)+'" cy="'+Y(l.lat)+'" r="3.4" fill="#e3ae4a"/>';
 }
 function drawTrace(){drawTraceInto($("lrTrace"),runPts);}
 var rmMap=null,rmReady=false,rmStart=null,rmEnd=null,rmPendingPts=null;
@@ -1669,8 +1669,8 @@ function drawRunMapPts(pts){
     rmMap.resize();
     var bounds=coords.reduce(function(b,c){return b.extend(c);},new maplibregl.LngLatBounds(coords[0],coords[0]));
     rmMap.fitBounds(bounds,{padding:24,maxZoom:17,duration:0});
-    rmStart=new maplibregl.Marker({element:mlCircleEl("#30d98f"),anchor:"center"}).setLngLat(coords[0]).addTo(rmMap);
-    rmEnd=new maplibregl.Marker({element:mlCircleEl("#0a84ff"),anchor:"center"}).setLngLat(coords[coords.length-1]).addTo(rmMap);
+    rmStart=new maplibregl.Marker({element:mlCircleEl("#4f8fe6"),anchor:"center"}).setLngLat(coords[0]).addTo(rmMap);
+    rmEnd=new maplibregl.Marker({element:mlCircleEl("#e3ae4a"),anchor:"center"}).setLngLat(coords[coords.length-1]).addTo(rmMap);
   }catch(e){}
 }
 function initRunMapWithMaplibre(r){
@@ -1680,7 +1680,7 @@ function initRunMapWithMaplibre(r){
       rmMap.on("load",function(){
         try{
           rmMap.addSource("rm-route",{type:"geojson",data:{type:"Feature",geometry:{type:"LineString",coordinates:[]}}});
-          rmMap.addLayer({id:"rm-route-line",type:"line",source:"rm-route",layout:{"line-cap":"round","line-join":"round"},paint:{"line-color":"#0a84ff","line-width":5,"line-opacity":.95}});
+          rmMap.addLayer({id:"rm-route-line",type:"line",source:"rm-route",layout:{"line-cap":"round","line-join":"round"},paint:{"line-color":"#e3ae4a","line-width":5,"line-opacity":.95}});
           rmReady=true;
           if(rmPendingPts){drawRunMapPts(rmPendingPts);rmPendingPts=null;}
         }catch(e){}
@@ -1751,7 +1751,8 @@ function renderMeals(){
   if(state.page!=="meals")return; /* repeinte automatiquement par showPage() à la prochaine visite */
   var kcal=state.meals.reduce(function(s,m){return s+Number(m.kcal||0);},0),prot=state.meals.reduce(function(s,m){return s+Number(m.protein||0);},0),carbs=state.meals.reduce(function(s,m){return s+Number(m.carbs||0);},0),fat=state.meals.reduce(function(s,m){return s+Number(m.fat||0);},0);
   var goal=Number(state.profile.cal||2400),carbGoal=fnum(state.macro.carbs,265),protGoal=fnum(state.macro.protein,155),fatGoal=fnum(state.macro.fat,80);
-  ring($("calRing"),Math.min(1,kcal/goal),"#0a84ff",Math.round(kcal)+"\n/ "+goal+" kcal");
+  ring($("calRing"),Math.min(1,kcal/goal),"#e3ae4a",Math.round(kcal)+"\n/ "+goal+" kcal");
+  $("mCarbsGoal").textContent=Math.round(carbGoal);$("mProtGoal").textContent=Math.round(protGoal);$("mFatGoal").textContent=Math.round(fatGoal);
   $("mCarbs").textContent=Math.round(carbs*10)/10;$("mProt").textContent=Math.round(prot*10)/10;$("mFat").textContent=Math.round(fat*10)/10;
   $("mCarbsBar").style.width=Math.min(100,carbs/carbGoal*100)+"%";$("mProtBar").style.width=Math.min(100,prot/protGoal*100)+"%";$("mFatBar").style.width=Math.min(100,fat/fatGoal*100)+"%";
   var limits={"Petit-déjeuner":Math.round(goal*0.25/10)*10,"Déjeuner":Math.round(goal*0.35/10)*10,"Dîner":Math.round(goal*0.30/10)*10,"Collation":Math.round(goal*0.10/10)*10},ids={"Petit-déjeuner":"breakfastKcal","Déjeuner":"lunchKcal","Dîner":"dinnerKcal","Collation":"snackKcal"};
