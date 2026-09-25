@@ -650,3 +650,5 @@ button.lrow:active{background:var(--surface2)}
 :root[data-theme="light"] .guided-x,:root[data-theme="light"] .lr-x{background:rgba(0,0,0,.06);border-color:rgba(0,0,0,.08);color:#000}
 
 .brand-logo{width:28px;height:28px;border-radius:8px;flex:0 0 auto;display:block;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.run-seg{grid-template-columns:repeat(2,1fr);margin:10px 0 4px}
+.complete-tread{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;margin-bottom:10px;border-radius:999px;background:var(--surface2);border:1px solid var(--hair);color:var(--text);font-weight:600;font-size:14.5px}

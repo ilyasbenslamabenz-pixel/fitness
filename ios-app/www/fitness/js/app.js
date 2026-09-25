@@ -556,7 +556,7 @@ function renderPlan(){
     +'<div class="row"><div class="ic">'+icon+'</div><div style="flex:1;min-width:0"><h3>'+esc(title)+'</h3><div class="sub">'+esc(sub)+'</div></div></div>'
     +'<ul class="plan-list">'+lines.map(function(l){return '<li>'+(pl.kind==="walk"?esc(l):l)+'</li>';}).join("")+'</ul>'
     +go
-    +'<div class="plan-foot">'+alt+(pl.kind==="walk"&&!done?'<button class="plan-alt" data-act="planDone"><svg class="ic-s" aria-hidden="true"><use href="#i-checkmark"/></svg>C\'est fait</button>':'')+'</div>'
+    +'<div class="plan-foot">'+alt+(pl.kind==="gym"?'<button class="plan-alt" data-act="planTread"><svg class="ic-s" aria-hidden="true"><use href="#i-figure_walk"/></svg>+ Tapis</button>':'')+(pl.kind==="walk"&&!done?'<button class="plan-alt" data-act="planDone"><svg class="ic-s" aria-hidden="true"><use href="#i-checkmark"/></svg>C\'est fait</button>':'')+'</div>'
     +'<button class="plan-steps" data-act="openSteps"><span>Pas '+(i===ti?"aujourd'hui":"ce jour")+'</span><b>'+st.toLocaleString("fr-CH")+' / '+STEP_GOAL.toLocaleString("fr-CH")+'</b><i><em style="width:'+stepPct+'%"></em></i></button>';
 }
 /* marche : ~0.6 kcal/kg/km à allure soutenue */
@@ -1192,7 +1192,7 @@ function guidedFinishFlow(){
   var streakNow=computeStreak();
   delete guidedStartTimes[p.id];
   openComplete({
-    sessionName:sessionName,exCount:exCount,durMin:durMin,volume:Math.round(totalVolume),kcal:kcal,
+    sessionName:sessionName,gym:(p.cat||"muscu")==="muscu",exCount:exCount,durMin:durMin,volume:Math.round(totalVolume),kcal:kcal,
     isNewPR:isNewPR,prName:isNewPR?lp.n:null,prWeight:isNewPR?lp.w:null,
     streak:streakNow,bestStreak:Math.max(prevBestStreak,streakNow)
   });
@@ -1210,6 +1210,7 @@ function openComplete(data){
   if(data.streak>0&&data.streak>=data.bestStreak)sub="Nouveau record de série personnel !";
   else{var remain=Math.max(0,data.bestStreak-data.streak);sub=remain>0?("Ton meilleur streak est à "+data.bestStreak+" — encore "+remain+" jour"+(remain>1?"s":"")):"Continue comme ça !";}
   $("cpStreakSub").textContent=sub;
+  var cpT=$("cpTread");if(cpT)cpT.style.display=data.gym?"":"none";
   $("completeView").classList.add("on");
   haptic("success");
 }
@@ -1359,7 +1360,8 @@ function renderCardio(){
   $("runList").innerHTML=recent.length?recent.map(function(r){
     var pace=(r.dist>0&&r.dur>0)?fmtPace(r.dur/r.dist)+" /km":"—";
     var hasRoute=Array.isArray(r.pts)&&r.pts.length>1;
-    return '<div class="runrow"><div class="ri"><b>'+(r.walk?"Marche · ":"")+num(r.dist)+' km</b><span>'+fmtDate(r.d)+' · '+num(r.dur)+' min'+(r.kcal?' · '+Math.round(r.kcal)+' kcal':'')+'</span></div><div class="rp">'+pace+'</div>'
+    var lab=(r.tread?"Tapis · ":"")+(r.walk?"Marche · ":"")+num(r.dist)+" km"+(r.incline?" · pente "+num(r.incline)+" %":"");
+    return '<div class="runrow"><div class="ri"><b>'+esc(lab)+'</b><span>'+fmtDate(r.d)+' · '+num(r.dur)+' min'+(r.kcal?' · '+Math.round(r.kcal)+' kcal':'')+'</span></div><div class="rp">'+pace+'</div>'
       +(hasRoute?'<button class="mapbtn" data-act="viewRunMap" data-id="'+esc(r.id||"")+'"><svg class="ic-s" aria-hidden="true"><use href="#i-map_fill"/></svg></button>':'')
       +'<button class="del" data-act="delRun" data-id="'+esc(r.id||"")+'"><svg class="ic-s" aria-hidden="true"><use href="#i-xmark"/></svg></button></div>';
   }).join(""):'<div class="empty">Aucune course. Ajoute-en une, ou branche Strava en étape 2.</div>';
@@ -1381,16 +1383,68 @@ function renderEnergy(){
   if(el)el.innerHTML=faces.map(function(f,i){return '<button class="'+(cur===i+1?"on":"")+'" data-act="energy" data-v="'+(i+1)+'">'+f+'</button>';}).join("");
 }
 function setEnergy(v){upsertV(state.energy,today(),v);save();renderEnergy();renderToday();toast("Forme du jour enregistrée");}
-function openRun(){$("runDist").value="";$("runDur").value="";$("runDate").value=today();$("runPace").textContent="";$("runModal").classList.add("on");}
+/* saisie cardio : dehors (distance + durée) ou sur tapis (vitesse, pente, durée),
+   course ou marche */
+var runWhere="out",runKind="run",runDistTouched=false;
+function openRun(preset){
+  preset=preset||{};
+  ["runDist","runDur","runSpeed","runIncline","runKcal"].forEach(function(id){$(id).value="";});
+  if(preset.dur)$("runDur").value=preset.dur;
+  if(preset.speed)$("runSpeed").value=preset.speed;
+  if(preset.incline!=null)$("runIncline").value=preset.incline;
+  $("runDate").value=today();runDistTouched=false;
+  setRunMode(preset.where||"out",preset.kind||"run");
+  $("runModal").classList.add("on");
+}
 function closeRun(){$("runModal").classList.remove("on");}
-function updateRunPace(){var di=fnum($("runDist").value,0),du=fnum($("runDur").value,0);$("runPace").textContent=(di>0&&du>0)?("Allure "+fmtPace(du/di)+" /km"):"";}
+function setRunMode(where,kind){
+  runWhere=where;runKind=kind;
+  document.querySelectorAll("#runWhere .cat-tab").forEach(function(b){b.classList.toggle("on",b.dataset.v===where);});
+  document.querySelectorAll("#runKind .cat-tab").forEach(function(b){b.classList.toggle("on",b.dataset.v===kind);});
+  var t=where==="tread";
+  $("runOutOnly").style.display=t?"none":"";$("runTreadOnly").style.display=t?"":"none";$("runTreadKcal").style.display=t?"":"none";
+  updateRunPace();
+}
+/* dépense sur tapis : équations ACSM (VO2 en ml/kg/min, 5 kcal par litre d'O2),
+   la pente compte beaucoup en marche */
+function treadKcal(speedKmh,inclinePct,durMin,walk){
+  var v=speedKmh*1000/60,g=Math.max(0,inclinePct||0)/100;
+  var vo2=walk?(3.5+0.1*v+1.8*v*g):(3.5+0.2*v+0.9*v*g);
+  return Math.max(1,Math.round(vo2*latestBody()/1000*5*durMin));
+}
+function runFormValues(){
+  var du=fnum($("runDur").value,0),di=fnum($("runDist").value,0),sp=fnum($("runSpeed").value,0),inc=fnum($("runIncline").value,0),mk=fnum($("runKcal").value,0);
+  var walk=runKind==="walk",kcal=0;
+  if(runWhere==="tread"){
+    if(!sp&&di>0&&du>0)sp=di/(du/60);
+    if(!(di>0)&&sp>0&&du>0)di=sp*du/60;
+    if(sp>0&&du>0)kcal=treadKcal(sp,inc,du,walk);
+    if(mk>0&&kcal>0)kcal=Math.min(kcal,Math.round(mk)); /* les tapis surestiment souvent : on garde la plus basse */
+    else if(mk>0)kcal=Math.round(mk);
+  }else if(di>0){kcal=walk?estimateWalkDistKcal(di):estimateRunKcal(di,du);}
+  return {du:du,di:di,sp:sp,inc:inc,kcal:kcal,walk:walk};
+}
+function updateRunPace(){
+  if(runWhere==="tread"&&!runDistTouched){
+    var sp=fnum($("runSpeed").value,0),du=fnum($("runDur").value,0);
+    $("runDist").value=(sp>0&&du>0)?Math.round(sp*du/60*100)/100:"";
+  }
+  var f=runFormValues(),parts=[];
+  if(f.di>0&&f.du>0)parts.push("Allure "+fmtPace(f.du/f.di)+" /km");
+  if(f.kcal>0)parts.push("≈ "+f.kcal+" kcal");
+  $("runPace").textContent=parts.join(" · ");
+}
 function saveRun(){
-  var di=Number(String($("runDist").value).replace(",",".")),du=Number(String($("runDur").value).replace(",","."));
-  var d=$("runDate").value||today();
-  if(!(di>0)||!(du>0)){toast("Distance et durée requises");return;}
-  state.runs.push({id:"r"+Date.now()+Math.floor(Math.random()*1000),d:d,dist:Math.round(di*100)/100,dur:Math.round(du*10)/10,src:"manual",kcal:estimateRunKcal(di,du)});
-  autoTickRunProg(d);
-  save();closeRun();renderProgress();toast("Course ajoutée");
+  var f=runFormValues(),d=$("runDate").value||today();
+  if(!(f.du>0)){toast("Indique la durée");return;}
+  if(!(f.di>0)){toast(runWhere==="tread"?"Indique la vitesse ou la distance":"Distance et durée requises");return;}
+  var r={id:"r"+Date.now()+Math.floor(Math.random()*1000),d:d,dist:Math.round(f.di*100)/100,dur:Math.round(f.du*10)/10,src:"manual",kcal:f.kcal||estimateRunKcal(f.di,f.du)};
+  if(f.walk)r.walk=true;
+  if(runWhere==="tread"){r.tread=true;if(f.sp)r.speed=Math.round(f.sp*10)/10;if(f.inc)r.incline=f.inc;}
+  state.runs.push(r);
+  if(!f.walk)autoTickRunProg(d);
+  save();closeRun();renderProgress();renderToday();
+  toast((runWhere==="tread"?"Tapis":"")+(f.walk?(runWhere==="tread"?" · marche":"Marche"):(runWhere==="tread"?" · course":"Course"))+" ajoutée · ≈ "+r.kcal+" kcal");
 }
 /* ===== live GPS run tracking ===== */
 var geoWatch=null,geoRetryTimer=null,geoStaleTimer=null,geoRetryCount=0,runActive=false,runPaused=false;
@@ -2472,6 +2526,10 @@ document.addEventListener("click",function(e){
     case "runDiscard": discardRun(); break;
     case "runClose": closeRun(); break;
     case "runSave": saveRun(); break;
+    case "runWhere": setRunMode(a.dataset.v,runKind); break;
+    case "runKind": setRunMode(runWhere,a.dataset.v); break;
+    case "treadAfter": closeComplete(); showPage("today"); openRun({where:"tread",kind:"walk",dur:15,speed:5,incline:8}); break;
+    case "planTread": openRun({where:"tread",kind:"walk",dur:15,speed:5,incline:8}); break;
     case "delRun": delRunConfirm(a.dataset.id); break;
     case "viewRunMap": openRunMap(a.dataset.id); break;
     case "runMapClose": closeRunMap(); break;
@@ -2506,7 +2564,8 @@ document.addEventListener("click",function(e){
 document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible"){checkDayRollover();if(runActive&&!runPaused)requestWake();fixLiveMapSize();}else{cloudAutoBackup(true);}});
 document.addEventListener("input",function(e){
   var id=e.target.id;
-  if(id==="runDist"||id==="runDur")updateRunPace();
+  if(id==="runDist"){runDistTouched=!!e.target.value;updateRunPace();}
+  else if(id==="runDur"||id==="runSpeed"||id==="runIncline"||id==="runKcal")updateRunPace();
   else if(id==="foodQty")applyFoodRef100ToQty();
   else if(id==="foodKcal"||id==="foodProt"||id==="foodCarbs"||id==="foodFat")clearFoodRef100();
   else if(id==="foodName")scheduleFoodSearch();

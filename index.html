@@ -422,6 +422,7 @@
   </div>
   <div style="flex:1"></div>
   <div class="complete-bottom">
+    <button class="complete-tread" id="cpTread" data-act="treadAfter"><svg class="ic-s" aria-hidden="true"><use href="#i-figure_walk"/></svg> Ajouter le tapis (marche inclinée)</button>
     <button class="complete-home" data-act="completeClose">Retour à l'accueil</button>
   </div>
 </div>
@@ -511,11 +512,20 @@
 </div></div>
 
 <div class="modal" id="runModal"><div class="sheet">
-  <h3>Ajouter une course</h3>
-  <button class="btn primary" data-act="liveStart" style="margin:6px 0 2px"><svg class="ic-s" aria-hidden="true"><use href="#i-location_fill"/></svg> Suivi GPS en direct</button>
-  <div class="or-sep"><span>ou saisir manuellement</span></div>
-  <div class="row2"><div class="field"><label>Distance (km)</label><input id="runDist" type="number" inputmode="decimal" step="0.1"></div>
-  <div class="field"><label>Durée (min)</label><input id="runDur" type="number" inputmode="decimal" step="1"></div></div>
+  <h3>Ajouter du cardio</h3>
+  <div class="sess-cat run-seg" id="runWhere"><button class="cat-tab" data-act="runWhere" data-v="out">Dehors</button><button class="cat-tab" data-act="runWhere" data-v="tread">Tapis</button></div>
+  <div class="sess-cat run-seg" id="runKind"><button class="cat-tab" data-act="runKind" data-v="run">Course</button><button class="cat-tab" data-act="runKind" data-v="walk">Marche</button></div>
+  <div id="runOutOnly">
+    <button class="btn primary" data-act="liveStart" style="margin:6px 0 2px"><svg class="ic-s" aria-hidden="true"><use href="#i-location_fill"/></svg> Suivi GPS en direct</button>
+    <div class="or-sep"><span>ou saisir manuellement</span></div>
+  </div>
+  <div id="runTreadOnly" class="row2">
+    <div class="field"><label>Vitesse (km/h)</label><input id="runSpeed" type="number" inputmode="decimal" step="0.1" placeholder="ex. 5"></div>
+    <div class="field"><label>Pente (%)</label><input id="runIncline" type="number" inputmode="decimal" step="0.5" placeholder="0"></div>
+  </div>
+  <div class="row2"><div class="field"><label>Durée (min)</label><input id="runDur" type="number" inputmode="decimal" step="1"></div>
+  <div class="field"><label>Distance (km)</label><input id="runDist" type="number" inputmode="decimal" step="0.01"></div></div>
+  <div id="runTreadKcal" class="field"><label>Calories affichées par le tapis (optionnel)</label><input id="runKcal" type="number" inputmode="numeric" step="1" placeholder="—"></div>
   <div class="field"><label>Date</label><input id="runDate" type="date"></div>
   <div id="runPace" class="date" style="text-align:center;margin-top:8px;min-height:16px"></div>
   <div class="acts"><button class="btn ghost" data-act="runClose">Annuler</button><button class="btn primary" data-act="runSave">Ajouter</button></div>
@@ -578,7 +588,7 @@
 <div class="snack" id="snack"><div class="msg" id="snackMsg"></div><button data-act="snackAct" id="snackBtn">Annuler</button></div>
 <div class="toast" id="toast" hidden></div>
 
-<script src="/fitness/js/app.js?v=16"></script>
+<script src="/fitness/js/app.js?v=17"></script>
 <script src="/fitness/js/boot.js?v=3"></script>
 </body>
 </html>
