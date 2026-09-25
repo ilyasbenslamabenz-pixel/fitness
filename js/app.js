@@ -1469,11 +1469,25 @@ function delRunConfirm(id){
   state.runs.splice(idx,1);save();renderProgress();
   snack("Course supprimée","Annuler",function(){state.runs.splice(idx,0,removed);save();renderProgress();},5000);
 }
+/* export : sur iPhone, le téléchargement d'un fichier depuis une app installée sur l'écran d'accueil ne fait souvent rien.
+   On passe donc par la feuille de partage (« Enregistrer dans Fichiers », AirDrop, mail…) quand elle accepte les fichiers. */
 function exportData(){
-  try{var blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
-    var url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="evo-fit-"+today()+".json";
-    document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(url);a.remove();},120);markBackup();renderBackupNag();toast("Données exportées");
-  }catch(e){toast("Export impossible");}
+  var json=JSON.stringify(state,null,2),fname="evo-fit-"+today()+".json";
+  function done(){markBackup();renderBackupNag();if(state.page==="profile")renderProfile();toast("Données exportées");}
+  function download(){
+    try{var blob=new Blob([json],{type:"application/json"});
+      var url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=fname;
+      document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(url);a.remove();},1500);done();
+    }catch(e){toast("Export impossible");}
+  }
+  try{
+    var file=typeof File==="function"?new File([json],fname,{type:"application/json"}):null;
+    if(file&&navigator.canShare&&navigator.canShare({files:[file]})&&navigator.share){
+      navigator.share({files:[file],title:"Sauvegarde EVO Fit Coach"}).then(done).catch(function(e){if(!e||e.name!=="AbortError")download();});
+      return;
+    }
+  }catch(e){}
+  download();
 }
 function importData(file){
   var r=new FileReader();
@@ -1590,6 +1604,7 @@ function renderWeightTrend(){
     txt="Rythme : "+fr(pw)+" kg/sem. · "+(weeks>104?"à ce rythme, l'objectif de "+fr(target)+" kg est à plus de 2 ans : resserre un peu les calories.":"objectif "+fr(target)+" kg vers "+eta.toLocaleDateString("fr-CH",{month:"long",year:"numeric"}));
     if(pw<-1.5)txt+=" · rythme rapide : garde tes protéines hautes";
   }else if(w<=target)txt="Objectif atteint, bravo ! Tu peux fixer un nouveau poids cible dans le Profil.";
+  else if(pw>0.05)txt="Poids en hausse ces 4 dernières semaines (+"+fr(pw)+" kg/sem.) : vérifie tes calories dans Repas.";
   else txt="Poids stable ces 4 dernières semaines ("+(pw>0?"+":"")+fr(pw)+" kg/sem.) : vérifie tes calories dans Repas.";
   el.textContent=txt;
 }
@@ -1618,7 +1633,7 @@ function goalLine(f){return '<i class="goal" style="bottom:calc(18px + (100% - 1
 function renderCalSum(){
   var el=$("calSum");if(!el)return;
   var r=calWeekStats();
-  el.textContent=r?(r.defTxt+" · "+r.ok+"/"+r.past+" jours dans l'objectif calorique."):"Ajoute tes repas dans Nutrition : ton bilan de la semaine apparaîtra ici.";
+  el.textContent=r?(r.defTxt+(r.past?" · "+r.ok+"/"+r.past+" jours dans l'objectif calorique.":".")):"Ajoute tes repas dans Nutrition : ton bilan de la semaine apparaîtra ici.";
 }
 function calWeekStats(){
   var goal=Number(state.profile.cal||2400),base=new Date(),list=[];
@@ -1626,7 +1641,9 @@ function calWeekStats(){
   if(!list.length)return null;
   var past=list.filter(function(x){return x.d!==today();}),avgList=past.length?past:list;
   var ok=past.filter(function(x){return x.v.kcal<=goal*1.05&&x.v.kcal>=goal*0.75;}).length;
-  var defs=avgList.map(function(x){return dayBurn(x.d).total-x.v.kcal;}),avgDef=Math.round(defs.reduce(function(a2,b2){return a2+b2;},0)/defs.length);
+  /* moyenne sur les journées terminées seulement : la journée en cours est incomplète */
+  if(!past.length)return {ok:0,past:0,avgDef:0,defTxt:"Ton déficit moyen s'affichera dès demain, après une première journée complète"};
+  var defs=past.map(function(x){return dayBurn(x.d).total-x.v.kcal;}),avgDef=Math.round(defs.reduce(function(a2,b2){return a2+b2;},0)/defs.length);
   var defTxt=avgDef>0?'Déficit moyen ≈ '+kfmt(avgDef)+' kcal/jour, soit environ −'+fr(avgDef*7/7700)+' kg de graisse par semaine (estimation)':'Pas de déficit en moyenne ('+kfmt(-avgDef)+' kcal/jour au-dessus de ta dépense) : réduis un peu les portions';
   return {ok:ok,past:past.length,avgDef:avgDef,defTxt:defTxt};
 }
@@ -1640,13 +1657,12 @@ function renderCalWeek(){
   var past=withData.filter(function(x){return x.d!==today();}),avgList=past.length?past:withData;
   var avg=Math.round(avgList.reduce(function(s,x){return s+x.v.kcal;},0)/avgList.length),avgP=Math.round(avgList.reduce(function(s,x){return s+x.v.prot;},0)/avgList.length);
   var ok=past.filter(function(x){return x.v.kcal<=goal*1.05&&x.v.kcal>=goal*0.75;}).length;
-  var defs=avgList.map(function(x){return dayBurn(x.d).total-x.v.kcal;}),avgDef=Math.round(defs.reduce(function(a2,b2){return a2+b2;},0)/defs.length);
-  var defTxt=avgDef>0?'Déficit moyen ≈ '+kfmt(avgDef)+' kcal/jour, soit environ −'+fr(avgDef*7/7700)+' kg de graisse par semaine (estimation).':'Pas de déficit en moyenne ('+kfmt(-avgDef)+' kcal/jour au-dessus de ta dépense) : réduis un peu les portions.';
+  var defTxt=calWeekStats().defTxt+"."; /* même calcul que le résumé de Progrès */
   box.innerHTML='<div class="calbars">'+goalLine(goal/mx)+days.map(function(x){
       var h=x.v?Math.max(4,x.v.kcal/mx*100):0,cls=!x.v?"":(x.v.kcal>goal*1.05?"over":(x.v.kcal<goal*0.75&&x.d!==today()?"under":"ok"));
       return '<div class="cb'+(x.d===today()?" today":"")+'"><div class="bar"><i class="'+cls+'" style="height:'+h+'%"></i></div><span>'+x.lab+'</span></div>';
     }).join("")+'</div>'
-    +'<div class="big3" style="margin-bottom:0"><div><div class="v num">'+avg.toLocaleString("fr-CH")+'</div><div class="l">kcal / jour (moy.)</div></div><div><div class="v num">'+avgP+' g</div><div class="l">protéines (moy.)</div></div><div><div class="v num">'+ok+'/'+past.length+'</div><div class="l">jours dans l\'objectif</div></div></div>'
+    +'<div class="big3" style="margin-bottom:0"><div><div class="v num">'+avg.toLocaleString("fr-CH")+'</div><div class="l">kcal / jour (moy.)</div></div><div><div class="v num">'+avgP+' g</div><div class="l">protéines (moy.)</div></div><div><div class="v num">'+(past.length?ok+'/'+past.length:'—')+'</div><div class="l">jours dans l\'objectif</div></div></div>'
     +'<div class="trend-line">'+defTxt+'</div>';
 }
 /* historique des séances */
