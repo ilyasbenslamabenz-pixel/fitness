@@ -6,7 +6,7 @@ var START_DATE="2026-09-21";
 
 /* programme perte de poids : pecs 2×/semaine (haut et intérieur), dos pour la posture,
    fessiers et gainage pour les hanches ; la graisse part via le déficit et le cardio */
-var PROGRAM_VERSION=2;
+var PROGRAM_VERSION=3;
 var DEFAULT_PROGRAM=[
  {id:"push",name:"Pectoraux & épaules",short:"Pecs",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-flame_fill"/></svg>',focus:"Pecs (haut et intérieur) · épaules · triceps",ex:[
    {n:"Développé couché haltères",t:"4 × 8-10",w:true},
@@ -15,12 +15,13 @@ var DEFAULT_PROGRAM=[
    {n:"Dips assistés",t:"3 × 8-12",w:true},
    {n:"Élévations latérales",t:"3 × 12-15",w:true},
    {n:"Extension triceps corde",t:"3 × 12-15",w:true}]},
- {id:"pull",name:"Dos & biceps",short:"Dos",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-scope"/></svg>',focus:"Dos · posture · biceps",ex:[
+ {id:"pull",name:"Dos & bras",short:"Bras",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-scope"/></svg>',focus:"Dos · biceps · triceps",ex:[
    {n:"Tirage vertical",t:"4 × 8-10",w:true},
    {n:"Rowing haltère",t:"3 × 10-12",w:true},
    {n:"Tirage horizontal poulie",t:"3 × 10-12",w:true},
-   {n:"Face pull",t:"3 × 15",w:true},
-   {n:"Curl biceps haltères",t:"3 × 10-12",w:true}]},
+   {n:"Curl biceps haltères",t:"3 × 10-12",w:true},
+   {n:"Curl marteau haltères",t:"3 × 10-12",w:true},
+   {n:"Extension triceps au-dessus de la tête",t:"3 × 12-15",w:true}]},
  {id:"legs",name:"Jambes & hanches",short:"Hanches",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-figure_walk"/></svg>',focus:"Fessiers · cuisses · gainage",ex:[
    {n:"Hip thrust machine",t:"4 × 10-12",w:true},
    {n:"Presse à cuisses",t:"3 × 10-12",w:true},
@@ -44,6 +45,13 @@ var HOME_PROGRAM=[
    {n:"Hip thrust au sol",t:"4 × 15-20",w:false},
    {n:"Squats",t:"3 × 15-20",w:false},
    {n:"Gainage (planche)",t:"3 × 30-45 s",w:false}]},
+ {id:"home-arms",cat:"maison",name:"Pecs & bras maison",short:"Bras",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-house_fill"/></svg>',focus:"Pecs · triceps · biceps (haltères ou bouteilles d'eau)",ex:[
+   {n:"Pompes déclinées",t:"4 × 8-12",w:false},
+   {n:"Pompes serrées",t:"4 × 8-12",w:false},
+   {n:"Dips sur chaise",t:"4 × 10-15",w:false},
+   {n:"Curl biceps haltères",t:"4 × 12-15",w:true},
+   {n:"Pompes larges",t:"3 × 10-12",w:false},
+   {n:"Gainage (planche)",t:"3 × 30-45 s",w:false}]},
  {id:"home-hiit1",cat:"maison",name:"HIIT cardio 1",short:"HIIT1",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg>',focus:"Cardio · circuit brûle-graisse",ex:[
    {n:"Jumping jacks",t:"4 × 30 s",w:false},
    {n:"Mountain climbers",t:"4 × 30 s",w:false},
@@ -66,7 +74,7 @@ var HOME_PROGRAM=[
 
 /* photos de démonstration des exercices (img/exercises) : début et fin du mouvement,
    issues de Free Exercise DB (domaine public, github.com/yuhonas/free-exercise-db) */
-var EX_PHOTOS={"Pompes":["pushups-1","pushups-0"],"Pompes larges":["pushups-1","pushups-0"],"Pompes déclinées":["decline-push-up-0","decline-push-up-1"],"Squats":["bodyweight-squat-0","bodyweight-squat-1"],"Squats sumo":["plie-dumbbell-squat-0","plie-dumbbell-squat-1"],"Squat jumps":["freehand-jump-squat-0","freehand-jump-squat-1"],"Fentes arrière":["crossover-reverse-lunge-0","crossover-reverse-lunge-1"],"Fentes marchées haltères":["dumbbell-lunges-0","dumbbell-lunges-1"],"Jumping lunges":["split-jump-0","split-jump-1"],"Gainage (planche)":["plank-1"],"Gainage":["plank-1"],"Gainage latéral":["side-bridge-0","side-bridge-1"],"Mountain climbers":["mountain-climbers-0","mountain-climbers-1"],"Plank jacks":["push-up-to-side-plank-0"],"Burpees":["freehand-jump-squat-0","pushups-1","freehand-jump-squat-1"],"Jumping jacks":["star-jump-0","star-jump-1"],"Corde à sauter (ou sur place)":["rope-jumping-0","rope-jumping-1"],"High knees":["fast-skipping-0","fast-skipping-1"],"Sprint sur place":["running-treadmill-0","running-treadmill-1"],"Dips sur chaise":["bench-dips-0","bench-dips-1"],"Hip thrust au sol":["butt-lift-bridge-0","butt-lift-bridge-1"],"Hip thrust machine":["barbell-hip-thrust-0","barbell-hip-thrust-1"],"Développé couché haltères":["dumbbell-bench-press-0","dumbbell-bench-press-1"],"Développé incliné haltères":["incline-dumbbell-press-0","incline-dumbbell-press-1"],"Curl biceps haltères":["dumbbell-bicep-curl-0","dumbbell-bicep-curl-1"],"Élévations latérales":["side-lateral-raise-0","side-lateral-raise-1"],"Soulevé de terre roumain":["stiff-legged-dumbbell-deadlift-0","stiff-legged-dumbbell-deadlift-1"],"Rowing haltère":["one-arm-dumbbell-row-0","one-arm-dumbbell-row-1"],"Écarté poulie":["cable-crossover-0","cable-crossover-1"],"Extension triceps corde":["triceps-pushdown-rope-attachment-0","triceps-pushdown-rope-attachment-1"],"Face pull":["face-pull-0","face-pull-1"],"Tirage vertical":["wide-grip-lat-pulldown-0","wide-grip-lat-pulldown-1"],"Tirage vertical prise large":["wide-grip-lat-pulldown-0","wide-grip-lat-pulldown-1"],"Tirage horizontal poulie":["seated-cable-rows-0","seated-cable-rows-1"],"Chest press":["leverage-chest-press-0","leverage-chest-press-1"],"Développé militaire machine":["machine-shoulder-military-press-0","machine-shoulder-military-press-1"],"Dips assistés":["dip-machine-0","dip-machine-1"],"Presse à cuisses":["leg-press-0","leg-press-1"],"Abducteurs machine":["thigh-abductor-0","thigh-abductor-1"],"Cardio fractionné (vélo ou rameur)":["bicycling-stationary-0","bicycling-stationary-1"]};
+var EX_PHOTOS={"Curl marteau haltères":["hammer-curls-0","hammer-curls-1"],"Extension triceps au-dessus de la tête":["cable-rope-overhead-triceps-extension-0","cable-rope-overhead-triceps-extension-1"],"Pompes serrées":["pushups-close-and-wide-hand-positions-1","pushups-close-and-wide-hand-positions-0"],"Pompes":["pushups-1","pushups-0"],"Pompes larges":["pushups-1","pushups-0"],"Pompes déclinées":["decline-push-up-0","decline-push-up-1"],"Squats":["bodyweight-squat-0","bodyweight-squat-1"],"Squats sumo":["plie-dumbbell-squat-0","plie-dumbbell-squat-1"],"Squat jumps":["freehand-jump-squat-0","freehand-jump-squat-1"],"Fentes arrière":["crossover-reverse-lunge-0","crossover-reverse-lunge-1"],"Fentes marchées haltères":["dumbbell-lunges-0","dumbbell-lunges-1"],"Jumping lunges":["split-jump-0","split-jump-1"],"Gainage (planche)":["plank-1"],"Gainage":["plank-1"],"Gainage latéral":["side-bridge-0","side-bridge-1"],"Mountain climbers":["mountain-climbers-0","mountain-climbers-1"],"Plank jacks":["push-up-to-side-plank-0"],"Burpees":["freehand-jump-squat-0","pushups-1","freehand-jump-squat-1"],"Jumping jacks":["star-jump-0","star-jump-1"],"Corde à sauter (ou sur place)":["rope-jumping-0","rope-jumping-1"],"High knees":["fast-skipping-0","fast-skipping-1"],"Sprint sur place":["running-treadmill-0","running-treadmill-1"],"Dips sur chaise":["bench-dips-0","bench-dips-1"],"Hip thrust au sol":["butt-lift-bridge-0","butt-lift-bridge-1"],"Hip thrust machine":["barbell-hip-thrust-0","barbell-hip-thrust-1"],"Développé couché haltères":["dumbbell-bench-press-0","dumbbell-bench-press-1"],"Développé incliné haltères":["incline-dumbbell-press-0","incline-dumbbell-press-1"],"Curl biceps haltères":["dumbbell-bicep-curl-0","dumbbell-bicep-curl-1"],"Élévations latérales":["side-lateral-raise-0","side-lateral-raise-1"],"Soulevé de terre roumain":["stiff-legged-dumbbell-deadlift-0","stiff-legged-dumbbell-deadlift-1"],"Rowing haltère":["one-arm-dumbbell-row-0","one-arm-dumbbell-row-1"],"Écarté poulie":["cable-crossover-0","cable-crossover-1"],"Extension triceps corde":["triceps-pushdown-rope-attachment-0","triceps-pushdown-rope-attachment-1"],"Face pull":["face-pull-0","face-pull-1"],"Tirage vertical":["wide-grip-lat-pulldown-0","wide-grip-lat-pulldown-1"],"Tirage vertical prise large":["wide-grip-lat-pulldown-0","wide-grip-lat-pulldown-1"],"Tirage horizontal poulie":["seated-cable-rows-0","seated-cable-rows-1"],"Chest press":["leverage-chest-press-0","leverage-chest-press-1"],"Développé militaire machine":["machine-shoulder-military-press-0","machine-shoulder-military-press-1"],"Dips assistés":["dip-machine-0","dip-machine-1"],"Presse à cuisses":["leg-press-0","leg-press-1"],"Abducteurs machine":["thigh-abductor-0","thigh-abductor-1"],"Cardio fractionné (vélo ou rameur)":["bicycling-stationary-0","bicycling-stationary-1"]};
 function exPhotos(n){return EX_PHOTOS[n]||null;}
 function photoUrl(slug){return "/fitness/img/exercises/"+slug+".jpg";}
 var photoCycleT=null;
@@ -278,12 +286,13 @@ var state={
   fast:{active:false,start:null,hours:16},
   groceryList:JSON.parse(JSON.stringify(DEFAULT_GROCERY)),
   selEx:null,
-  customBarcodes:{}
+  customBarcodes:{},
+  planSwap:{}, planDone:{}
 };
 var cloudUser=null, toastT=null, cloudBackupT=null, autoRestoreAttempted=false;
 var restEnd=0, restBeeped=false, undoBuf=null, snackCb=null, snackT=null;
 var editDayId=null, editDayEx=[];
-var guidedIndex=0, guidedOpen=false, guidedDayId=null, guidedStartTimes={};
+var guidedFrom="session", guidedIndex=0, guidedOpen=false, guidedDayId=null, guidedStartTimes={};
 
 /* helpers */
 function today(){var d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
@@ -358,6 +367,8 @@ function merge(p){
   if(typeof p.groceryVersion==="number")state.groceryVersion=p.groceryVersion;
   if(typeof p.programVersion==="number")state.programVersion=p.programVersion;
   if(typeof p.macroVersion==="number")state.macroVersion=p.macroVersion;
+  if(p.planSwap&&typeof p.planSwap==="object")state.planSwap=p.planSwap;
+  if(p.planDone&&typeof p.planDone==="object")state.planDone=p.planDone;
   if(typeof p.suggest==="number")state.suggest=p.suggest;
   if(p.session&&typeof p.session==="object")state.session=p.session;
   if(p.lastDay)state.lastDay=p.lastDay;
@@ -403,6 +414,8 @@ function normalizeState(){
   if(state.programVersion!==PROGRAM_VERSION){
     var defDays={};DEFAULT_PROGRAM.concat(HOME_PROGRAM).forEach(function(d){defDays[d.id]=d;});
     state.program=state.program.map(function(p){return defDays[p.id]&&!p.edited?JSON.parse(JSON.stringify(defDays[p.id])):p;});
+    var have={};state.program.forEach(function(p){have[p.id]=1;});
+    DEFAULT_PROGRAM.concat(HOME_PROGRAM).forEach(function(d){if(!have[d.id])state.program.push(JSON.parse(JSON.stringify(d)));});
     state.programVersion=PROGRAM_VERSION;save();
   }
   if(["muscu","maison","running"].indexOf(state.sessionCategory)<0)state.sessionCategory="muscu";
@@ -472,6 +485,101 @@ function estimateStepsKcal(steps){
 }
 function weekNo(){var s=new Date((state.profile.startDate||START_DATE)+"T12:00:00"),diff=Math.floor((Date.now()-s)/864e5);return Math.max(1,Math.floor(diff/7)+1);}
 
+/* ===== plan de la semaine : quoi faire chaque jour =====
+   Perte de gras maximale sans perdre de muscle : 4 séances de muscu (pecs 2×, bras 2×),
+   cardio/marche les autres jours, 10 000 pas par jour. Chaque jour a une variante
+   (maison ou marche) si la salle n'est pas possible. Index 0 = lundi. */
+var STEP_GOAL=10000;
+var WEEK_PLAN=[
+ {day:"push",alt:"home-arms",extra:"Finis par 15 min de marche inclinée sur tapis (pente 8-10 %, 5 km/h)."},
+ {walk:{title:"Marche rapide",min:45,lines:["45 min à allure soutenue : tu peux parler, pas chanter","Idéal à jeun le matin ou après un repas"]},alt:"home-hiit1"},
+ {day:"pull",alt:"home-arms",extra:"Finis par 15 min de marche inclinée ou de vélo."},
+ {day:"home-hiit1",alt:"walk",extra:"+ 30 min de marche dans la journée.",walkAlt:{title:"Marche rapide",min:50,lines:["50 min à allure soutenue","Remplace le HIIT si tu es fatigué ou courbaturé"]}},
+ {day:"full",alt:"home-fb1",extra:"Le fractionné en fin de séance brûle le plus : ne le saute pas."},
+ {day:"legs",alt:"home-fb2",extra:"+ 30-45 min de marche : ce sont le déficit et le cardio qui affinent les hanches."},
+ {walk:{title:"Repos actif",min:40,rest:true,lines:["Marche tranquille 30-45 min","5-10 min d'étirements (pecs, hanches, dos)"]}}
+];
+var PLAN_DAYS=["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
+var planSel=null; /* jour affiché dans la carte (null = aujourd'hui) */
+function dowIdx(d){return ((d||new Date()).getDay()+6)%7;}
+function dateOfWeekday(i){var d=new Date();d.setDate(d.getDate()-dowIdx(d)+i);return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
+function progDay(id){return state.program.find(function(p){return p.id===id;});}
+/* ce qui est prévu pour un jour, en tenant compte du choix "variante" */
+function planFor(i){
+  var e=WEEK_PLAN[i],swapped=!!(state.planSwap&&state.planSwap[dateOfWeekday(i)]);
+  var useAlt=swapped&&e.alt;
+  if(e.walk&&!useAlt)return {kind:"walk",walk:e.walk,alt:e.alt,swapped:false};
+  if(useAlt){
+    if(e.alt==="walk")return {kind:"walk",walk:e.walkAlt,alt:true,swapped:true};
+    var ap=progDay(e.alt);if(ap)return {kind:ap.cat==="maison"?"home":"gym",p:ap,alt:true,swapped:true,extra:e.walk?null:e.extra};
+  }
+  var p=progDay(e.day);
+  if(!p)return {kind:"walk",walk:{title:"Marche rapide",min:45,lines:["45 min à allure soutenue"]},alt:null,swapped:false};
+  return {kind:p.cat==="maison"?"home":"gym",p:p,alt:e.alt||null,swapped:false,extra:e.extra};
+}
+function stepsOn(d){for(var i=0;i<state.steps.length;i++)if(state.steps[i].d===d)return Number(state.steps[i].v)||0;return 0;}
+function planDoneOn(d){
+  if(state.planDone&&state.planDone[d])return true;
+  if(state.sessions.some(function(s){return localDay(s.date)===d;}))return true;
+  return state.runs.some(function(r){return r.d===d;});
+}
+function renderPlan(){
+  var box=$("planCard");if(!box)return;
+  var ti=dowIdx(),i=planSel==null?ti:planSel,d=dateOfWeekday(i),pl=planFor(i),done=planDoneOn(d);
+  var week=PLAN_DAYS.map(function(n,k){
+    var dk=dateOfWeekday(k),pk=planFor(k),isDone=planDoneOn(dk),ic=pk.kind==="walk"?(pk.walk.rest?"moon_fill":"figure_walk"):(pk.kind==="home"?"house_fill":"dumbbell");
+    return '<button class="pw-d'+(k===i?" on":"")+(k===ti?" today":"")+(isDone?" done":"")+'" data-act="planDay" data-i="'+k+'"><span>'+n.charAt(0)+'</span><i><svg class="ic-s" aria-hidden="true"><use href="#i-'+(isDone?"checkmark":ic)+'"/></svg></i></button>';
+  }).join("");
+  var eyebrow=(i===ti?"AUJOURD'HUI · ":"")+PLAN_DAYS[i].toUpperCase()+(done?" · FAIT ✓":"");
+  var icon,title,sub,lines=[],go,alt="";
+  if(pl.kind==="walk"){
+    icon='<svg class="ic-s" aria-hidden="true"><use href="#i-'+(pl.walk.rest?"moon_fill":"figure_walk")+'"/></svg>';
+    title=pl.walk.title;sub=pl.walk.min+" min · brûle ~"+estimateWalkKcal(pl.walk.min)+" kcal";lines=pl.walk.lines.slice();
+    go='<button class="go" data-act="planGo">Démarrer la marche (GPS)</button>';
+  }else{
+    var mk=marksFor(pl.p.id),act=activeExercises(pl.p);
+    icon=pl.p.icon;title=pl.p.name;sub=act.length+" exercices · ~"+estimateDurationMin(pl.p)+" min · "+pl.p.focus;
+    lines=act.map(function(e){return esc(e.n)+' <span>'+esc(e.t)+'</span>';});
+    if(pl.extra)lines.push('<b>'+esc(pl.extra)+'</b>');
+    var started=act.some(function(e){return doneSetCount(mk,e)>0;});
+    go='<button class="go" data-act="planGo">'+(started?"Continuer la séance":"Commencer la séance")+'</button>';
+  }
+  if(pl.alt){
+    var altLab=pl.swapped?"Revenir au programme prévu":(WEEK_PLAN[i].alt==="walk"?"Trop fatigué ? Marche à la place":(pl.kind==="walk"?"Il pleut ? Séance HIIT à la maison":"Pas de salle ? Version maison"));
+    alt='<button class="plan-alt" data-act="planSwap"><svg class="ic-s" aria-hidden="true"><use href="#i-swap"/></svg>'+altLab+'</button>';
+  }
+  var st=stepsOn(d),stepPct=Math.min(100,Math.round(st/STEP_GOAL*100));
+  box.innerHTML='<div class="plan-week">'+week+'</div>'
+    +'<div class="eyebrow">'+eyebrow+'</div>'
+    +'<div class="row"><div class="ic">'+icon+'</div><div style="flex:1;min-width:0"><h3>'+esc(title)+'</h3><div class="sub">'+esc(sub)+'</div></div></div>'
+    +'<ul class="plan-list">'+lines.map(function(l){return '<li>'+(pl.kind==="walk"?esc(l):l)+'</li>';}).join("")+'</ul>'
+    +go
+    +'<div class="plan-foot">'+alt+(pl.kind==="walk"&&!done?'<button class="plan-alt" data-act="planDone"><svg class="ic-s" aria-hidden="true"><use href="#i-checkmark"/></svg>C\'est fait</button>':'')+'</div>'
+    +'<button class="plan-steps" data-act="openSteps"><span>Pas '+(i===ti?"aujourd'hui":"ce jour")+'</span><b>'+st.toLocaleString("fr-CH")+' / '+STEP_GOAL.toLocaleString("fr-CH")+'</b><i><em style="width:'+stepPct+'%"></em></i></button>';
+}
+/* marche : ~0.6 kcal/kg/km à allure soutenue */
+function estimateWalkDistKcal(km){return Math.max(1,Math.round(km*latestBody()*0.6));}
+/* marche rapide ~5,5 km/h : MET 4.3 */
+function estimateWalkKcal(min){return Math.round(4.3*latestBody()*(min/60));}
+function planGo(){
+  var i=planSel==null?dowIdx():planSel,pl=planFor(i);
+  if(pl.kind==="walk"){openLiveRun(true);return;}
+  state.sessionCategory=pl.p.cat||"muscu";
+  state.selDay=state.program.indexOf(pl.p);
+  save();openGuidedSession();
+}
+function planSwap(){
+  var i=planSel==null?dowIdx():planSel,d=dateOfWeekday(i);
+  if(!state.planSwap)state.planSwap={};
+  if(state.planSwap[d])delete state.planSwap[d];else state.planSwap[d]=true;
+  save();renderToday();haptic("light");
+}
+function planMarkDone(){
+  var i=planSel==null?dowIdx():planSel,d=dateOfWeekday(i);
+  if(!state.planDone)state.planDone={};
+  state.planDone[d]=true;save();renderToday();haptic("success");toast("Bien joué !");
+}
+
 /* charts */
 function lineChart(vals,color,unit){
   if(!vals.length)return '<div class="empty">Pas encore de données.<br>Elles apparaîtront dès ta première saisie.</div>';
@@ -516,10 +624,11 @@ function renderToday(){
   var w=latestBody(),start=Number(state.profile.start),target=Number(state.profile.target),lost=start-w;
 
   var mp=muscuProgram(),p=mp[state.suggest%mp.length];
-  $("nIc").innerHTML=p.icon;$("nName").textContent=p.name;$("nFocus").textContent=p.focus;
   var hh=new Date().getHours(),greet=hh<12?"Bonjour":(hh<18?"Salut":"Bonsoir");
+  var todayPl=planFor(dowIdx()),todayTitle=todayPl.kind==="walk"?todayPl.walk.title:todayPl.p.name;
   $("greetHello").textContent=greet+" 👋";
-  $("greetSub").textContent="Prêt pour "+p.name+" aujourd'hui ?";
+  $("greetSub").textContent=planDoneOn(today())?"Programme du jour fait, bravo ! 💪":"Au programme : "+todayTitle;
+  renderPlan();
 
   $("sLost").textContent=num(Math.max(0,lost));
   $("sSessions").textContent=state.sessions.length;
@@ -738,7 +847,7 @@ function parseWeekTarget(goal){
 }
 function runsSinceWeekStart(){
   var sd=state.runProg.weekStartDate||today();
-  return state.runs.filter(function(r){return r.d>=sd;});
+  return state.runs.filter(function(r){return !r.walk&&r.d>=sd;});
 }
 /* suggestion d'adaptation du programme à partir des courses réellement loguées cette
    semaine, comparées à l'objectif — seulement pour les semaines "course continue"
@@ -950,6 +1059,7 @@ function openGuidedSession(jumpToEx){
   guidedOpen=true;
   if(guidedDayId!==p.id||!guidedStartTimes[p.id])guidedStartTimes[p.id]=Date.now();
   guidedDayId=p.id;
+  guidedFrom=state.page==="today"?"today":"session"; /* retour : là d'où on a lancé la séance */
   state.page="session";
   document.querySelectorAll(".page").forEach(function(s){s.classList.toggle("on",s.id==="session");});
   document.querySelectorAll(".nav button").forEach(function(b){b.classList.toggle("on",b.dataset.page==="session");});
@@ -1233,7 +1343,7 @@ function renderCardio(){
   var runs=state.runs.slice().sort(function(a,b){return a.d.localeCompare(b.d);});
   $("cdRuns").textContent=runs.length;
   var km=runs.reduce(function(s,r){return s+Number(r.dist||0);},0);$("cdKm").textContent=num(Math.round(km*10)/10);
-  var paces=runs.filter(function(r){return r.dist>0&&r.dur>0;}).map(function(r){return r.dur/r.dist;});
+  var paces=runs.filter(function(r){return !r.walk&&r.dist>0&&r.dur>0;}).map(function(r){return r.dur/r.dist;});
   $("cdPace").textContent=paces.length?fmtPace(Math.min.apply(null,paces))+" /km":"—";
   $("cardioChart").innerHTML=lineChart(runs.map(function(r){return Number(r.dist);}),"#0a84ff"," km");
   var totalKcal=runs.reduce(function(s,r){return s+Number(r.kcal||0);},0);
@@ -1242,7 +1352,7 @@ function renderCardio(){
   $("runList").innerHTML=recent.length?recent.map(function(r){
     var pace=(r.dist>0&&r.dur>0)?fmtPace(r.dur/r.dist)+" /km":"—";
     var hasRoute=Array.isArray(r.pts)&&r.pts.length>1;
-    return '<div class="runrow"><div class="ri"><b>'+num(r.dist)+' km</b><span>'+fmtDate(r.d)+' · '+num(r.dur)+' min'+(r.kcal?' · '+Math.round(r.kcal)+' kcal':'')+'</span></div><div class="rp">'+pace+'</div>'
+    return '<div class="runrow"><div class="ri"><b>'+(r.walk?"Marche · ":"")+num(r.dist)+' km</b><span>'+fmtDate(r.d)+' · '+num(r.dur)+' min'+(r.kcal?' · '+Math.round(r.kcal)+' kcal':'')+'</span></div><div class="rp">'+pace+'</div>'
       +(hasRoute?'<button class="mapbtn" data-act="viewRunMap" data-id="'+esc(r.id||"")+'"><svg class="ic-s" aria-hidden="true"><use href="#i-map_fill"/></svg></button>':'')
       +'<button class="del" data-act="delRun" data-id="'+esc(r.id||"")+'"><svg class="ic-s" aria-hidden="true"><use href="#i-xmark"/></svg></button></div>';
   }).join(""):'<div class="empty">Aucune course. Ajoute-en une, ou branche Strava en étape 2.</div>';
@@ -1306,7 +1416,10 @@ function recoverLiveRunIfAny(){
 var lrMap=null,lrHead=null,lrStart=null,mapReady=false,mapMode="svg",mapCentered=false;
 function fmtClock(ms){var s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;return (h>0?h+":"+pad(m):String(m))+":"+pad(sec);}
 function haversine(a,b){var R=6371000,toR=Math.PI/180;var dLat=(b.lat-a.lat)*toR,dLng=(b.lng-a.lng)*toR,la1=a.lat*toR,la2=b.lat*toR;var x=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(la1)*Math.cos(la2)*Math.sin(dLng/2)*Math.sin(dLng/2);return 2*R*Math.asin(Math.min(1,Math.sqrt(x)));}
-function openLiveRun(){
+var liveWalk=false; /* suivi GPS d'une marche (plan de la semaine) plutôt que d'une course */
+function openLiveRun(walk){
+  liveWalk=walk===true;
+  var lt=document.querySelector("#liveRunModal .lr-title");if(lt)lt.textContent=liveWalk?"Marche en direct":"Course en direct";
   closeRun();
   runActive=false;runPaused=false;runMeters=0;runElapsedMs=0;runSegStart=0;runLastPt=null;runLastTime=0;runLastGeoTimestamp=0;runPts=[];runTick=null;geoRetryCount=0;runStartDate=today();
   $("lrTime").textContent="0:00";$("lrDist").textContent="0.00";$("lrPace").textContent="—";$("lrSpeed").textContent="—";
@@ -1348,12 +1461,15 @@ function finishRun(){
   runActive=false;stopGeo();releaseWake();if(runTick){clearInterval(runTick);runTick=null;}runLastPt=null;runLastTime=0;runLastGeoTimestamp=0;
   var km=Math.round(runMeters/10)/100,min=Math.round(runElapsedMs/6000)/10;
   if(km<0.05||min<0.2){clearLiveRunCheckpoint();toast("Course trop courte, non enregistrée");closeLiveRun();return;}
-  var runObj={id:"r"+Date.now()+Math.floor(Math.random()*1000),d:runStartDate,dist:km,dur:min,src:"gps",kcal:estimateRunKcal(km,min)};
+  var runObj={id:"r"+Date.now()+Math.floor(Math.random()*1000),d:runStartDate,dist:km,dur:min,src:"gps",kcal:liveWalk?estimateWalkDistKcal(km):estimateRunKcal(km,min)};
+  if(liveWalk)runObj.walk=true;
   if(runPts.length>1)runObj.pts=runPts.slice();
   state.runs.push(runObj);
-  autoTickRunProg(runObj.d);
+  if(!liveWalk)autoTickRunProg(runObj.d);
   clearLiveRunCheckpoint();
-  save();closeLiveRun();showPage("progress");renderProgress();toast("Course enregistrée · "+num(km)+" km");
+  save();closeLiveRun();
+  if(liveWalk){showPage("today");toast("Marche enregistrée · "+num(km)+" km");}
+  else{showPage("progress");renderProgress();toast("Course enregistrée · "+num(km)+" km");}
 }
 function discardRun(){if(runActive){if(!confirm("Abandonner la course en cours ?"))return;}clearLiveRunCheckpoint();closeLiveRun();}
 function startGeo(){
@@ -1452,7 +1568,7 @@ function updateLiveUI(){
   $("lrPace").textContent=(km>=0.10&&min>=0.5)?fmtPace(min/km):"—";
   var speedKmh=(ms>20000&&km>=0.05)?(km/(ms/3600000)):0;
   $("lrSpeed").textContent=speedKmh?num(Math.min(speedKmh,25)):"—";
-  $("lrKcal").textContent=km>=0.05?num(estimateRunKcal(km,0)):"0";
+  $("lrKcal").textContent=km>=0.05?num(liveWalk?estimateWalkDistKcal(km):estimateRunKcal(km,0)):"0";
 }
 function mapStyleUrl(){
   var isLight=document.documentElement.getAttribute("data-theme")==="light";
@@ -2272,8 +2388,12 @@ document.addEventListener("click",function(e){
       openGuidedSession();
       break;
     case "guidedStart": openGuidedSession(); break;
+    case "planDay": var pd=Number(a.dataset.i); planSel=(pd===dowIdx())?null:pd; renderPlan(); break;
+    case "planGo": planGo(); break;
+    case "planSwap": planSwap(); break;
+    case "planDone": planMarkDone(); break;
     case "guidedJump": openGuidedSession(ex); break;
-    case "guidedClose": closeGuided(); showPage(state.page||"today"); break;
+    case "guidedClose": closeGuided(); showPage(guidedFrom||state.page||"today"); break;
     case "guidedList": closeGuided(); renderSession(); break;
     case "guidedNext": guidedAdvance(); break;
     case "guidedSkip": guidedSkip(); break;
