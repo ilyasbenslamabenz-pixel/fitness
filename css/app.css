@@ -891,3 +891,8 @@ input[type=search]::-webkit-search-decoration{-webkit-appearance:none}
 .fr-list{background:var(--bg);border-color:var(--hair)}
 .food-result{min-height:56px}
 .food-ref-hint{margin:2px 2px 12px!important;line-height:1.35}
+/* recherche d'aliments : fenêtre en haut de l'écran, au-dessus du clavier */
+#mealModal.search-top{align-items:flex-start}
+#mealModal.search-top .sheet{border-radius:0 0 24px 24px;overflow-y:auto;padding-top:calc(var(--safe-top) + 10px);-webkit-overflow-scrolling:touch}
+#mealModal.search-top .sheet h3{display:none}
+#mealModal.search-top .sheet{background:var(--bg)}

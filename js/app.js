@@ -2795,7 +2795,20 @@ function renderFoodResults(list,q){
   syncFoodSearchMode();
 }
 var foodSearchT=null;
-function syncFoodSearchMode(){var box=$("foodSearchResults"),sh=box&&box.closest(".sheet");if(sh)sh.classList.toggle("searching",box.innerHTML.trim()!=="");}
+function syncFoodSearchMode(){
+  var box=$("foodSearchResults"),sh=box&&box.closest(".sheet"),on=!!box&&box.innerHTML.trim()!=="";
+  if(!sh)return;
+  sh.classList.toggle("searching",on);
+  var m=sh.closest(".modal");if(m)m.classList.toggle("search-top",on);
+  fitSearchSheet();
+}
+/* en recherche, la fenêtre remonte en haut de l'écran et s'arrête au-dessus du clavier (sinon la liste passe dessous) */
+function fitSearchSheet(){
+  var m=$("mealModal"),sh=m&&m.querySelector(".sheet");if(!sh)return;
+  if(m.classList.contains("search-top")){var vv=window.visualViewport,h=vv?vv.height:window.innerHeight;sh.style.maxHeight=Math.round(h)+"px";if(vv)sh.style.marginTop=Math.round(vv.offsetTop)+"px";}
+  else{sh.style.maxHeight="";sh.style.marginTop="";}
+}
+if(window.visualViewport){window.visualViewport.addEventListener("resize",fitSearchSheet);window.visualViewport.addEventListener("scroll",fitSearchSheet);}
 /* mode recherche : tant que des résultats s'affichent, ils prennent toute la fenêtre (les champs réapparaissent au choix d'un aliment) */
 (function(){var box=document.getElementById("foodSearchResults");if(!box||!window.MutationObserver)return;
   new MutationObserver(function(){var sh=box.closest(".sheet");if(sh)sh.classList.toggle("searching",box.innerHTML.trim()!=="");}).observe(box,{childList:true});})();
@@ -2808,9 +2821,11 @@ var offResultsCache={};
 async function fetchOffResults(q,swissOnly){
   var cacheKey=normText(q)+"|"+(swissOnly?"ch":"all");
   if(offResultsCache[cacheKey])return offResultsCache[cacheKey];
-  var qs=swissOnly?(q+' countries_tags:"en:switzerland"'):q;
-  var url="https://search.openfoodfacts.org/search?q="+encodeURIComponent(qs)+"&page_size=8&fields=product_name,brands,nutriments,code";
-  var res=await fetch(url,{headers:{Accept:"application/json"}});
+  /* recherche classique d'OpenFoodFacts (le site suisse pour les produits Migros/Coop) : la nouvelle API de recherche
+     refuse désormais les appels depuis une app web (CORS), celle-ci les accepte. 8 s max. */
+  var url="https://"+(swissOnly?"ch-fr":"world")+".openfoodfacts.org/cgi/search.pl?search_terms="+encodeURIComponent(q)+"&search_simple=1&action=process&json=1&page_size=12&sort_by=unique_scans_n&fields=product_name,brands,nutriments,code";
+  var ctl=window.AbortController?new AbortController():null,tm=ctl?setTimeout(function(){ctl.abort();},8000):null;
+  var res;try{res=await fetch(url,{headers:{Accept:"application/json"},signal:ctl?ctl.signal:undefined});}finally{if(tm)clearTimeout(tm);}
   if(!res.ok)throw new Error("HTTP "+res.status);
   var data=await res.json();
   var results=(data.hits||data.products||[]).filter(function(p){return p.product_name;}).map(function(p){
