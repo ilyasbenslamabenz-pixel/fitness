@@ -695,7 +695,7 @@ function renderClaude(thinking){
     box.scrollTop=box.scrollHeight;
   }
   var b=$("clSendBtn");if(b)b.disabled=!!thinking;
-  var c=$("clCost");if(c)c.textContent=key?"Coût ce mois : ≈ "+clCost().toFixed(2).replace(".",",")+" $":"";
+  var c=$("clCost");if(c)c.textContent=key?"Coût ce mois : ≈ "+clCost().toFixed(clCost()<1?3:2).replace(".",",")+" $":"";
   var cl=$("clClearBtn");if(cl)cl.hidden=!hist.length;
 }
 document.addEventListener("keydown",function(e){
