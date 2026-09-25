@@ -2779,22 +2779,21 @@ function searchLocalFoods(q){
 }
 function renderFoodResults(list,q){
   var box=$("foodSearchResults");
+  if(normText(q||"")!==foodMoreQ){foodMoreQ=normText(q||"");foodMoreOpen=false;}
   if(!list.length){
     box.innerHTML='<div class="food-search-status">Aucun résultat pour « '+esc(q||"")+' ». Essaie un autre nom, ou saisis les valeurs manuellement.</div>';
     syncFoodSearchMode();return;
   }
-  /* une seule liste propre : base intégrée d'abord, puis produits OpenFoodFacts ; nom sur 2 lignes, valeurs /100 g à droite */
-  var html="",lastGroup=null;
-  list.forEach(function(f,i){
-    var g=f.local?"local":"off";
-    if(g!==lastGroup){html+='<div class="fr-h">'+(g==="local"?"Aliments de base":"Produits du commerce")+'</div>';lastGroup=g;}
-    html+='<button class="food-result" type="button" data-act="foodPick" data-i="'+i+'"><span class="fr-n">'+esc(f.name)+'</span>'
-      +'<span class="fr-v"><b>'+(f.kcal?Math.round(f.kcal):"—")+'</b> kcal<small>'+(f.protein!=null?fr(Math.round(f.protein*10)/10)+' g prot.':'')+'</small></span></button>';
-  });
-  box.innerHTML='<div class="fr-bar"><span>'+list.length+' résultat'+(list.length>1?"s":"")+' · valeurs pour 100 g</span><button type="button" data-act="foodSearchClose">Saisir moi-même</button></div><div class="fr-list">'+html+'</div>';
+  /* 3 meilleurs choix visibles, le reste dans une liste déroulante (« Voir N autres ») */
+  function row(f,i){return '<button class="food-result" type="button" data-act="foodPick" data-i="'+i+'"><span class="fr-n">'+esc(f.name)+(f.local?'':'<em>commerce</em>')+'</span>'
+      +'<span class="fr-v"><b>'+(f.kcal?Math.round(f.kcal):"—")+'</b> kcal<small>'+(f.protein!=null?fr(Math.round(f.protein*10)/10)+' g prot.':'')+' /100 g</small></span></button>';}
+  var top=list.slice(0,3).map(function(f,i){return row(f,i);}).join(""),rest=list.slice(3).map(function(f,k){return row(f,k+3);}).join(""),nRest=list.length-3;
+  box.innerHTML='<div class="fr-list">'+top+(nRest>0?'<div class="fr-rest"'+(foodMoreOpen?'':' hidden')+'>'+rest+'</div>':'')+'</div>'
+    +'<div class="fr-bar">'+(nRest>0?'<button type="button" class="fr-more" data-act="foodMore">'+(foodMoreOpen?'Moins de choix ▴':'Voir '+nRest+' autre'+(nRest>1?'s':'')+' choix ▾')+'</button>':'<span></span>')
+    +'<button type="button" data-act="foodSearchClose">Saisir moi-même</button></div>';
   syncFoodSearchMode();
 }
-var foodSearchT=null;
+var foodSearchT=null,foodMoreOpen=false,foodMoreQ="";
 function syncFoodSearchMode(){
   var box=$("foodSearchResults"),sh=box&&box.closest(".sheet"),on=!!box&&box.innerHTML.trim()!=="";
   if(!sh)return;
@@ -3132,6 +3131,7 @@ document.addEventListener("click",function(e){
     case "mClose": closeMeal(); break;
     case "mSave": saveMeal(); break;
     case "foodPick": pickFoodResult(Number(a.dataset.i)); break;
+    case "foodMore": foodMoreOpen=!foodMoreOpen; var fr0=document.querySelector("#foodSearchResults .fr-rest");if(fr0)fr0.hidden=!foodMoreOpen; a.textContent=foodMoreOpen?"Moins de choix ▴":"Voir "+(document.querySelectorAll("#foodSearchResults .fr-rest .food-result").length)+" autres choix ▾"; fitSearchSheet(); break;
     case "foodSearchClose": clearTimeout(foodSearchT); foodSearchSeq++; $("foodSearchResults").innerHTML="";syncFoodSearchMode(); break;
     case "delMeal": delMealConfirm(Number(a.dataset.i)); break;
     case "openRun": openRun(); break;
