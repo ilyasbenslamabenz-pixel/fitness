@@ -241,6 +241,10 @@ var LOCAL_FOODS=[
  {n:"Perche du lac (cuite)",kcal:100,p:21,c:0,f:1.3},
  {n:"Filet de perche pané (cuit)",kcal:220,p:16,c:15,f:11},
  {n:"Pomme de terre (cuite, nature)",kcal:87,p:2,c:20,f:0.1},
+ {n:"Pommes de terre au airfryer (sans huile)",kcal:100,p:2.5,c:22,f:0.1,a:"patate patates pdt airfryer airfrayer air fryer friteuse sans huile quartiers"},
+ {n:"Pommes de terre au airfryer (1 c. à café d'huile)",kcal:118,p:2.5,c:22,f:2,a:"patate patates pdt airfryer airfrayer air fryer friteuse huile quartiers rissolees"},
+ {n:"Frites maison au airfryer",kcal:135,p:3,c:25,f:3,a:"patate patates frite airfryer airfrayer air fryer friteuse"},
+ {n:"Patate douce au airfryer",kcal:110,p:2,c:25,f:0.3,a:"patate douce airfryer airfrayer air fryer friteuse"},
  {n:"Pomme de terre (frites au four)",kcal:165,p:3,c:26,f:5},
  {n:"Riz blanc (cuit)",kcal:130,p:2.7,c:28,f:0.3},
  {n:"Riz complet (cuit)",kcal:123,p:2.6,c:26,f:1},
@@ -2755,7 +2759,9 @@ function searchLocalFoods(q){
   var scored=[];
   LOCAL_FOODS.forEach(function(f){
     var name=normText(f.n);
-    if(!words.every(function(w){return name.indexOf(w)>=0;}))return;
+    /* synonymes : « patate » = pomme de terre, « airfrayer » = airfryer… */
+    var hay=name+" "+normText(f.a||"")+(name.indexOf("pomme de terre")>=0||name.indexOf("pommes de terre")>=0?" patate patates pdt":"");
+    if(!words.every(function(w){return hay.indexOf(w)>=0;}))return;
     var score=0;
     if(name===nq)score=100;
     else if(name.indexOf(nq)===0)score=80;
