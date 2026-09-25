@@ -1552,6 +1552,7 @@ function renderProgress(){
   var wh=state.weightHistory.slice(-12);
   $("weightChart").innerHTML=lineChart(wh.map(function(x){return Number(x.w);}),"#4f8fe6"," kg");
   $("wcFrom").textContent=wh.length?fmtDate(wh[0].d):"";
+  var wl=$("wList");if(wl)wl.innerHTML=state.weightHistory.slice().reverse().slice(0,15).map(function(x){return '<div class="hist-row"><div><b>'+fmtDate(x.d)+'</b></div><em>'+fr(x.w)+' kg</em><button class="del" data-act="delWeight" data-d="'+x.d+'" aria-label="Supprimer cette pesée"><svg class="ic-s" aria-hidden="true"><use href="#i-xmark"/></svg></button></div>';}).join("")||'<div class="empty" style="padding:8px 0">Aucune pesée.</div>';
   $("wcTo").textContent=wh.length?fmtDate(wh[wh.length-1].d):"";
 
   var lastBC=latestBodyComp(),bcCard=$("bodyCompCard");
@@ -1620,7 +1621,8 @@ function renderMeasures(){
   }
   var hips=ms.filter(function(x){return x.hips!=null;});
   box.innerHTML='<div class="big3" style="grid-template-columns:repeat(2,1fr)">'+stat("waist","taille")+stat("hips","hanches")+'</div>'
-    +(hips.length>1?'<div class="chartwrap">'+lineChart(hips.slice(-12).map(function(x){return Number(x.hips);}),"#d0875a"," cm")+'</div><div class="chartmeta"><span>tour de hanches</span><span>'+fmtDate(hips[hips.length-1].d)+'</span></div>':'');
+    +(hips.length>1?'<div class="chartwrap">'+lineChart(hips.slice(-12).map(function(x){return Number(x.hips);}),"#d0875a"," cm")+'</div><div class="chartmeta"><span>tour de hanches</span><span>'+fmtDate(hips[hips.length-1].d)+'</span></div>':'')
+    +'<details class="edit-list"><summary>Voir / supprimer des mesures</summary>'+ms.slice().reverse().slice(0,12).map(function(x){return '<div class="hist-row"><div><b>'+fmtDate(x.d)+'</b></div><em>'+(x.waist!=null?'taille '+fr(x.waist)+' cm':'')+(x.waist!=null&&x.hips!=null?' · ':'')+(x.hips!=null?'hanches '+fr(x.hips)+' cm':'')+'</em><button class="del" data-act="delMeasure" data-d="'+x.d+'" aria-label="Supprimer"><svg class="ic-s" aria-hidden="true"><use href="#i-xmark"/></svg></button></div>';}).join("")+'</details>';
 }
 /* calories des 7 derniers jours (journal + historique) */
 function dayIntake(d){
@@ -1665,15 +1667,35 @@ function renderCalWeek(){
     +'<div class="big3" style="margin-bottom:0"><div><div class="v num">'+avg.toLocaleString("fr-CH")+'</div><div class="l">kcal / jour (moy.)</div></div><div><div class="v num">'+avgP+' g</div><div class="l">protéines (moy.)</div></div><div><div class="v num">'+(past.length?ok+'/'+past.length:'—')+'</div><div class="l">jours dans l\'objectif</div></div></div>'
     +'<div class="trend-line">'+defTxt+'</div>';
 }
+/* suppression avec « Annuler » (pesée, mesure, séance enregistrées par erreur) */
+function delEntry(key,d,msg){
+  var arr=state[key]||[],ix=arr.findIndex(function(x){return x.d===d;});if(ix<0)return;
+  var old=arr[ix];arr.splice(ix,1);save();renderAll();haptic("light");
+  snack(msg+" ("+fmtDate(d)+")","Annuler",function(){state[key].push(old);state[key].sort(function(a2,b2){return a2.d.localeCompare(b2.d);});save();renderAll();},6000);
+}
+function delSession(i){
+  var s0=state.sessions[i];if(!s0)return;
+  var d=localDay(s0.date),q=state.program.find(function(pp){return pp.id===s0.dayId;});
+  /* les charges notées ce jour-là pour les exercices de cette séance partent avec elle (sauf si une autre séance du jour les utilise) */
+  var other=state.sessions.some(function(x,k){return k!==i&&localDay(x.date)===d&&x.dayId===s0.dayId;});
+  var names=q&&!other?q.ex.map(function(e){return e.n;}):[],removed={};
+  names.forEach(function(n){var a2=state.perf[n];if(!a2)return;var ix=a2.findIndex(function(x){return x.d===d;});if(ix>=0){removed[n]=a2[ix];a2.splice(ix,1);if(!a2.length)delete state.perf[n];}});
+  state.sessions.splice(i,1);save();renderAll();haptic("light");
+  snack("Séance supprimée ("+fmtDate(d)+")","Annuler",function(){
+    state.sessions.splice(i,0,s0);
+    Object.keys(removed).forEach(function(n){if(!state.perf[n])state.perf[n]=[];state.perf[n].push(removed[n]);state.perf[n].sort(function(a2,b2){return a2.d.localeCompare(b2.d);});});
+    save();renderAll();
+  },6000);
+}
 /* historique des séances */
 function renderSessionHistory(){
   var box=$("sessHist");if(!box)return;
   $("histCount").textContent=state.sessions.length?state.sessions.length+" au total":"";
   if(!state.sessions.length){box.innerHTML='<div class="empty" style="padding:10px 0">Tes séances terminées apparaîtront ici.</div>';return;}
-  box.innerHTML=state.sessions.slice(0,8).map(function(s){
+  box.innerHTML=state.sessions.slice(0,8).map(function(s,i){
     var d=new Date(s.date),lab=d.toLocaleDateString("fr-CH",{weekday:"short",day:"numeric",month:"short"});
     var extra=[s.done+"/"+s.total+" exos"];if(s.dur)extra.push(s.dur+" min");if(s.vol)extra.push(s.vol.toLocaleString("fr-CH")+" kg");
-    return '<div class="hist-row"><div><b>'+esc(s.name||"Séance")+'</b><span>'+lab+'</span></div><em>'+extra.join(" · ")+'</em></div>';
+    return '<div class="hist-row"><div><b>'+esc(s.name||"Séance")+'</b><span>'+lab+'</span></div><em>'+extra.join(" · ")+'</em><button class="del" data-act="delSession" data-i="'+i+'" aria-label="Supprimer cette séance"><svg class="ic-s" aria-hidden="true"><use href="#i-xmark"/></svg></button></div>';
   }).join("");
 }
 /* records par exercice */
@@ -2970,6 +2992,9 @@ document.addEventListener("click",function(e){
       break;
     case "guidedStart": openGuidedSession(); break;
     case "planList": planListOpen=!planListOpen; renderPlan(); break;
+    case "delWeight": delEntry("weightHistory",a.dataset.d,"Pesée supprimée"); break;
+    case "delMeasure": delEntry("measures",a.dataset.d,"Mesure supprimée"); break;
+    case "delSession": delSession(Number(a.dataset.i)); break;
     case "nutTab": setNutTab(a.dataset.t); break;
     case "nutGo": nutTab=a.dataset.t||"day"; lsSet("evoNutTab",nutTab); showPage("meals"); break;
     case "goRunProg": state.sessionCategory="running"; state.sessionAutoDay=today(); save(); showPage("session"); break;
