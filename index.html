@@ -520,12 +520,15 @@
     <div class="or-sep"><span>ou saisir manuellement</span></div>
   </div>
   <div id="runTreadOnly" class="row2">
-    <div class="field"><label>Vitesse (km/h)</label><input id="runSpeed" type="number" inputmode="decimal" step="0.1" placeholder="ex. 5"></div>
-    <div class="field"><label>Pente (%)</label><input id="runIncline" type="number" inputmode="decimal" step="0.5" placeholder="0"></div>
+    <div class="field"><label>Vitesse (km/h)</label><input id="runSpeed" type="text" inputmode="decimal"></div>
+    <div class="field"><label>ou allure (min/km)</label><input id="runPaceIn" type="text" inputmode="decimal" placeholder="mm:ss"></div>
   </div>
   <div class="row2"><div class="field"><label>Durée (min)</label><input id="runDur" type="number" inputmode="decimal" step="1"></div>
   <div class="field"><label>Distance (km)</label><input id="runDist" type="number" inputmode="decimal" step="0.01"></div></div>
-  <div id="runTreadKcal" class="field"><label>Calories affichées par le tapis (optionnel)</label><input id="runKcal" type="number" inputmode="numeric" step="1" placeholder="—"></div>
+  <div id="runTreadKcal" class="row2">
+    <div class="field"><label>Pente (%)</label><input id="runIncline" type="text" inputmode="decimal" placeholder="optionnel"></div>
+    <div class="field"><label>Kcal du tapis (option)</label><input id="runKcal" type="number" inputmode="numeric" step="1" placeholder="optionnel"></div>
+  </div>
   <div class="field"><label>Date</label><input id="runDate" type="date"></div>
   <div id="runPace" class="date" style="text-align:center;margin-top:8px;min-height:16px"></div>
   <div class="acts"><button class="btn ghost" data-act="runClose">Annuler</button><button class="btn primary" data-act="runSave">Ajouter</button></div>
@@ -588,7 +591,7 @@
 <div class="snack" id="snack"><div class="msg" id="snackMsg"></div><button data-act="snackAct" id="snackBtn">Annuler</button></div>
 <div class="toast" id="toast" hidden></div>
 
-<script src="/fitness/js/app.js?v=17"></script>
+<script src="/fitness/js/app.js?v=18"></script>
 <script src="/fitness/js/boot.js?v=3"></script>
 </body>
 </html>

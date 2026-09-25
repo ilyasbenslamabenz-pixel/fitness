@@ -1388,9 +1388,9 @@ function setEnergy(v){upsertV(state.energy,today(),v);save();renderEnergy();rend
 var runWhere="out",runKind="run",runDistTouched=false;
 function openRun(preset){
   preset=preset||{};
-  ["runDist","runDur","runSpeed","runIncline","runKcal"].forEach(function(id){$(id).value="";});
+  ["runDist","runDur","runSpeed","runPaceIn","runIncline","runKcal"].forEach(function(id){$(id).value="";});
   if(preset.dur)$("runDur").value=preset.dur;
-  if(preset.speed)$("runSpeed").value=preset.speed;
+  if(preset.speed){$("runSpeed").value=preset.speed;$("runPaceIn").value=fmtPace(60/preset.speed);}
   if(preset.incline!=null)$("runIncline").value=preset.incline;
   $("runDate").value=today();runDistTouched=false;
   setRunMode(preset.where||"out",preset.kind||"run");
@@ -1405,6 +1405,14 @@ function setRunMode(where,kind){
   $("runOutOnly").style.display=t?"none":"";$("runTreadOnly").style.display=t?"":"none";$("runTreadKcal").style.display=t?"":"none";
   updateRunPace();
 }
+/* allure saisie comme sur l'écran du tapis : "7:36", "7.36" ou "7,36" = 7 min 36 s ;
+   un seul chiffre après la virgule = minutes décimales ("7,5" = 7 min 30 s) */
+function parsePace(str){
+  var m=String(str||"").trim().match(/^(\d{1,2})(?:\s*([:.,'’])\s*(\d{1,2}))?$/);if(!m)return 0;
+  var min=Number(m[1]);if(!m[3])return min;
+  var sec=m[2]===":"||m[2]==="'"||m[2]==="’"||m[3].length===2?Number(m[3]):Number(m[3])*6;
+  return sec<60?min+sec/60:0;
+}
 /* dépense sur tapis : équations ACSM (VO2 en ml/kg/min, 5 kcal par litre d'O2),
    la pente compte beaucoup en marche */
 function treadKcal(speedKmh,inclinePct,durMin,walk){
@@ -1414,6 +1422,7 @@ function treadKcal(speedKmh,inclinePct,durMin,walk){
 }
 function runFormValues(){
   var du=fnum($("runDur").value,0),di=fnum($("runDist").value,0),sp=fnum($("runSpeed").value,0),inc=fnum($("runIncline").value,0),mk=fnum($("runKcal").value,0);
+  var pc=parsePace($("runPaceIn").value);if(pc>0)sp=60/pc; /* l'allure saisie est exacte, la vitesse affichée est arrondie */
   var walk=runKind==="walk",kcal=0;
   if(runWhere==="tread"){
     if(!sp&&di>0&&du>0)sp=di/(du/60);
@@ -1427,10 +1436,12 @@ function runFormValues(){
 function updateRunPace(){
   if(runWhere==="tread"&&!runDistTouched){
     var sp=fnum($("runSpeed").value,0),du=fnum($("runDur").value,0);
+    var pc=parsePace($("runPaceIn").value);if(pc>0)sp=60/pc;
     $("runDist").value=(sp>0&&du>0)?Math.round(sp*du/60*100)/100:"";
   }
   var f=runFormValues(),parts=[];
-  if(f.di>0&&f.du>0)parts.push("Allure "+fmtPace(f.du/f.di)+" /km");
+  if(runWhere==="tread"&&f.sp>0)parts.push("Allure "+fmtPace(60/f.sp)+" /km");
+  else if(f.di>0&&f.du>0)parts.push("Allure "+fmtPace(f.du/f.di)+" /km");
   if(f.kcal>0)parts.push("≈ "+f.kcal+" kcal");
   $("runPace").textContent=parts.join(" · ");
 }
@@ -2565,7 +2576,9 @@ document.addEventListener("visibilitychange",function(){if(document.visibilitySt
 document.addEventListener("input",function(e){
   var id=e.target.id;
   if(id==="runDist"){runDistTouched=!!e.target.value;updateRunPace();}
-  else if(id==="runDur"||id==="runSpeed"||id==="runIncline"||id==="runKcal")updateRunPace();
+  else if(id==="runSpeed"){var sv=fnum(e.target.value,0);$("runPaceIn").value=sv>0?fmtPace(60/sv):"";updateRunPace();}
+  else if(id==="runPaceIn"){var pv=parsePace(e.target.value);$("runSpeed").value=pv>0?String(Math.round(60/pv*10)/10).replace(".",","):"";updateRunPace();}
+  else if(id==="runDur"||id==="runIncline"||id==="runKcal")updateRunPace();
   else if(id==="foodQty")applyFoodRef100ToQty();
   else if(id==="foodKcal"||id==="foodProt"||id==="foodCarbs"||id==="foodFat")clearFoodRef100();
   else if(id==="foodName")scheduleFoodSearch();
