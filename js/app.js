@@ -2570,6 +2570,7 @@ var SEED_BARCODES={
   "7624841700177":{name:"Coop Prix Garantie Thon 120 g",kcal:341,protein:8.1,carbs:27,fat:22},
   "7624841548915":{name:"Coop Prix Garantie Thon sandwich 165 g",kcal:242,protein:9.6,carbs:23,fat:12},
   "8004030096004":{name:"Rio Mare Thon au naturel",kcal:118,protein:27,carbs:0.3,fat:1},
+  "7613269879398":{name:"Skyr Vanille (Migros) 170 g",kcal:81,protein:10,carbs:10,fat:0.5},
   "00118668":{name:"Skyr nature (Migros) 170 g",kcal:61,protein:11,carbs:4,fat:0.1},
   "7624841842280":{name:"Skyr Nature (Coop) 400 g",kcal:57,protein:11,carbs:3.3,fat:0},
   "7610029141528":{name:"Séré maigre / Magerquark (Denner) 500 g",kcal:59,protein:9,carbs:5.5,fat:0.5},
@@ -2612,11 +2613,8 @@ async function lookupBarcode(code){
   }
   $("scanStatus").textContent="Recherche du produit…";$("scanProduct").classList.remove("on");
   try{
-    var url="https://world.openfoodfacts.org/api/v3/product/"+encodeURIComponent(code)+".json?fields=product_name,brands,nutriments,nutrition_data_per,nutriscore_grade";
-    var res=await fetch(url,{headers:{Accept:"application/json"}});
-    if(!res.ok)throw new Error("HTTP "+res.status);
-    var data=await res.json();
-    if(!data.product)throw new Error("not_found");
+    var data=await fetchOffProduct(code);
+    if(!data||!data.product)throw new Error(data?"not_found":"network");
     var p=data.product,n=p.nutriments||{};
     var kcal=offVal(n,["energy-kcal_100g","energy-kcal"]);
     var prot=offVal(n,["proteins_100g","proteins"]);
@@ -2632,14 +2630,39 @@ async function lookupBarcode(code){
     $("foodQty").value="100";
     $("foodFat").value=fat?Math.round(fat*10)/10:"";
     setFoodRef100(kcal,prot,carbs,fat);
+    /* gardé en mémoire : le prochain scan de ce produit marche même sans réseau */
+    if(kcal)state.customBarcodes[code]={name:name,kcal:kcal,protein:prot||0,carbs:carbs||0,fat:fat||0};
+    save();
     stopBarcode();
     setTimeout(function(){closeScanner();$("mealModal").classList.add("on");},500);
   }catch(e){
-    $("scanStatus").textContent="Produit introuvable dans la base OpenFoodFacts. Saisis-le une fois manuellement : l'app s'en souviendra pour les prochains scans de ce code-barres.";
+    $("scanStatus").textContent=(e&&e.message==="network"
+      ?"Pas de réponse de la base OpenFoodFacts (réseau lent ou coupé). Réessaie dans un instant avec « Rechercher ce code », ou saisis le produit toi-même : "
+      :"Code "+code+" introuvable dans la base OpenFoodFacts. Vérifie les chiffres, ou saisis le produit toi-même : ")+"l'app s'en souviendra pour les prochains scans.";
     $("scanManualEntry").hidden=false;
     $("scanManualEntry").onclick=function(){enterBarcodeManually(code);};
     barcodeBusy=false;
   }
+}
+/* OpenFoodFacts : API v3 puis v2 (la v3 renvoie parfois une erreur), 8 s max par essai.
+   Renvoie {product} si trouvé, {} si le code n'existe pas, null si la base est injoignable. */
+async function fetchOffProduct(code){
+  var fields="product_name,brands,nutriments";
+  var urls=["https://world.openfoodfacts.org/api/v3/product/"+encodeURIComponent(code)+".json?fields="+fields,
+            "https://world.openfoodfacts.org/api/v2/product/"+encodeURIComponent(code)+".json?fields="+fields];
+  var answered=false;
+  for(var i=0;i<urls.length;i++){
+    var ctl=window.AbortController?new AbortController():null,tm=ctl?setTimeout(function(){ctl.abort();},8000):null;
+    try{
+      var res=await fetch(urls[i],{headers:{Accept:"application/json"},signal:ctl?ctl.signal:undefined});
+      if(tm)clearTimeout(tm);
+      if(res.status===404){answered=true;continue;}
+      if(!res.ok)continue;
+      var d=await res.json();answered=true;
+      if(d&&d.product&&(d.product.product_name||d.product.nutriments))return {product:d.product};
+    }catch(e){if(tm)clearTimeout(tm);}
+  }
+  return answered?{}:null;
 }
 function enterBarcodeManually(code){
   pendingBarcode=code;
