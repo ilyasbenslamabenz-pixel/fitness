@@ -267,7 +267,7 @@
       <button data-act="addMeal"><span class="tool-ico"><svg class="ic-s" aria-hidden="true"><use href="#i-search"/></svg></span>Rechercher<br>un aliment</button>
       <button data-act="openFavorites"><span class="tool-ico"><svg class="ic-s" aria-hidden="true"><use href="#i-star_fill"/></svg></span>Mes aliments</button>
     </div>
-    <div class="section-title-row"><h2>Mes repas</h2></div>
+    <div class="section-title-row"><h2>Mes repas du jour</h2></div>
     <div class="meal-sections">
       <div class="meal-section">
         <div class="meal-section-head"><div class="meal-group-ico" style="color:#7db4f5"><svg class="ic-s" aria-hidden="true"><use href="#i-sunrise_fill"/></svg></div><div class="meal-group-info"><b>Petit déjeuner</b><span id="breakfastKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Petit-déjeuner"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button></div>
@@ -286,11 +286,12 @@
         <div class="meal-section-items" id="itemsSnack"></div>
       </div>
     </div>
-    <div class="section-title-row"><h2>Liste de courses</h2></div>
-    <div class="fast-card"><div class="fast-ico"><svg class="ic-s" aria-hidden="true"><use href="#i-cart_fill"/></svg></div><div><b>Migros · mois</b><span id="groceryText">—</span></div><button data-act="groceryOpen" id="groceryBtn">Ouvrir</button></div>
-    <div class="section-title-row"><h2>Jeûne</h2></div>
-    <div class="fast-card"><div class="fast-ico"><svg class="ic-s" aria-hidden="true"><use href="#i-timer_fill"/></svg></div><div><b id="fastTitle">Routine 16:8</b><span id="fastText">Aucun jeûne en cours</span><div class="fast-progress"><i id="fastProgress"></i></div></div><button data-act="fasting" id="fastBtn">Démarrer</button></div>
-    <div class="section-title-row"><h2>Idées de la semaine</h2></div><div id="weeklyMenu"></div>
+    <div class="tool-tiles">
+      <button class="tool-tile" data-act="groceryOpen"><span class="tt-ico"><svg class="ic-s" aria-hidden="true"><use href="#i-cart_fill"/></svg></span><b>Courses</b><span id="groceryText">—</span></button>
+      <button class="tool-tile" data-act="fasting"><span class="tt-ico"><svg class="ic-s" aria-hidden="true"><use href="#i-timer_fill"/></svg></span><b id="fastTitle">Routine 16:8</b><span id="fastText">Aucun jeûne en cours</span><div class="fast-progress"><i id="fastProgress"></i></div><span id="fastBtn" hidden></span></button>
+    </div>
+    <div class="section-title-row"><h2>Menu de la semaine</h2></div>
+    <div class="card menu-card" id="weeklyMenu"></div>
   </section>
 
   <!-- EAU -->
@@ -610,7 +611,7 @@
 <div class="snack" id="snack"><div class="msg" id="snackMsg"></div><button data-act="snackAct" id="snackBtn">Annuler</button></div>
 <div class="toast" id="toast" hidden></div>
 
-<script src="/fitness/js/app.js?v=20"></script>
+<script src="/fitness/js/app.js?v=21"></script>
 <script src="/fitness/js/boot.js?v=3"></script>
 </body>
 </html>

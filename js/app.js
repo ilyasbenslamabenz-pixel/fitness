@@ -1905,25 +1905,60 @@ function openSteps(){var t=valToday(state.steps);$("stepsInput").value=t||"";$("
 function closeSteps(){$("stepsModal").classList.remove("on");}
 function saveSteps(){var v=Math.round(Number($("stepsInput").value));if(!(v>=0)||!isFinite(v)){toast("Nombre invalide");return;}upsertV(state.steps,today(),v);save();closeSteps();renderProgress();renderToday();toast("Pas enregistrés");}
 
-var weeklyMenuDay=-1;
-var menuOpenDay=null; /* accordéon : un seul jour développé à la fois (aujourd'hui par défaut) */
+var weeklyMenuKey="";
+var menuOpenDay=null; /* jour affiché dans la carte du menu (aujourd'hui par défaut) */
+/* le menu type (~1 800-1 950 kcal) est mis à l'échelle de l'objectif calorique du Profil :
+   quantités (g, œufs), kcal et protéines ajustées du même facteur */
+function menuFactor(d){
+  var base=MENU[d][1].reduce(function(s,m){var x=m[2].match(/(\d+)\s*kcal/);return s+(x?Number(x[1]):0);},0);
+  var goal=Number(state.profile.cal||2400);
+  return base?Math.max(0.6,Math.min(1.8,goal/base)):1;
+}
+/* ajustement du menu à l'objectif : les portions de protéines restent (objectif protéines
+   déjà couvert), ce sont les féculents qui absorbent l'écart de calories ; un repas sans
+   féculent pesé est ajusté en entier */
+var MENU_PROTEIN_FOODS=/skyr|thon|crevette|œuf|fromage blanc|tofu|whey|lait|séré|cottage/i;
+function scaleGrams(part,f){
+  return part.replace(/(\d+)\s*g\b/g,function(_,n){var v=Number(n)*f;v=v>=50?Math.round(v/10)*10:Math.max(5,Math.round(v/5)*5);return v+" g";});
+}
+function menuMeal(d,m){
+  var row=MENU[d][1][m],f=menuFactor(d),xk=row[2].match(/(\d+)\s*kcal/),xp=row[2].match(/(\d+)\s*g prot/);
+  var k0=xk?Number(xk[1]):0,p0=xp?Number(xp[1]):0,parts=row[1].split(" + ");
+  var carbParts=parts.filter(function(x){return /\d+\s*g\b/.test(x)&&!MENU_PROTEIN_FOODS.test(x);});
+  var desc=row[1],prot=p0;
+  if(Math.abs(f-1)>=0.03){
+    if(carbParts.length){
+      var carbK=Math.max(80,k0-p0*5.5),fc=Math.max(0.4,Math.min(3,1+k0*(f-1)/carbK));
+      desc=parts.map(function(x){return carbParts.indexOf(x)>=0?scaleGrams(x,fc):x;}).join(" + ");
+      prot=Math.round(p0+(fc-1)*carbK*0.03);
+    }else{
+      desc=scaleGrams(row[1],f).replace(/(\d+)\s*œufs?/g,function(_,n){var v=Math.max(1,Math.round(Number(n)*f));return v+(v>1?" œufs":" œuf");});
+      prot=Math.round(p0*f);
+    }
+  }
+  return {type:row[0],desc:desc,kcal:Math.round(k0*f/10)*10,prot:prot};
+}
 function buildWeeklyMenuHTML(){
   var idx=(new Date().getDay()+6)%7;
-  if(menuOpenDay==null)menuOpenDay=idx;
-  $("weeklyMenu").innerHTML=MENU.map(function(d,i){
-    var dk=d[1].reduce(function(s,m){var x=m[2].match(/(\d+)\s*kcal/);return s+(x?Number(x[1]):0);},0);
-    var isOpen=i===menuOpenDay;
-    return '<div class="menuday '+(i===idx?"today":"")+(isOpen?" open":"")+'">'
-      +'<button class="mh" data-act="toggleMenuDay" data-d="'+i+'"><b>'+d[0]+(i===idx?" · aujourd'hui":"")+'</b><span style="color:var(--muted)">'+dk+' kcal <span class="chev">'+(isOpen?"▾":"▸")+'</span></span></button>'
-      +(isOpen?d[1].map(function(m,j){return '<div class="mm"><div class="mt"><span>'+esc(m[0])+'</span><span style="color:var(--muted)">'+esc(m[2])+'</span></div><div class="md">'+esc(m[1])+'</div><button class="add" data-act="menuAdd" data-d="'+i+'" data-m="'+j+'">＋ Ajouter au journal</button></div>';}).join(""):"")
-      +'</div>';
-  }).join("");
+  if(menuOpenDay==null||menuOpenDay<0)menuOpenDay=idx;
+  var d=menuOpenDay,meals=MENU[d][1].map(function(_,m){return menuMeal(d,m);});
+  var tk=meals.reduce(function(s,x){return s+x.kcal;},0),tp=meals.reduce(function(s,x){return s+x.prot;},0);
+  var goal=Number(state.profile.cal||2400);
+  $("weeklyMenu").innerHTML='<div class="menu-days">'+MENU.map(function(dd,i){
+      return '<button class="md'+(i===d?" on":"")+(i===idx?" today":"")+'" data-act="toggleMenuDay" data-d="'+i+'">'+dd[0].charAt(0)+'</button>';
+    }).join("")+'</div>'
+    +'<div class="menu-head"><b>'+MENU[d][0]+(d===idx?" · aujourd'hui":"")+'</b><span>≈ '+tk.toLocaleString("fr-CH")+' kcal · '+tp+' g prot.</span></div>'
+    +'<div class="menu-note">Quantités ajustées à ton objectif de '+goal.toLocaleString("fr-CH")+' kcal</div>'
+    +meals.map(function(x,m){
+      return '<div class="menu-row"><div class="menu-t"><small><em>'+esc(x.type)+'</em> · '+x.kcal+' kcal · '+x.prot+' g prot.</small><span>'+esc(x.desc)+'</span></div>'
+        +'<button class="menu-add" data-act="menuAdd" data-d="'+d+'" data-m="'+m+'" aria-label="Ajouter au journal"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button></div>';
+    }).join("");
 }
-function toggleMenuDay(i){menuOpenDay=(menuOpenDay===i)?-1:i;buildWeeklyMenuHTML();}
+function toggleMenuDay(i){menuOpenDay=i;buildWeeklyMenuHTML();}
 function renderWeeklyMenuIfNeeded(){
-  var idx=(new Date().getDay()+6)%7;
-  if(idx===weeklyMenuDay)return; /* le menu ne change qu'une fois par jour : inutile de reconstruire ses lignes à chaque repas/eau ajoutés */
-  weeklyMenuDay=idx;
+  var key=((new Date().getDay()+6)%7)+"|"+state.profile.cal;
+  if(key===weeklyMenuKey)return; /* ne change qu'avec le jour ou l'objectif calorique */
+  weeklyMenuKey=key;
   buildWeeklyMenuHTML();
 }
 function renderMeals(){
@@ -2663,14 +2698,13 @@ document.addEventListener("click",function(e){
     case "stepsSave": saveSteps(); break;
     case "energy": setEnergy(Number(a.dataset.v)); break;
     case "toggleMenuDay": toggleMenuDay(Number(a.dataset.d)); break;
-    case "menuAdd": var row=MENU[Number(a.dataset.d)][1][Number(a.dataset.m)];
-      var xk=row[2].match(/(\d+)\s*kcal/),xp=row[2].match(/(\d+)\s*g prot/);
-      var mKcal=xk?Number(xk[1]):0,mProt=xp?Number(xp[1]):0;
+    case "menuAdd": var mm=menuMeal(Number(a.dataset.d),Number(a.dataset.m));
+      var mKcal=mm.kcal,mProt=mm.prot;
       /* glucides/lipides non détaillés dans le menu : estimation à partir du reste des
          calories (au-delà des protéines), répartition 65/35 cohérente avec des plats
          riz/pommes de terre — meilleur qu'un 0 franchement faux, mais reste une estimation */
       var mRemain=Math.max(0,mKcal-mProt*4),mCarbs=Math.round(mRemain*0.65/4),mFat=Math.round(mRemain*0.35/9);
-      addMealObj({name:row[1],kcal:mKcal,protein:mProt,carbs:mCarbs,fat:mFat,qty:100,type:row[0]}); toast("Ajouté au journal"); break;
+      addMealObj({name:mm.desc,kcal:mKcal,protein:mProt,carbs:mCarbs,fat:mFat,qty:100,type:mm.type}); toast("Ajouté au journal · "+mKcal+" kcal"); break;
     case "saveProfile": saveProfile(); break;
     case "login": login(); break;
     case "loginApple": loginApple(); break;
