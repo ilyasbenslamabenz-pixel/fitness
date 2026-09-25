@@ -4,54 +4,59 @@ var CFG={apiKey:"AIzaSyDgvRLAmyY86814Vuu_xqXb-TVJqUYeV2I",authDomain:"fitness-f4
 var KEY="evoFitV3", OLDKEY="evoFitCoachV2", BACKUPKEY="evoFitV3_backup";
 var START_DATE="2026-09-21";
 
+/* programme perte de poids : pecs 2×/semaine (haut et intérieur), dos pour la posture,
+   fessiers et gainage pour les hanches ; la graisse part via le déficit et le cardio */
+var PROGRAM_VERSION=2;
 var DEFAULT_PROGRAM=[
- {id:"push",name:"Poussée",short:"Push",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-flame_fill"/></svg>',focus:"Pecs · épaules · triceps",ex:[
+ {id:"push",name:"Pectoraux & épaules",short:"Pecs",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-flame_fill"/></svg>',focus:"Pecs (haut et intérieur) · épaules · triceps",ex:[
    {n:"Développé couché haltères",t:"4 × 8-10",w:true},
-   {n:"Développé incliné machine",t:"3 × 10-12",w:true},
+   {n:"Développé incliné haltères",t:"4 × 8-10",w:true},
    {n:"Écarté poulie",t:"3 × 12-15",w:true},
-   {n:"Élévations latérales",t:"4 × 12-15",w:true},
+   {n:"Dips assistés",t:"3 × 8-12",w:true},
+   {n:"Élévations latérales",t:"3 × 12-15",w:true},
    {n:"Extension triceps corde",t:"3 × 12-15",w:true}]},
- {id:"pull",name:"Tirage",short:"Pull",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-scope"/></svg>',focus:"Dos · biceps",ex:[
+ {id:"pull",name:"Dos & biceps",short:"Dos",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-scope"/></svg>',focus:"Dos · posture · biceps",ex:[
    {n:"Tirage vertical",t:"4 × 8-10",w:true},
-   {n:"Rowing machine",t:"4 × 10-12",w:true},
+   {n:"Rowing haltère",t:"3 × 10-12",w:true},
    {n:"Tirage horizontal poulie",t:"3 × 10-12",w:true},
    {n:"Face pull",t:"3 × 15",w:true},
    {n:"Curl biceps haltères",t:"3 × 10-12",w:true}]},
- {id:"legs",name:"Jambes",short:"Legs",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-figure_walk"/></svg>',focus:"Quadriceps · ischios · fessiers",ex:[
-   {n:"Presse à cuisses",t:"4 × 10-12",w:true},
-   {n:"Leg curl",t:"3 × 12-15",w:true},
-   {n:"Leg extension",t:"3 × 12-15",w:true},
-   {n:"Hip thrust machine",t:"3 × 10-12",w:true},
-   {n:"Mollets debout",t:"4 × 15-20",w:true}]},
- {id:"full",name:"Full body + cardio",short:"Full",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg>',focus:"Corps entier · cardio",ex:[
+ {id:"legs",name:"Jambes & hanches",short:"Hanches",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-figure_walk"/></svg>',focus:"Fessiers · cuisses · gainage",ex:[
+   {n:"Hip thrust machine",t:"4 × 10-12",w:true},
+   {n:"Presse à cuisses",t:"3 × 10-12",w:true},
+   {n:"Soulevé de terre roumain",t:"3 × 10-12",w:true},
+   {n:"Fentes marchées haltères",t:"3 × 12 / jambe",w:true},
+   {n:"Abducteurs machine",t:"3 × 15-20",w:true},
+   {n:"Gainage",t:"3 × 45 s",w:false}]},
+ {id:"full",name:"Pecs + cardio",short:"Cardio",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg>',focus:"Pecs · haut du corps · cardio brûle-graisse",ex:[
+   {n:"Chest press",t:"4 × 10-12",w:true},
+   {n:"Pompes",t:"3 × max",w:false},
    {n:"Développé militaire machine",t:"3 × 10-12",w:true},
    {n:"Tirage vertical prise large",t:"3 × 10-12",w:true},
-   {n:"Chest press",t:"3 × 10-12",w:true},
-   {n:"Gainage",t:"3 × 45 s",w:false},
-   {n:"Cardio (vélo ou tapis)",t:"20 min",w:false}]}
+   {n:"Cardio fractionné (vélo ou rameur)",t:"20 min : 30 s vite / 90 s lent",w:false}]}
 ];
 
 /* séance maison : force au poids du corps + cardio HIIT en alternance, sans matériel */
 var HOME_PROGRAM=[
- {id:"home-fb1",cat:"maison",name:"Full body 1",short:"FB1",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-house_fill"/></svg>',focus:"Poids du corps · corps entier",ex:[
+ {id:"home-fb1",cat:"maison",name:"Haut du corps & hanches",short:"FB1",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-house_fill"/></svg>',focus:"Pecs · fessiers · gainage",ex:[
    {n:"Pompes",t:"4 × 10-15",w:false},
-   {n:"Squats",t:"4 × 15-20",w:false},
-   {n:"Fentes avant",t:"3 × 12",w:false},
-   {n:"Gainage (planche)",t:"3 × 30-45 s",w:false},
-   {n:"Superman (lombaires)",t:"3 × 15",w:false}]},
- {id:"home-hiit1",cat:"maison",name:"HIIT cardio 1",short:"HIIT1",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg>',focus:"Cardio · circuit intense",ex:[
+   {n:"Pompes larges",t:"3 × 10-12",w:false},
+   {n:"Hip thrust au sol",t:"4 × 15-20",w:false},
+   {n:"Squats",t:"3 × 15-20",w:false},
+   {n:"Gainage (planche)",t:"3 × 30-45 s",w:false}]},
+ {id:"home-hiit1",cat:"maison",name:"HIIT cardio 1",short:"HIIT1",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg>',focus:"Cardio · circuit brûle-graisse",ex:[
    {n:"Jumping jacks",t:"4 × 30 s",w:false},
    {n:"Mountain climbers",t:"4 × 30 s",w:false},
    {n:"Burpees",t:"4 × 10",w:false},
    {n:"Squat jumps",t:"4 × 15",w:false},
    {n:"Corde à sauter (ou sur place)",t:"4 × 45 s",w:false}]},
- {id:"home-fb2",cat:"maison",name:"Full body 2",short:"FB2",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-house_fill"/></svg>',focus:"Poids du corps · corps entier",ex:[
-   {n:"Pompes déclinées",t:"4 × 10-15",w:false},
-   {n:"Squats sumo",t:"4 × 15",w:false},
-   {n:"Fentes arrière",t:"3 × 12",w:false},
-   {n:"Gainage latéral",t:"3 × 20-30 s",w:false},
-   {n:"Dips sur chaise",t:"3 × 10-15",w:false}]},
- {id:"home-hiit2",cat:"maison",name:"HIIT cardio 2",short:"HIIT2",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg>',focus:"Cardio · circuit intense",ex:[
+ {id:"home-fb2",cat:"maison",name:"Pecs & jambes",short:"FB2",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-house_fill"/></svg>',focus:"Pecs · triceps · jambes · taille",ex:[
+   {n:"Pompes déclinées",t:"4 × 8-12",w:false},
+   {n:"Dips sur chaise",t:"3 × 10-15",w:false},
+   {n:"Fentes arrière",t:"3 × 12 / jambe",w:false},
+   {n:"Squats sumo",t:"3 × 15",w:false},
+   {n:"Gainage latéral",t:"3 × 20-30 s",w:false}]},
+ {id:"home-hiit2",cat:"maison",name:"HIIT cardio 2",short:"HIIT2",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg>',focus:"Cardio · circuit brûle-graisse",ex:[
    {n:"High knees",t:"4 × 30 s",w:false},
    {n:"Burpees",t:"4 × 12",w:false},
    {n:"Jumping lunges",t:"4 × 12",w:false},
@@ -59,8 +64,6 @@ var HOME_PROGRAM=[
    {n:"Sprint sur place",t:"4 × 40 s",w:false}]}
 ];
 
-/* photos de démonstration pour les exercices au poids du corps (img/exercises/*.jpg),
-   affichées dans l'écran de séance guidée à la place de l'icône générique du jour */
 var EX_PHOTOS={
  "Pompes":"pompes",
  "Pompes déclinées":"pompes-declinees",
@@ -349,6 +352,7 @@ function merge(p){
   if(p.groceryList&&typeof p.groceryList==="object"&&Array.isArray(p.groceryList.once)&&Array.isArray(p.groceryList.weekly))state.groceryList=p.groceryList;
   if(p.customBarcodes&&typeof p.customBarcodes==="object")state.customBarcodes=p.customBarcodes;
   if(typeof p.groceryVersion==="number")state.groceryVersion=p.groceryVersion;
+  if(typeof p.programVersion==="number")state.programVersion=p.programVersion;
   if(typeof p.suggest==="number")state.suggest=p.suggest;
   if(p.session&&typeof p.session==="object")state.session=p.session;
   if(p.lastDay)state.lastDay=p.lastDay;
@@ -383,6 +387,13 @@ function normalizeState(){
      pour que les anciennes sauvegardes suivent les changements d'icônes */
   var defIcons={};DEFAULT_PROGRAM.concat(HOME_PROGRAM).forEach(function(d){defIcons[d.id]=d.icon;});
   state.program.forEach(function(p){if(defIcons[p.id])p.icon=defIcons[p.id];});
+  /* nouvelle version du programme : les jours par défaut sont remplacés, les jours ajoutés
+     par l'utilisateur sont conservés */
+  if(state.programVersion!==PROGRAM_VERSION){
+    var defDays={};DEFAULT_PROGRAM.concat(HOME_PROGRAM).forEach(function(d){defDays[d.id]=d;});
+    state.program=state.program.map(function(p){return defDays[p.id]?JSON.parse(JSON.stringify(defDays[p.id])):p;});
+    state.programVersion=PROGRAM_VERSION;save();
+  }
   if(["muscu","maison","running"].indexOf(state.sessionCategory)<0)state.sessionCategory="muscu";
   if(state.selDay>=state.program.length||state.selDay<0)state.selDay=0;
   if((state.program[state.selDay].cat||"muscu")!==state.sessionCategory&&state.sessionCategory!=="running"){
@@ -2161,8 +2172,6 @@ document.addEventListener("click",function(e){
     case "guidedPrev": guidedPrev(); break;
     case "guidedFinishNow": guidedFinishNow(); break;
     case "goRunning": showPage("session"); switchSessionCategory("running"); break;
-    case "quicklogOpen": $("quicklogSheet").classList.add("on"); break;
-    case "quicklogClose": $("quicklogSheet").classList.remove("on"); break;
     case "completeClose": closeComplete(); showPage("today"); break;
     case "selDay": state.selDay=Number(a.dataset.i); renderSession(); break;
     case "sessCat": switchSessionCategory(a.dataset.cat); break;
