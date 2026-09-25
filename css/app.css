@@ -539,19 +539,10 @@ button.lrow:active{background:var(--surface2)}
 .guided-name h3{font-size:24px;font-weight:800}
 .guided-name .sub{font-size:12.5px;color:var(--muted);margin-top:5px}
 .guided-ic{margin:18px 22px 0;height:120px;border-radius:20px;background:var(--surface);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;font-size:54px;flex:0 0 auto;overflow:hidden}
-.guided-ic.has-art{height:196px;padding:8px 6px 4px}
-/* illustrations des exercices (js/exart.js) */
-.ex-art{width:100%;height:100%;display:block}
-.ex-c1{stop-color:var(--primary)}.ex-c2{stop-color:var(--accent)}
-.ex-eq{stroke:var(--muted);opacity:.5}
-.ex-shadow{fill:rgba(0,0,0,.35)}
-:root[data-theme="light"] .ex-shadow{fill:rgba(10,22,40,.08)}
-.ex-cable{stroke:var(--muted);opacity:.85}
-.ex-db{stroke:var(--text)}
-:root[data-theme="light"] .ex-db{stroke:#3a4658}
-.ex-pad,.ex-pads{fill:var(--muted);stroke:var(--muted);stroke-linecap:round;opacity:.7}
-.ex-eqs{stroke:var(--muted);stroke-linecap:round}
-.exrow-art{flex:0 0 auto;width:60px;height:42px;border-radius:10px;background:var(--surface2);padding:2px}
+.guided-ic.has-photo{position:relative;height:auto;aspect-ratio:3/2;padding:0;background:#000}
+.guided-ic .gph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .45s ease}
+.guided-ic .gph.on{opacity:1}
+.exrow-art{flex:0 0 auto;width:60px;height:42px;border-radius:10px;object-fit:cover;background:var(--surface2)}
 .guided-vals{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:20px;flex:0 0 auto}
 .val-group{display:flex;align-items:center;gap:8px}
 .guided-vals .val{text-align:center;min-width:56px}

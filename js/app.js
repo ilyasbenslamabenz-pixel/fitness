@@ -64,11 +64,23 @@ var HOME_PROGRAM=[
    {n:"Sprint sur place",t:"4 × 40 s",w:false}]}
 ];
 
-/* illustrations animées des exercices (js/exart.js) */
-function hasArt(n){return !!(window.EXART&&window.EXART.has(n));}
-function hydrateArt(root){
-  if(!window.EXART)return;
-  root.querySelectorAll("[data-art]").forEach(function(h){window.EXART.mount(h,h.dataset.art,{still:true});h.removeAttribute("data-art");});
+/* photos de démonstration des exercices (img/exercises) : début et fin du mouvement,
+   issues de Free Exercise DB (domaine public, github.com/yuhonas/free-exercise-db) */
+var EX_PHOTOS={"Pompes":["pushups-1","pushups-0"],"Pompes larges":["pushups-1","pushups-0"],"Pompes déclinées":["decline-push-up-0","decline-push-up-1"],"Squats":["bodyweight-squat-0","bodyweight-squat-1"],"Squats sumo":["plie-dumbbell-squat-0","plie-dumbbell-squat-1"],"Squat jumps":["freehand-jump-squat-0","freehand-jump-squat-1"],"Fentes arrière":["crossover-reverse-lunge-0","crossover-reverse-lunge-1"],"Fentes marchées haltères":["dumbbell-lunges-0","dumbbell-lunges-1"],"Jumping lunges":["split-jump-0","split-jump-1"],"Gainage (planche)":["plank-1"],"Gainage":["plank-1"],"Gainage latéral":["side-bridge-0","side-bridge-1"],"Mountain climbers":["mountain-climbers-0","mountain-climbers-1"],"Plank jacks":["push-up-to-side-plank-0"],"Burpees":["freehand-jump-squat-0","pushups-1","freehand-jump-squat-1"],"Jumping jacks":["star-jump-0","star-jump-1"],"Corde à sauter (ou sur place)":["rope-jumping-0","rope-jumping-1"],"High knees":["fast-skipping-0","fast-skipping-1"],"Sprint sur place":["running-treadmill-0","running-treadmill-1"],"Dips sur chaise":["bench-dips-0","bench-dips-1"],"Hip thrust au sol":["butt-lift-bridge-0","butt-lift-bridge-1"],"Hip thrust machine":["barbell-hip-thrust-0","barbell-hip-thrust-1"],"Développé couché haltères":["dumbbell-bench-press-0","dumbbell-bench-press-1"],"Développé incliné haltères":["incline-dumbbell-press-0","incline-dumbbell-press-1"],"Curl biceps haltères":["dumbbell-bicep-curl-0","dumbbell-bicep-curl-1"],"Élévations latérales":["side-lateral-raise-0","side-lateral-raise-1"],"Soulevé de terre roumain":["stiff-legged-dumbbell-deadlift-0","stiff-legged-dumbbell-deadlift-1"],"Rowing haltère":["one-arm-dumbbell-row-0","one-arm-dumbbell-row-1"],"Écarté poulie":["cable-crossover-0","cable-crossover-1"],"Extension triceps corde":["triceps-pushdown-rope-attachment-0","triceps-pushdown-rope-attachment-1"],"Face pull":["face-pull-0","face-pull-1"],"Tirage vertical":["wide-grip-lat-pulldown-0","wide-grip-lat-pulldown-1"],"Tirage vertical prise large":["wide-grip-lat-pulldown-0","wide-grip-lat-pulldown-1"],"Tirage horizontal poulie":["seated-cable-rows-0","seated-cable-rows-1"],"Chest press":["leverage-chest-press-0","leverage-chest-press-1"],"Développé militaire machine":["machine-shoulder-military-press-0","machine-shoulder-military-press-1"],"Dips assistés":["dip-machine-0","dip-machine-1"],"Presse à cuisses":["leg-press-0","leg-press-1"],"Abducteurs machine":["thigh-abductor-0","thigh-abductor-1"],"Cardio fractionné (vélo ou rameur)":["bicycling-stationary-0","bicycling-stationary-1"]};
+function exPhotos(n){return EX_PHOTOS[n]||null;}
+function photoUrl(slug){return "/fitness/img/exercises/"+slug+".jpg";}
+var photoCycleT=null;
+function stopPhotoCycle(){clearInterval(photoCycleT);photoCycleT=null;}
+/* alterne les photos (début → fin du mouvement) en fondu, comme une démo animée */
+function startPhotoCycle(box){
+  stopPhotoCycle();
+  var imgs=box.querySelectorAll("img");if(imgs.length<2)return;
+  try{if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;}catch(e){}
+  var i=0;
+  photoCycleT=setInterval(function(){
+    if(!box.isConnected){stopPhotoCycle();return;}
+    imgs[i].classList.remove("on");i=(i+1)%imgs.length;imgs[i].classList.add("on");
+  },1300);
 }
 
 /* programme running progressif : 10 semaines, 3 séances identiques par semaine */
@@ -640,7 +652,7 @@ function exerciseRowHTML(e,mk){
   var meta=esc(e.t)+(last>0?" · dernier "+num(last)+" kg":"");
   return '<div class="exrow'+(isDone?" done":"")+'" data-act="guidedJump" data-ex="'+esc(e.n)+'">'
     +'<div class="exrow-check">'+(isDone?'✓':(doneN>0?doneN+"/"+cnt:''))+'</div>'
-    +(hasArt(e.n)?'<div class="exrow-art" data-art="'+esc(e.n)+'"></div>':'')
+    +(exPhotos(e.n)?'<img class="exrow-art" src="'+photoUrl(exPhotos(e.n)[exPhotos(e.n).length-1])+'" alt="" loading="lazy">':'')
     +'<div class="exrow-info"><h3>'+esc(e.n)+'</h3><div class="t">'+meta+'</div></div>'
     +'<button class="exrow-x" data-act="'+removeAct+'" data-ex="'+esc(e.n)+'" title="'+(e.extra?"Supprimer":"Retirer aujourd’hui")+'"><svg class="ic-s" aria-hidden="true"><use href="#i-xmark"/></svg></button>'
     +'</div>';
@@ -662,7 +674,6 @@ function refreshExerciseCard(exName){
   for(var i=0;i<rows.length;i++){
     if(rows[i].dataset.ex===exName){rows[i].outerHTML=exerciseRowHTML(e,mk);break;}
   }
-  hydrateArt($("exList"));
   updateSessionTotals();
   if(guidedOpen)renderGuided();
 }
@@ -690,7 +701,6 @@ function renderSession(){
     +'<button class="btn ghost" data-act="addExOpen">＋ Ajouter un exercice</button>'
     +(excl.length?'<button class="btn ghost" data-act="restoreEx">↺ Restaurer ('+excl.length+')</button>':'')
     +'</div>';
-  hydrateArt($("exList"));
   $("sesMeta").textContent=active.length+" exercice"+(active.length>1?"s":"")+" · ~"+estimateDurationMin(p)+" min";
   var totalSets=0,doneSets=0;
   active.forEach(function(e){var arr=setsArrFor(mk,e);totalSets+=arr.length;doneSets+=arr.filter(function(s){return s.done;}).length;});
@@ -940,7 +950,7 @@ function openGuidedSession(jumpToEx){
   renderSession();
   renderGuided();
 }
-function closeGuided(){cancelWork();guidedOpen=false;var v=$("guidedView");if(v)v.classList.remove("on");}
+function closeGuided(){cancelWork();stopPhotoCycle();var gi=$("gExIcon");if(gi)gi.dataset.ex="";guidedOpen=false;var v=$("guidedView");if(v)v.classList.remove("on");}
 function renderGuided(){
   if(!guidedOpen)return;
   var p=state.program[state.selDay],mk=marksFor(p.id),list=currentGuidedList();
@@ -960,11 +970,14 @@ function renderGuided(){
   var pg=progressionFor(e);
   $("gExSub").innerHTML=esc(e.t)+(pg?" · dernière fois "+num(pg.from)+" kg × "+pg.reps:(last>0?" · dernière fois "+num(last)+" kg":""))
     +(pg&&pg.up?'<div class="g-prog">Toutes tes séries réussies : essaie '+num(pg.to)+' kg</div>':'');
-  var ic=$("gExIcon"),art=hasArt(e.n);
-  ic.classList.toggle("has-art",art);
-  if(!art||ic.dataset.ex!==e.n){
-    ic.dataset.ex=art?e.n:"";
-    if(art)window.EXART.mount(ic,e.n);else ic.innerHTML=p.icon||'<svg class="ic-s" aria-hidden="true"><use href="#i-dumbbell"/></svg>';
+  var ic=$("gExIcon"),ph=exPhotos(e.n);
+  ic.classList.toggle("has-photo",!!ph);
+  if(!ph||ic.dataset.ex!==e.n){
+    ic.dataset.ex=ph?e.n:"";
+    if(ph){
+      ic.innerHTML=ph.map(function(sl,i){return '<img class="gph'+(i?"":" on")+'" src="'+photoUrl(sl)+'" alt="">';}).join("");
+      startPhotoCycle(ic);
+    }else{stopPhotoCycle();ic.innerHTML=p.icon||'<svg class="ic-s" aria-hidden="true"><use href="#i-dumbbell"/></svg>';}
   }
 
   var st=mk[e.n]||{},wv=(st.w!=null?st.w:defaultWeight(e)),rt=repTarget(e),rv=repsFor(mk,e),vals="";
