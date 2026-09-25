@@ -64,27 +64,12 @@ var HOME_PROGRAM=[
    {n:"Sprint sur place",t:"4 × 40 s",w:false}]}
 ];
 
-var EX_PHOTOS={
- "Pompes":"pompes",
- "Pompes déclinées":"pompes-declinees",
- "Squats":"squats",
- "Squats sumo":"squats-sumo",
- "Squat jumps":"squat-jumps",
- "Fentes avant":"fentes-avant",
- "Fentes arrière":"fentes-arriere",
- "Jumping lunges":"jumping-lunges",
- "Gainage (planche)":"gainage-planche",
- "Gainage latéral":"gainage-lateral",
- "Superman (lombaires)":"superman",
- "Dips sur chaise":"dips-chaise",
- "Jumping jacks":"jumping-jacks",
- "Mountain climbers":"mountain-climbers",
- "Burpees":"burpees",
- "Corde à sauter (ou sur place)":"corde-a-sauter",
- "High knees":"high-knees",
- "Plank jacks":"plank-jacks",
- "Sprint sur place":"sprint-place"
-};
+/* illustrations animées des exercices (js/exart.js) */
+function hasArt(n){return !!(window.EXART&&window.EXART.has(n));}
+function hydrateArt(root){
+  if(!window.EXART)return;
+  root.querySelectorAll("[data-art]").forEach(function(h){window.EXART.mount(h,h.dataset.art,{still:true});h.removeAttribute("data-art");});
+}
 
 /* programme running progressif : 10 semaines, 3 séances identiques par semaine */
 var RUNNING_PROGRAM=[
@@ -601,6 +586,7 @@ function exerciseRowHTML(e,mk){
   var meta=esc(e.t)+(last>0?" · dernier "+num(last)+" kg":"");
   return '<div class="exrow'+(isDone?" done":"")+'" data-act="guidedJump" data-ex="'+esc(e.n)+'">'
     +'<div class="exrow-check">'+(isDone?'✓':(doneN>0?doneN+"/"+cnt:''))+'</div>'
+    +(hasArt(e.n)?'<div class="exrow-art" data-art="'+esc(e.n)+'"></div>':'')
     +'<div class="exrow-info"><h3>'+esc(e.n)+'</h3><div class="t">'+meta+'</div></div>'
     +'<button class="exrow-x" data-act="'+removeAct+'" data-ex="'+esc(e.n)+'" title="'+(e.extra?"Supprimer":"Retirer aujourd’hui")+'"><svg class="ic-s" aria-hidden="true"><use href="#i-xmark"/></svg></button>'
     +'</div>';
@@ -622,6 +608,7 @@ function refreshExerciseCard(exName){
   for(var i=0;i<rows.length;i++){
     if(rows[i].dataset.ex===exName){rows[i].outerHTML=exerciseRowHTML(e,mk);break;}
   }
+  hydrateArt($("exList"));
   updateSessionTotals();
   if(guidedOpen)renderGuided();
 }
@@ -649,6 +636,7 @@ function renderSession(){
     +'<button class="btn ghost" data-act="addExOpen">＋ Ajouter un exercice</button>'
     +(excl.length?'<button class="btn ghost" data-act="restoreEx">↺ Restaurer ('+excl.length+')</button>':'')
     +'</div>';
+  hydrateArt($("exList"));
   $("sesMeta").textContent=active.length+" exercice"+(active.length>1?"s":"")+" · ~"+estimateDurationMin(p)+" min";
   var totalSets=0,doneSets=0;
   active.forEach(function(e){var arr=setsArrFor(mk,e);totalSets+=arr.length;doneSets+=arr.filter(function(s){return s.done;}).length;});
@@ -907,9 +895,12 @@ function renderGuided(){
   $("gExName").textContent=e.n;
   var last=lastWeight(e.n);
   $("gExSub").textContent=e.t+(last>0?" · dernière fois "+num(last)+" kg":"");
-  var exPhoto=EX_PHOTOS[e.n];
-  $("gExIcon").classList.toggle("has-photo",!!exPhoto);
-  $("gExIcon").innerHTML=exPhoto?'<img src="/fitness/img/exercises/'+exPhoto+'.jpg" alt="" class="guided-photo">':(p.icon||'<svg class="ic-s" aria-hidden="true"><use href="#i-dumbbell"/></svg>');
+  var ic=$("gExIcon"),art=hasArt(e.n);
+  ic.classList.toggle("has-art",art);
+  if(!art||ic.dataset.ex!==e.n){
+    ic.dataset.ex=art?e.n:"";
+    if(art)window.EXART.mount(ic,e.n);else ic.innerHTML=p.icon||'<svg class="ic-s" aria-hidden="true"><use href="#i-dumbbell"/></svg>';
+  }
 
   var st=mk[e.n]||{},wv=(st.w!=null?st.w:last),rt=repTarget(e),rv=repsFor(mk,e),vals="";
   if(e.w)vals+='<div class="val-group"><button data-act="w-" data-ex="'+esc(e.n)+'"><svg class="ic-s" aria-hidden="true"><use href="#i-minus"/></svg></button><div class="val"><b>'+num(wv)+'</b><span>KG</span></div><button data-act="w+" data-ex="'+esc(e.n)+'"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button></div>';
