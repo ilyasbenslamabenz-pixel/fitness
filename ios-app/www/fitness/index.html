@@ -68,7 +68,10 @@
     </div>
 
     <div id="backupNag"></div>
-    <div class="card ring-card">
+    <div class="next-cta plan-card" id="planCard"></div>
+    <div class="card day-card">
+      <div class="head" style="margin:0 0 4px"><div class="eyebrow">Ta journée</div><span class="link" data-act="go" data-page="meals">Repas ›</span></div>
+      <div class="ring-card">
       <div class="ring-wrap" id="ringWrap"></div>
       <div class="ring-rows">
         <div class="ring-row">
@@ -94,10 +97,10 @@
         </div>
       </div>
     </div>
+      <div id="burnCard" class="burn-inline"></div>
+    </div>
 
-    <div class="card burn-card" id="burnCard"></div>
 
-    <div class="next-cta plan-card" id="planCard"></div>
 
     <div class="quick-access">
       <button class="qa-btn" data-act="weigh"><div class="ic" style="color:#e3ae4a"><svg class="ic-s" aria-hidden="true"><use href="#i-scalemass_fill"/></svg></div><span class="lab">Peser</span></button>
@@ -138,6 +141,7 @@
           <div class="sday-info"><h3 id="sesName">—</h3><div class="sub" id="sesFocus">—</div></div>
         </div>
         <div class="sday-meta" id="sesMeta">—</div>
+        <div class="sday-last" id="sesLast"></div>
         <div id="sesTodayTag" class="sday-today"></div>
         <button class="btn primary" id="sesCta" data-act="guidedStart">Démarrer la séance</button>
         <div class="sday-prog" id="sesProgWrap" style="display:none">
@@ -446,9 +450,10 @@
   <div class="guided-prog"><i id="gProgBar" style="width:0%"></i></div>
   <div class="guided-top">
     <button class="guided-x" data-act="guidedClose" aria-label="Retour"><svg class="ic-s" aria-hidden="true"><use href="#i-chevron_back"/></svg></button>
-    <div class="guided-mid"><b id="gExN">1 / 1</b><span id="gSessName">—</span></div>
+    <div class="guided-mid"><b id="gExN">1 / 1</b><span id="gSessName">—</span><em id="gClock"></em></div>
     <button class="guided-timer" id="gTimer" data-act="restStop" style="visibility:hidden" title="Toucher pour passer le repos"><span><svg class="ic-s" aria-hidden="true"><use href="#i-timer_fill"/></svg></span><span id="gTimerT">0:00</span></button>
   </div>
+  <div class="g-strip" id="gStrip"></div>
   <div class="guided-body">
     <div class="guided-name">
       <h3 id="gExName">—</h3>
@@ -461,6 +466,7 @@
       <div class="g-rest-lab">Repos</div>
       <div class="g-rest-time" id="gRestT">1:30</div>
       <div class="g-rest-bar"><i id="gRestBar"></i></div>
+      <div class="g-rest-next" id="gRestNext"></div>
       <div class="g-rest-btns"><button data-act="restAdj" data-d="-15">−15 s</button><button class="skip" data-act="restStop">Passer</button><button data-act="restAdj" data-d="15">+15 s</button></div>
     </div>
     </div>
@@ -472,6 +478,7 @@
         <button class="guided-nav-btn" id="gPrevBtn" data-act="guidedPrev"><svg class="ic-s" aria-hidden="true"><use href="#i-chevron_left"/></svg>Précédent</button>
         <button class="guided-nav-btn" data-act="guidedSkip">Suivant<svg class="ic-s" aria-hidden="true"><use href="#i-chevron_right"/></svg></button>
       </div>
+      <div class="g-upnext" id="gUpNext"></div>
       <div class="guided-list-link"><span data-act="guidedList">Voir la liste</span> · <span data-act="guidedFinishNow">Terminer maintenant</span></div>
     </div>
   </div>
@@ -683,7 +690,7 @@
 <div class="snack" id="snack"><div class="msg" id="snackMsg"></div><button data-act="snackAct" id="snackBtn">Annuler</button></div>
 <div class="toast" id="toast" hidden></div>
 
-<script src="/fitness/js/app.js?v=32"></script>
+<script src="/fitness/js/app.js?v=33"></script>
 <script src="/fitness/js/boot.js?v=3"></script>
 </body>
 </html>
