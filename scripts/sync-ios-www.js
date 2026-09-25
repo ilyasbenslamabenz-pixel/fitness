@@ -8,7 +8,7 @@ const path = require("path");
 
 const ROOT = path.resolve(__dirname, "..");
 const DEST = path.join(ROOT, "ios-app", "www", "fitness");
-const FILES = ["index.html", "sw.js", "manifest.json", "icon-180.jpg", "icon-512.jpg", "og-image.jpg"];
+const FILES = ["index.html", "sw.js", "manifest.json", "icon-180.jpg", "icon-192.jpg", "icon-512.jpg", "og-image.jpg"];
 const DIRS = ["js", "css", "img"];
 
 fs.rmSync(DEST, { recursive: true, force: true });
