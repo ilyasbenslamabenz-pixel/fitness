@@ -69,6 +69,7 @@
 
     <div id="backupNag"></div>
     <div class="next-cta plan-card" id="planCard"></div>
+    <div class="card coach-card" id="coachCard"></div>
     <div class="card day-card">
       <div class="head" style="margin:0 0 4px"><div class="eyebrow">Ta journée</div><span class="link" data-act="go" data-page="meals">Repas ›</span></div>
       <div class="ring-card">
@@ -132,10 +133,9 @@
     </div>
 
     <div id="sessExerciseView">
-      <div class="eyebrow" style="margin:12px 2px 6px">Jour</div>
-      <div class="days" id="dayChips"></div>
 
       <div class="card sday-card">
+        <div class="ses-banner" id="sesBanner" hidden></div>
         <div class="sday-top">
           <div class="ic" id="sesIc" style="width:46px;height:46px;border-radius:12px;background:var(--surface2);display:grid;place-items:center;font-size:24px;flex:0 0 auto"><svg class="ic-s" aria-hidden="true"><use href="#i-flame_fill"/></svg></div>
           <div class="sday-info"><h3 id="sesName">—</h3><div class="sub" id="sesFocus">—</div></div>
@@ -156,8 +156,9 @@
         <div id="exList"></div>
       </div>
       <p style="font-size:12px;color:var(--faint);text-align:center;margin:14px 4px">Tape un exercice pour démarrer la séance guidée à partir de celui-ci.</p>
-    <div class="group-h">Mon programme · modifier une séance</div>
-    <div class="card list" id="progList"></div>
+    <div class="head" style="margin-top:22px"><h2 style="font-size:18px">Toutes les séances</h2></div>
+      <div class="pgrid" id="dayChips"></div>
+      <details class="edit-list prog-edit"><summary>Modifier mes séances (exercices, séries)</summary><div class="card list" id="progList"></div></details>
     </div>
 
     <div id="sessRunningView" style="display:none">
@@ -690,7 +691,7 @@
 <div class="snack" id="snack"><div class="msg" id="snackMsg"></div><button data-act="snackAct" id="snackBtn">Annuler</button></div>
 <div class="toast" id="toast" hidden></div>
 
-<script src="/fitness/js/app.js?v=41"></script>
+<script src="/fitness/js/app.js?v=42"></script>
 <script src="/fitness/js/boot.js?v=3"></script>
 </body>
 </html>
