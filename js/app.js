@@ -663,8 +663,8 @@ function clCost(){try{var c=JSON.parse(lsGet("evoClaudeCost")||"{}");return c.m=
 function clAddCost(u){if(!u)return;var usd=clCost()+(Number(u.input_tokens||0)*1+Number(u.output_tokens||0)*5)/1e6;lsSet("evoClaudeCost",JSON.stringify({m:clMonth(),usd:usd}));}
 var CL_TYPES=["Petit-déjeuner","Déjeuner","Dîner","Collation"];
 var CL_TOOLS=[
-  {name:"add_meal",description:"Ajoute un aliment ou un repas au journal du jour. Estime les valeurs nutritionnelles pour la quantité réellement mangée (pas pour 100 g). Un appel par aliment distinct.",
-    input_schema:{type:"object",properties:{name:{type:"string",description:"Nom court en français, ex. « Skyr nature Migros »"},qty_g:{type:"number",description:"Quantité mangée en grammes"},kcal:{type:"number"},protein:{type:"number",description:"Protéines en g"},carbs:{type:"number",description:"Glucides en g"},fat:{type:"number",description:"Lipides en g"},type:{type:"string",enum:CL_TYPES,description:"Omettre pour choisir selon l'heure"}},required:["name","qty_g","kcal","protein","carbs","fat"]}},
+  {name:"add_meal",description:"Ajoute un aliment au journal du jour. Donne les valeurs POUR 100 g (ou 100 ml), exactement comme sur l'étiquette ou une table nutritionnelle, et la quantité mangée : l'app calcule elle-même la portion. Liquides : 1 ml = 1 g. Un appel par aliment distinct.",
+    input_schema:{type:"object",properties:{name:{type:"string",description:"Nom court en français, ex. « Skyr nature Migros »"},qty_g:{type:"number",description:"Quantité mangée en g (ou ml)"},kcal_100g:{type:"number",description:"kcal pour 100 g/ml"},protein_100g:{type:"number",description:"Protéines en g pour 100 g/ml"},carbs_100g:{type:"number",description:"Glucides en g pour 100 g/ml"},fat_100g:{type:"number",description:"Lipides en g pour 100 g/ml"},type:{type:"string",enum:CL_TYPES,description:"Omettre pour choisir selon l'heure"}},required:["name","qty_g","kcal_100g","protein_100g","carbs_100g","fat_100g"]}},
   {name:"delete_last_meal",description:"Supprime le dernier aliment ajouté aujourd'hui (correction d'une erreur).",input_schema:{type:"object",properties:{}}},
   {name:"add_water",description:"Ajoute de l'eau bue (ou en retire avec une valeur négative).",input_schema:{type:"object",properties:{ml:{type:"number"}},required:["ml"]}},
   {name:"log_weight",description:"Enregistre la pesée du jour.",input_schema:{type:"object",properties:{kg:{type:"number"}},required:["kg"]}},
@@ -675,14 +675,14 @@ var CL_TOOLS=[
   {name:"log_workout",description:"Enregistre une séance de musculation faite aujourd'hui avec les charges. Chaque exercice : nom, séries, répétitions, charge en kg (0 si poids du corps).",input_schema:{type:"object",properties:{name:{type:"string",description:"Nom de la séance, ex. « Pectoraux » ; reprends le nom d'un jour du programme s'il correspond"},duration_min:{type:"number"},exercises:{type:"array",items:{type:"object",properties:{name:{type:"string"},sets:{type:"integer"},reps:{type:"integer"},weight_kg:{type:"number"}},required:["name","sets","reps"]}}},required:["exercises"]}},
   {name:"log_run",description:"Enregistre une course ou une marche faite aujourd'hui.",input_schema:{type:"object",properties:{kind:{type:"string",enum:["run","walk"]},distance_km:{type:"number"},duration_min:{type:"number"},treadmill:{type:"boolean"}},required:["kind","distance_km","duration_min"]}},
   {name:"delete_meal",description:"Supprime un aliment précis du jour, par son numéro #n dans la liste des repas. Uniquement si l'utilisateur le demande clairement ; s'il y a un doute sur lequel, demande.",input_schema:{type:"object",properties:{index:{type:"integer",description:"Numéro #n"}},required:["index"]}},
-  {name:"update_meal",description:"Corrige un aliment du jour (quantité, valeurs, repas, nom), par son numéro #n. Si seule la quantité change, donne aussi les kcal et macros recalculées.",input_schema:{type:"object",properties:{index:{type:"integer"},name:{type:"string"},qty_g:{type:"number"},kcal:{type:"number"},protein:{type:"number"},carbs:{type:"number"},fat:{type:"number"},type:{type:"string",enum:CL_TYPES}},required:["index"]}},
+  {name:"update_meal",description:"Corrige un aliment du jour par son numéro #n : quantité (g ou ml), valeurs POUR 100 g/ml si elles étaient fausses, repas ou nom. Ne donne que ce qui change : l'app recalcule la portion.",input_schema:{type:"object",properties:{index:{type:"integer"},name:{type:"string"},qty_g:{type:"number"},kcal_100g:{type:"number"},protein_100g:{type:"number"},carbs_100g:{type:"number"},fat_100g:{type:"number"},type:{type:"string",enum:CL_TYPES}},required:["index"]}},
   {name:"add_grocery",description:"Ajoute des articles à la liste de courses (section « à acheter une fois »).",input_schema:{type:"object",properties:{items:{type:"array",items:{type:"string"}}},required:["items"]}}
 ];
 function clSummary(){
   var td=today(),t={k:0,p:0,c:0,f:0};
   state.meals.forEach(function(m){t.k+=Number(m.kcal||0);t.p+=Number(m.protein||0);t.c+=Number(m.carbs||0);t.f+=Number(m.fat||0);});
   var wml=(state.water&&state.water.date===td)?Number(state.water.ml||0):0;
-  var lines=state.meals.map(function(m,i){return "- #"+(i+1)+" "+(m.type||"")+" : "+m.name+(m.menu?"":" "+Math.round(m.qty||100)+" g")+" · "+Math.round(m.kcal||0)+" kcal · "+Math.round(m.protein||0)+" g prot.";});
+  var lines=state.meals.map(function(m,i){return "- #"+(i+1)+" "+(m.type||"")+" : "+m.name+(m.menu?"":" "+Math.round(m.qty||100)+" g")+" · "+Math.round(m.kcal||0)+" kcal · "+Math.round(m.protein||0)+" g prot."+(m.per100?" ("+m.per100.kcal+" kcal/100 g)":"");});
   var pl=planFor(dowIdx());
   return "Date : "+td+" ("+new Date().toLocaleDateString("fr-CH",{weekday:"long"})+"), heure "+new Date().getHours()+" h\n"
     +"Repas du jour :\n"+(lines.join("\n")||"(aucun)")+"\n"
@@ -692,14 +692,29 @@ function clSummary(){
     +clWeightStats()+"\n"
     +"Programme du jour : "+(pl.kind==="walk"?pl.walk.title:pl.p.name)+(planDoneOn(td)?" (fait)":"");
 }
+/* valeurs pour 100 g depuis les champs *_100g (ou, par compatibilité, kcal/protein… absolus de la portion) */
+function clPer100(inp,base){
+  var q=Number(inp.qty_g)||0,r={};
+  var pairs=[["kcal","kcal_100g",900],["protein","protein_100g",100],["carbs","carbs_100g",100],["fat","fat_100g",100]];
+  for(var i=0;i<pairs.length;i++){
+    var k=pairs[i][0],v=inp[pairs[i][1]];
+    if(v==null&&inp[k]!=null&&q>0)v=Number(inp[k])/q*100;
+    if(v==null)v=base?base[k]:(k==="kcal"?null:0);
+    v=Number(v);if(!isFinite(v)||v<0||v>pairs[i][2])return null;
+    r[k]=Math.round(v*10)/10;
+  }
+  return r;
+}
+function clPortion(r,q){return {kcal:Math.round(r.kcal*q/100),protein:Math.round(r.protein*q/10)/10,carbs:Math.round(r.carbs*q/10)/10,fat:Math.round(r.fat*q/10)/10};}
 function clRunTool(name,inp){
   inp=inp||{};var td=today();
   switch(name){
     case "add_meal":
-      var q=Number(inp.qty_g),k=Number(inp.kcal);
-      if(!inp.name||!(q>0&&q<=5000)||!(k>=0&&k<=5000))return "Erreur : valeurs invalides, rien ajouté.";
+      /* valeurs pour 100 g : c'est l'app qui calcule la portion (le modèle se trompait en multipliant) */
+      var q=Number(inp.qty_g),r100=clPer100(inp,null);
+      if(!inp.name||!(q>0&&q<=5000)||!r100)return "Erreur : valeurs invalides (donne les valeurs pour 100 g entre 0 et 900 kcal), rien ajouté.";
       var ty=CL_TYPES.indexOf(inp.type)>=0?inp.type:defaultMealTypeByHour();
-      addMealObj({name:String(inp.name).slice(0,60),qty:Math.round(q),kcal:Math.round(k),protein:Math.round(fnum(inp.protein,0)*10)/10,carbs:Math.round(fnum(inp.carbs,0)*10)/10,fat:Math.round(fnum(inp.fat,0)*10)/10,type:ty});
+      addMealObj(Object.assign({name:String(inp.name).slice(0,60),qty:Math.round(q),type:ty,per100:r100},clPortion(r100,q)));
       return "Ajouté en "+ty+" (déjà compté dans ces totaux à jour, ne l'ajoute pas une 2e fois) :\n"+clSummary();
     case "delete_last_meal":
       if(!state.meals.length)return "Aucun repas à supprimer aujourd'hui.";
@@ -766,9 +781,11 @@ function clRunTool(name,inp){
     case "update_meal":
       var ui=Math.round(Number(inp.index))-1,m0=state.meals[ui];if(!m0)return "Erreur : numéro introuvable. "+clSummary();
       if(inp.name)m0.name=String(inp.name).slice(0,60);
+      /* valeurs de référence pour 100 g : celles données, sinon celles gardées à l'ajout, sinon déduites de la portion actuelle */
+      var q0=Number(m0.qty)||100,base=m0.per100||{kcal:m0.kcal/q0*100,protein:(m0.protein||0)/q0*100,carbs:(m0.carbs||0)/q0*100,fat:(m0.fat||0)/q0*100};
+      var nr=clPer100(inp,base);if(!nr)return "Erreur : valeurs pour 100 g invalides. "+clSummary();
       if(Number(inp.qty_g)>0&&Number(inp.qty_g)<=5000)m0.qty=Math.round(Number(inp.qty_g));
-      if(Number(inp.kcal)>=0&&Number(inp.kcal)<=5000&&inp.kcal!=null)m0.kcal=Math.round(Number(inp.kcal));
-      ["protein","carbs","fat"].forEach(function(f){if(inp[f]!=null&&Number(inp[f])>=0&&Number(inp[f])<=500)m0[f]=Math.round(Number(inp[f])*10)/10;});
+      m0.per100=nr;Object.assign(m0,clPortion(nr,Number(m0.qty)||100));
       if(CL_TYPES.indexOf(inp.type)>=0)m0.type=inp.type;
       save();renderMeals();renderToday();
       return "Corrigé : "+m0.name+". Totaux à jour :\n"+clSummary();
@@ -841,6 +858,7 @@ function clSystem(){
     +"Produits que j'ai achetés (utilise ces valeurs pour 100 g si je les mentionne) : "+LOCAL_FOODS.filter(function(f){return f.b;}).map(function(f){return f.n+" "+f.kcal+" kcal/"+f.p+" g prot.";}).join(" ; ")+".\n"
     +"Pour log_workout, reprends exactement un de ces noms d'exercice s'il correspond (sinon un nom clair et précis) : "+clExNames()+".\n"
     +"Ne fais jamais de calcul toi-même (durées, rythmes, moyennes, projections, dates) : recopie uniquement les chiffres calculés par l'app, et ne parle pas de « 30 jours » ou d'une autre durée qui n'y figure pas. Repères : une perte saine est de 0,5 à 1 % du poids par semaine ; au-delà, le risque de perdre du muscle augmente, d'où l'importance des protéines.\n"
+    +"Pour add_meal et update_meal, donne toujours les valeurs pour 100 g (ou 100 ml) telles qu'écrites sur l'étiquette, et la quantité : ne calcule jamais toi-même les kcal de la portion, l'app le fait. Si on te corrige une quantité ou une valeur, appelle update_meal au lieu de dire que c'est déjà bon.\n"
     +"N'écris jamais « noté », « ajouté » ou « enregistré » sans avoir appelé l'outil correspondant dans ce tour.\n"
     +"Ne propose jamais de viande. Pour les questions de progression, moyennes ou records, appelle get_history avant de répondre. Pour une séance ou une course décrite, enregistre-la (log_workout, log_run). Pour retirer ou corriger un aliment précis, utilise son numéro #n (delete_meal, update_meal) seulement si c'est clairement demandé ; en cas de doute, demande lequel. Si on te demande une idée de repas, propose 1 ou 2 options sans viande qui collent au reste de la journée (surtout les protéines), et ajoute les ingrédients à la liste de courses (add_grocery) seulement si on te le demande. Si une photo est jointe : repas ou aliment → identifie chaque aliment, estime les portions visibles et enregistre-les (add_meal) ; étiquette nutritionnelle → utilise ses valeurs pour la quantité indiquée (sinon demande la quantité) ; balance ou mètre ruban → enregistre la valeur lue ; si c'est flou ou ambigu, dis ce que tu vois et demande. Pour les chiffres (eau, kcal, protéines, reste), recopie les totaux renvoyés par le dernier outil appelé : ils incluent déjà ce qui vient d'être ajouté, ne refais aucune addition.\n\nDonnées de l'app avant ce message :\n"+clSummary();
 }
@@ -863,7 +881,7 @@ function clLabel(name,inp,out){
   inp=inp||{};if(CL_WRITE.indexOf(name)<0||/^Erreur/.test(String(out)))return null;
   var m;
   switch(name){
-    case "add_meal": return inp.name+" · "+Math.round(inp.qty_g)+" g · "+Math.round(inp.kcal)+" kcal";
+    case "add_meal": var lr=clPer100(inp,null);return inp.name+" · "+Math.round(inp.qty_g)+" g · "+(lr?clPortion(lr,Number(inp.qty_g)).kcal:"?")+" kcal";
     case "delete_last_meal": case "delete_meal": m=String(out).match(/Supprimé : ([^.\n]+)/);return m?"Supprimé : "+m[1]:null;
     case "update_meal": m=String(out).match(/Corrigé : ([^.\n]+)/);return m?"Corrigé : "+m[1]:null;
     case "add_water": return "Eau "+(inp.ml>0?"+":"")+Math.round(inp.ml)+" ml";
