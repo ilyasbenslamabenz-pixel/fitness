@@ -759,6 +759,7 @@ function clSystem(){
     +"Estime les portions de façon réaliste (valeurs des produits suisses courants) si la quantité manque, et dis-le. "
     +"Réponds en français, tutoiement, en 1 à 3 phrases courtes : ce que tu as noté (kcal et protéines) puis ce qu'il reste pour la journée. Pas de markdown, pas de listes. "
     +"Pour log_workout, reprends exactement un de ces noms d'exercice s'il correspond (sinon un nom clair et précis) : "+clExNames()+".\n"
+    +"N'écris jamais « noté », « ajouté » ou « enregistré » sans avoir appelé l'outil correspondant dans ce tour.\n"
     +"Ne propose jamais de viande. Pour les questions de progression, moyennes ou records, appelle get_history avant de répondre. Pour une séance ou une course décrite, enregistre-la (log_workout, log_run). Pour retirer ou corriger un aliment précis, utilise son numéro #n (delete_meal, update_meal) seulement si c'est clairement demandé ; en cas de doute, demande lequel. Si on te demande une idée de repas, propose 1 ou 2 options sans viande qui collent au reste de la journée (surtout les protéines), et ajoute les ingrédients à la liste de courses (add_grocery) seulement si on te le demande. Si une photo est jointe : repas ou aliment → identifie chaque aliment, estime les portions visibles et enregistre-les (add_meal) ; étiquette nutritionnelle → utilise ses valeurs pour la quantité indiquée (sinon demande la quantité) ; balance ou mètre ruban → enregistre la valeur lue ; si c'est flou ou ambigu, dis ce que tu vois et demande. Pour les chiffres (eau, kcal, protéines, reste), recopie les totaux renvoyés par le dernier outil appelé : ils incluent déjà ce qui vient d'être ajouté, ne refais aucune addition.\n\nDonnées de l'app avant ce message :\n"+clSummary();
 }
 function clLoadSdk(){
@@ -774,6 +775,26 @@ function clErrMsg(e){
   if(!s)return "Pas de connexion. Vérifie ton réseau et réessaie.";
   return "Erreur ("+s+"). Réessaie.";
 }
+/* ce qui a VRAIMENT été enregistré par un outil : affiché sous la réponse (✓), pour ne jamais se fier au texte seul */
+var CL_WRITE=["add_meal","delete_last_meal","delete_meal","update_meal","add_water","log_weight","log_steps","log_measures","log_workout","log_run","add_grocery"];
+function clLabel(name,inp,out){
+  inp=inp||{};if(CL_WRITE.indexOf(name)<0||/^Erreur/.test(String(out)))return null;
+  var m;
+  switch(name){
+    case "add_meal": return inp.name+" · "+Math.round(inp.qty_g)+" g · "+Math.round(inp.kcal)+" kcal";
+    case "delete_last_meal": case "delete_meal": m=String(out).match(/Supprimé : ([^.\n]+)/);return m?"Supprimé : "+m[1]:null;
+    case "update_meal": m=String(out).match(/Corrigé : ([^.\n]+)/);return m?"Corrigé : "+m[1]:null;
+    case "add_water": return "Eau "+(inp.ml>0?"+":"")+Math.round(inp.ml)+" ml";
+    case "log_weight": return "Poids "+fr(Math.round(Number(inp.kg)*10)/10)+" kg";
+    case "log_steps": return kfmt(inp.steps)+" pas";
+    case "log_measures": return "Mensurations"+(inp.waist_cm?" · taille "+fr(inp.waist_cm)+" cm":"")+(inp.hips_cm?" · hanches "+fr(inp.hips_cm)+" cm":"");
+    case "log_workout": return "Séance · "+(inp.exercises||[]).length+" exercice"+((inp.exercises||[]).length>1?"s":"");
+    case "log_run": return (inp.kind==="walk"?"Marche ":"Course ")+fr(inp.distance_km)+" km · "+Math.round(inp.duration_min)+" min";
+    case "add_grocery": m=String(out).match(/: (.+)\.$/);return m?"Courses : "+m[1]:null;
+  }
+  return null;
+}
+function clPending(){try{return JSON.parse(lsGet("evoClaudePending")||"null");}catch(e){return null;}}
 async function clSend(){
   var inp=$("clInput");if(!inp||clBusy)return;
   var text=inp.value.trim(),photo=clPhoto;if(!text&&!photo)return;
@@ -783,6 +804,9 @@ async function clSend(){
   var nImg=0;for(var hi=hist.length-1;hi>=0;hi--)if(hist[hi].img&&++nImg>3)delete hist[hi].img;
   clSaveHist(hist);inp.value="";clPhoto=null;renderClPhoto();
   clBusy=true;renderClaude(true);
+  /* marqueur « réponse en cours » : si l'app est fermée ou rechargée avant la fin, on le saura au retour */
+  lsSet("evoClaudePending",JSON.stringify({t:text,photo:!!photo,at:Date.now()}));
+  var saved=[],writeErr=false;
   try{
     var Anthropic=await clLoadSdk();
     var client=new Anthropic({apiKey:clKey(),dangerouslyAllowBrowser:true,maxRetries:1});
@@ -800,14 +824,22 @@ async function clSend(){
       msgs.push({role:"assistant",content:res.content});
       var results=res.content.filter(function(b){return b.type==="tool_use";}).map(function(b){
         var out;try{out=clRunTool(b.name,b.input);}catch(err){out="Erreur : "+err.message;}
+        var lb=clLabel(b.name,b.input,out);if(lb)saved.push(lb);else if(CL_WRITE.indexOf(b.name)>=0)writeErr=true;
         return {type:"tool_result",tool_use_id:b.id,content:out};
       });
       msgs.push({role:"user",content:results});
     }
-    hist=clHist();hist.push({r:"ai",t:reply||"C'est noté."});clSaveHist(hist);
+    var entry={r:"ai",t:reply||(saved.length?"C'est noté.":"")};
+    if(saved.length)entry.ok=saved;
+    /* le texte dit « noté » alors qu'aucun outil n'a rien enregistré : on prévient */
+    else if(!writeErr&&/\b(not[ée]|ajout[ée]|enregistr[ée]|supprim[ée]|corrig[ée])/i.test(reply)){entry.warn=1;entry.retry=text;}
+    hist=clHist();hist.push(entry);clSaveHist(hist);
   }catch(e){
-    hist=clHist();hist.push({r:"ai",t:clErrMsg(e),err:1});clSaveHist(hist);
+    var ee={r:"ai",t:clErrMsg(e)+(saved.length?"":" Rien n'a été enregistré."),err:1};
+    if(saved.length)ee.ok=saved;else if(!photo)ee.retry=text;
+    hist=clHist();hist.push(ee);clSaveHist(hist);
   }
+  lsDel("evoClaudePending");
   clBusy=false;renderClaude(false);
 }
 function renderClaude(thinking){
@@ -818,7 +850,15 @@ function renderClaude(thinking){
   }else if(!hist.length&&!thinking){
     box.innerHTML='';
   }else{
-    box.innerHTML=hist.slice(-12).map(function(x){return '<div class="cl-msg '+(x.r==="me"?"me":"ai")+(x.err?" err":"")+(x.img?" has-img":"")+'">'+(x.img?'<img src="'+x.img+'" alt="Photo envoyée">'+(x.t?'<span class="cl-cap">'+esc(x.t)+'</span>':''):esc(x.t))+'</div>';}).join("")
+    var base=Math.max(0,hist.length-12),pend=!thinking&&!clBusy?clPending():null;
+    box.innerHTML=hist.slice(-12).map(function(x,k){
+      var html='<div class="cl-msg '+(x.r==="me"?"me":"ai")+(x.err?" err":"")+(x.img?" has-img":"")+'">'+(x.img?'<img src="'+x.img+'" alt="Photo envoyée">'+(x.t?'<span class="cl-cap">'+esc(x.t)+'</span>':''):esc(x.t))+'</div>';
+      if(x.ok)html+='<div class="cl-ok">'+x.ok.map(function(l){return '<span>✓ '+esc(l)+'</span>';}).join("")+'</div>';
+      if(x.warn)html+='<div class="cl-ok warn"><span>⚠ Rien n\'a été enregistré</span></div>';
+      if(x.retry&&k===hist.length-base-1)html+='<button class="cl-retry" data-act="clRetry" data-i="'+(base+k)+'">Renvoyer</button>';
+      return html;
+    }).join("")
+      +(pend?'<div class="cl-ok warn"><span>⚠ Réponse interrompue (app fermée ou rechargée) : rien n\'a été enregistré</span></div>'+(pend.photo?'<div class="cl-note">Renvoie la photo.</div>':'<button class="cl-retry" data-act="clRetryPending">Renvoyer</button>'):'')
       +(thinking?'<div class="cl-msg ai typing"><i></i><i></i><i></i></div>':'');
     box.scrollTop=box.scrollHeight;
     /* les miniatures grandissent en chargeant : on redescend en bas une fois chargées */
@@ -3504,6 +3544,8 @@ document.addEventListener("click",function(e){
     case "clSugg": $("clInput").value=a.textContent; clSend(); break;
     case "clPhoto": $("clFile").click(); break;
     case "clPhotoDel": clPhoto=null; renderClPhoto(); break;
+    case "clRetry": var rh=clHist(),rx=rh[Number(a.dataset.i)];if(rx&&rx.retry){var rt=rx.retry;rh.splice(Number(a.dataset.i),1);if(rh.length&&rh[rh.length-1].r==="me"&&rh[rh.length-1].t===rt)rh.pop();clSaveHist(rh);$("clInput").value=rt;clSend();} break;
+    case "clRetryPending": var pp=clPending();lsDel("evoClaudePending");if(pp&&pp.t){var ph=clHist();if(ph.length&&ph[ph.length-1].r==="me"&&ph[ph.length-1].t===pp.t)ph.pop();clSaveHist(ph);$("clInput").value=pp.t;clSend();}else renderClaude(false); break;
     case "clClear": var clOld=clHist(); clSaveHist([]); renderClaude(false); snack("Conversation effacée","Annuler",function(){clSaveHist(clOld);renderClaude(false);},6000); break;
     case "clSaveKey": var kv=$("fClaudeKey").value.trim();
       if(!kv){try{localStorage.removeItem("evoClaudeKey");}catch(e){}toast("Clé supprimée");}
@@ -3574,6 +3616,8 @@ function swipeTabs(pageId,tabs,getTab,setTab){
 }
 swipeTabs("progress",PROG_TABS,function(){return progTab;},setProgTab);
 swipeTabs("meals",NUT_TABS,function(){return nutTab;},setNutTab);
+/* demande au navigateur de ne jamais effacer les données de l'app pour faire de la place */
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persisted().then(function(p){if(!p)navigator.storage.persist();}).catch(function(){});}catch(e){}
 /* mise à jour automatique : iOS garde l'app en mémoire pendant des heures, les nouvelles versions n'apparaissaient
    qu'après l'avoir fermée à la main. Au retour au premier plan, on compare la version en ligne avec celle chargée
    et on recharge, sauf pendant une séance guidée, une course ou une saisie en cours. */
