@@ -562,7 +562,31 @@ function estimateRunKcal(distKm,durMin){
 /* ===== Coach Claude : discussion sur l'Accueil pour noter repas, eau, poids, pas =====
    Modèle léger (Haiku 4.5, ~0,1 centime par message). La clé API reste sur ce téléphone (evoClaudeKey),
    elle n'est ni exportée ni synchronisée. Le SDK officiel n'est chargé qu'au premier message. */
-var CL_MODEL="claude-haiku-4-5",clBusy=false,clSdk=null;
+var CL_MODEL="claude-haiku-4-5",clBusy=false,clSdk=null,clPhoto=null; /* clPhoto = {b64, thumb} en attente d'envoi */
+/* photo réduite à 1024 px max en JPEG : ~1 200 tokens (≈ 0,1 centime), largement assez pour reconnaître un plat ou lire une étiquette */
+function clShrink(file,max,q){
+  return new Promise(function(ok,ko){
+    var url=URL.createObjectURL(file),img=new Image();
+    img.onload=function(){
+      var r=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight)),c=document.createElement("canvas");
+      c.width=Math.max(1,Math.round(img.naturalWidth*r));c.height=Math.max(1,Math.round(img.naturalHeight*r));
+      c.getContext("2d").drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);ok(c.toDataURL("image/jpeg",q));
+    };
+    img.onerror=function(){URL.revokeObjectURL(url);ko(new Error("image"));};
+    img.src=url;
+  });
+}
+function clPickPhoto(file){
+  if(!file)return;
+  Promise.all([clShrink(file,1024,0.8),clShrink(file,240,0.6)]).then(function(a){
+    clPhoto={b64:a[0].split(",")[1],thumb:a[1]};renderClPhoto();try{$("clInput").focus();}catch(e){}
+  }).catch(function(){toast("Photo illisible, essaie une autre");});
+}
+function renderClPhoto(){
+  var el=$("clPhotoPrev");if(!el)return;
+  el.hidden=!clPhoto;
+  el.innerHTML=clPhoto?'<img src="'+clPhoto.thumb+'" alt=""><span>Photo prête · ajoute un détail si tu veux (quantité, repas…)</span><button data-act="clPhotoDel" aria-label="Retirer la photo"><svg class="ic-s" aria-hidden="true"><use href="#i-xmark"/></svg></button>':"";
+}
 function clKey(){return lsGet("evoClaudeKey")||"";}
 function clHist(){try{var a=JSON.parse(lsGet("evoClaudeChat")||"[]");return Array.isArray(a)?a:[];}catch(e){return [];}}
 function clSaveHist(a){lsSet("evoClaudeChat",JSON.stringify(a.slice(-40)));}
@@ -636,7 +660,7 @@ function clSystem(){
     +"Quand il décrit ce qu'il a mangé, bu, pesé ou marché, enregistre-le directement avec les outils, sans demander de confirmation. "
     +"Estime les portions de façon réaliste (valeurs des produits suisses courants) si la quantité manque, et dis-le. "
     +"Réponds en français, tutoiement, en 1 à 3 phrases courtes : ce que tu as noté (kcal et protéines) puis ce qu'il reste pour la journée. Pas de markdown, pas de listes. "
-    +"Ne propose jamais de viande. Pour les chiffres (eau, kcal, protéines, reste), recopie les totaux renvoyés par le dernier outil appelé : ils incluent déjà ce qui vient d'être ajouté, ne refais aucune addition.\n\nDonnées de l'app avant ce message :\n"+clSummary();
+    +"Ne propose jamais de viande. Si une photo est jointe : repas ou aliment → identifie chaque aliment, estime les portions visibles et enregistre-les (add_meal) ; étiquette nutritionnelle → utilise ses valeurs pour la quantité indiquée (sinon demande la quantité) ; balance ou mètre ruban → enregistre la valeur lue ; si c'est flou ou ambigu, dis ce que tu vois et demande. Pour les chiffres (eau, kcal, protéines, reste), recopie les totaux renvoyés par le dernier outil appelé : ils incluent déjà ce qui vient d'être ajouté, ne refais aucune addition.\n\nDonnées de l'app avant ce message :\n"+clSummary();
 }
 function clLoadSdk(){
   if(clSdk)return Promise.resolve(clSdk);
@@ -653,16 +677,20 @@ function clErrMsg(e){
 }
 async function clSend(){
   var inp=$("clInput");if(!inp||clBusy)return;
-  var text=inp.value.trim();if(!text)return;
+  var text=inp.value.trim(),photo=clPhoto;if(!text&&!photo)return;
   if(!clKey()){toast("Ajoute ta clé dans Profil");showPage("profile");return;}
-  var hist=clHist();hist.push({r:"me",t:text});clSaveHist(hist);inp.value="";
+  var hist=clHist(),mine={r:"me",t:text};if(photo)mine.img=photo.thumb;hist.push(mine);
+  /* seules les 3 dernières miniatures sont gardées (place dans le téléphone) */
+  var nImg=0;for(var hi=hist.length-1;hi>=0;hi--)if(hist[hi].img&&++nImg>3)delete hist[hi].img;
+  clSaveHist(hist);inp.value="";clPhoto=null;renderClPhoto();
   clBusy=true;renderClaude(true);
   try{
     var Anthropic=await clLoadSdk();
     var client=new Anthropic({apiKey:clKey(),dangerouslyAllowBrowser:true,maxRetries:1});
     /* contexte : les 8 derniers messages texte, en commençant par un message de l'utilisateur */
     var ctx=hist.slice(-8);while(ctx.length&&ctx[0].r!=="me")ctx.shift();
-    var msgs=ctx.map(function(x){return {role:x.r==="me"?"user":"assistant",content:x.t};});
+    var msgs=ctx.map(function(x){return {role:x.r==="me"?"user":"assistant",content:(x.img?"[photo déjà analysée] ":"")+(x.t||"(photo)")};});
+    if(photo)msgs[msgs.length-1].content=[{type:"image",source:{type:"base64",media_type:"image/jpeg",data:photo.b64}},{type:"text",text:text||"Analyse cette photo et enregistre ce que j'ai mangé."}];
     var reply="",sys=clSystem(); /* figé au début : sinon Claude recompte ce qu'il vient d'ajouter */
     for(var it=0;it<6;it++){
       var res=await client.messages.create({model:CL_MODEL,max_tokens:1024,system:sys,tools:CL_TOOLS,messages:msgs});
@@ -691,7 +719,7 @@ function renderClaude(thinking){
   }else if(!hist.length&&!thinking){
     box.innerHTML='<div class="cl-empty">Ex. « 200 g de skyr nature et une banane » ou « j\'ai bu 50 cl ».<div class="cl-sugg"><button data-act="clSugg">200 g de skyr nature et une banane</button><button data-act="clSugg">Il me reste combien de protéines ?</button></div></div>';
   }else{
-    box.innerHTML=hist.slice(-12).map(function(x){return '<div class="cl-msg '+(x.r==="me"?"me":"ai")+(x.err?" err":"")+'">'+esc(x.t)+'</div>';}).join("")
+    box.innerHTML=hist.slice(-12).map(function(x){return '<div class="cl-msg '+(x.r==="me"?"me":"ai")+(x.err?" err":"")+(x.img?" has-img":"")+'">'+(x.img?'<img src="'+x.img+'" alt="Photo envoyée">':'')+(x.t?esc(x.t):'')+'</div>';}).join("")
       +(thinking?'<div class="cl-msg ai typing"><i></i><i></i><i></i></div>':'');
     box.scrollTop=box.scrollHeight;
   }
@@ -699,6 +727,9 @@ function renderClaude(thinking){
   var c=$("clCost");if(c)c.textContent=key?"Coût ce mois : ≈ "+clCost().toFixed(clCost()<1?3:2).replace(".",",")+" $":"";
   var cl=$("clClearBtn");if(cl)cl.hidden=!hist.length;
 }
+document.addEventListener("change",function(e){
+  if(e.target&&e.target.id==="clFile"){var f=e.target.files&&e.target.files[0];e.target.value="";clPickPhoto(f);}
+});
 document.addEventListener("keydown",function(e){
   if(e.target&&e.target.id==="clInput"&&e.key==="Enter"&&!e.isComposing){e.preventDefault();clSend();}
 });
@@ -3312,6 +3343,8 @@ document.addEventListener("click",function(e){
     case "foodMore": foodMoreOpen=!foodMoreOpen; var fr0=document.querySelector("#foodSearchResults .fr-rest");if(fr0)fr0.hidden=!foodMoreOpen; a.textContent=foodMoreOpen?"Moins de choix ▴":"Voir "+(document.querySelectorAll("#foodSearchResults .fr-rest .food-result").length)+" autres choix ▾"; fitSearchSheet(); break;
     case "clSend": clSend(); break;
     case "clSugg": $("clInput").value=a.textContent; clSend(); break;
+    case "clPhoto": $("clFile").click(); break;
+    case "clPhotoDel": clPhoto=null; renderClPhoto(); break;
     case "clClear": clSaveHist([]); renderClaude(false); break;
     case "clSaveKey": var kv=$("fClaudeKey").value.trim();
       if(!kv){try{localStorage.removeItem("evoClaudeKey");}catch(e){}toast("Clé supprimée");}
