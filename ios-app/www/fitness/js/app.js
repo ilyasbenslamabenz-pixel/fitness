@@ -1713,15 +1713,8 @@ function renderGuided(){
   else if(last>0)lastTxt=" · dernière fois "+fr(last)+" kg";
   $("gExSub").innerHTML=esc(e.t)+lastTxt
     +(pg&&pg.up?'<div class="g-prog">Toutes tes séries réussies : essaie '+fr(pg.to)+' kg</div>':'');
-  var ic=$("gExIcon"),ph=exPhotos(e.n);
-  ic.classList.toggle("has-photo",!!ph);
-  if(!ph||ic.dataset.ex!==e.n){
-    ic.dataset.ex=ph?e.n:"";
-    if(ph){
-      ic.innerHTML=ph.map(function(sl,i){return '<img class="gph'+(i?"":" on")+'" src="'+photoUrl(sl)+'" alt="">';}).join("")+muscleMapSVG(e.n);
-      startPhotoCycle(ic);
-    }else{stopPhotoCycle();var mmh=muscleMapSVG(e.n);ic.classList.toggle("has-map",!!mmh);ic.innerHTML=mmh||p.icon||'<svg class="ic-s" aria-hidden="true"><use href="#i-dumbbell"/></svg>';}
-  }
+  /* écran de séance épuré : uniquement les séries, pas de photo */
+  var ic=$("gExIcon");if(ic&&ic.innerHTML){stopPhotoCycle();ic.innerHTML="";ic.dataset.ex="";}
 
   var st=mk[e.n]||{},wv=(st.w!=null?st.w:defaultWeight(e)),rt=repTarget(e),rv=repsFor(mk,e),vals="";
   if(e.w)vals+='<div class="val-group"><button data-act="w-" data-ex="'+esc(e.n)+'"><svg class="ic-s" aria-hidden="true"><use href="#i-minus"/></svg></button><div class="val"><input class="wval gw-in" data-ex="'+esc(e.n)+'" type="text" inputmode="decimal" value="'+num(wv)+'" aria-label="Charge en kg"><span>KG</span></div><button data-act="w+" data-ex="'+esc(e.n)+'"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button></div>';

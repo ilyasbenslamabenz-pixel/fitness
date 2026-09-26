@@ -1013,3 +1013,8 @@ input[type=search]::-webkit-search-decoration{-webkit-appearance:none}
 .guided-ic.has-map .mmap polygon{fill:var(--ring-track)}
 .guided-ic.has-map .mmap polygon.mp{fill:#e5383b}
 .guided-ic.has-map .mmap polygon.ms{fill:#f2a0a1}
+/* séance guidée sans photo : seul l'écran de repos occupe cette zone, dans le flux */
+#gExIcon{display:none}
+.guided-media .g-rest{position:relative;top:auto;left:auto;right:auto;bottom:auto;margin:14px 22px 0;padding:18px 12px}
+.guided-body{justify-content:flex-start;flex:0 0 auto}
+.guided-name{margin-top:22px}
