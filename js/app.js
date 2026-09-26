@@ -628,9 +628,9 @@ function estimateRunKcal(distKm,durMin){
   return 0;
 }
 /* ===== Coach Claude : discussion sur l'Accueil pour noter repas, eau, poids, pas =====
-   Modèle léger (Haiku 4.5, ~0,1 centime par message). La clé API reste sur ce téléphone (evoClaudeKey),
+   Modèle : Opus 4.8 (5 $ / 25 $ par million de tokens, ~1 à 3 centimes par message). La clé API reste sur ce téléphone (evoClaudeKey),
    elle n'est ni exportée ni synchronisée. Le SDK officiel n'est chargé qu'au premier message. */
-var CL_MODEL="claude-haiku-4-5",clBusy=false,clSdk=null,clPhoto=null; /* clPhoto = {b64, thumb} en attente d'envoi */
+var CL_MODEL="claude-opus-4-8",CL_PRICE={in:5,out:25},clBusy=false,clSdk=null,clPhoto=null; /* clPhoto = {b64, thumb} en attente d'envoi */
 /* photo réduite à 1024 px max en JPEG : ~1 200 tokens (≈ 0,1 centime), largement assez pour reconnaître un plat ou lire une étiquette */
 function clShrink(file,max,q){
   return new Promise(function(ok,ko){
@@ -660,7 +660,7 @@ function clHist(){try{var a=JSON.parse(lsGet("evoClaudeChat")||"[]");return Arra
 function clSaveHist(a){lsSet("evoClaudeChat",JSON.stringify(a.slice(-40)));}
 function clMonth(){return today().slice(0,7);}
 function clCost(){try{var c=JSON.parse(lsGet("evoClaudeCost")||"{}");return c.m===clMonth()?Number(c.usd)||0:0;}catch(e){return 0;}}
-function clAddCost(u){if(!u)return;var usd=clCost()+(Number(u.input_tokens||0)*1+Number(u.output_tokens||0)*5)/1e6;lsSet("evoClaudeCost",JSON.stringify({m:clMonth(),usd:usd}));}
+function clAddCost(u){if(!u)return;var usd=clCost()+(Number(u.input_tokens||0)*CL_PRICE.in+Number(u.output_tokens||0)*CL_PRICE.out)/1e6;lsSet("evoClaudeCost",JSON.stringify({m:clMonth(),usd:usd}));}
 var CL_TYPES=["Petit-déjeuner","Déjeuner","Dîner","Collation"];
 var CL_TOOLS=[
   {name:"add_meal",description:"Ajoute un aliment au journal du jour. Donne les valeurs POUR 100 g (ou 100 ml), exactement comme sur l'étiquette ou une table nutritionnelle, et la quantité mangée : l'app calcule elle-même la portion. Liquides : 1 ml = 1 g. Un appel par aliment distinct.",
