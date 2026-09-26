@@ -1,10 +1,10 @@
 :root{
-  --bg:#050a17; --surface:linear-gradient(165deg,rgba(255,255,255,.10),rgba(255,255,255,.025) 45%,rgba(255,255,255,.015)); --surface2:rgba(255,255,255,.07); --hair:rgba(255,255,255,.13);
+  --bg:#01030a; --surface:linear-gradient(165deg,rgba(120,150,210,.075),rgba(120,150,210,.02) 45%,rgba(120,150,210,.012)); --surface2:rgba(140,165,220,.06); --hair:rgba(160,185,235,.10);
   --text:#f5f8fc; --muted:#90a4c2; --faint:#5f7292;
-  --primary:#e3ae4a; --primary-dim:#3a2c12; --accent:#4f8fe6; --accent-dim:#142a4a; --accent-text:#7db4f5;
+  --primary:#e3ae4a; --primary-dim:#3a2c12; --accent:#2c63c4; --accent-dim:#0c1d3d; --accent-text:#5a8fe0;
   --on-primary:#1c1405; --gold-grad:linear-gradient(90deg,#f7dc95,#e3ae4a 55%,#c48a2c); --gold-grad-v:linear-gradient(180deg,#f5d38a,#e3ae4a);
   --warn:#ff453a; --warn-dim:#4a201c;
-  --on-accent:#04101f;
+  --on-accent:#ffffff;
   --radius:24px; --radius-sm:16px;
   --glass-blur:blur(26px) saturate(180%);
   --shadow-card:inset 0 1px 0 rgba(255,255,255,.22),inset 0 0 0 1px rgba(255,255,255,.03),0 16px 36px -16px rgba(0,0,0,.6),0 2px 8px rgba(0,0,0,.3);
@@ -12,9 +12,9 @@
   --font:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI','Roboto','Oxygen','Ubuntu','Cantarell','Fira Sans','Droid Sans','Helvetica Neue',sans-serif;
   --display:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI','Roboto',system-ui,sans-serif;
   --safe-top:env(safe-area-inset-top,0px); --safe-bot:env(safe-area-inset-bottom,0px);
-  --nav-bg:linear-gradient(165deg,rgba(255,255,255,.14),rgba(255,255,255,.04) 55%,rgba(255,255,255,.02)),rgba(8,14,26,.82);
+  --nav-bg:linear-gradient(165deg,rgba(255,255,255,.14),rgba(255,255,255,.04) 55%,rgba(255,255,255,.02)),rgba(4,8,18,.9);
   --nav-border:rgba(255,255,255,.16);
-  --halo1:rgba(227,174,74,.20); --halo2:rgba(79,143,230,.24); --halo3:rgba(40,74,150,.24);
+  --halo1:rgba(227,174,74,.20); --halo2:rgba(30,60,130,.16); --halo3:rgba(20,40,100,.16);
   --complete-top:#1d1708;
   --ring-track:#3c4145;
 }
@@ -81,7 +81,7 @@ a{color:inherit;text-decoration:none}
 .hero .wt{font-family:var(--display);font-weight:700;font-size:64px;line-height:.92;letter-spacing:-.03em}
 .hero .wt small{font-size:22px;color:var(--muted);font-weight:600;margin-left:4px}
 .delta{display:inline-flex;align-items:center;gap:5px;font-size:13.5px;font-weight:600;padding:5px 10px;border-radius:999px;margin-top:10px}
-.delta.down{color:var(--accent-text);background:rgba(79,143,230,.14)}
+.delta.down{color:var(--accent-text);background:rgba(44,99,196,.14)}
 .delta.up{color:#ff6b5f;background:rgba(227,174,74,.14)}
 .delta.flat{color:var(--muted);background:var(--surface2)}
 .bar{height:8px;border-radius:99px;background:var(--surface2);overflow:hidden;margin-top:16px}
@@ -94,7 +94,7 @@ a{color:inherit;text-decoration:none}
 .btn:active{transform:scale(.96);filter:brightness(1.12)}
 .btn.primary{background:var(--gold-grad-v);border-color:transparent;color:var(--on-primary);box-shadow:0 6px 18px -8px rgba(227,174,74,.45),var(--shadow-pop)}
 .btn.ghost{background:var(--surface2)}
-.btn.mint{background:linear-gradient(180deg,#7db4f5,var(--accent));color:#ffffff;border-color:transparent;box-shadow:0 6px 18px -8px rgba(79,143,230,.4),var(--shadow-pop)}
+.btn.mint{background:linear-gradient(180deg,#5a8fe0,var(--accent));color:#ffffff;border-color:transparent;box-shadow:0 6px 18px -8px rgba(44,99,196,.4),var(--shadow-pop)}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
 /* next session card */
@@ -596,14 +596,14 @@ button.lrow:active{background:var(--surface2)}
 .complete{position:fixed;inset:0;z-index:85;display:none;flex-direction:column;max-width:520px;margin:0 auto;overflow:hidden;
   background:linear-gradient(180deg,var(--complete-top) 0%,var(--bg) 46%);color:var(--text)}
 .complete.on{display:flex}
-.complete-glow1{position:absolute;top:-60px;left:-40px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(79,143,230,.22),transparent 70%)}
+.complete-glow1{position:absolute;top:-60px;left:-40px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(44,99,196,.22),transparent 70%)}
 .complete-glow2{position:absolute;top:40px;right:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(227,174,74,.20),transparent 70%)}
 .complete-check{position:relative;text-align:center;margin-top:64px}
 .complete-check .ic{width:84px;height:84px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;margin:0 auto;box-shadow:0 14px 34px -10px rgba(227,174,74,.45);font-size:38px;color:#ffffff}
 .complete-check h2{font-size:25px;font-weight:800;margin-top:18px}
 .complete-check .sub{font-size:13.5px;color:var(--muted);margin-top:6px}
 .complete-pr{position:relative;display:flex;align-items:center;justify-content:center;margin-top:16px}
-.complete-pr span{background:rgba(227,174,74,.14);border:1px solid rgba(79,143,230,.35);color:#f7dc95;font-size:12px;font-weight:700;padding:7px 13px;border-radius:999px}
+.complete-pr span{background:rgba(227,174,74,.14);border:1px solid rgba(44,99,196,.35);color:#f7dc95;font-size:12px;font-weight:700;padding:7px 13px;border-radius:999px}
 .complete-stats{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:26px 24px 0}
 .complete-stats div{background:var(--surface);border:1px solid var(--hair);border-radius:16px;padding:14px 6px;text-align:center;box-shadow:var(--shadow-pop)}
 .complete-stats b{font-size:19px;font-weight:800;display:block}
@@ -848,7 +848,7 @@ button.stat:active{transform:scale(.97)}
 .g-strip::-webkit-scrollbar{display:none}
 .gst{flex:0 0 auto;width:34px;height:34px;border-radius:50%;background:var(--surface2);border:1px solid var(--hair);color:var(--muted);font-size:13px;font-weight:700}
 .gst.part{border-color:var(--primary);color:var(--primary)}
-.gst.done{background:rgba(79,143,230,.22);border-color:transparent;color:var(--accent-text)}
+.gst.done{background:rgba(44,99,196,.22);border-color:transparent;color:var(--accent-text)}
 .gst.cur{background:var(--gold-grad);color:var(--on-primary);border-color:transparent;transform:scale(1.08)}
 .guided-name{margin-top:8px}
 .guided-name h3{font-size:22px}
