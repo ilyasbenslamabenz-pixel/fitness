@@ -36,7 +36,7 @@
   },2500);
 })();
 </script>
-<link rel="stylesheet" href="/fitness/css/app.css?v=15">
+<link rel="stylesheet" href="/fitness/css/app.css?v=16">
 <script>
 (function(){
   try{
@@ -390,6 +390,12 @@
       <label class="lrow"><span class="lrow-ic" style="color:#5a8fe0"><svg class="ic-s" aria-hidden="true"><use href="#i-drop_fill"/></svg></span><span class="lrow-t">Eau</span><input class="lrow-v" id="fWater" type="number" inputmode="decimal" step="0.1"><span class="lrow-u">L</span></label>
     </div>
     <button class="btn primary" style="margin-top:14px" data-act="saveProfile">Enregistrer les objectifs</button>
+    <div class="group-h">Montre WHOOP</div>
+    <div class="card list">
+      <div class="lrow"><span class="lrow-ic" style="color:#e3ae4a"><svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg></span><span class="lrow-t" id="whoopStatus">Non connecté</span></div>
+    </div>
+    <div class="row2" id="whoopBtns" style="margin-top:12px"></div>
+    <div class="group-f">Dépense calorique mesurée, récupération, sommeil et effort, repris sur l'Accueil et par le coach.</div>
     <div class="group-h">Coach Claude</div>
     <div class="card list">
       <label class="lrow"><span class="lrow-ic" style="color:#d0875a"><svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg></span><span class="lrow-t">Clé API</span><input class="lrow-v" id="fClaudeKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="sk-ant-…"></label>
@@ -696,7 +702,7 @@
 <div class="snack" id="snack"><div class="msg" id="snackMsg"></div><button data-act="snackAct" id="snackBtn">Annuler</button></div>
 <div class="toast" id="toast" hidden></div>
 
-<script src="/fitness/js/app.js?v=65"></script>
+<script src="/fitness/js/app.js?v=66"></script>
 <script src="/fitness/js/boot.js?v=3"></script>
 </body>
 </html>

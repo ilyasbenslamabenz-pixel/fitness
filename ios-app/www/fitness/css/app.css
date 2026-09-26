@@ -1025,3 +1025,9 @@ input[type=search]::-webkit-search-decoration{-webkit-appearance:none}
 .glass.part button{color:#fff!important}
 .glass.full button{color:#06203a!important;font-size:20px}
 :root[data-theme="light"] .glass{background:#dfe6ef!important}
+/* WHOOP : récupération, sommeil, effort sous la dépense du jour */
+.wh-strip{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px;margin-top:10px}
+.wh-chip{background:var(--surface2);border-radius:12px;padding:8px 6px;text-align:center}
+.wh-chip b{display:block;font-size:17px;color:var(--text)}
+.wh-chip span{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+.wh-chip.good b{color:#34c77b}.wh-chip.mid b{color:#e3ae4a}.wh-chip.low b{color:var(--warn)}

@@ -3,6 +3,8 @@
 var CFG={apiKey:"AIzaSyDgvRLAmyY86814Vuu_xqXb-TVJqUYeV2I",authDomain:"fitness-f423a.firebaseapp.com",projectId:"fitness-f423a",storageBucket:"fitness-f423a.firebasestorage.app",messagingSenderId:"186607401810",appId:"1:186607401810:web:309ca695d884a6ec96588b"};
 var KEY="evoFitV3", OLDKEY="evoFitCoachV2", BACKUPKEY="evoFitV3_backup";
 var START_DATE="2026-09-21";
+/* adresse du relais WHOOP (cloudflare-worker/whoop.js) une fois déployé, ex. "https://evo-whoop.xxx.workers.dev" */
+var WHOOP_WORKER="";
 
 /* programme perte de poids : pecs 2×/semaine (haut et intérieur), dos pour la posture,
    fessiers et gainage pour les hanches ; la graisse part via le déficit et le cardio */
@@ -509,6 +511,7 @@ function merge(p){
   if(typeof p.sessionCategory==="string")state.sessionCategory=p.sessionCategory;
   if(typeof p.sessionAutoDay==="string")state.sessionAutoDay=p.sessionAutoDay;
   if(p.runProg&&typeof p.runProg==="object")state.runProg=p.runProg;
+  if(p.whoop&&typeof p.whoop==="object"&&p.whoop.days)state.whoop=p.whoop;
 }
 function normalizeState(){
   if(!/^\d{4}-\d{2}-\d{2}$/.test(state.profile.startDate||""))state.profile.startDate=START_DATE;
@@ -690,6 +693,7 @@ function clSummary(){
     +"Reste : "+Math.max(0,Math.round(Number(state.profile.cal||2400)-t.k))+" kcal · "+Math.max(0,Math.round(fnum(state.macro.protein,155)-t.p))+" g de protéines\n"
     +"Eau bue : "+wml+" / "+Math.round(Number(state.waterGoal||3)*1000)+" ml (reste "+Math.max(0,Math.round(Number(state.waterGoal||3)*1000)-wml)+" ml) · Pas : "+stepsOn(td)+" · Dépense estimée : "+dayBurn(td).total+" kcal\n"
     +clWeightStats()+"\n"
+    +(whoopDay(td)?"WHOOP aujourd'hui : "+whoopLine(whoopDay(td))+" (si la récupération est basse, < 34 %, conseille une séance légère ; élevée, > 66 %, séance normale ou intense)\n":"")
     +"Programme du jour : "+(pl.kind==="walk"?pl.walk.title:pl.p.name)+(planDoneOn(td)?" (fait)":"");
 }
 /* valeurs pour 100 g depuis les champs *_100g (ou, par compatibilité, kcal/protein… absolus de la portion) */
@@ -1025,7 +1029,15 @@ function dayBurn(d){
     var dur=Number(r.dur)||0,gross=Number(r.kcal)||(r.walk?estimateWalkDistKcal(Number(r.dist)||0):estimateRunKcal(Number(r.dist)||0,dur));
     cardioK+=Math.max(0,Math.round(gross-w*dur/60));
   });
-  return {bmr:bmr,base:base,steps:stepsK,sess:sessK,cardio:cardioK,total:base+stepsK+sessK+cardioK};
+  var est={bmr:bmr,base:base,steps:stepsK,sess:sessK,cardio:cardioK,total:base+stepsK+sessK+cardioK};
+  /* montre WHOOP : dépense mesurée (fréquence cardiaque) à la place de l'estimation ; pour la journée en cours,
+     on ajoute la dépense de repos jusqu'à minuit pour rester comparable à l'objectif du jour */
+  var wd=whoopDay(d);
+  if(wd&&wd.kcal>0){
+    var rest=0;if(wd.ongoing&&d===today()){var n=new Date(),left=Math.max(0,24-n.getHours()-n.getMinutes()/60);rest=Math.round(bmr*left/24);}
+    est.whoop={kcal:wd.kcal,rest:rest};est.total=wd.kcal+rest;
+  }
+  return est;
 }
 function kfmt(n){return Math.round(n).toLocaleString("fr-CH");}
 function renderBurn(){
@@ -1038,7 +1050,9 @@ function renderBurn(){
   box.innerHTML='<div class="burn3"><div><b>'+kfmt(b.total)+'</b><span>dépensé</span></div>'
     +'<div class="'+(bal<=0?"good":"bad")+'"><b>'+(bal<=0?"−":"+")+kfmt(Math.abs(bal))+'</b><span>'+(bal<=0?"déficit":"surplus")+'</span></div>'
     +'<button class="burn-steps" data-act="openSteps"><b>'+kfmt(st)+'</b><span>pas / '+kfmt(STEP_GOAL)+'</span><i><em style="width:'+Math.min(100,Math.round(st/STEP_GOAL*100))+'%"></em></i></button></div>'
-    +'<div class="burn-detail">Dépense estimée : '+parts.join(' + ')+' kcal'+(state.profile.height&&state.profile.age?'':' · <u data-act="go" data-page="profile">indique ta taille et ton âge</u> pour plus de précision')+'</div>';
+    +(b.whoop?'<div class="burn-detail">Dépense mesurée par WHOOP : '+kfmt(b.whoop.kcal)+' kcal'+(b.whoop.rest?' + repos jusqu\'à minuit '+kfmt(b.whoop.rest)+' kcal':'')+'</div>'
+      :'<div class="burn-detail">Dépense estimée : '+parts.join(' + ')+' kcal'+(state.profile.height&&state.profile.age?'':' · <u data-act="go" data-page="profile">indique ta taille et ton âge</u> pour plus de précision')+'</div>')
+    +whoopStripHTML(d);
 }
 /* marche : distance = pas × longueur de foulée moyenne (~0.762 m), coût ~0.5 kcal/kg/km (environ la moitié de la course) */
 function estimateStepsKcal(steps){
@@ -2981,6 +2995,9 @@ function renderProfile(){
   $("fStart").value=state.profile.start;$("fTarget").value=state.profile.target;$("fCal").value=state.profile.cal;
   $("fCarbs").value=state.macro.carbs;$("fProt").value=state.macro.protein;$("fFat").value=state.macro.fat;$("fWater").value=state.waterGoal;
   renderProgList();
+  var wst=$("whoopStatus");if(wst){var wt=whoopTok(),wu=state.whoop&&state.whoop.updated;
+    wst.innerHTML=!WHOOP_WORKER?'Relais pas encore installé (voir le guide).':(wt?'Connecté'+(wu?' · synchro '+new Date(wu).toLocaleTimeString("fr-CH",{hour:"2-digit",minute:"2-digit"}):''):'Non connecté');
+    $("whoopBtns").innerHTML=wt?'<button class="btn" data-act="whoopSync">Synchroniser</button><button class="btn ghost" data-act="whoopDisconnect">Déconnecter</button>':'<button class="btn" data-act="whoopConnect"'+(WHOOP_WORKER?'':' disabled')+'>Connecter WHOOP</button>';}
   var ks=$("clKeyStatus");if(ks){var kk=clKey();ks.innerHTML=kk?'Clé enregistrée sur ce téléphone : <b class="good">…'+esc(kk.slice(-4))+'</b>':'Aucune clé : le coach Claude de l\'Accueil est désactivé.';}
   var bs=$("backupStatus");if(bs){var dn=daysSinceBackup();bs.innerHTML='Dernière sauvegarde : <b class="'+(dn==null||dn>=7?"bad":"good")+'">'+backupLabel()+'</b>'+(cloudUser?" · automatique (cloud)":" · connecte-toi ou exporte régulièrement");}
 }
@@ -3643,6 +3660,9 @@ document.addEventListener("click",function(e){
     case "foodPick": pickFoodResult(Number(a.dataset.i)); break;
     case "foodMore": foodMoreOpen=!foodMoreOpen; var fr0=document.querySelector("#foodSearchResults .fr-rest");if(fr0)fr0.hidden=!foodMoreOpen; a.textContent=foodMoreOpen?"Moins de choix ▴":"Voir "+(document.querySelectorAll("#foodSearchResults .fr-rest .food-result").length)+" autres choix ▾"; fitSearchSheet(); break;
     case "wPt": showWeightTip(Number(a.dataset.i)); break;
+    case "whoopConnect": whoopConnect(); break;
+    case "whoopDisconnect": whoopDisconnect(); break;
+    case "whoopSync": whoopSync(true,7); toast("Synchro WHOOP…"); break;
     case "clSend": clSend(); break;
     case "clSugg": $("clInput").value=a.textContent; clSend(); break;
     case "clPhoto": $("clFile").click(); break;
@@ -3881,6 +3901,99 @@ function haptic(kind){
   }catch(e){}
 }
 
+/* ===== montre WHOOP : connexion via le relais, synchro des 7 derniers jours ===== */
+function whoopTok(){try{return JSON.parse(lsGet("evoWhoop")||"null");}catch(e){return null;}}
+function whoopDay(d){return state.whoop&&state.whoop.days&&state.whoop.days[d]||null;}
+function whoopLine(w){
+  var p=[];
+  if(w.rec!=null)p.push("récupération "+w.rec+" %");
+  if(w.sleep!=null)p.push("sommeil "+w.sleep+" %"+(w.sleepH?" ("+fr(w.sleepH)+" h)":""));
+  if(w.strain!=null)p.push("effort "+fr(w.strain)+"/21");
+  if(w.kcal)p.push(kfmt(w.kcal)+" kcal"+(w.ongoing?" depuis le réveil":""));
+  if(w.hrv)p.push("VFC "+w.hrv+" ms");
+  if(w.rhr)p.push("FC repos "+w.rhr);
+  return p.join(" · ");
+}
+function whoopStripHTML(d){
+  var w=whoopDay(d);if(!w)return "";
+  function chip(lab,val,cls){return '<div class="wh-chip'+(cls?" "+cls:"")+'"><b>'+val+'</b><span>'+lab+'</span></div>';}
+  var rc=w.rec==null?"":(w.rec>=67?"good":w.rec>=34?"mid":"low");
+  return '<div class="wh-strip">'+(w.rec!=null?chip("récupération",w.rec+" %",rc):"")+(w.sleep!=null?chip("sommeil",w.sleep+" %"):"")+(w.strain!=null?chip("effort",fr(w.strain)):"")+'</div>';
+}
+function whoopConnect(){
+  if(!WHOOP_WORKER){toast("Relais WHOOP pas encore installé");return;}
+  var st="";var a=new Uint8Array(16);crypto.getRandomValues(a);a.forEach(function(x){st+=("0"+x.toString(16)).slice(-2);});
+  lsSet("evoWhoopState",st);location.href=WHOOP_WORKER.replace(/\/$/,"")+"/login?state="+st;
+}
+function whoopDisconnect(){try{localStorage.removeItem("evoWhoop");}catch(e){}state.whoop=null;save();renderAll();renderProfile();toast("WHOOP déconnecté");}
+/* retour de la page de connexion WHOOP : jetons dans le fragment (#whoop=…) */
+function whoopHandleReturn(){
+  var h=location.hash||"";if(h.indexOf("#whoop")!==0)return;
+  try{history.replaceState(null,"",location.pathname+location.search);}catch(e){}
+  if(h.indexOf("#whoop_error=")===0){toast("Connexion WHOOP refusée : "+decodeURIComponent(h.slice(13)).slice(0,60));return;}
+  try{
+    var b=h.slice(7).replace(/-/g,"+").replace(/_/g,"/");while(b.length%4)b+="=";
+    var t=JSON.parse(decodeURIComponent(escape(atob(b))));
+    if(!t.a||t.s!==lsGet("evoWhoopState")){toast("Connexion WHOOP invalide, réessaie");return;}
+    lsSet("evoWhoop",JSON.stringify({a:t.a,r:t.r,e:t.e}));lsDel("evoWhoopState");
+    toast("WHOOP connecté");whoopSync(true,30);
+  }catch(e){toast("Connexion WHOOP invalide, réessaie");}
+}
+var whoopBusy=false;
+function whoopPost(path,body){
+  return fetch(WHOOP_WORKER.replace(/\/$/,"")+path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
+    .then(function(r){return r.json().then(function(d){d.__status=r.status;return d;});});
+}
+function whoopFresh(t,force){
+  if(!force&&t.e&&t.e>Date.now()+60000)return Promise.resolve(t);
+  return whoopPost("/refresh",{refresh_token:t.r}).then(function(d){
+    if(!d.a)throw new Error(d.error||"refresh");
+    var n={a:d.a,r:d.r||t.r,e:d.e};lsSet("evoWhoop",JSON.stringify(n));return n;
+  });
+}
+function whoopSync(force,days){
+  var t=whoopTok();if(!WHOOP_WORKER||!t||whoopBusy||navigator.onLine===false)return;
+  var last=state.whoop&&state.whoop.updated||0;if(!force&&Date.now()-last<15*60000)return;
+  whoopBusy=true;
+  whoopFresh(t,false).then(function(t2){
+    return whoopPost("/data",{access_token:t2.a,days:days||7}).then(function(d){
+      if(d.__status===401)return whoopFresh(t2,true).then(function(t3){return whoopPost("/data",{access_token:t3.a,days:days||7});});
+      return d;
+    });
+  }).then(function(d){
+    if(!d||!d.cycles)throw new Error(d&&d.error||"données");
+    whoopApply(d);whoopBusy=false;
+  }).catch(function(e){whoopBusy=false;if(force)toast("Synchro WHOOP impossible");console.warn("WHOOP",e);});
+}
+function whoopApply(d){
+  var days=(state.whoop&&state.whoop.days)||{},byCycle={};
+  (d.cycles||[]).forEach(function(c){
+    /* un cycle WHOOP commence à l'endormissement : le jour vécu est celui situé 12 h après le début */
+    var t0=new Date(c.start).getTime(),day=localDay(new Date(isNaN(t0)?Date.now():t0+12*36e5).toISOString()),sc=c.score||{};
+    byCycle[c.id]=day;
+    var o=days[day]=Object.assign({},days[day]||{});
+    if(sc.kilojoule)o.kcal=Math.round(sc.kilojoule/4.184);
+    if(sc.strain!=null)o.strain=Math.round(sc.strain*10)/10;
+    o.ongoing=!c.end;
+  });
+  (d.recovery||[]).forEach(function(r){
+    var day=byCycle[r.cycle_id];if(!day||!r.score)return;
+    var o=days[day];o.rec=Math.round(r.score.recovery_score);
+    if(r.score.hrv_rmssd_milli)o.hrv=Math.round(r.score.hrv_rmssd_milli);
+    if(r.score.resting_heart_rate)o.rhr=Math.round(r.score.resting_heart_rate);
+  });
+  (d.sleep||[]).forEach(function(z){
+    if(z.nap||!z.score)return;var day=localDay(z.end||z.start),o=days[day]=days[day]||{};
+    if(z.score.sleep_performance_percentage!=null)o.sleep=Math.round(z.score.sleep_performance_percentage);
+    var ss=z.score.stage_summary||{},ms=(ss.total_light_sleep_time_milli||0)+(ss.total_slow_wave_sleep_time_milli||0)+(ss.total_rem_sleep_time_milli||0);
+    if(ms)o.sleepH=Math.round(ms/36e5*10)/10;
+  });
+  var keep={},lim=new Date(Date.now()-60*864e5);lim=localDay(lim.toISOString());
+  Object.keys(days).forEach(function(k){if(k>=lim)keep[k]=days[k];});
+  state.whoop={updated:Date.now(),days:keep};save();renderAll();
+}
+document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")whoopSync(false);});
+
 var EVO_BOOTED=false;
 window.EVO_BOOT_OK=false;
 
@@ -3896,6 +4009,7 @@ function evoBoot(){
     showPage("today");
     recoverLiveRunIfAny();
     setupFirebase();
+    whoopHandleReturn();whoopSync(false);
     setInterval(function(){updateRest();updateWork();updateGuidedClock();},300);
     setInterval(renderFasting,1000);
     setInterval(checkDayRollover,60000);
