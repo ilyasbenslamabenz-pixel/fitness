@@ -1995,8 +1995,9 @@ function renderSteps(){
 }
 function renderEnergy(){
   var a=state.energy.slice().sort(function(x,y){return x.d.localeCompare(y.d);});
-  $("energyChart").innerHTML=lineChart(a.slice(-14).map(function(x){return Number(x.v);}),"#e3ae4a","");
-  $("enLast").textContent=a.length?fmtDate(a[a.length-1].d):"";
+  var ec=$("energyChart"),el0=$("enLast");
+  if(ec)ec.innerHTML=lineChart(a.slice(-14).map(function(x){return Number(x.v);}),"#e3ae4a","");
+  if(el0)el0.textContent=a.length?fmtDate(a[a.length-1].d):"";
   var faces=["😫","😕","😐","🙂","🔥"],cur=valToday(state.energy),el=$("efaces");
   if(el)el.innerHTML=faces.map(function(f,i){return '<button class="'+(cur===i+1?"on":"")+'" data-act="energy" data-v="'+(i+1)+'">'+f+'</button>';}).join("");
 }
