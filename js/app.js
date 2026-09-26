@@ -678,7 +678,7 @@ function clSummary(){
     +"Totaux : "+Math.round(t.k)+" / "+Number(state.profile.cal||2400)+" kcal · protéines "+Math.round(t.p)+" / "+fnum(state.macro.protein,155)+" g · glucides "+Math.round(t.c)+" / "+fnum(state.macro.carbs,0)+" g · lipides "+Math.round(t.f)+" / "+fnum(state.macro.fat,0)+" g\n"
     +"Reste : "+Math.max(0,Math.round(Number(state.profile.cal||2400)-t.k))+" kcal · "+Math.max(0,Math.round(fnum(state.macro.protein,155)-t.p))+" g de protéines\n"
     +"Eau bue : "+wml+" / "+Math.round(Number(state.waterGoal||3)*1000)+" ml (reste "+Math.max(0,Math.round(Number(state.waterGoal||3)*1000)-wml)+" ml) · Pas : "+stepsOn(td)+" · Dépense estimée : "+dayBurn(td).total+" kcal\n"
-    +"Poids actuel : "+fr(latestBody())+" kg (départ "+fr(state.profile.start)+", objectif "+fr(state.profile.target)+")\n"
+    +clWeightStats()+"\n"
     +"Programme du jour : "+(pl.kind==="walk"?pl.walk.title:pl.p.name)+(planDoneOn(td)?" (fait)":"");
 }
 function clRunTool(name,inp){
@@ -775,10 +775,13 @@ function clRunTool(name,inp){
 function clHistory(days){
   days=Math.max(7,Math.min(180,Math.round(Number(days)||30)));
   var from=new Date();from.setDate(from.getDate()-days+1);var f=from.getFullYear()+"-"+pad(from.getMonth()+1)+"-"+pad(from.getDate());
+  /* jamais avant le début du suivi : sinon « 30 jours » alors que tout a commencé lundi */
+  var sd=state.profile.startDate||START_DATE,clipped=false;if(f<sd){f=sd;clipped=true;}
+  var realDays=Math.round((new Date(today()+"T12:00:00")-new Date(f+"T12:00:00"))/864e5)+1;
   function inR(d){return d>=f;}
   function avg(a){return a.length?Math.round(a.reduce(function(x,y){return x+y;},0)/a.length):0;}
   function pick(a,n){if(a.length<=n)return a;var o=[],st=(a.length-1)/(n-1);for(var i=0;i<n;i++)o.push(a[Math.round(i*st)]);return o;}
-  var out=["Période : "+f+" → "+today()+" ("+days+" jours)"];
+  var out=["Période : "+f+" → "+today()+" ("+realDays+" jours"+(clipped?", c'est-à-dire depuis le début du suivi":"")+")",clWeightStats()];
   var wh=state.weightHistory.filter(function(x){return inR(x.d);});
   out.push("Poids : "+(wh.length?pick(wh,12).map(function(x){return x.d.slice(5)+" "+x.w;}).join(", ")+" (variation "+(Math.round((wh[wh.length-1].w-wh[0].w)*10)/10)+" kg)":"aucune pesée")+" · départ "+state.profile.start+" kg, objectif "+state.profile.target+" kg");
   var ms=(state.measures||[]).filter(function(x){return inR(x.d);});
@@ -802,6 +805,22 @@ function clHistory(days){
   return out.join("\n");
 }
 function clExNames(){var o=[];state.program.forEach(function(q){q.ex.forEach(function(e){if(o.indexOf(e.n)<0)o.push(e.n);});});Object.keys(state.perf).forEach(function(k){if(o.indexOf(k)<0)o.push(k);});return o.slice(0,80).join(", ");}
+/* chiffres du poids calculés par l'app (mêmes formules que la carte Poids) : le coach les recopie, il ne calcule pas */
+function clWeightStats(){
+  var sd=state.profile.startDate||START_DATE,start=Number(state.profile.start),target=Number(state.profile.target),w=latestBody();
+  var days=Math.max(0,Math.round((new Date(today()+"T12:00:00")-new Date(sd+"T12:00:00"))/864e5));
+  var lost=Math.round((start-w)*10)/10,left=Math.round((w-target)*10)/10;
+  var t="Poids : actuel "+fr(w)+" kg · départ "+fr(start)+" kg le "+sd+" (il y a "+days+" jour"+(days>1?"s":"")+", soit "+fr(Math.round(days/7*10)/10)+" semaine(s)) · "+(lost>=0?"perdu "+fr(lost):"pris "+fr(-lost))+" kg depuis le début · reste "+fr(Math.max(0,left))+" kg jusqu'à l'objectif "+fr(target)+" kg";
+  var tr=weightTrend();
+  if(tr){
+    var pw=Math.round(tr.perWeek*100)/100,pct=Math.round(-tr.perWeek/w*1000)/10;
+    t+=" · rythme mesuré (tendance des pesées) "+fr(pw)+" kg/semaine, soit "+fr(pct)+" % du poids par semaine";
+    if(tr.perWeek<-0.05&&left>0&&days>=14){var wk=left/(-tr.perWeek),eta=new Date(Date.now()+wk*7*864e5);t+=" · à ce rythme, objectif atteint dans environ "+Math.round(wk)+" semaines (vers "+eta.toLocaleDateString("fr-CH",{month:"long",year:"numeric"})+")";}
+    else if(left>0&&days<14)t+=" · pas encore de date d'arrivée fiable (il faut 2 semaines de suivi)";
+  }else t+=" · rythme : pas encore assez de pesées (il faut au moins 3 pesées sur 5 jours)";
+  if(days<14)t+=" · début du suivi (moins de 2 semaines) : une grande partie de la perte initiale est de l'eau et du glycogène, le rythme va ralentir";
+  return t;
+}
 function clSystem(){
   return "Tu es le coach intégré à l'app EVO Fit Coach d'un homme qui veut passer d'environ 100 kg à 85 kg en gardant son muscle (salle EVO Fitness à Genève, Suisse). "
     +"Il ne mange pas de viande, mais mange poisson, crevettes, œufs et produits laitiers. Il achète surtout à la Migros et à la Coop. "
@@ -810,6 +829,7 @@ function clSystem(){
     +"Réponds en français, tutoiement, en 1 à 3 phrases courtes : ce que tu as noté (kcal et protéines) puis ce qu'il reste pour la journée. Pas de markdown, pas de listes. "
     +"Produits que j'ai achetés (utilise ces valeurs pour 100 g si je les mentionne) : "+LOCAL_FOODS.filter(function(f){return f.b;}).map(function(f){return f.n+" "+f.kcal+" kcal/"+f.p+" g prot.";}).join(" ; ")+".\n"
     +"Pour log_workout, reprends exactement un de ces noms d'exercice s'il correspond (sinon un nom clair et précis) : "+clExNames()+".\n"
+    +"Ne fais jamais de calcul toi-même (durées, rythmes, moyennes, projections, dates) : recopie uniquement les chiffres calculés par l'app, et ne parle pas de « 30 jours » ou d'une autre durée qui n'y figure pas. Repères : une perte saine est de 0,5 à 1 % du poids par semaine ; au-delà, le risque de perdre du muscle augmente, d'où l'importance des protéines.\n"
     +"N'écris jamais « noté », « ajouté » ou « enregistré » sans avoir appelé l'outil correspondant dans ce tour.\n"
     +"Ne propose jamais de viande. Pour les questions de progression, moyennes ou records, appelle get_history avant de répondre. Pour une séance ou une course décrite, enregistre-la (log_workout, log_run). Pour retirer ou corriger un aliment précis, utilise son numéro #n (delete_meal, update_meal) seulement si c'est clairement demandé ; en cas de doute, demande lequel. Si on te demande une idée de repas, propose 1 ou 2 options sans viande qui collent au reste de la journée (surtout les protéines), et ajoute les ingrédients à la liste de courses (add_grocery) seulement si on te le demande. Si une photo est jointe : repas ou aliment → identifie chaque aliment, estime les portions visibles et enregistre-les (add_meal) ; étiquette nutritionnelle → utilise ses valeurs pour la quantité indiquée (sinon demande la quantité) ; balance ou mètre ruban → enregistre la valeur lue ; si c'est flou ou ambigu, dis ce que tu vois et demande. Pour les chiffres (eau, kcal, protéines, reste), recopie les totaux renvoyés par le dernier outil appelé : ils incluent déjà ce qui vient d'être ajouté, ne refais aucune addition.\n\nDonnées de l'app avant ce message :\n"+clSummary();
 }
@@ -2078,8 +2098,10 @@ function renderWeightTrend(){
   var el=$("wTrend");if(!el)return;
   var tr=weightTrend(),w=latestBody(),target=Number(state.profile.target);
   if(!tr){el.textContent="Pèse-toi 2 à 3 fois par semaine : le rythme de perte et la date d'arrivée s'afficheront ici.";return;}
-  var pw=tr.perWeek,txt;
-  if(pw<-0.05&&w>target){
+  var pw=tr.perWeek,txt,sdays=Math.round((new Date(today()+"T12:00:00")-new Date((state.profile.startDate||START_DATE)+"T12:00:00"))/864e5);
+  /* les 2 premières semaines, la baisse est surtout de l'eau : pas de date d'arrivée à partir de ce rythme */
+  if(pw<-0.05&&w>target&&sdays<14)txt="Rythme : "+fr(pw)+" kg/sem. · début du suivi : cette première baisse est surtout de l'eau, la date d'arrivée s'affichera après 2 semaines";
+  else if(pw<-0.05&&w>target){
     var weeks=(w-target)/(-pw),eta=new Date(Date.now()+weeks*7*864e5);
     txt="Rythme : "+fr(pw)+" kg/sem. · "+(weeks>104?"à ce rythme, l'objectif de "+fr(target)+" kg est à plus de 2 ans : resserre un peu les calories.":"objectif "+fr(target)+" kg vers "+eta.toLocaleDateString("fr-CH",{month:"long",year:"numeric"}));
     if(pw<-1.5)txt+=" · rythme rapide : garde tes protéines hautes";
