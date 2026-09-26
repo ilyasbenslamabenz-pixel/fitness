@@ -273,7 +273,7 @@ function migrateGroceryList(old){
    consultable instantanément sans réseau, complète OpenFoodFacts qui couvre mal le non-transformé */
 var LOCAL_FOODS=[
  /* achats Coop (ticket du 26.09.26) : valeurs pour 100 g ou 100 ml, q = portion habituelle en g */
- {n:"Isey Skyr framboise-grenade (pot 170 g)",kcal:80,p:9.6,c:10,f:0.2,q:170,o:3,b:1,a:"skyr isey emmi framboise grenade pot yogourt yaourt"},
+ {n:"Isey Skyr framboise-grenade sans lactose (pot 170 g)",kcal:76,p:9.5,c:4.4,f:2.2,q:170,o:3,b:1,a:"skyr isey emmi framboise grenade sans lactose lactose free pot yogourt yaourt"},
  {n:"Isey Skyr myrtille-framboise (pot 170 g)",kcal:80,p:9.6,c:10,f:0.2,q:170,o:3,b:1,a:"skyr isey emmi myrtille framboise pot yogourt yaourt"},
  {n:"Rama Cremefine 7 % (crème à cuisiner)",kcal:89,p:1.1,c:4.8,f:7.4,o:3,b:1,a:"creme cuisine cremefine rama sauce"},
  {n:"Gruyère AOP râpé (Coop)",kcal:396,p:27,c:0.4,f:32,q:30,o:3,b:1,a:"gruyere fromage rape coop"},
@@ -3100,7 +3100,7 @@ function stopBarcode(){
 function closeScanner(){stopBarcode();$("scanModal").classList.remove("on");}
 /* produits Coop/Migros/Denner courants mal ou pas référencés sur OpenFoodFacts, vérifiés manuellement
    (fiches produit Coop/Migros/Denner/OpenFoodFacts, valeurs pour 100 g/ml) */
-var SEED_BARCODES={
+var SEED_BARCODES={"5690845003790":{name:"Isey Skyr framboise-grenade sans lactose",kcal:76,protein:9.5,carbs:4.4,fat:2.2},"8719200041219":{name:"Rama Cremefine 7 %",kcal:89,protein:1.1,carbs:4.8,fat:7.4},
   "7610846871868":{name:"Qualité & Prix Thon rosé au naturel (Coop) 155 g",kcal:110,protein:26,carbs:0,fat:0.5},
   "7627534978501":{name:"Qualité & Prix Thon rosé à l'huile de tournesol (Coop)",kcal:186,protein:25,carbs:0,fat:9.5},
   "7610800036739":{name:"Coop Lifestyle Thon rosé au naturel 200 g",kcal:117,protein:26,carbs:1,fat:1},
