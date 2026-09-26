@@ -6,7 +6,7 @@ var START_DATE="2026-09-21";
 
 /* programme perte de poids : pecs 2×/semaine (haut et intérieur), dos pour la posture,
    fessiers et gainage pour les hanches ; la graisse part via le déficit et le cardio */
-var PROGRAM_VERSION=4;
+var PROGRAM_VERSION=5;
 var DEFAULT_PROGRAM=[
  {id:"push",name:"Pectoraux & épaules",short:"Pecs",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-flame_fill"/></svg>',focus:"Pecs (haut et intérieur) · épaules · triceps",ex:[
    {n:"Développé couché haltères",t:"4 × 8-10",w:true},
@@ -64,6 +64,17 @@ var HOME_PROGRAM=[
    {n:"Fentes arrière",t:"3 × 12 / jambe",w:false},
    {n:"Squats sumo",t:"3 × 15",w:false},
    {n:"Gainage latéral",t:"3 × 20-30 s",w:false}]},
+ /* routine pecs : 2 à 3 fois par semaine, jamais le lendemain d'une séance pecs en salle.
+    Progression : +1 à 2 répétitions par série chaque semaine ; quand toutes les séries dépassent la fourchette,
+    passer à la variante plus dure (pompes pieds surélevés, planche +15 s) */
+ {id:"home-psg",cat:"maison",name:"Pompes · squats · gainage",short:"Pompes",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-flame_fill"/></svg>',focus:"Pecs (haut, milieu, intérieur) · jambes · gainage · +1 à 2 reps par série chaque semaine",ex:[
+   {n:"Pompes",t:"4 × 8-15",w:false},
+   {n:"Pompes déclinées",t:"3 × 6-12",w:false},
+   {n:"Pompes serrées",t:"3 × 6-12",w:false},
+   {n:"Squats",t:"4 × 15-20",w:false},
+   {n:"Squats sumo",t:"3 × 15-20",w:false},
+   {n:"Gainage (planche)",t:"3 × 30-60 s",w:false},
+   {n:"Gainage latéral",t:"2 × 20-40 s",w:false}]},
  {id:"home-hiit2",cat:"maison",name:"HIIT cardio 2",short:"HIIT 2",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg>',focus:"Cardio · circuit brûle-graisse",ex:[
    {n:"High knees",t:"4 × 30 s",w:false},
    {n:"Burpees",t:"4 × 12",w:false},
@@ -1263,7 +1274,7 @@ function todayRings(p){
     if(pl.kind==="walk")seanceTxt=pl.walk.title;
     else{var pmk=marksFor(pl.p.id),tot=0,dn=0;activeExercises(pl.p).forEach(function(e){var a=setsArrFor(pmk,e);tot+=a.length;dn+=a.filter(function(x){return x.done;}).length;});seanceTxt=dn+"/"+tot+" séries";}
   }
-  var wml0=Number(wt.ml||0),eauTxt=(wml0<1000?fmtL(wml0):fmtL(wml0).replace(" L",""))+" / "+String(waterGoalMl/1000).replace(".",",")+" L";
+  var wml0=Number(wt.ml||0),eauTxt=(wml0<=0?"0":wml0<1000?fmtL(wml0):fmtL(wml0).replace(" L",""))+" / "+String(waterGoalMl/1000).replace(".",",")+" L";
   var repasTxt=Math.round(dk).toLocaleString("fr-CH")+" / "+Number(state.profile.cal||2400).toLocaleString("fr-CH");
   return {seance:seance,eau:eau,repas:repas,score:score,seanceTxt:seanceTxt,eauTxt:eauTxt,repasTxt:repasTxt};
 }
