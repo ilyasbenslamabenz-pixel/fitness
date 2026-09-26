@@ -358,12 +358,19 @@ function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
 function $(id){return document.getElementById(id);}
 function toast(m){var el=$("toast");el.textContent=m;el.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){el.hidden=true;},2000);}
 
+/* écriture qui dit si elle a réussi : lsSet avale les erreurs, dont « stockage plein » */
+function lsTrySet(k,v){try{localStorage.setItem(k,v);return true;}catch(e){return false;}}
+var storageWarnT=0;
 function save(){
-  try{
-    var payload=JSON.stringify(state);
-    lsSet(KEY,payload);
-    lsSet(BACKUPKEY,payload);
-  }catch(e){}
+  var payload;try{payload=JSON.stringify(state);}catch(e){return;}
+  var ok=lsTrySet(KEY,payload);
+  /* stockage plein : on libère la copie de secours (identique) puis on réessaie */
+  if(!ok){lsDel(BACKUPKEY);ok=lsTrySet(KEY,payload);}
+  if(ok){if(!lsTrySet(BACKUPKEY,payload))lsDel(BACKUPKEY);}
+  else if(Date.now()-storageWarnT>600000){
+    storageWarnT=Date.now();
+    snack("Mémoire de l'app pleine : ta dernière saisie n'est pas enregistrée sur le téléphone. Exporte tes données.","Exporter",exportData,12000);
+  }
   cloudAutoBackup();
 }
 function isLocalStateEmpty(){
@@ -3497,7 +3504,7 @@ document.addEventListener("click",function(e){
     case "clSugg": $("clInput").value=a.textContent; clSend(); break;
     case "clPhoto": $("clFile").click(); break;
     case "clPhotoDel": clPhoto=null; renderClPhoto(); break;
-    case "clClear": clSaveHist([]); renderClaude(false); break;
+    case "clClear": var clOld=clHist(); clSaveHist([]); renderClaude(false); snack("Conversation effacée","Annuler",function(){clSaveHist(clOld);renderClaude(false);},6000); break;
     case "clSaveKey": var kv=$("fClaudeKey").value.trim();
       if(!kv){try{localStorage.removeItem("evoClaudeKey");}catch(e){}toast("Clé supprimée");}
       else if(!/^sk-ant-[\w-]{20,}$/.test(kv)){toast("Clé invalide (elle commence par sk-ant-)");break;}
@@ -3577,7 +3584,8 @@ function checkAppUpdate(){
   fetch("/fitness/index.html?u="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(html){
     var m=String(html||"").match(/js\/app\.js\?v=(\d+)/);
     if(!m||m[1]===APP_V)return;
-    if(guidedOpen||runActive||document.querySelector(".modal.on")||document.visibilityState!=="visible")return;
+    /* jamais pendant une réponse du coach ou un message en cours d'écriture : la réponse serait perdue */
+    if(guidedOpen||runActive||clBusy||clPhoto||($("clInput")&&$("clInput").value.trim())||document.querySelector(".modal.on")||document.visibilityState!=="visible")return;
     location.reload();
   }).catch(function(){});
 }
