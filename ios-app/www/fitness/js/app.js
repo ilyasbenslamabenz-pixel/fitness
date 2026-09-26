@@ -584,7 +584,7 @@ function clPickPhoto(file){
 }
 function renderClPhoto(){
   var el=$("clPhotoPrev");if(!el)return;
-  el.hidden=!clPhoto;
+  el.hidden=!clPhoto;clSyncSend();
   el.innerHTML=clPhoto?'<img src="'+clPhoto.thumb+'" alt=""><span></span><button data-act="clPhotoDel" aria-label="Retirer la photo"><svg class="ic-s" aria-hidden="true"><use href="#i-xmark"/></svg></button>':"";
 }
 function clKey(){return lsGet("evoClaudeKey")||"";}
@@ -715,18 +715,24 @@ function renderClaude(thinking){
   var box=$("clLog");if(!box)return;
   var hist=clHist(),key=clKey();
   if(!key){
-    box.innerHTML='<div class="cl-empty">Écris-moi ce que tu manges, bois ou pèses, je le note pour toi.<br><button class="btn ghost" data-act="go" data-page="profile">Ajouter ma clé Anthropic</button></div>';
+    box.innerHTML='<button class="cl-keybtn" data-act="go" data-page="profile">Ajouter ma clé Anthropic ›</button>';
   }else if(!hist.length&&!thinking){
     box.innerHTML='';
   }else{
-    box.innerHTML=hist.slice(-12).map(function(x){return '<div class="cl-msg '+(x.r==="me"?"me":"ai")+(x.err?" err":"")+(x.img?" has-img":"")+'">'+(x.img?'<img src="'+x.img+'" alt="Photo envoyée">':'')+(x.t?esc(x.t):'')+'</div>';}).join("")
+    box.innerHTML=hist.slice(-12).map(function(x){return '<div class="cl-msg '+(x.r==="me"?"me":"ai")+(x.err?" err":"")+(x.img?" has-img":"")+'">'+(x.img?'<img src="'+x.img+'" alt="Photo envoyée">'+(x.t?'<span class="cl-cap">'+esc(x.t)+'</span>':''):esc(x.t))+'</div>';}).join("")
       +(thinking?'<div class="cl-msg ai typing"><i></i><i></i><i></i></div>':'');
     box.scrollTop=box.scrollHeight;
+    /* les miniatures grandissent en chargeant : on redescend en bas une fois chargées */
+    box.querySelectorAll("img").forEach(function(im){if(!im.complete)im.onload=function(){box.scrollTop=box.scrollHeight;};});
   }
   var b=$("clSendBtn");if(b)b.disabled=!!thinking;
-  var c=$("clCost");if(c)c.textContent=key?"Coût ce mois : ≈ "+clCost().toFixed(clCost()<1?3:2).replace(".",",")+" $":"";
+  var c=$("clCost");if(c)c.textContent=key?"≈ "+clCost().toFixed(clCost()<1?3:2).replace(".",",")+" $ ce mois":"Non configuré";
+  clSyncSend();
   var cl=$("clClearBtn");if(cl)cl.hidden=!hist.length;
 }
+/* bouton envoyer allumé seulement quand il y a quelque chose à envoyer */
+function clSyncSend(){var b=$("clSendBtn"),i=$("clInput");if(b&&i)b.classList.toggle("ready",!!(i.value.trim()||clPhoto));}
+document.addEventListener("input",function(e){if(e.target&&e.target.id==="clInput")clSyncSend();});
 document.addEventListener("change",function(e){
   if(e.target&&e.target.id==="clFile"){var f=e.target.files&&e.target.files[0];e.target.value="";clPickPhoto(f);}
 });

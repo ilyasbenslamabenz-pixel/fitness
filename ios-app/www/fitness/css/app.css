@@ -934,31 +934,46 @@ input[type=search]::-webkit-search-decoration{-webkit-appearance:none}
 .plan-thumbs img{width:64px;height:44px;border-radius:9px;object-fit:cover;flex:0 0 auto;border:1px solid var(--hair)}
 .plan-thumbs:empty{display:none}
 /* coach Claude (Accueil) */
-.cl-card{margin-top:12px;padding:14px}
-.cl-log{display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto;-webkit-overflow-scrolling:touch;margin-bottom:10px}
-.cl-msg{max-width:85%;padding:8px 12px;border-radius:16px;font-size:14px;line-height:1.4;white-space:pre-wrap;word-wrap:break-word}
-.cl-msg.me{align-self:flex-end;background:var(--primary);color:var(--on-primary);border-bottom-right-radius:5px}
-.cl-msg.ai{align-self:flex-start;background:var(--surface2);color:var(--text);border-bottom-left-radius:5px}
-.cl-msg.err{color:var(--warn)}
-.cl-msg.typing{display:flex;gap:4px;padding:12px 14px}
+.cl-card{margin-top:12px;padding:14px;position:relative;overflow:hidden}
+.cl-card::before{content:"";position:absolute;top:-90px;right:-70px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,var(--accent-dim),transparent 70%);pointer-events:none}
+.cl-head{display:flex;align-items:center;gap:10px;position:relative}
+.cl-av{flex:none;width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:var(--gold-grad);color:var(--on-primary);box-shadow:0 4px 12px rgba(227,174,74,.25)}
+.cl-av .ic-s{width:18px;height:18px}
+.cl-ht{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.15}
+.cl-ht b{font-size:15px;color:var(--text)}
+.cl-ht small{font-size:11.5px;color:var(--faint);margin-top:2px}
+.cl-clear{flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:var(--faint);background:transparent}
+.cl-clear[hidden]{display:none}
+.cl-clear .ic-s{width:15px;height:15px}
+.cl-log{position:relative;display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto;-webkit-overflow-scrolling:touch;margin-top:12px;padding:2px 0}
+.cl-log:empty{display:none}
+.cl-msg{max-width:82%;padding:9px 13px;border-radius:18px;font-size:14.5px;line-height:1.4;white-space:pre-wrap;word-wrap:break-word;animation:clIn .22s ease-out}
+.cl-msg.me{align-self:flex-end;background:var(--gold-grad);color:var(--on-primary);border-bottom-right-radius:6px;font-weight:500}
+.cl-msg.ai{align-self:flex-start;background:var(--surface2);color:var(--text);border-bottom-left-radius:6px}
+.cl-msg.err{color:var(--warn);background:var(--warn-dim)}
+.cl-msg.has-img{padding:4px}
+.cl-msg.has-img img{display:block;width:170px;max-width:100%;max-height:200px;border-radius:14px;object-fit:cover}
+.cl-msg .cl-cap{display:block;padding:6px 9px 4px}
+.cl-msg.typing{display:flex;gap:4px;padding:13px 15px}
 .cl-msg.typing i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:clDot 1s infinite ease-in-out}
 .cl-msg.typing i:nth-child(2){animation-delay:.15s}.cl-msg.typing i:nth-child(3){animation-delay:.3s}
 @keyframes clDot{0%,80%,100%{opacity:.3;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
-.cl-empty{font-size:13.5px;color:var(--muted);line-height:1.45}
-.cl-empty .btn{margin-top:10px;width:100%}
-.cl-sugg{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.cl-sugg button{font-size:13px;padding:7px 11px;border-radius:999px;background:var(--surface2);color:var(--text)}
-.cl-row{display:flex;gap:8px;align-items:center}
-.cl-row input{flex:1;min-width:0;font-size:16px;padding:11px 14px;border-radius:999px;border:1px solid var(--hair);background:var(--surface2);color:var(--text)}
-.cl-send{flex:none;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--primary);color:var(--on-primary)}
-.cl-send:disabled{opacity:.45}
-.cl-cost{font-size:11.5px;color:var(--faint);margin-top:6px;text-align:right}
-.cl-cost:empty{display:none}
-.cl-cam{flex:none;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--surface2);color:var(--text)}
-.cl-photo{display:flex;align-items:center;gap:10px;margin-bottom:8px;padding:6px;border-radius:14px;background:var(--surface2);font-size:12.5px;color:var(--muted)}
+@keyframes clIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.cl-msg{animation:none}}
+.cl-keybtn{width:100%;padding:11px;border-radius:14px;background:var(--surface2);color:var(--accent-text);font-weight:600;font-size:14px}
+.cl-photo{position:relative;display:block;width:64px;margin-top:12px}
 .cl-photo[hidden]{display:none}
-.cl-photo img{width:48px;height:48px;object-fit:cover;border-radius:10px;flex:none}
-.cl-photo span{flex:1;min-width:0}
-.cl-photo button{flex:none;width:30px;height:30px;display:grid;place-items:center;color:var(--muted)}
-.cl-msg.has-img img{display:block;max-width:160px;max-height:160px;border-radius:10px;margin:-2px -4px 4px;object-fit:cover}
-.cl-log:empty{display:none}
+.cl-photo img{display:block;width:64px;height:64px;object-fit:cover;border-radius:14px;border:1px solid var(--hair)}
+.cl-photo span{display:none}
+.cl-photo button{position:absolute;top:-7px;right:-7px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--text);color:var(--bg)}
+.cl-photo button .ic-s{width:11px;height:11px}
+.cl-bar{position:relative;display:flex;align-items:center;gap:4px;margin-top:12px;padding:4px;border-radius:999px;background:var(--surface2);border:1px solid var(--hair);transition:border-color .15s}
+.cl-bar:focus-within{border-color:var(--accent)}
+.cl-bar input{flex:1;min-width:0;font-size:16px;padding:8px 4px;border:0;background:transparent;color:var(--text);outline:none;box-shadow:none}
+.cl-cam{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--muted);background:transparent}
+.cl-cam .ic-s{width:19px;height:19px}
+.cl-send{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--hair);color:var(--faint);transition:background .15s,color .15s,transform .15s}
+.cl-send.ready{background:var(--gold-grad);color:var(--on-primary)}
+.cl-send.ready:active{transform:scale(.92)}
+.cl-send:disabled{opacity:.5}
+.cl-send .ic-s{width:16px;height:16px}
