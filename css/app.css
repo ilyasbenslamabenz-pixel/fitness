@@ -961,3 +961,4 @@ input[type=search]::-webkit-search-decoration{-webkit-appearance:none}
 .cl-photo span{flex:1;min-width:0}
 .cl-photo button{flex:none;width:30px;height:30px;display:grid;place-items:center;color:var(--muted)}
 .cl-msg.has-img img{display:block;max-width:160px;max-height:160px;border-radius:10px;margin:-2px -4px 4px;object-fit:cover}
+.cl-log:empty{display:none}
