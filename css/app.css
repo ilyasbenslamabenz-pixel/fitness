@@ -1018,3 +1018,10 @@ input[type=search]::-webkit-search-decoration{-webkit-appearance:none}
 .guided-media .g-rest{position:relative;top:auto;left:auto;right:auto;bottom:auto;margin:14px 22px 0;padding:18px 12px}
 .guided-body{justify-content:flex-start;flex:0 0 auto}
 .guided-name{margin-top:22px}
+/* verres d'eau : vide sombre, entamé à moitié, plein bleu avec ✓ */
+.glass{background:rgba(90,143,224,.18)!important;overflow:hidden}
+.glass .glass-fill{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg,#8fd3ff,#3f8fe0);transition:height .25s ease}
+.glass button{z-index:1;color:var(--faint)!important;font-size:18px}
+.glass.part button{color:#fff!important}
+.glass.full button{color:#06203a!important;font-size:20px}
+:root[data-theme="light"] .glass{background:#dfe6ef!important}
