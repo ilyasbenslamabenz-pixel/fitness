@@ -628,9 +628,9 @@ function estimateRunKcal(distKm,durMin){
   return 0;
 }
 /* ===== Coach Claude : discussion sur l'Accueil pour noter repas, eau, poids, pas =====
-   Modèle : Opus 4.8 (5 $ / 25 $ par million de tokens, ~1 à 3 centimes par message). La clé API reste sur ce téléphone (evoClaudeKey),
+   Modèle : Sonnet 5 (2 $ / 10 $ par million de tokens, ~1 centime par message), réflexion adaptative à effort moyen. La clé API reste sur ce téléphone (evoClaudeKey),
    elle n'est ni exportée ni synchronisée. Le SDK officiel n'est chargé qu'au premier message. */
-var CL_MODEL="claude-opus-4-8",CL_PRICE={in:5,out:25},clBusy=false,clSdk=null,clPhoto=null; /* clPhoto = {b64, thumb} en attente d'envoi */
+var CL_MODEL="claude-sonnet-5",CL_PRICE={in:2,out:10},clBusy=false,clSdk=null,clPhoto=null; /* clPhoto = {b64, thumb} en attente d'envoi */
 /* photo réduite à 1024 px max en JPEG : ~1 200 tokens (≈ 0,1 centime), largement assez pour reconnaître un plat ou lire une étiquette */
 function clShrink(file,max,q){
   return new Promise(function(ok,ko){
@@ -916,7 +916,7 @@ async function clSend(){
     if(photo)msgs[msgs.length-1].content=[{type:"image",source:{type:"base64",media_type:"image/jpeg",data:photo.b64}},{type:"text",text:text||"Analyse cette photo et enregistre ce que j'ai mangé."}];
     var reply="",sys=clSystem(); /* figé au début : sinon Claude recompte ce qu'il vient d'ajouter */
     for(var it=0;it<6;it++){
-      var res=await client.messages.create({model:CL_MODEL,max_tokens:1024,system:sys,tools:CL_TOOLS,messages:msgs});
+      var res=await client.messages.create({model:CL_MODEL,max_tokens:4096,output_config:{effort:"medium"},system:sys,tools:CL_TOOLS,messages:msgs});
       clAddCost(res.usage);
       var txt=res.content.filter(function(b){return b.type==="text";}).map(function(b){return b.text;}).join(" ").trim();
       if(txt)reply=txt;
@@ -929,7 +929,7 @@ async function clSend(){
       });
       msgs.push({role:"user",content:results});
     }
-    var entry={r:"ai",t:reply||(saved.length?"C'est noté.":"")};
+    var entry={r:"ai",t:reply||(saved.length?"C'est noté.":"Je n'ai pas pu répondre cette fois, reformule ta demande.")};
     if(saved.length)entry.ok=saved;
     /* le texte dit « noté » alors qu'aucun outil n'a rien enregistré : on prévient */
     else if(!writeErr&&/\b(not[ée]|ajout[ée]|enregistr[ée]|supprim[ée]|corrig[ée])/i.test(reply)){entry.warn=1;entry.retry=text;}
