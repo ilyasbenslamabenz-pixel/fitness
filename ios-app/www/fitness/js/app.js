@@ -1233,7 +1233,7 @@ function todayRings(p){
     if(pl.kind==="walk")seanceTxt=pl.walk.title;
     else{var pmk=marksFor(pl.p.id),tot=0,dn=0;activeExercises(pl.p).forEach(function(e){var a=setsArrFor(pmk,e);tot+=a.length;dn+=a.filter(function(x){return x.done;}).length;});seanceTxt=dn+"/"+tot+" séries";}
   }
-  var eauTxt=String(Math.round(Number(wt.ml||0)/100)/10).replace(".",",")+" / "+String(waterGoalMl/1000).replace(".",",")+" L";
+  var wml0=Number(wt.ml||0),eauTxt=(wml0<1000?fmtL(wml0):fmtL(wml0).replace(" L",""))+" / "+String(waterGoalMl/1000).replace(".",",")+" L";
   var repasTxt=Math.round(dk).toLocaleString("fr-CH")+" / "+Number(state.profile.cal||2400).toLocaleString("fr-CH");
   return {seance:seance,eau:eau,repas:repas,score:score,seanceTxt:seanceTxt,eauTxt:eauTxt,repasTxt:repasTxt};
 }
@@ -2735,7 +2735,9 @@ function renderMeals(){
   renderWeeklyMenuIfNeeded();
   renderGrocerySummary();
 }
-function fmtL(ml){return String(Math.round(ml/100)/10).replace(".",",")+" L";}
+/* quantités d'eau exactes : 250 ml, 1,5 L, 2,75 L (sans arrondir 250 ml à 0,3 L) */
+function fmtL(ml){ml=Math.round(Number(ml)||0);if(Math.abs(ml)<1000)return ml+" ml";return String(Math.round(ml/10)/100).replace(".",",")+" L";}
+function fmtL1(ml){return String(Math.round(ml/100)/10).replace(".",",")+" L";}
 function renderWater(){
   if(state.page!=="water")return;
   if(rollWater())save();var wt=state.water;
@@ -2749,8 +2751,12 @@ function renderWater(){
   $("waterLeft").textContent=left>0?"Encore "+fmtL(left):"Objectif atteint 🎉";
   var nG=Math.ceil(left/waterStep);
   $("waterHint").textContent=left>0?"≈ "+nG+" verre"+(nG>1?"s":"")+" de "+fr(waterStep/10)+" cl":"Continue à boire selon ta soif";
-  var glasses=Math.min(10,Math.floor(ml/waterStep+1e-9));
-  $("waterGlasses").innerHTML=Array.from({length:10},function(_,i){return '<div class="glass'+(i<glasses?" full":"")+'"><button data-act="waterAdd" data-amount="'+(i<glasses?(-waterStep):waterStep)+'" aria-label="'+(i<glasses?"Retirer":"Ajouter")+' '+waterStep+' ml">'+(i<glasses?"✓":"＋")+'</button></div>';}).join("");
+  /* verres pleins (✓), un verre entamé rempli en partie, les autres vides */
+  var glasses=Math.min(10,Math.floor(ml/waterStep+1e-9)),partPct=glasses<10?Math.round((ml-glasses*waterStep)/waterStep*100):0;
+  $("waterGlasses").innerHTML=Array.from({length:10},function(_,i){
+    var full=i<glasses,fill=full?100:(i===glasses?partPct:0);
+    return '<div class="glass'+(full?" full":(fill>0?" part":""))+'"><i class="glass-fill" style="height:'+fill+'%"></i><button data-act="waterAdd" data-amount="'+(full?(-waterStep):waterStep)+'" aria-label="'+(full?"Retirer":"Ajouter")+' '+waterStep+' ml">'+(full?"✓":"＋")+'</button></div>';
+  }).join("");
   $("waterStepLab").textContent="1 verre = "+waterStep+" ml";
   /* 7 derniers jours */
   var hist=state.waterHistory||[],days=[],base=new Date();
@@ -2761,7 +2767,7 @@ function renderWater(){
   $("waterWeek").innerHTML='<div class="calbars">'+goalLine(goalMl/mx)+days.map(function(x){
       return '<div class="cb'+(x.d===today()?" today":"")+'"><div class="bar"><i class="'+(x.v>=goalMl?"ok":(x.v>0?"under":""))+'" style="height:'+(x.v?Math.max(4,x.v/mx*100):0)+'%"></i></div><span>'+x.lab+'</span></div>';
     }).join("")+'</div>'
-    +'<div class="big3" style="margin-bottom:0;grid-template-columns:repeat(2,1fr)"><div><div class="v num">'+(past.length?fmtL(past.reduce(function(s2,x){return s2+x.v;},0)/past.length):"—")+'</div><div class="l">moyenne / jour</div></div><div><div class="v num">'+days.filter(function(x){return x.v>=goalMl;}).length+'/7</div><div class="l">jours objectif atteint</div></div></div>';
+    +'<div class="big3" style="margin-bottom:0;grid-template-columns:repeat(2,1fr)"><div><div class="v num">'+(past.length?fmtL1(past.reduce(function(s2,x){return s2+x.v;},0)/past.length):"—")+'</div><div class="l">moyenne / jour</div></div><div><div class="v num">'+days.filter(function(x){return x.v>=goalMl;}).length+'/7</div><div class="l">jours objectif atteint</div></div></div>';
 }
 function ring(svg,frac,color,center){
   var p=Math.max(0,Math.min(1,Number(frac)||0)),parts=String(center).split("\n");
