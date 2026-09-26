@@ -585,7 +585,7 @@ function clPickPhoto(file){
 function renderClPhoto(){
   var el=$("clPhotoPrev");if(!el)return;
   el.hidden=!clPhoto;
-  el.innerHTML=clPhoto?'<img src="'+clPhoto.thumb+'" alt=""><span>Photo prête · ajoute un détail si tu veux (quantité, repas…)</span><button data-act="clPhotoDel" aria-label="Retirer la photo"><svg class="ic-s" aria-hidden="true"><use href="#i-xmark"/></svg></button>':"";
+  el.innerHTML=clPhoto?'<img src="'+clPhoto.thumb+'" alt=""><span></span><button data-act="clPhotoDel" aria-label="Retirer la photo"><svg class="ic-s" aria-hidden="true"><use href="#i-xmark"/></svg></button>':"";
 }
 function clKey(){return lsGet("evoClaudeKey")||"";}
 function clHist(){try{var a=JSON.parse(lsGet("evoClaudeChat")||"[]");return Array.isArray(a)?a:[];}catch(e){return [];}}
@@ -717,7 +717,7 @@ function renderClaude(thinking){
   if(!key){
     box.innerHTML='<div class="cl-empty">Écris-moi ce que tu manges, bois ou pèses, je le note pour toi.<br><button class="btn ghost" data-act="go" data-page="profile">Ajouter ma clé Anthropic</button></div>';
   }else if(!hist.length&&!thinking){
-    box.innerHTML='<div class="cl-empty">Ex. « 200 g de skyr nature et une banane » ou « j\'ai bu 50 cl ».<div class="cl-sugg"><button data-act="clSugg">200 g de skyr nature et une banane</button><button data-act="clSugg">Il me reste combien de protéines ?</button></div></div>';
+    box.innerHTML='';
   }else{
     box.innerHTML=hist.slice(-12).map(function(x){return '<div class="cl-msg '+(x.r==="me"?"me":"ai")+(x.err?" err":"")+(x.img?" has-img":"")+'">'+(x.img?'<img src="'+x.img+'" alt="Photo envoyée">':'')+(x.t?esc(x.t):'')+'</div>';}).join("")
       +(thinking?'<div class="cl-msg ai typing"><i></i><i></i><i></i></div>':'');
