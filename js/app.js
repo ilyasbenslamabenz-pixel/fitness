@@ -272,6 +272,15 @@ function migrateGroceryList(old){
 /* base locale d'aliments bruts courants (kcal/protéines/glucides/lipides pour 100 g) —
    consultable instantanément sans réseau, complète OpenFoodFacts qui couvre mal le non-transformé */
 var LOCAL_FOODS=[
+ /* achats Coop (ticket du 26.09.26) : valeurs pour 100 g ou 100 ml, q = portion habituelle en g */
+ {n:"Isey Skyr framboise-grenade (pot 170 g)",kcal:80,p:9.6,c:10,f:0.2,q:170,o:3,b:1,a:"skyr isey emmi framboise grenade pot yogourt yaourt"},
+ {n:"Isey Skyr myrtille-framboise (pot 170 g)",kcal:80,p:9.6,c:10,f:0.2,q:170,o:3,b:1,a:"skyr isey emmi myrtille framboise pot yogourt yaourt"},
+ {n:"Rama Cremefine 7 % (crème à cuisiner)",kcal:89,p:1.1,c:4.8,f:7.4,o:3,b:1,a:"creme cuisine cremefine rama sauce"},
+ {n:"Gruyère AOP râpé (Coop)",kcal:396,p:27,c:0.4,f:32,q:30,o:3,b:1,a:"gruyere fromage rape coop"},
+ {n:"Œuf entier cru (Prix Garantie, 1 œuf ≈ 55 g)",kcal:143,p:12.6,c:0.7,f:9.5,q:55,o:3,b:1,a:"oeuf oeufs œufs coop prix garantie omelette"},
+ {n:"Banane bio Max Havelaar (1 banane ≈ 120 g)",kcal:89,p:1.1,c:20,f:0.3,q:120,o:3,b:1,a:"banane bananes bio max havelaar coop fruit"},
+ {n:"Champignons de Paris frais (Prix Garantie)",kcal:22,p:3.1,c:0.5,f:0.3,o:3,b:1,a:"champignon champignons paris coop prix garantie"},
+ {n:"familia High Protein Beeren (müesli, portion 50 g)",kcal:435,p:22,c:50,f:14,q:50,o:3,b:1,a:"familia muesli müesli protein proteine beeren baies fruits rouges cereales"},
  {n:"Truite (cuite)",kcal:168,p:24,c:0,f:7.5},
  {n:"Saumon (cuit)",kcal:208,p:20,c:0,f:13},
  {n:"Thon (au naturel, égoutté)",kcal:116,p:26,c:0,f:1},
@@ -799,6 +808,7 @@ function clSystem(){
     +"Quand il décrit ce qu'il a mangé, bu, pesé ou marché, enregistre-le directement avec les outils, sans demander de confirmation. "
     +"Estime les portions de façon réaliste (valeurs des produits suisses courants) si la quantité manque, et dis-le. "
     +"Réponds en français, tutoiement, en 1 à 3 phrases courtes : ce que tu as noté (kcal et protéines) puis ce qu'il reste pour la journée. Pas de markdown, pas de listes. "
+    +"Produits que j'ai achetés (utilise ces valeurs pour 100 g si je les mentionne) : "+LOCAL_FOODS.filter(function(f){return f.b;}).map(function(f){return f.n+" "+f.kcal+" kcal/"+f.p+" g prot.";}).join(" ; ")+".\n"
     +"Pour log_workout, reprends exactement un de ces noms d'exercice s'il correspond (sinon un nom clair et précis) : "+clExNames()+".\n"
     +"N'écris jamais « noté », « ajouté » ou « enregistré » sans avoir appelé l'outil correspondant dans ce tour.\n"
     +"Ne propose jamais de viande. Pour les questions de progression, moyennes ou records, appelle get_history avant de répondre. Pour une séance ou une course décrite, enregistre-la (log_workout, log_run). Pour retirer ou corriger un aliment précis, utilise son numéro #n (delete_meal, update_meal) seulement si c'est clairement demandé ; en cas de doute, demande lequel. Si on te demande une idée de repas, propose 1 ou 2 options sans viande qui collent au reste de la journée (surtout les protéines), et ajoute les ingrédients à la liste de courses (add_grocery) seulement si on te le demande. Si une photo est jointe : repas ou aliment → identifie chaque aliment, estime les portions visibles et enregistre-les (add_meal) ; étiquette nutritionnelle → utilise ses valeurs pour la quantité indiquée (sinon demande la quantité) ; balance ou mètre ruban → enregistre la valeur lue ; si c'est flou ou ambigu, dis ce que tu vois et demande. Pour les chiffres (eau, kcal, protéines, reste), recopie les totaux renvoyés par le dernier outil appelé : ils incluent déjà ce qui vient d'être ajouté, ne refais aucune addition.\n\nDonnées de l'app avant ce message :\n"+clSummary();
@@ -3222,7 +3232,7 @@ function searchLocalFoods(q){
     scored.push({f:f,score:score});
   });
   scored.sort(function(a,b){return b.score-a.score||a.f.n.length-b.f.n.length;});
-  return scored.map(function(x){var f=x.f;return {name:f.n,kcal:f.kcal,protein:f.p,carbs:f.c,fat:f.f,local:true};});
+  return scored.map(function(x){var f=x.f;return {name:f.n,kcal:f.kcal,protein:f.p,carbs:f.c,fat:f.f,local:true,portion:f.q||0};});
 }
 function renderFoodResults(list,q){
   var box=$("foodSearchResults");
@@ -3311,6 +3321,8 @@ function pickFoodResult(i){
   $("foodCarbs").value=f.carbs?Math.round(f.carbs*10)/10:"";
   $("foodFat").value=f.fat?Math.round(f.fat*10)/10:"";
   setFoodRef100(f.kcal,f.protein,f.carbs,f.fat);
+  /* produit avec portion habituelle (pot, œuf, sachet…) : quantité préremplie et valeurs recalculées */
+  if(f.portion>0){$("foodQty").value=String(f.portion);applyFoodRef100ToQty();}
   $("foodSearchResults").innerHTML="";syncFoodSearchMode();
   /* on passe directement à la quantité */
   setTimeout(function(){try{var q=$("foodQty");q.focus();q.select();}catch(e){}},60);
