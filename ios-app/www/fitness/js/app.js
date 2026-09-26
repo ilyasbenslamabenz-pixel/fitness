@@ -1024,6 +1024,58 @@ function lineChart(vals,color,unit){
   return svg;
 }
 
+/* courbe du poids : un point par pesée placé à sa vraie date, poids écrit sur les points clés
+   (premier, dernier, plus haut, plus bas), dates sous l'axe, bulle au toucher sur chaque point */
+var wChartPts=[];
+function weightChart(wh){
+  wChartPts=[];
+  if(!wh.length)return lineChart([],"","");
+  if(wh.length===1)return lineChart([Number(wh[0].w)],"var(--accent-text)"," kg");
+  var W=320,H=190,pl=18,pr=24,pt=28,pb=44,n=wh.length;
+  var t=wh.map(function(x){return new Date(x.d+"T12:00:00").getTime();}),v=wh.map(function(x){return Number(x.w);});
+  var t0=t[0],t1=t[n-1],span=Math.max(1,t1-t0);
+  var mn=Math.min.apply(null,v),mx=Math.max.apply(null,v);
+  if(mx-mn<1){var c=(mx+mn)/2;mn=c-0.5;mx=c+0.5;}
+  var xs=function(i){return pl+(t[i]-t0)/span*(W-pl-pr);},ys=function(y){return pt+(mx-y)/(mx-mn)*(H-pt-pb);};
+  var P=v.map(function(y,i){return [xs(i),ys(y)];});
+  var line=P.map(function(q,i){return (i?"L":"M")+q[0].toFixed(1)+" "+q[1].toFixed(1);}).join(" ");
+  var area=line+" L"+P[n-1][0].toFixed(1)+" "+(H-pb)+" L"+P[0][0].toFixed(1)+" "+(H-pb)+" Z";
+  var gid="wg"+Math.floor(Math.random()*1e6);
+  /* points étiquetés : premier, dernier, min, max (sans doublon) */
+  var iMin=v.indexOf(Math.min.apply(null,v)),iMax=v.indexOf(Math.max.apply(null,v)),lab=[0,n-1,iMin,iMax].filter(function(x,k,a){return a.indexOf(x)===k;});
+  var svg='<svg class="chart wchart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Évolution du poids">'
+    +'<defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2c63c4" stop-opacity="0.28"/><stop offset="1" stop-color="#2c63c4" stop-opacity="0"/></linearGradient></defs>';
+  /* 3 repères horizontaux discrets */
+  [0,0.5,1].forEach(function(f){var y=(pt+f*(H-pt-pb)).toFixed(1);svg+='<line x1="'+pl+'" y1="'+y+'" x2="'+(W-pr)+'" y2="'+y+'" class="wc-grid"/>';});
+  svg+='<path d="'+area+'" fill="url(#'+gid+')"/>'
+    +'<path d="'+line+'" fill="none" stroke="#2c63c4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+  P.forEach(function(q,i){svg+='<circle cx="'+q[0].toFixed(1)+'" cy="'+q[1].toFixed(1)+'" r="'+(i===n-1?5:4)+'" class="wc-dot'+(i===n-1?' last':'')+'"/>';});
+  lab.forEach(function(i){
+    /* étiquette du côté opposé aux voisins : sous un creux, au-dessus d'un pic */
+    var q=P[i],nb=[P[i-1],P[i+1]].filter(Boolean),ny=nb.reduce(function(a2,b2){return a2+b2[1];},0)/nb.length,below=q[1]>ny,ty=below?q[1]+19:q[1]-11;
+    var anchor=q[0]<pl+14?"start":(q[0]>W-pr-14?"end":"middle");
+    svg+='<text x="'+q[0].toFixed(1)+'" y="'+ty.toFixed(1)+'" text-anchor="'+anchor+'" class="wc-val'+(i===n-1?' last':'')+'">'+fr(v[i])+'</text>';
+  });
+  /* dates : premier, dernier et jusqu'à 3 intermédiaires bien espacés */
+  var ticks=[0],minGap=52;for(var i=1;i<n-1;i++){if(P[i][0]-P[ticks[ticks.length-1]][0]>=minGap&&P[n-1][0]-P[i][0]>=minGap)ticks.push(i);}ticks.push(n-1);
+  if(ticks.length>5){var keep=[ticks[0]],st=(ticks.length-1)/4;for(var k=1;k<4;k++)keep.push(ticks[Math.round(k*st)]);keep.push(ticks[ticks.length-1]);ticks=keep;}
+  ticks.forEach(function(i,k){var d=new Date(wh[i].d+"T12:00:00");svg+='<text x="'+P[i][0].toFixed(1)+'" y="'+(H-8)+'" text-anchor="'+(k===0?"start":(k===ticks.length-1?"end":"middle"))+'" class="wc-date">'+d.getDate()+'/'+(d.getMonth()+1)+'</text>';});
+  /* zones de toucher larges (invisibles) */
+  P.forEach(function(q,i){svg+='<circle cx="'+q[0].toFixed(1)+'" cy="'+q[1].toFixed(1)+'" r="15" class="wc-hit" data-act="wPt" data-i="'+i+'"/>';});
+  svg+='</svg><div class="wc-tip" id="wcTip" hidden></div>';
+  wChartPts=wh.map(function(x,i){return {d:x.d,w:v[i],x:P[i][0]/W,y:P[i][1]/H,prev:i?v[i-1]:null};});
+  return svg;
+}
+function showWeightTip(i){
+  var tip=$("wcTip"),p=wChartPts[i];if(!tip||!p)return;
+  var d=new Date(p.d+"T12:00:00").toLocaleDateString("fr-CH",{weekday:"short",day:"numeric",month:"short"});
+  var diff=p.prev!=null?Math.round((p.w-p.prev)*10)/10:null;
+  tip.innerHTML='<b>'+fr(p.w)+' kg</b><span>'+esc(d)+(diff!=null?' · <em class="'+(diff<=0?"down":"up")+'">'+(diff>0?"+":diff<0?"−":"±")+fr(Math.abs(diff))+' kg</em>':'')+'</span>';
+  tip.hidden=false;
+  tip.style.left=Math.max(14,Math.min(86,p.x*100))+"%";tip.style.top=(p.y*100)+"%";
+  tip.classList.toggle("below",p.y<0.4);
+  document.querySelectorAll("#weightChart .wc-dot").forEach(function(c,k){c.classList.toggle("sel",k===i);});
+}
 /* ===== renders ===== */
 function safeRender(fn){
   try{fn();return true;}catch(e){console.error("EVO render error",e);return false;}
@@ -1886,7 +1938,7 @@ function renderProgress(){
   $("pwLost").textContent=fr(Math.max(0,start-w));
   $("pwLeft").textContent=fr(Math.max(0,w-target));
   var wh=state.weightHistory.slice(-12);
-  $("weightChart").innerHTML=lineChart(wh.map(function(x){return Number(x.w);}),"#2c63c4"," kg");
+  $("weightChart").innerHTML=weightChart(wh);
   $("wcFrom").textContent=wh.length?fmtDate(wh[0].d):"";
   var wl=$("wList");if(wl)wl.innerHTML=state.weightHistory.slice().reverse().slice(0,15).map(function(x){return '<div class="hist-row"><div><b>'+fmtDate(x.d)+'</b></div><em>'+fr(x.w)+' kg</em><button class="del" data-act="delWeight" data-d="'+x.d+'" aria-label="Supprimer cette pesée"><svg class="ic-s" aria-hidden="true"><use href="#i-xmark"/></svg></button></div>';}).join("")||'<div class="empty" style="padding:8px 0">Aucune pesée.</div>';
   $("wcTo").textContent=wh.length?fmtDate(wh[wh.length-1].d):"";
@@ -3440,6 +3492,7 @@ document.addEventListener("click",function(e){
     case "mSave": saveMeal(); break;
     case "foodPick": pickFoodResult(Number(a.dataset.i)); break;
     case "foodMore": foodMoreOpen=!foodMoreOpen; var fr0=document.querySelector("#foodSearchResults .fr-rest");if(fr0)fr0.hidden=!foodMoreOpen; a.textContent=foodMoreOpen?"Moins de choix ▴":"Voir "+(document.querySelectorAll("#foodSearchResults .fr-rest .food-result").length)+" autres choix ▾"; fitSearchSheet(); break;
+    case "wPt": showWeightTip(Number(a.dataset.i)); break;
     case "clSend": clSend(); break;
     case "clSugg": $("clInput").value=a.textContent; clSend(); break;
     case "clPhoto": $("clFile").click(); break;
