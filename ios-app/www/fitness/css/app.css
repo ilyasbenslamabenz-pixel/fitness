@@ -1031,3 +1031,7 @@ input[type=search]::-webkit-search-decoration{-webkit-appearance:none}
 .wh-chip b{display:block;font-size:17px;color:var(--text)}
 .wh-chip span{display:block;font-size:11px;color:var(--muted);margin-top:2px}
 .wh-chip.good b{color:#34c77b}.wh-chip.mid b{color:#e3ae4a}.wh-chip.low b{color:var(--warn)}
+.wh-code{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:20px}
+.wh-code-in{background:var(--bg);border:1px solid var(--hair);border-radius:20px;padding:18px;max-width:420px;width:100%}
+.wh-code-in b{font-size:17px}.wh-code-in p{font-size:13.5px;color:var(--muted);line-height:1.45;margin:8px 0 12px}
+.wh-code-in textarea{width:100%;font-size:12px;font-family:ui-monospace,Menlo,monospace;border-radius:12px;border:1px solid var(--hair);background:var(--surface2);color:var(--text);padding:10px;margin-bottom:12px;word-break:break-all}
