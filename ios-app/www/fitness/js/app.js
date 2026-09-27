@@ -293,6 +293,7 @@ var LOCAL_FOODS=[
  {n:"Œuf entier cru (Prix Garantie, 1 œuf ≈ 55 g)",kcal:143,p:12.6,c:0.7,f:9.5,q:55,o:3,b:1,a:"oeuf oeufs œufs coop prix garantie omelette"},
  {n:"Banane bio Max Havelaar (1 banane ≈ 120 g)",kcal:89,p:1.1,c:20,f:0.3,q:120,o:3,b:1,a:"banane bananes bio max havelaar coop fruit"},
  {n:"Champignons de Paris frais (Prix Garantie)",kcal:22,p:3.1,c:0.5,f:0.3,o:3,b:1,a:"champignon champignons paris coop prix garantie"},
+ {n:"Whey Protein Migros (1 dose = 30 g)",kcal:375,p:77,c:6.4,f:4.6,q:30,o:3,b:1,a:"whey proteine protein poudre shaker migros dose isolate"},
  {n:"familia High Protein Beeren (müesli, portion 50 g)",kcal:435,p:22,c:50,f:14,q:50,o:3,b:1,a:"familia muesli müesli protein proteine beeren baies fruits rouges cereales"},
  {n:"Truite (cuite)",kcal:168,p:24,c:0,f:7.5},
  {n:"Saumon (cuit)",kcal:208,p:20,c:0,f:13},
@@ -3980,7 +3981,7 @@ function haptic(kind){
 }
 
 /* ===== protéines du jour : barre dans « Ta journée » et idée concrète l'après-midi s'il en manque ===== */
-var PROT_IDEAS=[["un skyr Isey",16],["3 œufs",19],["1 dose de whey",24],["150 g de saumon",30],["150 g de crevettes",36],["150 g de thon",39]];
+var PROT_IDEAS=[["un skyr Isey",16],["3 œufs",19],["1 dose de whey",23],["150 g de saumon",30],["150 g de crevettes",36],["150 g de thon",39]];
 function protIdeas(left){
   var one=PROT_IDEAS.find(function(x){return x[1]>=left;});
   if(one)return one[0]+" ("+one[1]+" g)";
