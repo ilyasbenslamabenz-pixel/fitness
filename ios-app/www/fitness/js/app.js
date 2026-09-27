@@ -162,7 +162,45 @@ var MUSCLE_KW=[
   [/gainage|plank|planche|crunch|abdo|relevé|mountain/,"abdos · obliques"],[/mollet|calf/,"mollets"],
   [/high knees|sprint|jumping|burpee|jacks|corde|vélo|rameur|tapis|elliptique|course|marche/,"cardio · jambes"]
 ];
+/* muscles précis des exercices du programme : [principaux, secondaires] */
+var EX_MUSCLES={
+ "Squat barre":[["quadriceps","gluteal"],["hamstring","abductors","lower-back"]],
+ "Squats":[["quadriceps","gluteal"],["hamstring","abductors"]],
+ "Développé couché barre":[["chest"],["triceps","front-deltoids"]],
+ "Développé couché haltères":[["chest"],["triceps","front-deltoids"]],
+ "Développé incliné haltères":[["chest","front-deltoids"],["triceps"]],
+ "Écarté poulie":[["chest"],["front-deltoids"]],
+ "Dips assistés":[["chest","triceps"],["front-deltoids"]],
+ "Dips aux barres":[["chest","triceps"],["front-deltoids"]],
+ "Élévations latérales":[["front-deltoids","back-deltoids"],["trapezius"]],
+ "Rowing barre":[["upper-back","trapezius"],["biceps","back-deltoids","lower-back","forearm"]],
+ "Tirage horizontal poulie":[["upper-back","trapezius"],["biceps","back-deltoids","forearm"]],
+ "Tractions":[["upper-back"],["biceps","back-deltoids","forearm"]],
+ "Soulevé de terre":[["gluteal","hamstring","lower-back"],["quadriceps","trapezius","upper-back","forearm"]],
+ "Soulevé de terre roumain":[["hamstring","gluteal"],["lower-back","forearm"]],
+ "Leg curl allongé":[["hamstring"],["calves"]],
+ "Leg curl assis":[["hamstring"],["calves"]],
+ "Tapis de course":[["gluteal","hamstring","calves"],["quadriceps"]],
+ "Cardio fractionné (vélo ou rameur)":[["quadriceps","gluteal"],["hamstring","calves","upper-back"]],
+ "Pompes":[["chest"],["triceps","front-deltoids","abs"]],
+ "Pompes larges":[["chest"],["front-deltoids","triceps"]],
+ "Pompes déclinées":[["chest","front-deltoids"],["triceps"]],
+ "Gainage (planche)":[["abs"],["obliques","lower-back","front-deltoids"]],
+ "Hip thrust au sol":[["gluteal"],["hamstring"]],
+ "Hip thrust machine":[["gluteal"],["hamstring"]]
+};
+var MUSCLE_FR={"chest":"Pectoraux","triceps":"Triceps","biceps":"Biceps","front-deltoids":"Épaules","back-deltoids":"Épaules","upper-back":"Dos","lower-back":"Bas du dos","trapezius":"Trapèzes","abs":"Abdos","obliques":"Obliques","gluteal":"Fessiers","quadriceps":"Quadriceps","hamstring":"Ischios","calves":"Mollets","left-soleus":"Mollets","right-soleus":"Mollets","forearm":"Avant-bras","abductors":"Adducteurs","abductor":"Abducteurs"};
+/* plusieurs exercices : un muscle est « principal » s'il l'est pour au moins un exercice */
+function musclesOf(names){
+  var p=[],sec=[];
+  (Array.isArray(names)?names:[names]).forEach(function(n){var m=exMuscles(n);if(!m)return;
+    m.p.forEach(function(x){if(p.indexOf(x)<0)p.push(x);});m.s.forEach(function(x){if(sec.indexOf(x)<0)sec.push(x);});});
+  sec=sec.filter(function(x){return p.indexOf(x)<0;});
+  return p.length||sec.length?{p:p,s:sec}:null;
+}
+function muscleNames(list){var out=[];list.forEach(function(m){var l=MUSCLE_FR[m];if(l&&out.indexOf(l)<0)out.push(l);});return out;}
 function exMuscles(n){
+  var ov=EX_MUSCLES[n];if(ov)return {p:ov[0].slice(),s:ov[1].slice()};
   var c=EX_CATALOG.find(function(x){return x[0].toLowerCase()===String(n).toLowerCase();}),txt=c?c[2]:"";
   if(!txt){var l=normText(n);for(var i=0;i<MUSCLE_KW.length;i++)if(MUSCLE_KW[i][0].test(l)||MUSCLE_KW[i][0].test(String(n).toLowerCase())){txt=MUSCLE_KW[i][1];break;}}
   if(!txt)return null;
@@ -173,12 +211,19 @@ function exMuscles(n){
   return prim.length||sec.length?{p:prim,s:sec}:null;
 }
 function muscleMapSVG(n){
-  var mm=exMuscles(n);if(!mm)return "";
+  var mm=musclesOf(n);if(!mm)return "";
   function side(arr){return '<svg viewBox="0 0 100 200" aria-hidden="true">'+arr.map(function(g){
     var cls=mm.p.indexOf(g[0])>=0?"mp":(mm.s.indexOf(g[0])>=0?"ms":"");
     return g[1].map(function(pts){return '<polygon points="'+pts+'"'+(cls?' class="'+cls+'"':'')+'/>';}).join("");
   }).join("")+'</svg>';}
   return '<div class="mmap" role="img" aria-label="Muscles travaillés">'+side(BODY_MAP.front)+side(BODY_MAP.back)+'</div>';
+}
+/* carte + noms des muscles (Séance et séance guidée) */
+function muscleCard(names){
+  var mm=musclesOf(names);if(!mm)return "";
+  var pn=muscleNames(mm.p),sn=muscleNames(mm.s).filter(function(x){return pn.indexOf(x)<0;});
+  return '<div class="mcard">'+muscleMapSVG(names)+'<div class="mcard-t"><small>Muscles principaux</small><div class="mtags">'+pn.map(function(x){return '<span class="mtag p">'+x+'</span>';}).join("")+'</div>'
+    +(sn.length?'<small>Secondaires</small><div class="mtags">'+sn.map(function(x){return '<span class="mtag">'+x+'</span>';}).join("")+'</div>':'')+'</div></div>';
 }
 var photoCycleT=null;
 function stopPhotoCycle(){clearInterval(photoCycleT);photoCycleT=null;}
@@ -1550,6 +1595,7 @@ function renderSession(){
   var sl=$("sesLight");if(sl)sl.innerHTML=state.session.light&&state.session.light[p.id]?'<div class="ses-light"><span>Version légère : 1 série de moins, −10 % de charge</span><button data-act="sessNormal">Revenir à la normale</button></div>':'';
   var ban=$("sesBanner");if(ban){var ph=activeExercises(p).map(function(e){var x=exPhotos(e.n);return x?photoUrl(x[x.length-1]):null;}).filter(Boolean).slice(0,3);
     ban.innerHTML=ph.map(function(u){return '<img src="'+u+'" alt="" loading="lazy">';}).join("");ban.hidden=!ph.length;}
+  var smu=$("sesMuscles");if(smu){smu.innerHTML=muscleCard(activeExercises(p).map(function(e){return e.n;}));smu.hidden=!smu.innerHTML;}
   /* la puce choisie reste visible (la liste défile horizontalement) */
   var onChip=chips.querySelector(".chip.on");
   if(onChip){var cr=chips.getBoundingClientRect(),br=onChip.getBoundingClientRect();if(br.left<cr.left||br.right>cr.right)chips.scrollLeft+=br.left-cr.left-(cr.width-br.width)/2;}
@@ -1871,8 +1917,8 @@ function renderGuided(){
   else if(last>0)lastTxt=" · dernière fois "+fr(last)+" kg";
   $("gExSub").innerHTML=esc(e.t)+lastTxt
     +(pg&&pg.up?'<div class="g-prog">Toutes tes séries réussies : essaie '+fr(pg.to)+' kg</div>':'');
-  /* écran de séance épuré : uniquement les séries, pas de photo */
-  var ic=$("gExIcon");if(ic&&ic.innerHTML){stopPhotoCycle();ic.innerHTML="";ic.dataset.ex="";}
+  /* écran de séance épuré : pas de photo, seulement la carte des muscles travaillés */
+  var ic=$("gExIcon");if(ic&&ic.dataset.ex!==e.n){stopPhotoCycle();ic.innerHTML=muscleCard(e.n);ic.dataset.ex=e.n;ic.classList.toggle("has-map",!!ic.innerHTML);}
 
   var st=mk[e.n]||{},wv=(st.w!=null?st.w:defaultWeight(e)),rt=repTarget(e),rv=repsFor(mk,e),vals="";
   if(e.w)vals+='<div class="val-group"><button data-act="w-" data-ex="'+esc(e.n)+'"><svg class="ic-s" aria-hidden="true"><use href="#i-minus"/></svg></button><div class="val"><input class="wval gw-in" data-ex="'+esc(e.n)+'" type="text" inputmode="decimal" value="'+num(wv)+'" aria-label="Charge en kg"><span>KG</span></div><button data-act="w+" data-ex="'+esc(e.n)+'"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button></div>';

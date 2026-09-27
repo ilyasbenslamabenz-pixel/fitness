@@ -1016,13 +1016,9 @@ input[type=search]::-webkit-search-decoration{-webkit-appearance:none}
 .mmap polygon{fill:#c9cdd4}
 .mmap polygon.mp{fill:#e5383b}
 .mmap polygon.ms{fill:#f2a0a1}
-.guided-ic.has-map .mmap{position:static;box-shadow:none;background:transparent;gap:10px}
-.guided-ic.has-map .mmap svg{width:48px;height:96px}
-.guided-ic.has-map .mmap polygon{fill:var(--ring-track)}
-.guided-ic.has-map .mmap polygon.mp{fill:#e5383b}
-.guided-ic.has-map .mmap polygon.ms{fill:#f2a0a1}
 /* séance guidée sans photo : seul l'écran de repos occupe cette zone, dans le flux */
 #gExIcon{display:none}
+#gExIcon.has-map{display:block;height:auto;margin:10px 22px 0;padding:10px 12px;font-size:inherit;background:var(--surface);border:1px solid var(--hair)}
 .guided-media .g-rest{position:relative;top:auto;left:auto;right:auto;bottom:auto;margin:14px 22px 0;padding:18px 12px}
 .guided-body{justify-content:flex-start;flex:0 0 auto}
 .guided-name{margin-top:22px}
@@ -1079,3 +1075,18 @@ input[type=search]::-webkit-search-decoration{-webkit-appearance:none}
 .cl-msg.has-img .cl-imgs+.cl-cap{margin:6px 9px 0}
 .cl-zoom{position:fixed;inset:0;z-index:210;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;padding:16px}
 .cl-zoom img{max-width:100%;max-height:100%;border-radius:12px}
+
+/* carte des muscles (Séance + séance guidée) */
+.mcard{display:flex;align-items:center;gap:14px}
+.mcard .mmap{position:static;box-shadow:none;background:transparent;padding:0;gap:6px;pointer-events:none;flex:0 0 auto}
+.mcard .mmap svg{width:50px;height:100px}
+.mcard .mmap polygon{fill:var(--ring-track)}
+.mcard .mmap polygon.mp{fill:var(--accent-text)}
+.mcard .mmap polygon.ms{fill:var(--accent-text);fill-opacity:.4}
+.mcard-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.mcard-t small{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.mtags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px}
+.mtag{font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px;background:var(--surface2);color:var(--muted)}
+.mtag.p{background:var(--accent-dim);color:var(--accent-text)}
+.ses-muscles{margin:12px 0 2px;padding:12px;border-radius:16px;border:1px solid var(--hair)}
+#gExIcon.has-map .mmap svg{width:44px;height:88px}
