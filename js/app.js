@@ -8,36 +8,42 @@ var WHOOP_WORKER="";
 
 /* programme perte de poids : pecs 2×/semaine (haut et intérieur), dos pour la posture,
    fessiers et gainage pour les hanches ; la graisse part via le déficit et le cardio */
-var PROGRAM_VERSION=5;
+var PROGRAM_VERSION=6;
 var DEFAULT_PROGRAM=[
- {id:"push",name:"Pectoraux & épaules",short:"Pecs",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-flame_fill"/></svg>',focus:"Pecs (haut et intérieur) · épaules · triceps",ex:[
-   {n:"Développé couché haltères",t:"4 × 8-10",w:true},
+ {id:"fbA",name:"Full body A",short:"Full A",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-dumbbell"/></svg>',focus:"Squat et développé couché lourds · dos · soulevé de terre léger (technique)",ex:[
+   {n:"Squat barre",t:"4 × 6-8",w:true},
+   {n:"Développé couché barre",t:"4 × 6-8",w:true},
+   {n:"Rowing barre",t:"4 × 8-10",w:true},
+   {n:"Tractions",t:"3 × 5-8",w:false},
+   {n:"Soulevé de terre",t:"3 × 8",w:true}]},
+ {id:"cardio1",name:"Cardio endurance",short:"Cardio",met:6,min:50,icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-figure_walk"/></svg>',focus:"Marche inclinée longue · brûle-graisse doux pour les articulations",ex:[
+   {n:"Tapis de course",t:"40 min : pente 10-12 %, 5 km/h",w:false},
+   {n:"Gainage (planche)",t:"3 × 30-45 s",w:false}]},
+ {id:"pecs-isch",name:"Pectoraux & ischios",short:"Pecs",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-flame_fill"/></svg>',focus:"Pecs (haut et intérieur) · triceps · arrière des cuisses",ex:[
    {n:"Développé incliné haltères",t:"4 × 8-10",w:true},
    {n:"Écarté poulie",t:"3 × 12-15",w:true},
    {n:"Dips assistés",t:"3 × 8-12",w:true},
-   {n:"Élévations latérales",t:"3 × 12-15",w:true},
-   {n:"Extension triceps corde",t:"3 × 12-15",w:true}]},
- {id:"pull",name:"Dos & bras",short:"Bras",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-scope"/></svg>',focus:"Dos · biceps · triceps",ex:[
-   {n:"Tirage vertical",t:"4 × 8-10",w:true},
-   {n:"Rowing haltère",t:"3 × 10-12",w:true},
-   {n:"Tirage horizontal poulie",t:"3 × 10-12",w:true},
-   {n:"Curl biceps haltères",t:"3 × 10-12",w:true},
-   {n:"Curl marteau haltères",t:"3 × 10-12",w:true},
-   {n:"Extension triceps au-dessus de la tête",t:"3 × 12-15",w:true}]},
- {id:"legs",name:"Jambes & hanches",short:"Hanches",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-figure_walk"/></svg>',focus:"Fessiers · cuisses · gainage",ex:[
-   {n:"Hip thrust machine",t:"4 × 10-12",w:true},
-   {n:"Presse à cuisses",t:"3 × 10-12",w:true},
-   {n:"Soulevé de terre roumain",t:"3 × 10-12",w:true},
-   {n:"Fentes marchées haltères",t:"3 × 12 / jambe",w:true},
-   {n:"Abducteurs machine",t:"3 × 15-20",w:true},
-   {n:"Gainage",t:"3 × 45 s",w:false}]},
- {id:"full",name:"Pecs + cardio",short:"Pecs 2",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg>',focus:"Pecs · haut du corps · cardio brûle-graisse",ex:[
-   {n:"Chest press",t:"4 × 10-12",w:true},
-   {n:"Pompes",t:"3 × max",w:false},
-   {n:"Développé militaire machine",t:"3 × 10-12",w:true},
-   {n:"Tirage vertical prise large",t:"3 × 10-12",w:true},
-   {n:"Cardio fractionné (vélo ou rameur)",t:"20 min : 30 s vite / 90 s lent",w:false}]}
+   {n:"Soulevé de terre roumain",t:"4 × 8-10",w:true},
+   {n:"Leg curl allongé",t:"3 × 10-12",w:true}]},
+ {id:"cardio2",name:"Cardio fractionné",short:"HIIT",met:7.5,min:40,icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg>',focus:"Fractionné vélo ou rameur + marche inclinée · la séance qui brûle le plus",ex:[
+   {n:"Cardio fractionné (vélo ou rameur)",t:"20 min : 30 s vite / 90 s lent",w:false},
+   {n:"Tapis de course",t:"20 min : pente 10 %, 5 km/h",w:false}]},
+ {id:"fbB",name:"Full body B",short:"Full B",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-dumbbell"/></svg>',focus:"Soulevé de terre lourd · squat et développé couché en volume · dos",ex:[
+   {n:"Soulevé de terre",t:"4 × 5-6",w:true},
+   {n:"Développé couché barre",t:"3 × 8-10",w:true},
+   {n:"Squat barre",t:"3 × 8-10",w:true},
+   {n:"Rowing barre",t:"3 × 10-12",w:true},
+   {n:"Tractions",t:"3 × max",w:false}]}
 ];
+/* anciennes séances salle, retirées du programme (gardées si l'utilisateur les a modifiées) */
+/* anciens jours par défaut (programme v5) : retirés à la migration ; leurs exercices servent encore à nettoyer les charges quand on supprime une vieille séance */
+var RETIRED_EX={
+ push:["Développé couché haltères","Développé incliné haltères","Écarté poulie","Dips assistés","Élévations latérales","Extension triceps corde"],
+ pull:["Tirage vertical","Rowing haltère","Tirage horizontal poulie","Curl biceps haltères","Curl marteau haltères","Extension triceps au-dessus de la tête"],
+ legs:["Hip thrust machine","Presse à cuisses","Soulevé de terre roumain","Fentes marchées haltères","Abducteurs machine","Gainage"],
+ full:["Chest press","Pompes","Développé militaire machine","Tirage vertical prise large","Cardio fractionné (vélo ou rameur)"]
+};
+var RETIRED_DAYS=Object.keys(RETIRED_EX);
 
 /* séance maison : force au poids du corps + cardio HIIT en alternance, sans matériel */
 var HOME_PROGRAM=[
@@ -554,7 +560,13 @@ function normalizeState(){
     var defDays={};DEFAULT_PROGRAM.concat(HOME_PROGRAM).forEach(function(d){defDays[d.id]=d;});
     state.program=state.program.map(function(p){return defDays[p.id]&&!p.edited?JSON.parse(JSON.stringify(defDays[p.id])):p;});
     var have={};state.program.forEach(function(p){have[p.id]=1;});
-    DEFAULT_PROGRAM.concat(HOME_PROGRAM).forEach(function(d){if(!have[d.id])state.program.push(JSON.parse(JSON.stringify(d)));});
+    state.program=state.program.filter(function(p){return RETIRED_DAYS.indexOf(p.id)<0||p.edited;});
+    have={};state.program.forEach(function(p){have[p.id]=1;});
+    /* nouveaux jours salle en tête, dans l'ordre de la semaine */
+    var fresh=DEFAULT_PROGRAM.filter(function(d){return !have[d.id];}).map(function(d){return JSON.parse(JSON.stringify(d));});
+    state.program=fresh.concat(state.program);
+    HOME_PROGRAM.forEach(function(d){if(!have[d.id])state.program.push(JSON.parse(JSON.stringify(d)));});
+    state.selDay=0;state.suggest=0;
     state.programVersion=PROGRAM_VERSION;save();
   }
   if(["muscu","maison","running"].indexOf(state.sessionCategory)<0)state.sessionCategory="muscu";
@@ -815,7 +827,7 @@ function clRunTool(name,inp){
         var entry={d:td,w:w,r:reps,s:s0};if(ix>=0)arr[ix]=entry;else arr.push(entry);
         arr.sort(function(a2,b2){return a2.d.localeCompare(b2.d);});
       });
-      var ses={date:new Date().toISOString(),dayId:day?day.id:"coach",name:day?day.name:nm,done:exs.length,total:exs.length,src:"coach"};
+      var ses={date:new Date().toISOString(),dayId:day?day.id:"coach",name:day?day.name:nm,done:exs.length,total:exs.length,src:"coach",ex:exs.map(function(e){return exName(e.name);})};
       var dm=Number(inp.duration_min);if(dm>0&&dm<=300)ses.dur=Math.round(dm);
       state.sessions.unshift(ses);state.sessions=state.sessions.slice(0,200);
       save();renderAll();
@@ -1085,7 +1097,8 @@ function dayBurn(d){
     if(localDay(x.date)!==d)return;
     var q=state.program.find(function(pp){return pp.id===x.dayId;}),cat=(q&&q.cat)||"muscu";
     var dur=Number(x.dur)||(q?estimateDurationMin(q):45);
-    var gross=Number(x.kcal)||estimateSessionKcal(cat,dur);
+    /* séances cardio : MET propre au jour (marche inclinée ~6, fractionné ~7,5) au lieu de celui de la musculation */
+    var gross=Number(x.kcal)||(q&&q.met?Math.max(1,Math.round(q.met*w*dur/60)):estimateSessionKcal(cat,dur));
     sessK+=Math.max(0,Math.round(gross-w*dur/60));
   });
   state.runs.forEach(function(r){
@@ -1132,12 +1145,12 @@ function weekNo(){var s=new Date((state.profile.startDate||START_DATE)+"T12:00:0
    (maison ou marche) si la salle n'est pas possible. Index 0 = lundi. */
 var STEP_GOAL=10000;
 var WEEK_PLAN=[
- {day:"push",alt:"home-arms",extra:"Finis par 15 min de marche inclinée sur tapis (pente 8-10 %, 5 km/h)."},
- {walk:{title:"Marche rapide",min:45,lines:["45 min à allure soutenue : tu peux parler, pas chanter","Idéal à jeun le matin ou après un repas"]},alt:"home-hiit1"},
- {day:"pull",alt:"home-arms",extra:"Finis par 15 min de marche inclinée ou de vélo."},
- {day:"home-hiit1",alt:"walk",extra:"+ 30 min de marche dans la journée.",walkAlt:{title:"Marche rapide",min:50,lines:["50 min à allure soutenue","Remplace le HIIT si tu es fatigué ou courbaturé"]}},
- {day:"full",alt:"home-fb1",extra:"Le fractionné en fin de séance brûle le plus : ne le saute pas."},
- {day:"legs",alt:"home-fb2",extra:"+ 30-45 min de marche : ce sont le déficit et le cardio qui affinent les hanches."},
+ {day:"fbA",alt:"home-fb1",extra:"Échauffe-toi 10 min, puis 2 séries légères avant le squat et le développé couché."},
+ {day:"cardio1",alt:"walk",extra:"+ tes pas de la journée.",walkAlt:{title:"Marche rapide",min:50,lines:["50 min à allure soutenue","Si tu n'as pas accès au tapis"]}},
+ {day:"pecs-isch",alt:"home-psg",extra:"Finis par 10 min de marche inclinée."},
+ {day:"cardio2",alt:"home-hiit1",extra:"Le fractionné brûle le plus : ne le saute pas."},
+ {day:"fbB",alt:"home-fb2",extra:"Soulevé de terre en premier, dos neutre ; monte la charge quand toutes les séries passent."},
+ {walk:{title:"Marche longue",min:60,lines:["60 min dehors à allure soutenue","Tes jambes récupèrent de la semaine"]},alt:"home-hiit2"},
  {walk:{title:"Repos actif",min:40,rest:true,lines:["Marche tranquille 30-45 min","5-10 min d'étirements (pecs, hanches, dos)"]}}
 ];
 var PLAN_DAYS=["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
@@ -1467,6 +1480,7 @@ function isExDone(mk,e){var arr=setsArrFor(mk,e),cnt=setCount(e);for(var i=0;i<c
 function exSets(mk,e){return doneSetCount(mk,e);} /* conservé pour compat : nombre total de séries validées (bonus incluses) */
 function repsFor(mk,e){var rt=repTarget(e);if(!rt)return null;var st=mk[e.n]||{};return st.reps!=null?st.reps:rt.max;}
 function estimateDurationMin(p){
+  if(p.min)return p.min;
   var active=activeExercises(p),totalSets=0;
   active.forEach(function(e){totalSets+=setCount(e);});
   return Math.max(15,Math.round(totalSets*2.5/5)*5);
@@ -1785,7 +1799,7 @@ function applyFinish(p,doneEx,d,totalCount){
     if(ix>=0)arr[ix]=entry;else arr.push(entry);
     arr.sort(function(a,b){return a.d.localeCompare(b.d);});
   });
-  state.sessions.unshift({date:new Date().toISOString(),dayId:p.id,name:p.name,done:doneEx.length,total:totalCount!=null?totalCount:p.ex.length});
+  state.sessions.unshift({date:new Date().toISOString(),dayId:p.id,name:p.name,done:doneEx.length,total:totalCount!=null?totalCount:p.ex.length,ex:doneEx.map(function(e){return e.n;})});
   state.sessions=state.sessions.slice(0,200);
 }
 function undoFinish(){
@@ -2289,7 +2303,7 @@ function delSession(i){
   var d=localDay(s0.date),q=state.program.find(function(pp){return pp.id===s0.dayId;});
   /* les charges notées ce jour-là pour les exercices de cette séance partent avec elle (sauf si une autre séance du jour les utilise) */
   var other=state.sessions.some(function(x,k){return k!==i&&localDay(x.date)===d&&x.dayId===s0.dayId;});
-  var names=q&&!other?q.ex.map(function(e){return e.n;}):[],removed={};
+  var names=other?[]:(s0.ex||(q?q.ex.map(function(e){return e.n;}):RETIRED_EX[s0.dayId])||[]),removed={};
   names.forEach(function(n){var a2=state.perf[n];if(!a2)return;var ix=a2.findIndex(function(x){return x.d===d;});if(ix>=0){removed[n]=a2[ix];a2.splice(ix,1);if(!a2.length)delete state.perf[n];}});
   state.sessions.splice(i,1);save();renderAll();haptic("light");
   snack("Séance supprimée ("+fmtDate(d)+")","Annuler",function(){
