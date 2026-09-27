@@ -36,7 +36,7 @@
   },2500);
 })();
 </script>
-<link rel="stylesheet" href="/fitness/css/app.css?v=22">
+<link rel="stylesheet" href="/fitness/css/app.css?v=23">
 <script>
 (function(){
   try{
@@ -145,33 +145,30 @@
     </div>
 
     <div id="sessExerciseView">
+      <div class="ses-picker" id="dayChips"></div>
 
       <div class="card sday-card">
-        <div class="ses-banner" id="sesBanner" hidden></div>
         <div class="sday-top">
-          <div class="ic" id="sesIc" style="width:46px;height:46px;border-radius:12px;background:var(--surface2);display:grid;place-items:center;font-size:24px;flex:0 0 auto"><svg class="ic-s" aria-hidden="true"><use href="#i-flame_fill"/></svg></div>
+          <div class="ic" id="sesIc"><svg class="ic-s" aria-hidden="true"><use href="#i-flame_fill"/></svg></div>
           <div class="sday-info"><h3 id="sesName">—</h3><div class="sub" id="sesFocus">—</div></div>
         </div>
+        <div id="sesTodayTag" class="sday-today"></div>
         <div class="sday-meta" id="sesMeta">—</div>
         <div id="sesMuscles" class="ses-muscles" hidden></div>
         <div id="sesLight"></div>
         <div class="sday-last" id="sesLast"></div>
-        <div id="sesTodayTag" class="sday-today"></div>
-        <button class="btn primary" id="sesCta" data-act="guidedStart">Démarrer la séance</button>
         <div class="sday-prog" id="sesProgWrap" style="display:none">
           <div class="sprog-mini"><i id="sesProg" style="width:0%"></i></div>
           <div class="sday-prog-text"><span id="sesDoneN">0</span><small id="sesTotN">/0</small> exos · <span id="sesProgText">0/0 séries</span></div>
         </div>
+        <button class="btn primary" id="sesCta" data-act="guidedStart">Démarrer la séance</button>
       </div>
       <div id="restBar" style="display:none"><span id="restLabel"></span><button id="restStop" data-act="restStop" style="display:none"></button></div>
 
-      <div class="head" style="margin-top:22px"><h2 style="font-size:18px">Exercices</h2></div>
-      <div class="card" style="padding:4px 14px">
+      <div class="head ses-ex-head"><h2>Exercices</h2><span>Touche un exercice pour voir le mouvement</span></div>
+      <div class="card ses-ex-card">
         <div id="exList"></div>
       </div>
-      <p style="font-size:12px;color:var(--faint);text-align:center;margin:14px 4px">Tape un exercice pour démarrer la séance guidée à partir de celui-ci.</p>
-    <div class="head" style="margin-top:22px"><h2 style="font-size:18px">Toutes les séances</h2></div>
-      <div class="pgrid" id="dayChips"></div>
       <details class="edit-list prog-edit"><summary>Modifier mes séances (exercices, séries)</summary><div class="card list" id="progList"></div></details>
     </div>
 
@@ -479,36 +476,39 @@
   <div class="guided-prog"><i id="gProgBar" style="width:0%"></i></div>
   <div class="guided-top">
     <button class="guided-x" data-act="guidedClose" aria-label="Retour"><svg class="ic-s" aria-hidden="true"><use href="#i-chevron_back"/></svg></button>
-    <div class="guided-mid"><b id="gExN">1 / 1</b><span id="gSessName">—</span><em id="gClock"></em></div>
-    <button class="guided-timer" id="gTimer" data-act="restStop" style="visibility:hidden" title="Toucher pour passer le repos"><span><svg class="ic-s" aria-hidden="true"><use href="#i-timer_fill"/></svg></span><span id="gTimerT">0:00</span></button>
+    <div class="guided-mid"><b id="gSessName">—</b><em id="gClock"></em></div>
+    <button class="guided-end" data-act="guidedFinishNow">Terminer</button>
+    <button class="guided-timer" id="gTimer" data-act="restStop" hidden></button>
   </div>
   <div class="g-strip" id="gStrip"></div>
   <div class="guided-body">
     <div class="guided-name">
+      <div class="g-exn" id="gExN">Exercice 1 / 1</div>
       <h3 id="gExName">—</h3>
       <div class="sub" id="gExSub">—</div>
     </div>
-    <div class="guided-media">
-    <div class="guided-ic" id="gExIcon"><svg class="ic-s" aria-hidden="true"><use href="#i-dumbbell"/></svg></div>
-    <div class="g-rest" id="gRest" hidden>
-      <button class="g-rest-sound" id="gSoundBtn" data-act="soundToggle" aria-label="Son du minuteur"></button>
-      <div class="g-rest-lab">Repos</div>
-      <div class="g-rest-time" id="gRestT">1:30</div>
-      <div class="g-rest-bar"><i id="gRestBar"></i></div>
-      <div class="g-rest-next" id="gRestNext"></div>
-      <div class="g-rest-btns"><button data-act="restAdj" data-d="-15">−15 s</button><button class="skip" data-act="restStop">Passer</button><button data-act="restAdj" data-d="15">+15 s</button></div>
-    </div>
-    </div>
-    <div class="guided-vals" id="gVals"></div>
+    <div class="g-muscle" id="gExIcon"></div>
     <div class="guided-sets" id="gSets"></div>
-    <div class="guided-bottom">
-      <button class="guided-next" id="gNextBtn" data-act="guidedNext">Valider la série</button>
-      <div class="guided-nav-row">
-        <button class="guided-nav-btn" id="gPrevBtn" data-act="guidedPrev"><svg class="ic-s" aria-hidden="true"><use href="#i-chevron_left"/></svg>Précédent</button>
-        <button class="guided-nav-btn" data-act="guidedSkip">Suivant<svg class="ic-s" aria-hidden="true"><use href="#i-chevron_right"/></svg></button>
+    <div class="g-upnext" id="gUpNext"></div>
+  </div>
+  <div class="guided-bottom">
+    <div class="g-rest" id="gRest" hidden>
+      <div class="g-rest-row">
+        <div class="g-rest-lab">Repos</div>
+        <div class="g-rest-time" id="gRestT">1:30</div>
+        <button class="g-rest-sound" id="gSoundBtn" data-act="soundToggle" aria-label="Son du minuteur"></button>
       </div>
-      <div class="g-upnext" id="gUpNext"></div>
-      <div class="guided-list-link"><span data-act="guidedList">Voir la liste</span> · <span data-act="guidedFinishNow">Terminer maintenant</span></div>
+      <div class="g-rest-bar"><i id="gRestBar"></i></div>
+      <div class="g-rest-foot">
+        <div class="g-rest-next" id="gRestNext"></div>
+        <div class="g-rest-btns"><button data-act="restAdj" data-d="-15">−15 s</button><button class="skip" data-act="restStop">Passer</button><button data-act="restAdj" data-d="15">+15 s</button></div>
+      </div>
+    </div>
+    <button class="guided-next" id="gNextBtn" data-act="guidedNext">Valider la série</button>
+    <div class="guided-nav-row">
+      <button class="guided-nav-btn" id="gPrevBtn" data-act="guidedPrev"><svg class="ic-s" aria-hidden="true"><use href="#i-chevron_left"/></svg>Précédent</button>
+      <button class="guided-nav-btn" data-act="guidedList">Liste</button>
+      <button class="guided-nav-btn" data-act="guidedSkip">Suivant<svg class="ic-s" aria-hidden="true"><use href="#i-chevron_right"/></svg></button>
     </div>
   </div>
 </div>
@@ -721,6 +721,10 @@
   <div class="sub" id="exiSub"></div>
   <div class="exi-photos" id="exiPhotos"></div>
   <div class="exi-muscles" id="exiMuscles"></div>
+  <div class="exi-ses" id="exiSesActs" hidden>
+    <button class="btn primary" id="exiGo" data-act="exiGo">Commencer par cet exercice</button>
+    <button class="btn ghost danger" id="exiRemove" data-act="exiRemove">Retirer de la séance d'aujourd'hui</button>
+  </div>
   <div class="acts"><button class="btn ghost" data-act="exInfoClose">Fermer</button><button class="btn primary" id="exiAdd" data-act="exInfoAdd" hidden>Ajouter</button></div>
 </div></div>
 
@@ -730,7 +734,7 @@
 <div class="toast" id="toast" hidden></div>
 
 <script src="/fitness/js/body-map.js?v=1"></script>
-<script src="/fitness/js/app.js?v=79"></script>
+<script src="/fitness/js/app.js?v=80"></script>
 <script src="/fitness/js/boot.js?v=3"></script>
 </body>
 </html>
