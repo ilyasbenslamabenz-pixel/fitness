@@ -930,7 +930,7 @@ function clLoadSdk(){
 }
 function clErrMsg(e){
   var s=e&&e.status,msg=String((e&&e.message)||"");
-  if(s===401)return "Clé API refusée. Vérifie-la dans Profil › Coach Claude.";
+  if(s===401)return "Clé API refusée. Vérifie-la dans Profil › IA.";
   if(s===429)return "Trop de messages d'un coup, réessaie dans une minute.";
   if(s===400&&/credit/i.test(msg))return "Crédit Anthropic épuisé. Recharge-le sur platform.claude.com (Billing).";
   if(s===529||s===503)return "Claude est surchargé, réessaie dans un instant.";
@@ -3064,7 +3064,7 @@ function renderProfile(){
   var wst=$("whoopStatus");if(wst){var wt=whoopTok(),wu=state.whoop&&state.whoop.updated;
     wst.innerHTML=!WHOOP_WORKER?'Relais pas encore installé (voir le guide).':(wt?'Connecté'+(wu?' · synchro '+new Date(wu).toLocaleTimeString("fr-CH",{hour:"2-digit",minute:"2-digit"}):''):'Non connecté');
     $("whoopBtns").innerHTML=wt?'<button class="btn" data-act="whoopSync">Synchroniser</button><button class="btn ghost" data-act="whoopDisconnect">Déconnecter</button>':'<button class="btn" data-act="whoopConnect"'+(WHOOP_WORKER?'':' disabled')+'>Connecter WHOOP</button>'+(WHOOP_WORKER?'<button class="btn ghost" data-act="whoopPaste">Coller un code</button>':'');}
-  var ks=$("clKeyStatus");if(ks){var kk=clKey();ks.innerHTML=kk?'Clé enregistrée sur ce téléphone : <b class="good">…'+esc(kk.slice(-4))+'</b>':'Aucune clé : le coach Claude de l\'Accueil est désactivé.';}
+  var ks=$("clKeyStatus");if(ks){var kk=clKey();ks.innerHTML=kk?'Clé enregistrée sur ce téléphone : <b class="good">…'+esc(kk.slice(-4))+'</b>':'Aucune clé : l\'IA de l\'Accueil est désactivée.';}
   var bs=$("backupStatus");if(bs){var dn=daysSinceBackup();bs.innerHTML='Dernière sauvegarde : <b class="'+(dn==null||dn>=7?"bad":"good")+'">'+backupLabel()+'</b>'+(cloudUser?" · automatique (cloud)":" · connecte-toi ou exporte régulièrement");}
 }
 
@@ -4026,7 +4026,7 @@ function renderWeekRecap(){
     +cell(st.kcal==null?"—":kfmt(st.kcal),"kcal/j")
     +cell(st.water==null?"—":fmtL1(st.water),"eau/j")
     +cell(st.steps==null?"—":kfmt(st.steps),"pas/j")
-    +'</div><button class="btn" style="width:100%;margin-top:12px" data-act="recapCoach">Conseils du coach</button></div>';
+    +'</div><button class="btn" style="width:100%;margin-top:12px" data-act="recapCoach">Conseils de l\'IA</button></div>';
 }
 /* ===== photos de progression : uniquement sur ce téléphone (IndexedDB), ni export ni cloud ===== */
 var phDbP=null;

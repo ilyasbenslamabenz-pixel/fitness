@@ -72,12 +72,12 @@
     <div class="card cl-card" id="claudeCard">
       <div class="cl-head">
         <span class="cl-av" aria-hidden="true"><svg class="ic-s"><use href="#i-sparkles"/></svg></span>
-        <div class="cl-ht"><b>Coach</b><small id="clCost"></small></div>
+        <div class="cl-ht"><b>IA</b><small id="clCost"></small></div>
         <button class="cl-clear" id="clClearBtn" data-act="clClear" aria-label="Effacer la conversation" hidden><svg class="ic-s" aria-hidden="true"><use href="#i-trash_fill"/></svg></button>
       </div>
       <div class="cl-log" id="clLog" aria-live="polite"></div>
       <div class="cl-photo" id="clPhotoPrev" hidden></div>
-      <div class="cl-bar"><button class="cl-cam" data-act="clPhoto" aria-label="Ajouter une photo"><svg class="ic-s" aria-hidden="true"><use href="#i-camera_fill"/></svg></button><input type="file" id="clFile" accept="image/*" multiple hidden><input id="clInput" type="text" enterkeyhint="send" autocomplete="off" autocorrect="on" aria-label="Message pour le coach"><button class="cl-send" id="clSendBtn" data-act="clSend" aria-label="Envoyer"><svg class="ic-s" aria-hidden="true"><use href="#i-arrow_up"/></svg></button></div>
+      <div class="cl-bar"><button class="cl-cam" data-act="clPhoto" aria-label="Ajouter une photo"><svg class="ic-s" aria-hidden="true"><use href="#i-camera_fill"/></svg></button><input type="file" id="clFile" accept="image/*" multiple hidden><input id="clInput" type="text" enterkeyhint="send" autocomplete="off" autocorrect="on" aria-label="Message pour l'IA"><button class="cl-send" id="clSendBtn" data-act="clSend" aria-label="Envoyer"><svg class="ic-s" aria-hidden="true"><use href="#i-arrow_up"/></svg></button></div>
     </div>
     <div class="card day-card">
       <div class="head" style="margin:0 0 4px"><div class="eyebrow">Ta journée</div><span class="link" data-act="go" data-page="meals">Repas ›</span></div>
@@ -411,8 +411,8 @@
       <div class="lrow"><span class="lrow-ic" style="color:#e3ae4a"><svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg></span><span class="lrow-t" id="whoopStatus">Non connecté</span></div>
     </div>
     <div class="row2" id="whoopBtns" style="margin-top:12px"></div>
-    <div class="group-f">Dépense calorique mesurée, récupération, sommeil et effort, repris sur l'Accueil et par le coach.</div>
-    <div class="group-h">Coach Claude</div>
+    <div class="group-f">Dépense calorique mesurée, récupération, sommeil et effort, repris sur l'Accueil et par l'IA.</div>
+    <div class="group-h">IA (Claude)</div>
     <div class="card list">
       <label class="lrow"><span class="lrow-ic" style="color:#d0875a"><svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg></span><span class="lrow-t">Clé API</span><input class="lrow-v" id="fClaudeKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="sk-ant-…"></label>
     </div>
@@ -718,7 +718,7 @@
 <div class="snack" id="snack"><div class="msg" id="snackMsg"></div><button data-act="snackAct" id="snackBtn">Annuler</button></div>
 <div class="toast" id="toast" hidden></div>
 
-<script src="/fitness/js/app.js?v=70"></script>
+<script src="/fitness/js/app.js?v=71"></script>
 <script src="/fitness/js/boot.js?v=3"></script>
 </body>
 </html>
