@@ -36,7 +36,7 @@
   },2500);
 })();
 </script>
-<link rel="stylesheet" href="/fitness/css/app.css?v=17">
+<link rel="stylesheet" href="/fitness/css/app.css?v=18">
 <script>
 (function(){
   try{
@@ -68,6 +68,7 @@
     </div>
 
     <div id="backupNag"></div>
+    <div id="weekRecap"></div>
     <div class="card cl-card" id="claudeCard">
       <div class="cl-head">
         <span class="cl-av" aria-hidden="true"><svg class="ic-s"><use href="#i-sparkles"/></svg></span>
@@ -104,8 +105,16 @@
             <div class="ring-row-bar"><div class="ring-row-fill" id="legRepasBar" style="width:0%;background:#d0875a"></div></div>
           </div>
         </div>
+        <div class="ring-row">
+          <div class="ring-row-ic" style="color:#34c77b;background:rgba(52,199,123,.14)"><svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg></div>
+          <div class="ring-row-main">
+            <div class="ring-row-top"><span class="ring-row-lab">Protéines</span><span class="ring-row-val" id="legProt">0 g</span></div>
+            <div class="ring-row-bar"><div class="ring-row-fill" id="legProtBar" style="width:0%;background:#34c77b"></div></div>
+          </div>
+        </div>
       </div>
     </div>
+      <div id="protTip"></div>
       <div id="burnCard" class="burn-inline"></div>
     </div>
 
@@ -144,6 +153,7 @@
           <div class="sday-info"><h3 id="sesName">—</h3><div class="sub" id="sesFocus">—</div></div>
         </div>
         <div class="sday-meta" id="sesMeta">—</div>
+        <div id="sesLight"></div>
         <div class="sday-last" id="sesLast"></div>
         <div id="sesTodayTag" class="sday-today"></div>
         <button class="btn primary" id="sesCta" data-act="guidedStart">Démarrer la séance</button>
@@ -227,6 +237,12 @@
     <div class="card" data-ptab="body">
       <div class="head" style="margin:0 0 2px"><div class="eyebrow">Tour de taille et de hanches</div><span class="link" data-act="weigh" data-mode="measure">＋ Mesurer</span></div>
       <div id="measBox"></div>
+    </div>
+
+    <div class="card" data-ptab="body">
+      <div class="head" style="margin:0 0 2px"><div class="eyebrow">Photos de progression</div><span class="link" data-act="photoAdd">＋ Photo</span></div>
+      <input type="file" id="photoFile" accept="image/*" hidden>
+      <div id="photoBox"></div>
     </div>
 
     <div class="card" id="bodyCompCard" data-ptab="body" style="display:none">
@@ -702,7 +718,7 @@
 <div class="snack" id="snack"><div class="msg" id="snackMsg"></div><button data-act="snackAct" id="snackBtn">Annuler</button></div>
 <div class="toast" id="toast" hidden></div>
 
-<script src="/fitness/js/app.js?v=67"></script>
+<script src="/fitness/js/app.js?v=68"></script>
 <script src="/fitness/js/boot.js?v=3"></script>
 </body>
 </html>
