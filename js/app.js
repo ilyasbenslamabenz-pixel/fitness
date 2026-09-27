@@ -675,7 +675,7 @@ var CL_TOOLS=[
     input_schema:{type:"object",properties:{name:{type:"string",description:"Nom court en français, ex. « Skyr nature Migros »"},qty_g:{type:"number",description:"Quantité mangée en g (ou ml)"},kcal_100g:{type:"number",description:"kcal pour 100 g/ml"},protein_100g:{type:"number",description:"Protéines en g pour 100 g/ml"},carbs_100g:{type:"number",description:"Glucides en g pour 100 g/ml"},fat_100g:{type:"number",description:"Lipides en g pour 100 g/ml"},type:{type:"string",enum:CL_TYPES,description:"Omettre pour choisir selon l'heure"}},required:["name","qty_g","kcal_100g","protein_100g","carbs_100g","fat_100g"]}},
   {name:"delete_last_meal",description:"Supprime le dernier aliment ajouté aujourd'hui (correction d'une erreur).",input_schema:{type:"object",properties:{}}},
   {name:"add_water",description:"Ajoute de l'eau bue (ou en retire avec une valeur négative).",input_schema:{type:"object",properties:{ml:{type:"number"}},required:["ml"]}},
-  {name:"log_weight",description:"Enregistre la pesée du jour.",input_schema:{type:"object",properties:{kg:{type:"number"}},required:["kg"]}},
+  {name:"log_weight",description:"Enregistre la pesée du jour, et si la balance les donne, le taux de masse grasse (%) et la masse musculaire (kg). Donne seulement ce qui est mentionné.",input_schema:{type:"object",properties:{kg:{type:"number",description:"Poids en kg"},fat_percent:{type:"number",description:"Masse grasse en % (3 à 60)"},muscle_kg:{type:"number",description:"Masse musculaire en kg (10 à 90)"}}}},
   {name:"log_steps",description:"Enregistre le nombre total de pas du jour (remplace la valeur existante).",input_schema:{type:"object",properties:{steps:{type:"integer"}},required:["steps"]}},
   {name:"log_measures",description:"Enregistre le tour de taille et/ou de hanches du jour, en cm.",input_schema:{type:"object",properties:{waist_cm:{type:"number"},hips_cm:{type:"number"}}}},
   {name:"get_day_summary",description:"Relit le bilan à jour de la journée (repas, totaux, eau, pas, poids).",input_schema:{type:"object",properties:{}}},
@@ -740,10 +740,22 @@ function clRunTool(name,inp){
       var ml=Math.round(Number(inp.ml));if(!ml||Math.abs(ml)>5000)return "Erreur : quantité invalide.";
       addWater(ml);return "Eau enregistrée (+"+ml+" ml, déjà compté dans ces totaux à jour, ne l'ajoute pas une 2e fois) :\n"+clSummary();
     case "log_weight":
-      var kg=Number(inp.kg);if(!(kg>=30&&kg<=350))return "Erreur : poids invalide.";
-      kg=Math.round(kg*10)/10;var h=state.weightHistory,ix=h.findIndex(function(x){return x.d===td;});
-      if(ix>=0)h[ix].w=kg;else h.push({d:td,w:kg});h.sort(function(a,b){return a.d.localeCompare(b.d);});
-      save();renderToday();return "Pesée enregistrée : "+kg+" kg. Totaux à jour :\n"+clSummary();
+      /* poids et/ou composition corporelle (mêmes bornes que la pesée manuelle) */
+      var kg=inp.kg!=null?Number(inp.kg):null,fat=inp.fat_percent!=null?Number(inp.fat_percent):null,mus=inp.muscle_kg!=null?Number(inp.muscle_kg):null;
+      if(kg==null&&fat==null&&mus==null)return "Erreur : rien à enregistrer.";
+      if(kg!=null&&!(kg>=30&&kg<=350))return "Erreur : poids invalide.";
+      if(fat!=null&&!(fat>=3&&fat<=60))return "Erreur : masse grasse invalide (3–60 %).";
+      if(mus!=null&&!(mus>=10&&mus<=90))return "Erreur : masse musculaire invalide (10–90 kg).";
+      var done=[];
+      if(kg!=null){kg=Math.round(kg*10)/10;var h=state.weightHistory,ix=h.findIndex(function(x){return x.d===td;});
+        if(ix>=0)h[ix].w=kg;else h.push({d:td,w:kg});h.sort(function(a,b){return a.d.localeCompare(b.d);});done.push("poids "+kg+" kg");}
+      if(fat!=null||mus!=null){
+        var bc=state.bodyComp,bi=bc.findIndex(function(x){return x.d===td;}),old=bi>=0?bc[bi]:{};
+        var en={d:td,fat:fat!=null?Math.round(fat*10)/10:(old.fat!=null?old.fat:null),muscle:mus!=null?Math.round(mus*10)/10:(old.muscle!=null?old.muscle:null)};
+        if(bi>=0)bc[bi]=en;else bc.push(en);bc.sort(function(a,b){return a.d.localeCompare(b.d);});
+        if(fat!=null)done.push("masse grasse "+en.fat+" %");if(mus!=null)done.push("muscle "+en.muscle+" kg");
+      }
+      save();renderToday();try{renderProgress();}catch(e){}return "Enregistré : "+done.join(", ")+". Totaux à jour :\n"+clSummary();
     case "log_steps":
       var st=Math.round(Number(inp.steps));if(!(st>=0&&st<=100000))return "Erreur : nombre de pas invalide.";
       upsertV(state.steps,td,st);save();renderToday();return "Pas enregistrés : "+st+". Totaux à jour :\n"+clSummary();
@@ -846,6 +858,8 @@ function clHistory(days){
   var out=["Période : "+f+" → "+today()+" ("+realDays+" jours"+(clipped?", c'est-à-dire depuis le début du suivi":"")+")",clWeightStats()];
   var wh=state.weightHistory.filter(function(x){return inR(x.d);});
   out.push("Poids : "+(wh.length?pick(wh,12).map(function(x){return x.d.slice(5)+" "+x.w;}).join(", ")+" (variation "+(Math.round((wh[wh.length-1].w-wh[0].w)*10)/10)+" kg)":"aucune pesée")+" · départ "+state.profile.start+" kg, objectif "+state.profile.target+" kg");
+  var bcs=(state.bodyComp||[]).filter(function(x){return inR(x.d);});
+  if(bcs.length)out.push("Composition corporelle : "+pick(bcs,8).map(function(x){return x.d.slice(5)+(x.fat!=null?" MG "+x.fat+" %":"")+(x.muscle!=null?" muscle "+x.muscle+" kg":"");}).join(", "));
   var ms=(state.measures||[]).filter(function(x){return inR(x.d);});
   if(ms.length)out.push("Mensurations : "+pick(ms,6).map(function(x){return x.d.slice(5)+(x.waist?" taille "+x.waist:"")+(x.hips?" hanches "+x.hips:"");}).join(", "));
   var ss=state.sessions.filter(function(x){return inR(localDay(x.date));});
@@ -873,6 +887,7 @@ function clWeightStats(){
   var days=Math.max(0,Math.round((new Date(today()+"T12:00:00")-new Date(sd+"T12:00:00"))/864e5));
   var lost=Math.round((start-w)*10)/10,left=Math.round((w-target)*10)/10;
   var t="Poids : actuel "+fr(w)+" kg · départ "+fr(start)+" kg le "+sd+" (il y a "+days+" jour"+(days>1?"s":"")+", soit "+fr(Math.round(days/7*10)/10)+" semaine(s)) · "+(lost>=0?"perdu "+fr(lost):"pris "+fr(-lost))+" kg depuis le début · reste "+fr(Math.max(0,left))+" kg jusqu'à l'objectif "+fr(target)+" kg";
+  var lbc=latestBodyComp();if(lbc&&(lbc.fat!=null||lbc.muscle!=null))t+=" · dernière composition ("+lbc.d+") :"+(lbc.fat!=null?" masse grasse "+fr(lbc.fat)+" %":"")+(lbc.muscle!=null?" masse musculaire "+fr(lbc.muscle)+" kg":"");
   var tr=weightTrend();
   if(tr){
     var pw=Math.round(tr.perWeek*100)/100,pct=Math.round(-tr.perWeek/w*1000)/10;
@@ -924,7 +939,7 @@ function clLabel(name,inp,out){
     case "delete_last_meal": case "delete_meal": m=String(out).match(/Supprimé : ([^.\n]+)/);return m?"Supprimé : "+m[1]:null;
     case "update_meal": m=String(out).match(/Corrigé : ([^.\n]+)/);return m?"Corrigé : "+m[1]:null;
     case "add_water": return "Eau "+(inp.ml>0?"+":"")+Math.round(inp.ml)+" ml";
-    case "log_weight": return "Poids "+fr(Math.round(Number(inp.kg)*10)/10)+" kg";
+    case "log_weight": var lw=[];if(inp.kg!=null)lw.push("Poids "+fr(Math.round(Number(inp.kg)*10)/10)+" kg");if(inp.fat_percent!=null)lw.push("Masse grasse "+fr(Math.round(Number(inp.fat_percent)*10)/10)+" %");if(inp.muscle_kg!=null)lw.push("Muscle "+fr(Math.round(Number(inp.muscle_kg)*10)/10)+" kg");return lw.join(" · ");
     case "log_steps": return kfmt(inp.steps)+" pas";
     case "log_measures": return "Mensurations"+(inp.waist_cm?" · taille "+fr(inp.waist_cm)+" cm":"")+(inp.hips_cm?" · hanches "+fr(inp.hips_cm)+" cm":"");
     case "log_workout": return "Séance · "+(inp.exercises||[]).length+" exercice"+((inp.exercises||[]).length>1?"s":"");
