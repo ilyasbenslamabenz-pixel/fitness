@@ -526,6 +526,14 @@ button.lrow:active{background:var(--surface2)}
 .pw-d.today span{color:var(--primary)}
 .pw-d.on{border-color:var(--primary);background:rgba(227,174,74,.14)}
 .pw-d.done i{background:var(--accent);color:#fff}
+.pw-d em{font-style:normal;font-size:10.5px;font-weight:600;opacity:.75;margin-top:-3px}
+.pw-d.past{opacity:.55}
+.plan-nav{position:relative;display:flex;align-items:center;justify-content:space-between;gap:8px;margin:-2px 0 12px}
+.plan-nav div{flex:1;text-align:center;display:flex;flex-direction:column;gap:1px}
+.plan-nav b{font-size:15px}
+.plan-nav span{font-size:12px;color:var(--muted)}
+.plan-nav button{width:36px;height:36px;border-radius:50%;background:var(--surface2);color:var(--text);font-size:22px;line-height:1;display:flex;align-items:center;justify-content:center;border:0}
+.plan-nav button:disabled{opacity:.3}
 .plan-list{list-style:none;margin:12px 0 0;padding:0;position:relative}
 .plan-list li{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;padding:7px 0;border-top:1px solid var(--hair)}
 .plan-list li span{color:var(--muted);white-space:nowrap;font-size:12.5px}
