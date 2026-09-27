@@ -638,7 +638,8 @@ function estimateRunKcal(distKm,durMin){
 /* ===== Coach Claude : discussion sur l'Accueil pour noter repas, eau, poids, pas =====
    Modèle : Sonnet 5 (2 $ / 10 $ par million de tokens, ~1 centime par message), réflexion adaptative à effort moyen. La clé API reste sur ce téléphone (evoClaudeKey),
    elle n'est ni exportée ni synchronisée. Le SDK officiel n'est chargé qu'au premier message. */
-var CL_MODEL="claude-sonnet-5",CL_PRICE={in:2,out:10},clBusy=false,clSdk=null,clPhoto=null; /* clPhoto = {b64, thumb} en attente d'envoi */
+var CL_MODEL="claude-sonnet-5",CL_PRICE={in:2,out:10},clBusy=false,clSdk=null,clPhotos=[]; /* photos en attente d'envoi : [{b64, thumb}], 5 au maximum */
+var CL_MAX_PHOTOS=5;
 /* photo réduite à 1024 px max en JPEG : ~1 200 tokens (≈ 0,1 centime), largement assez pour reconnaître un plat ou lire une étiquette */
 function clShrink(file,max,q){
   return new Promise(function(ok,ko){
@@ -652,16 +653,23 @@ function clShrink(file,max,q){
     img.src=url;
   });
 }
-function clPickPhoto(file){
-  if(!file)return;
-  Promise.all([clShrink(file,1024,0.8),clShrink(file,240,0.6)]).then(function(a){
-    clPhoto={b64:a[0].split(",")[1],thumb:a[1]};renderClPhoto();try{$("clInput").focus();}catch(e){}
-  }).catch(function(){toast("Photo illisible, essaie une autre");});
+/* 1 568 px : la taille maximale utile pour la vision de Claude (au-delà, l'image est réduite côté serveur) ;
+   vignette 480 px pour un affichage net dans la discussion */
+function clPickPhotos(files){
+  files=Array.prototype.slice.call(files||[]);if(!files.length)return;
+  var room=CL_MAX_PHOTOS-clPhotos.length;
+  if(room<=0){toast("5 photos maximum par message");return;}
+  if(files.length>room)toast("5 photos maximum : seules les "+room+" premières sont ajoutées");
+  Promise.all(files.slice(0,room).map(function(f){return Promise.all([clShrink(f,1568,0.85),clShrink(f,480,0.72)]).then(function(a){return {b64:a[0].split(",")[1],thumb:a[1]};},function(){return null;});}))
+    .then(function(list){
+      var ok=list.filter(Boolean);if(ok.length<list.length)toast("Une photo est illisible");
+      clPhotos=clPhotos.concat(ok);renderClPhoto();try{$("clInput").focus();}catch(e){}
+    });
 }
 function renderClPhoto(){
   var el=$("clPhotoPrev");if(!el)return;
-  el.hidden=!clPhoto;clSyncSend();
-  el.innerHTML=clPhoto?'<img src="'+clPhoto.thumb+'" alt=""><span></span><button data-act="clPhotoDel" aria-label="Retirer la photo"><svg class="ic-s" aria-hidden="true"><use href="#i-xmark"/></svg></button>':"";
+  el.hidden=!clPhotos.length;clSyncSend();
+  el.innerHTML=clPhotos.map(function(ph,i){return '<div class="cl-ph"><img src="'+ph.thumb+'" alt=""><button data-act="clPhotoDel" data-i="'+i+'" aria-label="Retirer la photo"><svg class="ic-s" aria-hidden="true"><use href="#i-xmark"/></svg></button></div>';}).join("");
 }
 function clKey(){return lsGet("evoClaudeKey")||"";}
 function clHist(){try{var a=JSON.parse(lsGet("evoClaudeChat")||"[]");return Array.isArray(a)?a:[];}catch(e){return [];}}
@@ -952,12 +960,13 @@ function clLabel(name,inp,out){
 function clPending(){try{return JSON.parse(lsGet("evoClaudePending")||"null");}catch(e){return null;}}
 async function clSend(){
   var inp=$("clInput");if(!inp||clBusy)return;
-  var text=inp.value.trim(),photo=clPhoto;if(!text&&!photo)return;
+  var text=inp.value.trim(),photos=clPhotos.slice(),photo=photos.length?photos:null;if(!text&&!photo)return;
   if(!clKey()){toast("Ajoute ta clé dans Profil");showPage("profile");return;}
-  var hist=clHist(),mine={r:"me",t:text};if(photo)mine.img=photo.thumb;hist.push(mine);
+  var hist=clHist(),mine={r:"me",t:text};if(photo)mine.imgs=photos.map(function(x){return x.thumb;});hist.push(mine);
   /* seules les 3 dernières miniatures sont gardées (place dans le téléphone) */
-  var nImg=0;for(var hi=hist.length-1;hi>=0;hi--)if(hist[hi].img&&++nImg>3)delete hist[hi].img;
-  clSaveHist(hist);inp.value="";clPhoto=null;renderClPhoto();
+  /* vignettes gardées pour les 2 derniers messages avec photos seulement (place dans le téléphone) */
+  var nImg=0;for(var hi=hist.length-1;hi>=0;hi--)if((hist[hi].imgs||hist[hi].img)&&++nImg>2){delete hist[hi].imgs;delete hist[hi].img;hist[hi].hadImg=1;}
+  clSaveHist(hist);inp.value="";clPhotos=[];renderClPhoto();
   clBusy=true;renderClaude(true);
   /* marqueur « réponse en cours » : si l'app est fermée ou rechargée avant la fin, on le saura au retour */
   lsSet("evoClaudePending",JSON.stringify({t:text,photo:!!photo,at:Date.now()}));
@@ -968,8 +977,9 @@ async function clSend(){
     /* contexte : les 8 derniers messages texte, en commençant par un message de l'utilisateur */
     /* contexte : les 8 derniers échanges, sans les messages d'erreur de l'app (« Pas de connexion »…) */
     var ctx=hist.filter(function(x){return !x.err;}).slice(-8);while(ctx.length&&ctx[0].r!=="me")ctx.shift();
-    var msgs=ctx.map(function(x){return {role:x.r==="me"?"user":"assistant",content:(x.img?"[photo déjà analysée] ":"")+(x.t||"(photo)")};});
-    if(photo)msgs[msgs.length-1].content=[{type:"image",source:{type:"base64",media_type:"image/jpeg",data:photo.b64}},{type:"text",text:text||"Analyse cette photo et enregistre ce que j'ai mangé."}];
+    var msgs=ctx.map(function(x){return {role:x.r==="me"?"user":"assistant",content:(x.img||x.imgs||x.hadImg?"[photo déjà analysée] ":"")+(x.t||"(photo)")};});
+    if(photo)msgs[msgs.length-1].content=photos.map(function(ph){return {type:"image",source:{type:"base64",media_type:"image/jpeg",data:ph.b64}};})
+      .concat([{type:"text",text:text||(photos.length>1?"Analyse ces photos et enregistre ce que j'ai mangé.":"Analyse cette photo et enregistre ce que j'ai mangé.")}]);
     var reply="",sys=clSystemBlocks(); /* figé au début : sinon Claude recompte ce qu'il vient d'ajouter */
     for(var it=0;it<6;it++){
       var res=await client.messages.create({model:CL_MODEL,max_tokens:4096,output_config:{effort:"medium"},system:sys,tools:CL_TOOLS,messages:msgs});
@@ -1008,7 +1018,7 @@ function renderClaude(thinking){
   }else{
     var base=Math.max(0,hist.length-12),pend=!thinking&&!clBusy?clPending():null;
     box.innerHTML=hist.slice(-12).map(function(x,k){
-      var html='<div class="cl-msg '+(x.r==="me"?"me":"ai")+(x.err?" err":"")+(x.img?" has-img":"")+'">'+(x.img?'<img src="'+x.img+'" alt="Photo envoyée">'+(x.t?'<span class="cl-cap">'+esc(x.t)+'</span>':''):esc(x.t))+'</div>';
+      var html='<div class="cl-msg '+(x.r==="me"?"me":"ai")+(x.err?" err":"")+(x.img||x.imgs?" has-img":"")+'">'+(x.img||x.imgs?clImgsHTML(x.imgs||[x.img])+(x.t?'<span class="cl-cap">'+esc(x.t)+'</span>':''):esc(x.t))+'</div>';
       if(x.ok)html+='<div class="cl-ok">'+x.ok.map(function(l){return '<span>✓ '+esc(l)+'</span>';}).join("")+'</div>';
       if(x.warn)html+='<div class="cl-ok warn"><span>⚠ Rien n\'a été enregistré</span></div>';
       if(x.retry&&k===hist.length-base-1)html+='<button class="cl-retry" data-act="clRetry" data-i="'+(base+k)+'">Renvoyer</button>';
@@ -1026,10 +1036,11 @@ function renderClaude(thinking){
   var cl=$("clClearBtn");if(cl)cl.hidden=!hist.length;
 }
 /* bouton envoyer allumé seulement quand il y a quelque chose à envoyer */
-function clSyncSend(){var b=$("clSendBtn"),i=$("clInput");if(b&&i)b.classList.toggle("ready",!!(i.value.trim()||clPhoto));}
+function clImgsHTML(list){return '<div class="cl-imgs n'+Math.min(list.length,4)+'">'+list.map(function(u){return '<img src="'+u+'" alt="Photo envoyée" data-act="clZoom">';}).join("")+'</div>';}
+function clSyncSend(){var b=$("clSendBtn"),i=$("clInput");if(b&&i)b.classList.toggle("ready",!!(i.value.trim()||clPhotos.length));}
 document.addEventListener("input",function(e){if(e.target&&e.target.id==="clInput")clSyncSend();});
 document.addEventListener("change",function(e){
-  if(e.target&&e.target.id==="clFile"){var f=e.target.files&&e.target.files[0];e.target.value="";clPickPhoto(f);}
+  if(e.target&&e.target.id==="clFile"){var fs=e.target.files;clPickPhotos(fs);e.target.value="";}
 });
 document.addEventListener("keydown",function(e){
   if(e.target&&e.target.id==="clInput"&&e.key==="Enter"&&!e.isComposing){e.preventDefault();clSend();}
@@ -3731,7 +3742,9 @@ document.addEventListener("click",function(e){
     case "clSend": clSend(); break;
     case "clSugg": $("clInput").value=a.textContent; clSend(); break;
     case "clPhoto": $("clFile").click(); break;
-    case "clPhotoDel": clPhoto=null; renderClPhoto(); break;
+    case "clPhotoDel": clPhotos.splice(Number(a.dataset.i)||0,1); renderClPhoto(); break;
+    case "clZoom": var zo=document.createElement("div");zo.className="cl-zoom";zo.setAttribute("data-act","clZoomClose");zo.innerHTML='<img alt="">';zo.firstChild.src=a.getAttribute("src");document.body.appendChild(zo); break;
+    case "clZoomClose": a.remove(); break;
     case "clRetry": var rh=clHist(),rx=rh[Number(a.dataset.i)];if(rx&&rx.retry){var rt=rx.retry;rh.splice(Number(a.dataset.i),1);if(rh.length&&rh[rh.length-1].r==="me"&&rh[rh.length-1].t===rt)rh.pop();clSaveHist(rh);$("clInput").value=rt;clSend();} break;
     case "clRetryPending": var pp=clPending();lsDel("evoClaudePending");if(pp&&pp.t){var ph=clHist();if(ph.length&&ph[ph.length-1].r==="me"&&ph[ph.length-1].t===pp.t)ph.pop();clSaveHist(ph);$("clInput").value=pp.t;clSend();}else renderClaude(false); break;
     case "clClear": var clOld=clHist(); clSaveHist([]); renderClaude(false); snack("Conversation effacée","Annuler",function(){clSaveHist(clOld);renderClaude(false);},6000); break;
@@ -3817,7 +3830,7 @@ function checkAppUpdate(){
     var m=String(html||"").match(/js\/app\.js\?v=(\d+)/);
     if(!m||m[1]===APP_V)return;
     /* jamais pendant une réponse du coach ou un message en cours d'écriture : la réponse serait perdue */
-    if(guidedOpen||runActive||clBusy||clPhoto||($("clInput")&&$("clInput").value.trim())||document.querySelector(".modal.on")||document.visibilityState!=="visible")return;
+    if(guidedOpen||runActive||clBusy||clPhotos.length||($("clInput")&&$("clInput").value.trim())||document.querySelector(".modal.on")||document.visibilityState!=="visible")return;
     location.reload();
   }).catch(function(){});
 }
