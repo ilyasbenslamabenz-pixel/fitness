@@ -1155,12 +1155,13 @@ var WEEK_PLAN=[
 ];
 var PLAN_DAYS=["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
 var planSel=null; /* jour affiché dans la carte (null = aujourd'hui) */
+var planWeek=0; /* semaine affichée : 0 = cette semaine, 1 = la prochaine, -1 = la précédente */
 function dowIdx(d){return ((d||new Date()).getDay()+6)%7;}
-function dateOfWeekday(i){var d=new Date();d.setDate(d.getDate()-dowIdx(d)+i);return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
+function dateOfWeekday(i,w){var d=new Date();d.setDate(d.getDate()-dowIdx(d)+i+7*(w||0));return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
 function progDay(id){return state.program.find(function(p){return p.id===id;});}
 /* ce qui est prévu pour un jour, en tenant compte du choix "variante" */
-function planFor(i){
-  var e=WEEK_PLAN[i],swapped=!!(state.planSwap&&state.planSwap[dateOfWeekday(i)]);
+function planFor(i,w){
+  var e=WEEK_PLAN[i],swapped=!!(state.planSwap&&state.planSwap[dateOfWeekday(i,w)]);
   var useAlt=swapped&&e.alt;
   if(e.walk&&!useAlt)return {kind:"walk",walk:e.walk,alt:e.alt,swapped:false};
   if(useAlt){
@@ -1180,30 +1181,32 @@ function planDoneOn(d){
 var planListOpen=false;
 function renderPlan(){
   var box=$("planCard");if(!box)return;
-  var ti=dowIdx(),i=planSel==null?ti:planSel,d=dateOfWeekday(i),pl=planFor(i),done=planDoneOn(d);
+  var w=planWeek,ti=w===0?dowIdx():-1,i=planSel==null?(w===0?dowIdx():0):planSel,d=dateOfWeekday(i,w),pl=planFor(i,w),done=planDoneOn(d),td=today();
   var week=PLAN_DAYS.map(function(n,k){
-    var dk=dateOfWeekday(k),pk=planFor(k),isDone=planDoneOn(dk),ic=pk.kind==="walk"?(pk.walk.rest?"moon_fill":"figure_walk"):(pk.kind==="home"?"house_fill":"dumbbell");
-    return '<button class="pw-d'+(k===i?" on":"")+(k===ti?" today":"")+(isDone?" done":"")+'" data-act="planDay" data-i="'+k+'"><span>'+n.charAt(0)+'</span><i><svg class="ic-s" aria-hidden="true"><use href="#i-'+(isDone?"checkmark":ic)+'"/></svg></i></button>';
+    var dk=dateOfWeekday(k,w),pk=planFor(k,w),isDone=planDoneOn(dk),ic=pk.kind==="walk"?(pk.walk.rest?"moon_fill":"figure_walk"):(pk.kind==="home"?"house_fill":(pk.p.met?"bolt_fill":"dumbbell"));
+    return '<button class="pw-d'+(k===i?" on":"")+(k===ti?" today":"")+(isDone?" done":"")+(dk<td&&!isDone?" past":"")+'" data-act="planDay" data-i="'+k+'"><span>'+n.charAt(0)+'</span><em>'+Number(dk.slice(8))+'</em><i><svg class="ic-s" aria-hidden="true"><use href="#i-'+(isDone?"checkmark":ic)+'"/></svg></i></button>';
   }).join("");
-  var eyebrow=(i===ti?"AUJOURD'HUI · ":"")+PLAN_DAYS[i].toUpperCase()+(done?" · FAIT ✓":"");
+  var wLab=w===0?"Cette semaine":(w===1?"Semaine prochaine":(w===-1?"Semaine dernière":"Dans "+w+" semaines"));
+  var nav='<div class="plan-nav"><button data-act="planWeek" data-d="-1" aria-label="Semaine précédente"'+(w<=-1?" disabled":"")+'>‹</button><div><b>'+wLab+'</b><span>'+fmtDate(dateOfWeekday(0,w))+' – '+fmtDate(dateOfWeekday(6,w))+'</span></div><button data-act="planWeek" data-d="1" aria-label="Semaine suivante"'+(w>=3?" disabled":"")+'>›</button></div>';
+  var eyebrow=(i===ti?"AUJOURD'HUI · ":"")+PLAN_DAYS[i].toUpperCase()+(w!==0?" "+fmtDate(d).toUpperCase():"")+(done?" · FAIT ✓":"");
   var icon,title,sub,lines=[],go,alt="";
   if(pl.kind==="walk"){
     icon='<svg class="ic-s" aria-hidden="true"><use href="#i-'+(pl.walk.rest?"moon_fill":"figure_walk")+'"/></svg>';
     title=pl.walk.title;sub=pl.walk.min+" min · brûle ~"+estimateWalkKcal(pl.walk.min)+" kcal";lines=pl.walk.lines.slice();
-    go='<button class="go" data-act="planGo">Démarrer la marche (GPS)</button>';
+    go=w!==0?'':'<button class="go" data-act="planGo">Démarrer la marche (GPS)</button>';
   }else{
     var mk=marksFor(pl.p.id),act=activeExercises(pl.p);
     icon=pl.p.icon;title=pl.p.name;sub=act.length+" exercices · ~"+estimateDurationMin(pl.p)+" min · "+pl.p.focus;
     lines=act.map(function(e){return esc(e.n)+' <span>'+esc(e.t)+'</span>';});
     if(pl.extra)lines.push('<b>'+esc(pl.extra)+'</b>');
     var started=act.some(function(e){return doneSetCount(mk,e)>0;});
-    go='<button class="go" data-act="planGo">'+(started?"Continuer la séance":"Commencer la séance")+'</button>';
+    go=w!==0?'':'<button class="go" data-act="planGo">'+(started?"Continuer la séance":"Commencer la séance")+'</button>';
   }
-  if(pl.alt){
+  if(pl.alt&&d>=td){
     var altLab=pl.swapped?"Revenir au programme prévu":(WEEK_PLAN[i].alt==="walk"?"Trop fatigué\u00a0? Marche à la place":(pl.kind==="walk"?"Il pleut\u00a0? Séance HIIT à la maison":"Pas de salle\u00a0? Version maison"));
     alt='<button class="plan-alt" data-act="planSwap"><svg class="ic-s" aria-hidden="true"><use href="#i-swap"/></svg>'+altLab+'</button>';
   }
-  box.innerHTML='<div class="plan-week">'+week+'</div>'
+  box.innerHTML=nav+'<div class="plan-week">'+week+'</div>'
     +'<div class="eyebrow">'+eyebrow+'</div>'
     +'<div class="row"><div class="ic">'+icon+'</div><div style="flex:1;min-width:0"><h3>'+esc(title)+'</h3><div class="sub">'+esc(sub)+'</div></div></div>'
     +go
@@ -1212,27 +1215,28 @@ function renderPlan(){
       ?'<ul class="plan-list">'+lines.map(function(l){return '<li>'+(pl.kind==="walk"?esc(l):l)+'</li>';}).join("")+'</ul>'
         +(pl.kind!=="walk"&&lines.length>2?'<button class="plan-more" data-act="planList">Masquer les exercices ▴</button>':'')
       :'<button class="plan-more" data-act="planList">Voir les '+act.length+' exercices ▾</button>')
-    +'<div class="plan-foot">'+alt+(pl.kind==="gym"?'<button class="plan-alt" data-act="planTread"><svg class="ic-s" aria-hidden="true"><use href="#i-figure_walk"/></svg>+ Tapis</button>':'')+(pl.kind==="walk"&&!done?'<button class="plan-alt" data-act="planDone"><svg class="ic-s" aria-hidden="true"><use href="#i-checkmark"/></svg>C\'est fait</button>':'')+'</div>';
+    +'<div class="plan-foot">'+alt+(pl.kind==="gym"&&w===0?'<button class="plan-alt" data-act="planTread"><svg class="ic-s" aria-hidden="true"><use href="#i-figure_walk"/></svg>+ Tapis</button>':'')+(pl.kind==="walk"&&!done&&d<=td?'<button class="plan-alt" data-act="planDone"><svg class="ic-s" aria-hidden="true"><use href="#i-checkmark"/></svg>C\'est fait</button>':'')+'</div>';
 }
 /* marche : ~0.6 kcal/kg/km à allure soutenue */
 function estimateWalkDistKcal(km){return Math.max(1,Math.round(km*latestBody()*0.6));}
 /* marche rapide ~5,5 km/h : MET 4.3 */
 function estimateWalkKcal(min){return Math.round(4.3*latestBody()*(min/60));}
+function planIdx(){return planSel==null?(planWeek===0?dowIdx():0):planSel;}
 function planGo(){
-  var i=planSel==null?dowIdx():planSel,pl=planFor(i);
+  var i=planIdx(),pl=planFor(i,planWeek);
   if(pl.kind==="walk"){openLiveRun(true);return;}
   state.sessionCategory=pl.p.cat||"muscu";
   state.selDay=state.program.indexOf(pl.p);
   save();openGuidedSession();
 }
 function planSwap(){
-  var i=planSel==null?dowIdx():planSel,d=dateOfWeekday(i);
+  var i=planIdx(),d=dateOfWeekday(i,planWeek);
   if(!state.planSwap)state.planSwap={};
   if(state.planSwap[d])delete state.planSwap[d];else state.planSwap[d]=true;
   save();renderToday();haptic("light");
 }
 function planMarkDone(){
-  var i=planSel==null?dowIdx():planSel,d=dateOfWeekday(i);
+  var i=planIdx(),d=dateOfWeekday(i,planWeek);
   if(!state.planDone)state.planDone={};
   state.planDone[d]=true;save();renderToday();haptic("success");toast("Bien joué !");
 }
@@ -3670,7 +3674,8 @@ document.addEventListener("click",function(e){
     case "exportNag": exportData(); break;
     case "nagLater": lsSet("evoNagSnooze",String(Date.now()+3*864e5)); renderBackupNag(); break;
     case "sessToday": var tp=planFor(dowIdx()); if(tp.kind!=="walk"){state.sessionCategory=tp.p.cat||"muscu";state.selDay=state.program.indexOf(tp.p);save();renderSession();} break;
-    case "planDay": var pd=Number(a.dataset.i); planSel=(pd===dowIdx())?null:pd; renderPlan(); break;
+    case "planDay": var pd=Number(a.dataset.i); planSel=(pd===dowIdx()&&planWeek===0)?null:pd; renderPlan(); break;
+    case "planWeek": planWeek=Math.max(-1,Math.min(3,planWeek+Number(a.dataset.d))); planSel=null; renderPlan(); haptic("light"); break;
     case "planGo": planGo(); break;
     case "planSwap": planSwap(); break;
     case "planDone": planMarkDone(); break;
