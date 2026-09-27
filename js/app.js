@@ -8,7 +8,7 @@ var WHOOP_WORKER="";
 
 /* programme perte de poids : pecs 2×/semaine (haut et intérieur), dos pour la posture,
    fessiers et gainage pour les hanches ; la graisse part via le déficit et le cardio */
-var PROGRAM_VERSION=6;
+var PROGRAM_VERSION=7;
 var DEFAULT_PROGRAM=[
  {id:"fbA",name:"Full body A",short:"Full A",icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-dumbbell"/></svg>',focus:"Squat et développé couché lourds · dos · soulevé de terre léger (technique)",ex:[
    {n:"Squat barre",t:"4 × 6-8",w:true},
@@ -23,6 +23,7 @@ var DEFAULT_PROGRAM=[
    {n:"Développé incliné haltères",t:"4 × 8-10",w:true},
    {n:"Écarté poulie",t:"3 × 12-15",w:true},
    {n:"Dips assistés",t:"3 × 8-12",w:true},
+   {n:"Élévations latérales",t:"3 × 12-15",w:true},
    {n:"Soulevé de terre roumain",t:"4 × 8-10",w:true},
    {n:"Leg curl allongé",t:"3 × 10-12",w:true}]},
  {id:"cardio2",name:"Cardio fractionné",short:"HIIT",met:7.5,min:40,icon:'<svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg>',focus:"Fractionné vélo ou rameur + marche inclinée · la séance qui brûle le plus",ex:[
@@ -32,10 +33,9 @@ var DEFAULT_PROGRAM=[
    {n:"Soulevé de terre",t:"4 × 5-6",w:true},
    {n:"Développé couché barre",t:"3 × 8-10",w:true},
    {n:"Squat barre",t:"3 × 8-10",w:true},
-   {n:"Rowing barre",t:"3 × 10-12",w:true},
+   {n:"Tirage horizontal poulie",t:"3 × 10-12",w:true},
    {n:"Tractions",t:"3 × max",w:false}]}
 ];
-/* anciennes séances salle, retirées du programme (gardées si l'utilisateur les a modifiées) */
 /* anciens jours par défaut (programme v5) : retirés à la migration ; leurs exercices servent encore à nettoyer les charges quand on supprime une vieille séance */
 var RETIRED_EX={
  push:["Développé couché haltères","Développé incliné haltères","Écarté poulie","Dips assistés","Élévations latérales","Extension triceps corde"],
