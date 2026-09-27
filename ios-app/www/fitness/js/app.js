@@ -99,9 +99,12 @@ function exPhotos(n){return EX_PHOTOS[n]||null;}
    poids libres, cardio, playground, mobilité) + poids du corps : [nom, zone, muscles, séries, charge] */
 var EX_ZONES={machine:"Machines",cable:"Poulies",free:"Poids libres",cardio:"Cardio",func:"Playground",body:"Poids du corps",mob:"Mobilité"};
 var EX_CATALOG=[["Chest press","machine","Pecs · triceps","4 × 10-12",1],["Développé militaire machine","machine","Épaules · triceps","3 × 10-12",1],["Tirage vertical","machine","Dos · biceps","4 × 8-10",1],["Dips assistés","machine","Pecs (bas) · triceps","3 × 8-12",1],["Presse à cuisses","machine","Cuisses · fessiers","3 × 10-12",1],["Abducteurs machine","machine","Fessiers · hanches","3 × 15-20",1],["Hip thrust machine","machine","Fessiers","4 × 10-12",1],["Écarté poulie","cable","Pecs (intérieur)","3 × 12-15",1],["Extension triceps corde","cable","Triceps","3 × 12-15",1],["Extension triceps au-dessus de la tête","cable","Triceps","3 × 12-15",1],["Face pull","cable","Épaules arrière · posture","3 × 15",1],["Tirage horizontal poulie","cable","Dos · biceps","3 × 10-12",1],["Tirage vertical prise large","cable","Dos (largeur)","3 × 10-12",1],["Développé couché haltères","free","Pecs · triceps","4 × 8-10",1],["Développé incliné haltères","free","Pecs (haut)","4 × 8-10",1],["Élévations latérales","free","Épaules","3 × 12-15",1],["Rowing haltère","free","Dos","3 × 10-12",1],["Curl biceps haltères","free","Biceps","3 × 10-12",1],["Curl marteau haltères","free","Biceps · avant-bras","3 × 10-12",1],["Soulevé de terre roumain","free","Ischios · fessiers","3 × 10-12",1],["Fentes marchées haltères","free","Cuisses · fessiers","3 × 12 / jambe",1],["Cardio fractionné (vélo ou rameur)","cardio","Cardio brûle-graisse","20 min : 30 s vite / 90 s lent",0],["Pompes","body","Pecs · triceps","3 × max",0],["Pompes larges","body","Pecs","3 × 10-12",0],["Pompes déclinées","body","Pecs (haut)","3 × 8-12",0],["Pompes serrées","body","Triceps · pecs","3 × 8-12",0],["Dips sur chaise","body","Triceps","3 × 10-15",0],["Squats","body","Cuisses · fessiers","3 × 15-20",0],["Squats sumo","body","Fessiers · intérieur des cuisses","3 × 15",0],["Fentes arrière","body","Cuisses · fessiers","3 × 12 / jambe",0],["Hip thrust au sol","body","Fessiers","4 × 15-20",0],["Gainage (planche)","body","Abdos · gainage","3 × 30-45 s",0],["Gainage latéral","body","Obliques · taille","3 × 20-30 s",0],["Burpees","func","Corps entier · cardio","4 × 10",0],["Mountain climbers","func","Cardio · abdos","4 × 30 s",0],["Jumping jacks","func","Cardio","4 × 30 s",0],["Squat jumps","func","Jambes · cardio","4 × 15",0],["Corde à sauter (ou sur place)","func","Cardio","4 × 45 s",0],["Développé couché machine","machine","Pecs · triceps","3 × 10-12",1],["Pec deck (butterfly)","machine","Pecs (intérieur)","3 × 12-15",1],["Oiseau machine","machine","Épaules arrière · posture","3 × 12-15",1],["Tirage horizontal machine","machine","Dos · biceps","3 × 10-12",1],["Tirage haut machine","machine","Dos (largeur)","3 × 10-12",1],["Tractions assistées","machine","Dos · biceps","3 × 6-10",1],["Curl biceps machine","machine","Biceps","3 × 10-12",1],["Hack squat","machine","Cuisses · fessiers","3 × 10-12",1],["Leg extension","machine","Quadriceps","3 × 12-15",1],["Leg curl assis","machine","Ischios","3 × 12-15",1],["Leg curl allongé","machine","Ischios","3 × 12-15",1],["Adducteurs machine","machine","Intérieur des cuisses","3 × 15",1],["Mollets debout","machine","Mollets","3 × 15",1],["Mollets assis","machine","Mollets","3 × 15",1],["Crunch machine","machine","Abdos","3 × 15",1],["Extension lombaires","machine","Bas du dos · fessiers","3 × 12-15",0],["Squat à la Smith machine","machine","Cuisses · fessiers","3 × 10-12",1],["Pull-over poulie","cable","Dos · pecs","3 × 12-15",1],["Curl marteau poulie (corde)","cable","Biceps · avant-bras","3 × 12-15",1],["Crunch poulie","cable","Abdos","3 × 15",1],["Kickback fessier poulie","cable","Fessiers","3 × 15 / jambe",1],["Woodchop poulie","cable","Obliques · gainage","3 × 12 / côté",1],["Développé couché barre","free","Pecs · triceps","4 × 6-10",1],["Écarté haltères","free","Pecs","3 × 12",1],["Écarté incliné haltères","free","Pecs (haut)","3 × 12",1],["Développé militaire haltères","free","Épaules · triceps","3 × 8-12",1],["Rowing barre","free","Dos","3 × 8-10",1],["Barre au front","free","Triceps","3 × 10-12",1],["Kickback triceps haltère","free","Triceps","3 × 12-15",1],["Squat barre","free","Cuisses · fessiers","4 × 6-10",1],["Goblet squat","free","Cuisses · fessiers","3 × 10-12",1],["Soulevé de terre","free","Dos · fessiers · ischios","3 × 5-8",1],["Hip thrust barre","free","Fessiers","4 × 10-12",1],["Tractions","free","Dos · biceps","3 × max",0],["Dips aux barres","free","Pecs (bas) · triceps","3 × 8-12",0],["Shrugs haltères","free","Trapèzes","3 × 12-15",1],["Tapis de course","cardio","Cardio","20 min",0],["Vélo","cardio","Cardio · cuisses","20 min",0],["Vélo couché","cardio","Cardio (doux pour le dos)","20 min",0],["Rameur","cardio","Cardio · dos · jambes","15 min",0],["Elliptique / AMT","cardio","Cardio sans impact","20 min",0],["Stairmaster","cardio","Cardio · fessiers","15 min",0],["Air bike","cardio","Cardio fractionné","10 min",0],["SkiErg","cardio","Cardio · dos · bras","10 min",0],["Battle rope","func","Cardio · épaules","4 × 30 s",0],["Kettlebell swing","func","Fessiers · ischios · cardio","4 × 15",1],["Box jump","func","Jambes · explosivité","4 × 8",0],["Med ball slam","func","Corps entier · cardio","4 × 12",1],["Rowing TRX","func","Dos · biceps","3 × 12",0],["Pompes TRX","func","Pecs · gainage","3 × 10-12",0],["Farmer walk","func","Grip · gainage · trapèzes","4 × 30 s",1],["Poussée de traîneau","func","Jambes · cardio","4 × 20 m",1],["Étirement pectoraux","mob","Pecs · épaules","2 × 30 s",0],["Étirement ischios","mob","Arrière des cuisses","2 × 30 s",0],["Étirement fléchisseurs de hanche","mob","Hanches","2 × 30 s",0],["Chat-vache","mob","Dos","2 × 30 s",0],["Posture de l'enfant","mob","Dos · hanches","2 × 30 s",0]];
-var pickMode="session",pickZone="all";
+var pickMode="session",pickZone="all",pickMuscle="all";
+/* groupes musculaires du catalogue : un exercice y figure si l'un de ses muscles principaux en fait partie */
+var MUSCLE_GROUPS=[["chest","Pectoraux",["chest"]],["back","Dos",["upper-back","lower-back","trapezius"]],["shoulders","Épaules",["front-deltoids","back-deltoids"]],["arms","Bras",["biceps","triceps","forearm"]],["abs","Abdos",["abs","obliques"]],["glutes","Fessiers",["gluteal","abductor"]],["legs","Cuisses",["quadriceps","hamstring","abductors"]],["calves","Mollets",["calves","left-soleus","right-soleus"]]];
+function inMuscleGroup(n,gid){var g=MUSCLE_GROUPS.find(function(x){return x[0]===gid;}),m=exMuscles(n);return !!(g&&m&&m.p.some(function(x){return g[2].indexOf(x)>=0;}));}
 function openExPicker(mode){
-  pickMode=mode||"session";pickZone="all";$("pickSearch").value="";
+  pickMode=mode||"session";pickZone="all";pickMuscle="all";$("pickSearch").value="";
   renderExPicker();$("exPickModal").classList.add("on");
 }
 function closeExPicker(){$("exPickModal").classList.remove("on");}
@@ -110,8 +113,12 @@ function renderExPicker(){
   $("pickZones").innerHTML=[["all","Tout"]].concat(Object.keys(EX_ZONES).map(function(k){return [k,EX_ZONES[k]];})).map(function(z){
     return '<button class="pchip'+(z[0]===pickZone?" on":"")+'" data-act="pickZone" data-z="'+z[0]+'">'+z[1]+'</button>';
   }).join("");
+  $("pickMuscles").innerHTML=[["all","Tous les muscles"]].concat(MUSCLE_GROUPS).map(function(g){
+    return '<button class="pchip'+(g[0]===pickMuscle?" on":"")+'" data-act="pickMuscle" data-m="'+g[0]+'">'+g[1]+'</button>';
+  }).join("");
   var list=EX_CATALOG.filter(function(x){
     if(pickZone!=="all"&&x[1]!==pickZone)return false;
+    if(pickMuscle!=="all"&&!inMuscleGroup(x[0],pickMuscle))return false;
     if(!q)return true;
     var hay=normText(x[0]+" "+x[2]+" "+EX_ZONES[x[1]]);
     return q.split(/\s+/).every(function(w){return hay.indexOf(w)>=0;});
@@ -119,7 +126,7 @@ function renderExPicker(){
   $("pickList").innerHTML=list.length?list.map(function(x){
     var ph=exPhotos(x[0]),i=EX_CATALOG.indexOf(x);
     return '<button class="pick-row" data-act="pickEx" data-i="'+i+'">'
-      +(ph?'<img class="exrow-art" src="'+photoUrl(ph[ph.length-1])+'" alt="" loading="lazy">':'<span class="exrow-art pick-noimg"><svg class="ic-s" aria-hidden="true"><use href="#i-dumbbell"/></svg></span>')
+      +'<span class="exrow-art-wrap" data-act="exInfo" data-ex="'+esc(x[0])+'" data-pick="'+i+'" aria-label="Voir la fiche">'+(ph?'<img class="exrow-art" src="'+photoUrl(ph[ph.length-1])+'" alt="" loading="lazy">':'<span class="exrow-art pick-noimg"><svg class="ic-s" aria-hidden="true"><use href="#i-dumbbell"/></svg></span>')+'<i class="exi-badge">i</i></span>'
       +'<span class="pick-t"><b>'+esc(x[0])+'</b><small>'+esc(EX_ZONES[x[1]])+' · '+esc(x[2])+' · '+esc(x[3])+'</small></span>'
       +'<span class="pick-add"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></span></button>';
   }).join(""):'<div class="empty">Aucun exercice trouvé. Crée-le toi-même ci-dessous.</div>';
@@ -139,9 +146,13 @@ function pickExercise(i){
   save();closeExPicker();renderSession();toast("« "+ex.n+" » ajouté à la séance d'aujourd'hui");
 }
 function photoUrl(slug){return "/fitness/img/exercises/"+slug+".jpg";}
-/* ===== carte des muscles : silhouettes face/dos, muscles principaux en rouge, secondaires en rouge clair =====
-   tracés issus de react-body-highlighter (MIT, © 2020 GV79, voir licenses/react-body-highlighter.txt) */
-var BODY_MAP={"front":[["chest",["51.8 41.6 51 55.1 58 58 67.8 55.5 70.6 47.3 62 41.6","29.8 46.5 31.4 55.5 40.8 58 48.2 55.1 47.8 42 37.6 42"]],["obliques",["68.6 63.3 67.3 57.1 58.8 59.6 60 64.1 60.4 83.3 65.7 78.8 66.5 69.8","33.9 78.4 33.1 71.8 31 63.3 32.2 57.1 40.8 59.2 39.2 63.3 39.2 83.7"]],["abs",["56.3 59.2 58 64.1 58.4 78 58.4 92.7 56.3 98.4 55.1 104.1 51.4 107.8 51 84.5 50.6 67.3 51 57.1","43.7 58.8 48.6 57.1 49 67.3 48.6 84.5 48.2 107.3 44.5 103.7 40.8 91.4 40.8 78.4 41.2 64.5"]],["biceps",["16.7 68.2 18 71.4 22.9 66.1 29 53.9 27.8 49.4 20.4 55.9","71.4 49.4 70.2 54.7 76.3 66.1 81.6 71.8 82.9 69 78.8 55.5"]],["triceps",["69.4 55.5 69.4 61.6 75.9 72.7 77.6 70.2 75.5 67.3","22.4 69.4 29.8 55.5 29.8 60.8 22.9 73.1"]],["neck",["55.5 23.7 50.6 33.5 50.6 39.2 61.6 40 70.6 44.9 69.4 36.7 63.3 35.1 58.4 30.6","29 44.9 30.2 37.1 36.3 35.1 41.2 30.2 44.5 24.5 49 33.9 48.6 39.2 38 39.6"]],["front-deltoids",["78.4 53.1 79.6 47.8 79.2 41.2 75.9 38 71 36.3 72.2 42.9 71.4 47.3","28.2 47.3 21.2 53.1 20 47.8 20.4 40.8 24.5 37.1 28.6 37.1 26.9 43.3"]],["head",["42.4 2.9 40 11.8 42 19.6 46.1 23.3 49.8 25.3 54.7 22.4 57.6 19.2 59.2 10.2 57.1 2.4 49.8 0"]],["abductors",["52.7 110.2 54.3 124.9 60 110.2 62 100 64.9 94.3 60 92.7 56.7 104.5","47.8 110.6 44.9 125.3 42 115.9 40.4 113.1 39.6 107.3 38 102.4 34.7 93.9 39.6 92.2 41.6 99.2 43.7 105.3"]],["quadriceps",["34.7 98.8 37.1 108.2 37.1 127.8 34.3 137.1 31 132.7 29.4 120 28.2 111.4 29.4 100.8 32.2 94.7","63.3 105.7 64.5 100 66.9 94.7 70.2 101.2 71 111.8 68.2 133.1 65.3 137.6 62.4 128.6 62 111.4","38.8 129.4 38.4 112.2 41.2 118.4 44.5 129.4 42.9 135.1 40 146.1 36.3 146.5 35.5 140","59.6 145.7 55.5 129 60.8 113.9 61.2 130.2 64.1 139.6 62.9 146.5","32.7 138.4 26.5 145.7 25.7 136.7 25.7 127.3 26.9 114.3 29.4 133.5","71.8 113.1 73.9 124.1 73.9 140.4 72.7 145.7 66.5 138.4 70.2 133.5"]],["knees",["33.9 140 34.7 143.3 35.5 147.3 36.3 151 35.1 156.7 29.8 156.7 27.3 152.7 27.3 147.3 30.2 144.1","65.7 140 72.2 147.8 72.2 152.2 69.8 157.1 64.9 156.7 62.9 151"]],["calves",["71.4 160.4 73.5 153.5 76.7 161.2 79.6 167.8 78.4 187.8 79.6 195.5 74.7 195.5","24.9 194.7 27.8 164.9 28.2 160.4 26.1 154.3 24.9 157.6 22.4 161.6 20.8 167.8 22 188.2 20.8 195.5","72.7 195.1 69.8 159.2 65.3 158.4 64.1 162.4 64.1 165.3 65.7 177.1","35.5 158.4 35.9 162.4 35.9 166.9 35.1 172.2 35.1 176.7 32.2 182 30.6 187.3 26.9 194.7 27.3 187.8 28.2 180.4 28.6 175.5 29 169.8 29.8 164.1 30.2 158.8"]],["forearm",["6.1 88.6 10.2 75.1 14.7 70.2 16.3 74.3 19.2 73.5 4.5 97.6 0 100","84.5 69.8 83.3 73.5 80 73.1 95.1 98.4 100 100.4 93.5 89.4 89.8 76.3","77.6 72.2 77.6 77.6 80.4 84.1 85.3 89.8 92.2 101.2 94.7 99.6","6.9 101.2 13.5 90.6 18.8 84.1 21.6 77.1 21.2 71.8 4.9 98.8"]]],"back":[["head",["50.6 0 46 0.9 40.9 5.5 40.4 12.8 45.1 20 55.7 20 59.1 13.6 59.6 4.7 55.7 1.3"]],["trapezius",["44.7 21.7 47.7 21.7 47.2 38.3 47.7 64.7 38.3 53.2 35.3 40.9 31.1 36.6 39.1 33.2 43.8 27.2","52.3 21.7 55.7 21.7 56.6 27.2 60.9 32.8 68.9 36.6 64.7 40.4 61.7 53.2 52.3 64.7 53.2 38.3"]],["back-deltoids",["29.4 37 23 39.1 17.4 44.3 18.3 53.6 24.3 49.4 27.2 46.4","71.1 37 78.3 39.6 82.6 44.7 81.7 53.6 74.9 48.9 72.3 45.1"]],["upper-back",["31.1 38.7 28.1 48.9 28.5 55.3 34 75.3 47.2 71.1 47.2 66.4 36.6 54 33.6 41.3","68.9 38.7 71.9 49.4 71.5 56.2 66 75.3 52.8 71.1 52.8 66.4 63.4 54.5 66.4 41.7"]],["triceps",["26.8 49.8 17.9 55.7 14.5 72.3 16.6 81.7 21.7 63.8 26.8 55.7","73.6 50.2 82.1 55.7 86 73.2 83.4 82.1 77.9 63 73.2 55.7","26.8 58.3 26.8 68.5 23 75.3 19.1 77.4 22.6 65.5","72.8 58.3 77 64.7 80.4 77.4 76.6 75.3 72.8 68.9"]],["lower-back",["47.7 72.8 34.5 77 35.3 83.4 49.4 102.1 46.8 83","52.3 72.8 65.5 77 64.7 83.4 50.6 102.1 53.2 83.8"]],["forearm",["86.4 75.7 91.1 83.4 93.2 94 100 106.4 96.2 104.3 88.1 89.4 84.3 83.8","13.6 75.7 8.9 83.8 6.8 93.6 0 106.4 3.8 104.3 12.3 88.5 15.7 83","81.3 79.6 77.4 77.9 79.1 84.7 91.1 103.8 93.2 108.9 94.5 104.7","18.7 79.6 22.1 77.9 20.9 84.3 9.4 103 6.8 108.5 5.1 104.7"]],["gluteal",["44.7 99.6 30.2 108.5 29.8 118.7 31.5 126 47.2 121.3 49.4 114.9","55.3 99.1 51.1 114.5 52.3 120.9 68.1 126 69.8 119.1 69.4 108.5"]],["abductor",["48.1 123 44.7 123 41.3 125.5 45.1 144.3 48.5 135.7 48.9 129.4","51.9 122.6 55.7 123.4 59.1 126 54.9 144.3 51.9 136.2 51.1 129.4"]],["hamstring",["28.9 122.1 31.1 129.4 36.6 126 35.3 135.3 34.5 150.2 29.4 158.3 28.9 146.8 27.7 141.3 27.2 131.5","71.5 121.7 69.4 128.9 63.8 126 65.5 136.6 66.4 150.2 71.1 158.3 71.5 147.7 72.8 142.1 73.6 131.9","38.7 125.5 44.3 146 40.4 166.8 36.2 152.8 37 135.3","61.7 125.5 63.4 136.2 64.3 153.2 60 166.8 56.2 146.4"]],["knees",["34.5 153.2 31.1 159.1 33.6 166.4 37.4 162.6","66.4 153.6 63 163 66.8 166.4 69.4 159.1"]],["calves",["29.4 160.4 28.5 167.2 24.7 179.6 23.8 192.8 25.5 197 28.5 193.2 29.8 180 31.9 171.1 31.9 166.8","37.4 165.1 35.3 167.7 33.2 171.9 31.1 180.4 30.2 191.9 34 200 38.7 190.6 39.1 168.9","63 165.1 61.3 168.5 61.7 190.6 66.4 199.6 70.6 191.9 68.9 179.6 66.8 170.2","70.6 160.4 72.3 168.5 75.7 179.1 76.6 192.8 74.5 196.6 72.3 193.6 70.6 179.6 68.1 168.1"]],["left-soleus",["28.5 195.7 30.2 195.7 33.6 201.7 30.6 220 28.5 213.6 26.8 198.3"]],["right-soleus",["69.8 195.7 71.9 195.7 73.6 198.3 71.9 213.2 70.2 219.6 67.2 202.1"]]]};
+/* ===== carte des muscles : silhouettes face/dos détaillées (BODY_SVG, js/body-map.js) ===== */
+/* identifiants internes → zones du dessin, pour chaque face */
+var MM_SLUG={
+ front:{"chest":"chest","obliques":"obliques","abs":"abs","biceps":"biceps","triceps":"triceps","front-deltoids":"deltoids","abductors":"adductors","quadriceps":"quadriceps","calves":"calves","forearm":"forearm","trapezius":"trapezius"},
+ back:{"trapezius":"trapezius","back-deltoids":"deltoids","upper-back":"upper-back","triceps":"triceps","lower-back":"lower-back","forearm":"forearm","gluteal":"gluteal","abductor":"gluteal","hamstring":"hamstring","calves":"calves","left-soleus":"calves","right-soleus":"calves","abductors":"adductors"}
+};
+var MM_BASE={hair:1,head:1,hands:1,feet:1,ankles:1,knees:1,neck:1};
 var MUSCLE_TOK=[
   [/pecs/,["chest"]],[/^triceps/,["triceps"]],[/^biceps/,["biceps"]],[/^bras$/,["biceps","triceps"]],
   [/épaules arrière/,["back-deltoids"]],[/^épaules/,["front-deltoids","back-deltoids"]],
@@ -286,13 +297,33 @@ function exMuscles(n){
   return prim.length||sec.length?{p:prim,s:sec}:null;
 }
 function muscleMapSVG(n){
-  var mm=musclesOf(n);if(!mm)return "";
-  function side(arr){return '<svg viewBox="0 0 100 200" aria-hidden="true">'+arr.map(function(g){
-    var cls=mm.p.indexOf(g[0])>=0?"mp":(mm.s.indexOf(g[0])>=0?"ms":"");
-    return g[1].map(function(pts){return '<polygon points="'+pts+'"'+(cls?' class="'+cls+'"':'')+'/>';}).join("");
-  }).join("")+'</svg>';}
-  return '<div class="mmap" role="img" aria-label="Muscles travaillés">'+side(BODY_MAP.front)+side(BODY_MAP.back)+'</div>';
+  var mm=musclesOf(n);if(!mm||typeof BODY_SVG==="undefined")return "";
+  function side(k,vb){
+    var on={},sec={};
+    mm.p.forEach(function(m){var z=MM_SLUG[k][m];if(z)on[z]=1;});
+    mm.s.forEach(function(m){var z=MM_SLUG[k][m];if(z&&!on[z])sec[z]=1;});
+    return '<svg viewBox="'+vb+'" aria-hidden="true">'+BODY_SVG[k].map(function(g){
+      var cls=MM_BASE[g[0]]?"bb":(on[g[0]]?"mp":(sec[g[0]]?"ms":""));
+      return g[1].map(function(d){return '<path d="'+d+'"'+(cls?' class="'+cls+'"':'')+'/>';}).join("");
+    }).join("")+'</svg>';
+  }
+  return '<div class="mmap" role="img" aria-label="Muscles travaillés">'+side("front","46 88 636 1262")+side("back","766 88 636 1262")+'</div>';
 }
+/* fiche d'un exercice : photos du mouvement (début → fin) + muscles travaillés */
+function openExInfo(n,pickI){
+  var m=$("exInfoModal");if(!m||!n)return;
+  var c=EX_CATALOG.find(function(x){return x[0].toLowerCase()===String(n).toLowerCase();}),ph=exPhotos(n)||[];
+  $("exiName").textContent=n;
+  $("exiSub").textContent=c?EX_ZONES[c[1]]+" · "+c[3]:"Exercice personnalisé";
+  var box=$("exiPhotos");
+  box.innerHTML=ph.map(function(slug,k){return '<img class="gph'+(k===0?" on":"")+'" src="'+photoUrl(slug)+'" alt="">';}).join("")
+    +(ph.length>1?'<div class="exi-steps">'+ph.map(function(x,k){return '<span class="gcap'+(k===0?" on":"")+'">'+(k===0?"Début":(k===ph.length-1?"Fin":"Étape "+(k+1)))+'</span>';}).join("")+'</div>':'');
+  box.hidden=!ph.length;
+  $("exiMuscles").innerHTML=muscleCard(n)||'<div class="empty">Muscles non renseignés pour cet exercice.</div>';
+  var add=$("exiAdd");add.hidden=pickI==null||pickI==="";if(!add.hidden)add.dataset.i=pickI;
+  m.classList.add("on");if(ph.length>1)startPhotoCycle(box);
+}
+function closeExInfo(){stopPhotoCycle();var m=$("exInfoModal");if(m)m.classList.remove("on");}
 /* carte + noms des muscles (Séance et séance guidée) */
 function muscleCard(names){
   var mm=musclesOf(names);if(!mm)return "";
@@ -310,7 +341,9 @@ function startPhotoCycle(box){
   var i=0;
   photoCycleT=setInterval(function(){
     if(!box.isConnected){stopPhotoCycle();return;}
-    imgs[i].classList.remove("on");i=(i+1)%imgs.length;imgs[i].classList.add("on");
+    var caps=box.querySelectorAll(".gcap");
+    imgs[i].classList.remove("on");if(caps[i])caps[i].classList.remove("on");
+    i=(i+1)%imgs.length;imgs[i].classList.add("on");if(caps[i])caps[i].classList.add("on");
   },1300);
 }
 
@@ -1618,7 +1651,7 @@ function exerciseRowHTML(e,mk){
   var meta=esc(e.t)+(last>0?" · dernier "+fr(last)+" kg"+(lastE&&lastE.r?" × "+lastE.r:""):"");
   return '<div class="exrow'+(isDone?" done":"")+'" data-act="guidedJump" data-ex="'+esc(e.n)+'">'
     +'<div class="exrow-check">'+(isDone?'✓':(doneN>0?doneN+"/"+cnt:''))+'</div>'
-    +(exPhotos(e.n)?'<img class="exrow-art" src="'+photoUrl(exPhotos(e.n)[exPhotos(e.n).length-1])+'" alt="" loading="lazy">':'')
+    +'<span class="exrow-art-wrap" data-act="exInfo" data-ex="'+esc(e.n)+'" aria-label="Voir la fiche">'+(exPhotos(e.n)?'<img class="exrow-art" src="'+photoUrl(exPhotos(e.n)[exPhotos(e.n).length-1])+'" alt="" loading="lazy">':'<span class="exrow-art pick-noimg"><svg class="ic-s" aria-hidden="true"><use href="#i-dumbbell"/></svg></span>')+'<i class="exi-badge">i</i></span>'
     +'<div class="exrow-info"><h3>'+esc(e.n)+'</h3><div class="t">'+meta+'</div></div>'
     +'<button class="exrow-x" data-act="'+removeAct+'" data-ex="'+esc(e.n)+'" title="'+(e.extra?"Supprimer":"Retirer aujourd’hui")+'"><svg class="ic-s" aria-hidden="true"><use href="#i-xmark"/></svg></button>'
     +'</div>';
@@ -1993,7 +2026,7 @@ function renderGuided(){
   $("gExSub").innerHTML=esc(e.t)+lastTxt
     +(pg&&pg.up?'<div class="g-prog">Toutes tes séries réussies : essaie '+fr(pg.to)+' kg</div>':'');
   /* écran de séance épuré : pas de photo, seulement la carte des muscles travaillés */
-  var ic=$("gExIcon");if(ic&&ic.dataset.ex!==e.n){stopPhotoCycle();ic.innerHTML=muscleCard(e.n);ic.dataset.ex=e.n;ic.classList.toggle("has-map",!!ic.innerHTML);}
+  var ic=$("gExIcon");if(ic&&ic.dataset.ex!==e.n){stopPhotoCycle();ic.innerHTML=muscleCard(e.n);ic.dataset.ex=e.n;ic.classList.toggle("has-map",!!ic.innerHTML);if(ic.innerHTML)ic.setAttribute("data-act","exInfo");else ic.removeAttribute("data-act");}
 
   var st=mk[e.n]||{},wv=(st.w!=null?st.w:defaultWeight(e)),rt=repTarget(e),rv=repsFor(mk,e),vals="";
   if(e.w)vals+='<div class="val-group"><button data-act="w-" data-ex="'+esc(e.n)+'"><svg class="ic-s" aria-hidden="true"><use href="#i-minus"/></svg></button><div class="val"><input class="wval gw-in" data-ex="'+esc(e.n)+'" type="text" inputmode="decimal" value="'+num(wv)+'" aria-label="Charge en kg"><span>KG</span></div><button data-act="w+" data-ex="'+esc(e.n)+'"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button></div>';
@@ -3829,6 +3862,10 @@ document.addEventListener("click",function(e){
     case "pickClose": closeExPicker(); break;
     case "pickZone": pickZone=a.dataset.z; renderExPicker(); break;
     case "pickEx": pickExercise(Number(a.dataset.i)); break;
+    case "pickMuscle": pickMuscle=a.dataset.m; renderExPicker(); break;
+    case "exInfo": openExInfo(a.dataset.ex,a.dataset.pick); break;
+    case "exInfoClose": closeExInfo(); break;
+    case "exInfoAdd": var xi=Number(a.dataset.i); closeExInfo(); pickExercise(xi); break;
     case "pickCustom": closeExPicker(); if(pickMode==="edit")edAddEx(); else openAddExercise(); break;
     case "addExClose": closeAddExercise(); break;
     case "addExSave": saveAddExercise(); break;

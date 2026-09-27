@@ -1,4 +1,5 @@
 :root{
+  --mm-base:#3b465c; --mm-skin:#283042; --mm-line:#0a0e17; --mm-on:#4f8df5; --mm-glow:rgba(79,141,245,.55);
   --bg:#01030a; --surface:linear-gradient(165deg,rgba(120,150,210,.075),rgba(120,150,210,.02) 45%,rgba(120,150,210,.012)); --surface2:rgba(140,165,220,.06); --hair:rgba(160,185,235,.10);
   --text:#f5f8fc; --muted:#90a4c2; --faint:#5f7292;
   --primary:#e3ae4a; --primary-dim:#3a2c12; --accent:#2c63c4; --accent-dim:#0c1d3d; --accent-text:#5a8fe0;
@@ -19,6 +20,7 @@
   --ring-track:#3c4145;
 }
 :root[data-theme="light"]{
+  --mm-base:#d3d9e3; --mm-skin:#e4e8ef; --mm-line:#ffffff; --mm-on:#2f6fd8; --mm-glow:rgba(47,111,216,.25);
   --bg:#eef1f6; --surface:linear-gradient(165deg,rgba(255,255,255,.88),rgba(255,255,255,.62) 55%,rgba(255,255,255,.5)); --surface2:rgba(10,22,40,.05); --hair:rgba(10,22,40,.11);
   --text:#0b1220; --muted:#556376; --faint:#8793a4;
   --primary:#a8741a; --primary-dim:#f5e6c4; --accent:#2f6fc4; --accent-dim:#dce8f8; --accent-text:#2a63b8;
@@ -1011,11 +1013,6 @@ input[type=search]::-webkit-search-decoration{-webkit-appearance:none}
 .cl-note{align-self:flex-start;font-size:12px;color:var(--muted)}
 /* carte des muscles (séance guidée) */
 .guided-ic{position:relative}
-.mmap{position:absolute;right:8px;bottom:8px;display:flex;gap:1px;padding:5px 6px;border-radius:12px;background:rgba(255,255,255,.93);box-shadow:0 4px 12px rgba(0,0,0,.25);pointer-events:none}
-.mmap svg{width:46px;height:92px;display:block}
-.mmap polygon{fill:#c9cdd4}
-.mmap polygon.mp{fill:#e5383b}
-.mmap polygon.ms{fill:#f2a0a1}
 /* séance guidée sans photo : seul l'écran de repos occupe cette zone, dans le flux */
 #gExIcon{display:none}
 #gExIcon.has-map{display:block;height:auto;margin:10px 22px 0;padding:10px 12px;font-size:inherit;background:var(--surface);border:1px solid var(--hair)}
@@ -1078,15 +1075,34 @@ input[type=search]::-webkit-search-decoration{-webkit-appearance:none}
 
 /* carte des muscles (Séance + séance guidée) */
 .mcard{display:flex;align-items:center;gap:14px}
-.mcard .mmap{position:static;box-shadow:none;background:transparent;padding:0;gap:6px;pointer-events:none;flex:0 0 auto}
-.mcard .mmap svg{width:50px;height:100px}
-.mcard .mmap polygon{fill:var(--ring-track)}
-.mcard .mmap polygon.mp{fill:var(--accent-text)}
-.mcard .mmap polygon.ms{fill:var(--accent-text);fill-opacity:.4}
 .mcard-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
 .mcard-t small{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
 .mtags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px}
 .mtag{font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px;background:var(--surface2);color:var(--muted)}
 .mtag.p{background:var(--accent-dim);color:var(--accent-text)}
 .ses-muscles{margin:12px 0 2px;padding:12px;border-radius:16px;border:1px solid var(--hair)}
-#gExIcon.has-map .mmap svg{width:44px;height:88px}
+
+/* silhouettes musculaires détaillées */
+.mmap{display:flex;gap:4px;flex:0 0 auto;pointer-events:none}
+.mmap svg{width:56px;height:111px;display:block;overflow:visible}
+.mmap path{fill:var(--mm-base);stroke:var(--mm-line);stroke-width:4;stroke-linejoin:round}
+.mmap path.bb{fill:var(--mm-skin)}
+.mmap path.mp{fill:var(--mm-on);filter:drop-shadow(0 0 14px var(--mm-glow))}
+.mmap path.ms{fill:var(--mm-on);fill-opacity:.42}
+.mcard .mmap svg{width:64px;height:127px}
+.mmap.big svg{width:120px;height:238px}
+
+/* fiche exercice */
+.exrow-art-wrap{position:relative;flex:0 0 auto;display:block;line-height:0;cursor:pointer}
+.exi-badge{position:absolute;right:-3px;bottom:-3px;width:17px;height:17px;border-radius:50%;background:var(--accent);color:#fff;font:italic 700 11px/17px Georgia,serif;text-align:center;box-shadow:0 0 0 2px var(--bg)}
+.exi-sheet{max-height:92vh;overflow-y:auto}
+.exi-photos{position:relative;margin:12px 0 0;aspect-ratio:4/3;border-radius:18px;overflow:hidden;background:var(--surface2)}
+.exi-photos .gph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .45s ease}
+.exi-photos .gph.on{opacity:1}
+.exi-steps{position:absolute;left:10px;bottom:10px;display:flex;gap:6px}
+.exi-steps span{font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px;background:rgba(0,0,0,.45);color:rgba(255,255,255,.6);transition:background .3s,color .3s}
+.exi-steps span.on{background:var(--accent);color:#fff}
+.exi-muscles{margin-top:14px;padding:14px;border-radius:18px;border:1px solid var(--hair)}
+.exi-muscles .mmap svg{width:84px;height:167px}
+#gExIcon.has-map{cursor:pointer}
+#exInfoModal{z-index:90}

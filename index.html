@@ -36,7 +36,7 @@
   },2500);
 })();
 </script>
-<link rel="stylesheet" href="/fitness/css/app.css?v=21">
+<link rel="stylesheet" href="/fitness/css/app.css?v=22">
 <script>
 (function(){
   try{
@@ -708,18 +708,29 @@
 <div class="modal" id="exPickModal"><div class="sheet pick-sheet">
   <h3>Choisir un exercice</h3>
   <div class="sub">Machines et zones d'une salle EVO (Technogym), poids libres, cardio, playground, mobilité et poids du corps.</div>
-  <div class="pick-search"><svg class="ic-s" aria-hidden="true"><use href="#i-search"/></svg><input id="pickSearch" type="search" placeholder="Rechercher (pecs, poulie, tapis…)"></div>
+  <div class="pick-search"><svg class="ic-s" aria-hidden="true"><use href="#i-search"/></svg><input id="pickSearch" type="search" aria-label="Rechercher un exercice"></div>
   <div class="pick-zones" id="pickZones"></div>
+  <div class="pick-zones" id="pickMuscles"></div>
   <div class="pick-list" id="pickList"></div>
   <button class="btn ghost" data-act="pickCustom" style="width:100%;margin-top:10px">Exercice introuvable ? Le créer</button>
   <div class="acts"><button class="btn ghost" data-act="pickClose">Fermer</button></div>
 </div></div>
 
+<div class="modal" id="exInfoModal"><div class="sheet exi-sheet">
+  <h3 id="exiName">—</h3>
+  <div class="sub" id="exiSub"></div>
+  <div class="exi-photos" id="exiPhotos"></div>
+  <div class="exi-muscles" id="exiMuscles"></div>
+  <div class="acts"><button class="btn ghost" data-act="exInfoClose">Fermer</button><button class="btn primary" id="exiAdd" data-act="exInfoAdd" hidden>Ajouter</button></div>
+</div></div>
+
+
 <div class="rest-pill" id="restPill" hidden><svg class="ic-s" aria-hidden="true"><use href="#i-timer_fill"/></svg><span>Repos</span><b id="restPillT">1:30</b><button data-act="restAdj" data-d="-15">−15</button><button class="skip" data-act="restStop">Passer</button><button data-act="restAdj" data-d="15">+15</button></div>
 <div class="snack" id="snack"><div class="msg" id="snackMsg"></div><button data-act="snackAct" id="snackBtn">Annuler</button></div>
 <div class="toast" id="toast" hidden></div>
 
-<script src="/fitness/js/app.js?v=77"></script>
+<script src="/fitness/js/body-map.js?v=1"></script>
+<script src="/fitness/js/app.js?v=79"></script>
 <script src="/fitness/js/boot.js?v=3"></script>
 </body>
 </html>
