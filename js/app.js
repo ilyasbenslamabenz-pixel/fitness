@@ -663,7 +663,7 @@ function clHist(){try{var a=JSON.parse(lsGet("evoClaudeChat")||"[]");return Arra
 function clSaveHist(a){lsSet("evoClaudeChat",JSON.stringify(a.slice(-40)));}
 function clMonth(){return today().slice(0,7);}
 function clCost(){try{var c=JSON.parse(lsGet("evoClaudeCost")||"{}");return c.m===clMonth()?Number(c.usd)||0:0;}catch(e){return 0;}}
-function clAddCost(u){if(!u)return;var usd=clCost()+(Number(u.input_tokens||0)*CL_PRICE.in+Number(u.output_tokens||0)*CL_PRICE.out)/1e6;lsSet("evoClaudeCost",JSON.stringify({m:clMonth(),usd:usd}));}
+function clAddCost(u){if(!u)return;var usd=clCost()+(Number(u.input_tokens||0)*CL_PRICE.in+Number(u.cache_creation_input_tokens||0)*CL_PRICE.in*1.25+Number(u.cache_read_input_tokens||0)*CL_PRICE.in*0.1+Number(u.output_tokens||0)*CL_PRICE.out)/1e6;lsSet("evoClaudeCost",JSON.stringify({m:clMonth(),usd:usd}));}
 var CL_TYPES=["Petit-déjeuner","Déjeuner","Dîner","Collation"];
 var CL_TOOLS=[
   {name:"add_meal",description:"Ajoute un aliment au journal du jour. Donne les valeurs POUR 100 g (ou 100 ml), exactement comme sur l'étiquette ou une table nutritionnelle, et la quantité mangée : l'app calcule elle-même la portion. Liquides : 1 ml = 1 g. Un appel par aliment distinct.",
@@ -864,7 +864,12 @@ function clSystem(){
     +"Ne fais jamais de calcul toi-même (durées, rythmes, moyennes, projections, dates) : recopie uniquement les chiffres calculés par l'app, et ne parle pas de « 30 jours » ou d'une autre durée qui n'y figure pas. Repères : une perte saine est de 0,5 à 1 % du poids par semaine ; au-delà, le risque de perdre du muscle augmente, d'où l'importance des protéines.\n"
     +"Pour add_meal et update_meal, donne toujours les valeurs pour 100 g (ou 100 ml) telles qu'écrites sur l'étiquette, et la quantité : ne calcule jamais toi-même les kcal de la portion, l'app le fait. Si on te corrige une quantité ou une valeur, appelle update_meal au lieu de dire que c'est déjà bon.\n"
     +"N'écris jamais « noté », « ajouté » ou « enregistré » sans avoir appelé l'outil correspondant dans ce tour.\n"
-    +"Ne propose jamais de viande. Pour les questions de progression, moyennes ou records, appelle get_history avant de répondre. Pour une séance ou une course décrite, enregistre-la (log_workout, log_run). Pour retirer ou corriger un aliment précis, utilise son numéro #n (delete_meal, update_meal) seulement si c'est clairement demandé ; en cas de doute, demande lequel. Si on te demande une idée de repas, propose 1 ou 2 options sans viande qui collent au reste de la journée (surtout les protéines), et ajoute les ingrédients à la liste de courses (add_grocery) seulement si on te le demande. Si une photo est jointe : repas ou aliment → identifie chaque aliment, estime les portions visibles et enregistre-les (add_meal) ; étiquette nutritionnelle → utilise ses valeurs pour la quantité indiquée (sinon demande la quantité) ; balance ou mètre ruban → enregistre la valeur lue ; si c'est flou ou ambigu, dis ce que tu vois et demande. Pour les chiffres (eau, kcal, protéines, reste), recopie les totaux renvoyés par le dernier outil appelé : ils incluent déjà ce qui vient d'être ajouté, ne refais aucune addition.\n\nDonnées de l'app avant ce message :\n"+clSummary();
+    +"Ne propose jamais de viande. Pour les questions de progression, moyennes ou records, appelle get_history avant de répondre. Pour une séance ou une course décrite, enregistre-la (log_workout, log_run). Pour retirer ou corriger un aliment précis, utilise son numéro #n (delete_meal, update_meal) seulement si c'est clairement demandé ; en cas de doute, demande lequel. Si on te demande une idée de repas, propose 1 ou 2 options sans viande qui collent au reste de la journée (surtout les protéines), et ajoute les ingrédients à la liste de courses (add_grocery) seulement si on te le demande. Si une photo est jointe : repas ou aliment → identifie chaque aliment, estime les portions visibles et enregistre-les (add_meal) ; étiquette nutritionnelle → utilise ses valeurs pour la quantité indiquée (sinon demande la quantité) ; balance ou mètre ruban → enregistre la valeur lue ; si c'est flou ou ambigu, dis ce que tu vois et demande. Pour les chiffres (eau, kcal, protéines, reste), recopie les totaux renvoyés par le dernier outil appelé : ils incluent déjà ce qui vient d'être ajouté, ne refais aucune addition.";
+}
+/* consignes en 2 blocs : la partie fixe (avec les outils, placés avant) est mise en cache chez Anthropic,
+   les appels suivants la paient ~10 fois moins cher ; le bilan du jour, qui change à chaque message, vient après */
+function clSystemBlocks(){
+  return [{type:"text",text:clSystem(),cache_control:{type:"ephemeral"}},{type:"text",text:"Données de l'app avant ce message :\n"+clSummary()}];
 }
 function clLoadSdk(){
   if(clSdk)return Promise.resolve(clSdk);
@@ -915,10 +920,11 @@ async function clSend(){
     var Anthropic=await clLoadSdk();
     var client=new Anthropic({apiKey:clKey(),dangerouslyAllowBrowser:true,maxRetries:1});
     /* contexte : les 8 derniers messages texte, en commençant par un message de l'utilisateur */
-    var ctx=hist.slice(-8);while(ctx.length&&ctx[0].r!=="me")ctx.shift();
+    /* contexte : les 8 derniers échanges, sans les messages d'erreur de l'app (« Pas de connexion »…) */
+    var ctx=hist.filter(function(x){return !x.err;}).slice(-8);while(ctx.length&&ctx[0].r!=="me")ctx.shift();
     var msgs=ctx.map(function(x){return {role:x.r==="me"?"user":"assistant",content:(x.img?"[photo déjà analysée] ":"")+(x.t||"(photo)")};});
     if(photo)msgs[msgs.length-1].content=[{type:"image",source:{type:"base64",media_type:"image/jpeg",data:photo.b64}},{type:"text",text:text||"Analyse cette photo et enregistre ce que j'ai mangé."}];
-    var reply="",sys=clSystem(); /* figé au début : sinon Claude recompte ce qu'il vient d'ajouter */
+    var reply="",sys=clSystemBlocks(); /* figé au début : sinon Claude recompte ce qu'il vient d'ajouter */
     for(var it=0;it<6;it++){
       var res=await client.messages.create({model:CL_MODEL,max_tokens:4096,output_config:{effort:"medium"},system:sys,tools:CL_TOOLS,messages:msgs});
       clAddCost(res.usage);
@@ -2997,7 +3003,7 @@ function renderProfile(){
   renderProgList();
   var wst=$("whoopStatus");if(wst){var wt=whoopTok(),wu=state.whoop&&state.whoop.updated;
     wst.innerHTML=!WHOOP_WORKER?'Relais pas encore installé (voir le guide).':(wt?'Connecté'+(wu?' · synchro '+new Date(wu).toLocaleTimeString("fr-CH",{hour:"2-digit",minute:"2-digit"}):''):'Non connecté');
-    $("whoopBtns").innerHTML=wt?'<button class="btn" data-act="whoopSync">Synchroniser</button><button class="btn ghost" data-act="whoopDisconnect">Déconnecter</button>':'<button class="btn" data-act="whoopConnect"'+(WHOOP_WORKER?'':' disabled')+'>Connecter WHOOP</button>';}
+    $("whoopBtns").innerHTML=wt?'<button class="btn" data-act="whoopSync">Synchroniser</button><button class="btn ghost" data-act="whoopDisconnect">Déconnecter</button>':'<button class="btn" data-act="whoopConnect"'+(WHOOP_WORKER?'':' disabled')+'>Connecter WHOOP</button>'+(WHOOP_WORKER?'<button class="btn ghost" data-act="whoopPaste">Coller un code</button>':'');}
   var ks=$("clKeyStatus");if(ks){var kk=clKey();ks.innerHTML=kk?'Clé enregistrée sur ce téléphone : <b class="good">…'+esc(kk.slice(-4))+'</b>':'Aucune clé : le coach Claude de l\'Accueil est désactivé.';}
   var bs=$("backupStatus");if(bs){var dn=daysSinceBackup();bs.innerHTML='Dernière sauvegarde : <b class="'+(dn==null||dn>=7?"bad":"good")+'">'+backupLabel()+'</b>'+(cloudUser?" · automatique (cloud)":" · connecte-toi ou exporte régulièrement");}
 }
@@ -3661,6 +3667,9 @@ document.addEventListener("click",function(e){
     case "foodMore": foodMoreOpen=!foodMoreOpen; var fr0=document.querySelector("#foodSearchResults .fr-rest");if(fr0)fr0.hidden=!foodMoreOpen; a.textContent=foodMoreOpen?"Moins de choix ▴":"Voir "+(document.querySelectorAll("#foodSearchResults .fr-rest .food-result").length)+" autres choix ▾"; fitSearchSheet(); break;
     case "wPt": showWeightTip(Number(a.dataset.i)); break;
     case "whoopConnect": whoopConnect(); break;
+    case "whoopPaste": whoopPaste(); break;
+    case "whoopCopy": var wta=document.querySelector(".wh-code textarea");try{navigator.clipboard.writeText(wta.value).then(function(){toast("Code copié");});}catch(e){wta.select();document.execCommand("copy");toast("Code copié");} break;
+    case "whoopCodeClose": var wc=document.querySelector(".wh-code");if(wc)wc.remove(); break;
     case "whoopDisconnect": whoopDisconnect(); break;
     case "whoopSync": whoopSync(true,7); toast("Synchro WHOOP…"); break;
     case "clSend": clSend(); break;
@@ -3931,13 +3940,29 @@ function whoopHandleReturn(){
   var h=location.hash||"";if(h.indexOf("#whoop")!==0)return;
   try{history.replaceState(null,"",location.pathname+location.search);}catch(e){}
   if(h.indexOf("#whoop_error=")===0){toast("Connexion WHOOP refusée : "+decodeURIComponent(h.slice(13)).slice(0,60));return;}
-  try{
-    var b=h.slice(7).replace(/-/g,"+").replace(/_/g,"/");while(b.length%4)b+="=";
-    var t=JSON.parse(decodeURIComponent(escape(atob(b))));
-    if(!t.a||t.s!==lsGet("evoWhoopState")){toast("Connexion WHOOP invalide, réessaie");return;}
-    lsSet("evoWhoop",JSON.stringify({a:t.a,r:t.r,e:t.e}));lsDel("evoWhoopState");
-    toast("WHOOP connecté");whoopSync(true,30);
-  }catch(e){toast("Connexion WHOOP invalide, réessaie");}
+  var code=h.slice(7),t=whoopParse(code);
+  if(!t){toast("Connexion WHOOP invalide, réessaie");return;}
+  var mine=lsGet("evoWhoopState");
+  if(mine&&t.s===mine){whoopAccept(t);return;}
+  /* iPhone : la page de connexion s'est ouverte dans le navigateur intégré, qui n'a pas le même stockage
+     que l'app de l'écran d'accueil ; on affiche un code à coller dans l'app */
+  whoopShowCode(code);
+}
+function whoopParse(code){
+  try{var b=String(code||"").trim().replace(/-/g,"+").replace(/_/g,"/");while(b.length%4)b+="=";
+    var t=JSON.parse(decodeURIComponent(escape(atob(b))));return t&&t.a&&t.r?t:null;}catch(e){return null;}
+}
+function whoopAccept(t){lsSet("evoWhoop",JSON.stringify({a:t.a,r:t.r,e:t.e||0}));lsDel("evoWhoopState");toast("WHOOP connecté");renderProfile();whoopSync(true,30);}
+function whoopShowCode(code){
+  var el=document.createElement("div");el.className="wh-code";
+  el.innerHTML='<div class="wh-code-in"><b>Connexion WHOOP réussie</b><p>Tu es sans doute dans le navigateur intégré. Copie ce code, retourne dans l\'app EVO Fit, puis Profil › Montre WHOOP › « Coller un code ».</p>'
+    +'<textarea readonly rows="3"></textarea><div class="row2"><button class="btn primary" data-act="whoopCopy">Copier le code</button><button class="btn ghost" data-act="whoopCodeClose">Fermer</button></div></div>';
+  el.querySelector("textarea").value=code;document.body.appendChild(el);
+}
+function whoopPaste(){
+  var c=prompt("Colle le code de connexion WHOOP");if(!c)return;
+  var t=whoopParse(c.replace(/^.*#whoop=/,""));if(!t){toast("Code invalide");return;}
+  whoopAccept(t);
 }
 var whoopBusy=false;
 function whoopPost(path,body){
