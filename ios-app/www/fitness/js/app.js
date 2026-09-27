@@ -310,7 +310,7 @@ function muscleMapSVG(n){
   return '<div class="mmap" role="img" aria-label="Muscles travaillés">'+side("front","46 88 636 1262")+side("back","766 88 636 1262")+'</div>';
 }
 /* fiche d'un exercice : photos du mouvement (début → fin) + muscles travaillés */
-function openExInfo(n,pickI){
+function openExInfo(n,pickI,from){
   var m=$("exInfoModal");if(!m||!n)return;
   var c=EX_CATALOG.find(function(x){return x[0].toLowerCase()===String(n).toLowerCase();}),ph=exPhotos(n)||[];
   $("exiName").textContent=n;
@@ -321,9 +321,19 @@ function openExInfo(n,pickI){
   box.hidden=!ph.length;
   $("exiMuscles").innerHTML=muscleCard(n)||'<div class="empty">Muscles non renseignés pour cet exercice.</div>';
   var add=$("exiAdd");add.hidden=pickI==null||pickI==="";if(!add.hidden)add.dataset.i=pickI;
+  var fromSes=from==="ses"&&!guidedOpen,sa=$("exiSesActs");
+  if(sa){sa.hidden=!fromSes;if(fromSes){var p=state.program[state.selDay],e=p&&findActiveEx(p,n);
+    $("exiGo").dataset.ex=n;$("exiRemove").dataset.ex=n;$("exiRemove").dataset.extra=e&&e.extra?"1":"";
+    var mk=p?marksFor(p.id):{},done=e?isExDone(mk,e):false;$("exiGo").textContent=done?"Refaire cet exercice":(e&&doneSetCount(mk,e)>0?"Continuer cet exercice":"Commencer par cet exercice");}}
   m.classList.add("on");if(ph.length>1)startPhotoCycle(box);
 }
 function closeExInfo(){stopPhotoCycle();var m=$("exInfoModal");if(m)m.classList.remove("on");}
+/* version compacte : petites silhouettes + muscles principaux (Séance, séance guidée) */
+function muscleLine(names,go){
+  var mm=musclesOf(names);if(!mm)return "";
+  var pn=muscleNames(mm.p),sn=muscleNames(mm.s).filter(function(x){return pn.indexOf(x)<0;});
+  return '<div class="mline">'+muscleMapSVG(names)+'<div class="mline-t"><small>Muscles travaillés</small><b>'+pn.join(" · ")+'</b>'+(sn.length?'<span>+ '+sn.join(", ").toLowerCase()+'</span>':'')+'</div>'+(go?'<span class="mline-go">'+go+'<svg class="ic-s" aria-hidden="true"><use href="#i-chevron_right"/></svg></span>':'')+'</div>';
+}
 /* carte + noms des muscles (Séance et séance guidée) */
 function muscleCard(names){
   var mm=musclesOf(names);if(!mm)return "";
@@ -1642,18 +1652,20 @@ function estimateDurationMin(p){
   active.forEach(function(e){totalSets+=setCount(e);});
   return Math.max(15,Math.round(totalSets*2.5/5)*5);
 }
-function exerciseRowHTML(e,mk){
+/* objectif lisible : "4 × 8-10" → "4 séries × 8-10 reps" */
+function targetText(e){var rt=repTarget(e),m=String(e.t||"").match(/^\s*(\d+)\s*[×xX]/);
+  return rt&&m?m[1]+" séries × "+(rt.min===rt.max?rt.min:rt.min+"-"+rt.max)+" reps":String(e.t||"");}
+function exerciseRowHTML(e,mk,idx){
   var arr=setsArrFor(mk,e),cnt=setCount(e),isDone=isExDone(mk,e);
   var doneN=arr.filter(function(s){return s.done;}).length;
-  var last=lastWeight(e.n);
-  var removeAct=e.extra?"removeExtraEx":"excludeEx";
-  var lastE=(state.perf[e.n]||[]).slice(-1)[0];
-  var meta=esc(e.t)+(last>0?" · dernier "+fr(last)+" kg"+(lastE&&lastE.r?" × "+lastE.r:""):"");
-  return '<div class="exrow'+(isDone?" done":"")+'" data-act="guidedJump" data-ex="'+esc(e.n)+'">'
-    +'<div class="exrow-check">'+(isDone?'✓':(doneN>0?doneN+"/"+cnt:''))+'</div>'
-    +'<span class="exrow-art-wrap" data-act="exInfo" data-ex="'+esc(e.n)+'" aria-label="Voir la fiche">'+(exPhotos(e.n)?'<img class="exrow-art" src="'+photoUrl(exPhotos(e.n)[exPhotos(e.n).length-1])+'" alt="" loading="lazy">':'<span class="exrow-art pick-noimg"><svg class="ic-s" aria-hidden="true"><use href="#i-dumbbell"/></svg></span>')+'<i class="exi-badge">i</i></span>'
+  var last=lastWeight(e.n),lastE=(state.perf[e.n]||[]).slice(-1)[0];
+  var meta=esc(targetText(e))+(last>0?'<br><span class="exrow-last">Dernière fois '+fr(last)+" kg"+(lastE&&lastE.r?" × "+lastE.r:"")+'</span>':"");
+  var ph=exPhotos(e.n);
+  return '<div class="exrow'+(isDone?" done":(doneN?" part":""))+'" data-act="exInfo" data-ex="'+esc(e.n)+'" data-from="ses">'
+    +'<div class="exrow-num">'+(isDone?'<svg class="ic-s" aria-hidden="true"><use href="#i-checkmark"/></svg>':(doneN>0?doneN+"/"+cnt:(idx!=null?idx+1:"")))+'</div>'
+    +(ph?'<img class="exrow-art" src="'+photoUrl(ph[ph.length-1])+'" alt="" loading="lazy">':'<span class="exrow-art pick-noimg"><svg class="ic-s" aria-hidden="true"><use href="#i-dumbbell"/></svg></span>')
     +'<div class="exrow-info"><h3>'+esc(e.n)+'</h3><div class="t">'+meta+'</div></div>'
-    +'<button class="exrow-x" data-act="'+removeAct+'" data-ex="'+esc(e.n)+'" title="'+(e.extra?"Supprimer":"Retirer aujourd’hui")+'"><svg class="ic-s" aria-hidden="true"><use href="#i-xmark"/></svg></button>'
+    +'<svg class="ic-s exrow-go" aria-hidden="true"><use href="#i-chevron_right"/></svg>'
     +'</div>';
 }
 /* recalcule seulement les compteurs/la barre de progression — pas les cartes d'exercice */
@@ -1671,7 +1683,7 @@ function refreshExerciseCard(exName){
   var p=state.program[state.selDay],mk=marksFor(p.id),e=findActiveEx(p,exName);if(!e)return;
   var rows=$("exList").querySelectorAll(".exrow");
   for(var i=0;i<rows.length;i++){
-    if(rows[i].dataset.ex===exName){rows[i].outerHTML=exerciseRowHTML(e,mk);break;}
+    if(rows[i].dataset.ex===exName){rows[i].outerHTML=exerciseRowHTML(e,mk,i);break;}
   }
   updateSessionTotals();
   if(guidedOpen)renderGuided();
@@ -1694,16 +1706,14 @@ function renderSession(){
     var ls=state.sessions.find(function(x){return x.dayId===p.id;}),st2;
     if(p.id===plannedId)st2='<i class="pc-tag today">Aujourd\'hui</i>';
     else if(ls){var dd=Math.round((new Date(today()+"T12:00:00")-new Date(localDay(ls.date)+"T12:00:00"))/864e5);st2='<i class="pc-tag">'+(dd<=0?"fait aujourd'hui":(dd===1?"fait hier":"il y a "+dd+" j"))+'</i>';}
-    else st2='<i class="pc-tag new">Jamais faite</i>';
-    return '<button class="chip pcard '+(i===state.selDay?"on":"")+(p.id===plannedId?" planned":"")+'" data-act="selDay" data-i="'+i+'"><span class="e">'+p.icon+'</span><b>'+esc(p.name)+'</b><small>'+activeExercises(p).length+' exos · ~'+estimateDurationMin(p)+' min</small>'+st2+'</button>';
+    else st2='<i class="pc-tag new">Nouvelle</i>';
+    return '<button class="chip pcard '+(i===state.selDay?"on":"")+(p.id===plannedId?" planned":"")+'" data-act="selDay" data-i="'+i+'"><span class="e">'+p.icon+'</span><b>'+esc(p.name)+'</b>'+st2+'</button>';
   }).join("");
   var p=state.program[state.selDay];
   if(!p||(p.cat||"muscu")!==state.sessionCategory){p=dayList[0];state.selDay=state.program.indexOf(p);}
   $("sesIc").innerHTML=p.icon;$("sesName").textContent=p.name;$("sesFocus").textContent=p.focus;
   var sl=$("sesLight");if(sl)sl.innerHTML=state.session.light&&state.session.light[p.id]?'<div class="ses-light"><span>Version légère : 1 série de moins, −10 % de charge</span><button data-act="sessNormal">Revenir à la normale</button></div>':'';
-  var ban=$("sesBanner");if(ban){var ph=activeExercises(p).map(function(e){var x=exPhotos(e.n);return x?photoUrl(x[x.length-1]):null;}).filter(Boolean).slice(0,3);
-    ban.innerHTML=ph.map(function(u){return '<img src="'+u+'" alt="" loading="lazy">';}).join("");ban.hidden=!ph.length;}
-  var smu=$("sesMuscles");if(smu){smu.innerHTML=muscleCard(activeExercises(p).map(function(e){return e.n;}));smu.hidden=!smu.innerHTML;}
+  var smu=$("sesMuscles");if(smu){smu.innerHTML=muscleLine(activeExercises(p).map(function(e){return e.n;}));smu.hidden=!smu.innerHTML;}
   /* la puce choisie reste visible (la liste défile horizontalement) */
   var onChip=chips.querySelector(".chip.on");
   if(onChip){var cr=chips.getBoundingClientRect(),br=onChip.getBoundingClientRect();if(br.left<cr.left||br.right>cr.right)chips.scrollLeft+=br.left-cr.left-(cr.width-br.width)/2;}
@@ -1714,7 +1724,7 @@ function renderSession(){
     else tag.innerHTML='<span class="today-tag rest">Aujourd\'hui : '+esc(plToday.walk.title.toLowerCase())+'</span>';
   }
   var mk=marksFor(p.id),active=activeExercises(p),excl=excludedFor(p.id);
-  $("exList").innerHTML=active.map(function(e){return exerciseRowHTML(e,mk);}).join("")
+  $("exList").innerHTML=active.map(function(e,k){return exerciseRowHTML(e,mk,k);}).join("")
     +'<div class="exc-foot">'
     +'<button class="btn ghost" data-act="addExOpen">＋ Ajouter un exercice</button>'
     +(excl.length?'<button class="btn ghost" data-act="restoreEx">↺ Restaurer ('+excl.length+')</button>':'')
@@ -2025,24 +2035,26 @@ function renderGuided(){
   else if(last>0)lastTxt=" · dernière fois "+fr(last)+" kg";
   $("gExSub").innerHTML=esc(e.t)+lastTxt
     +(pg&&pg.up?'<div class="g-prog">Toutes tes séries réussies : essaie '+fr(pg.to)+' kg</div>':'');
-  /* écran de séance épuré : pas de photo, seulement la carte des muscles travaillés */
-  var ic=$("gExIcon");if(ic&&ic.dataset.ex!==e.n){stopPhotoCycle();ic.innerHTML=muscleCard(e.n);ic.dataset.ex=e.n;ic.classList.toggle("has-map",!!ic.innerHTML);if(ic.innerHTML)ic.setAttribute("data-act","exInfo");else ic.removeAttribute("data-act");}
+  /* écran de séance épuré : pas de photo, une ligne « muscles travaillés » qui ouvre la fiche */
+  var ic=$("gExIcon");if(ic&&ic.dataset.ex!==e.n){ic.innerHTML=muscleLine(e.n,"Mouvement");ic.dataset.ex=e.n;if(ic.innerHTML)ic.setAttribute("data-act","exInfo");else ic.removeAttribute("data-act");}
 
-  var st=mk[e.n]||{},wv=(st.w!=null?st.w:defaultWeight(e)),rt=repTarget(e),rv=repsFor(mk,e),vals="";
-  if(e.w)vals+='<div class="val-group"><button data-act="w-" data-ex="'+esc(e.n)+'"><svg class="ic-s" aria-hidden="true"><use href="#i-minus"/></svg></button><div class="val"><input class="wval gw-in" data-ex="'+esc(e.n)+'" type="text" inputmode="decimal" value="'+num(wv)+'" aria-label="Charge en kg"><span>KG</span></div><button data-act="w+" data-ex="'+esc(e.n)+'"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button></div>';
-  if(e.w&&rt)vals+='<div class="guided-sep"></div>';
-  if(rt)vals+='<div class="val-group"><button data-act="r-" data-ex="'+esc(e.n)+'"><svg class="ic-s" aria-hidden="true"><use href="#i-minus"/></svg></button><div class="val"><b style="color:var(--accent-text)">'+rv+'</b><span>REPS</span></div><button data-act="r+" data-ex="'+esc(e.n)+'"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button></div>';
-  if(!vals)vals='<div class="val"><b>'+arr.length+'</b><span>SÉRIES</span></div>';
-  $("gVals").innerHTML=vals;
+  var st=mk[e.n]||{},wv=(st.w!=null?st.w:defaultWeight(e)),rt=repTarget(e),rv=repsFor(mk,e),vals="",durS=exDurationSec(e);
+  if(e.w)vals+='<div class="val-group"><button data-act="w-" data-ex="'+esc(e.n)+'" aria-label="Moins de charge"><svg class="ic-s" aria-hidden="true"><use href="#i-minus"/></svg></button><div class="val"><input class="wval gw-in" data-ex="'+esc(e.n)+'" type="text" inputmode="decimal" value="'+num(wv)+'" aria-label="Charge en kg"><span>KG</span></div><button data-act="w+" data-ex="'+esc(e.n)+'" aria-label="Plus de charge"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button></div>';
+  if(rt)vals+='<div class="val-group"><button data-act="r-" data-ex="'+esc(e.n)+'" aria-label="Moins de répétitions"><svg class="ic-s" aria-hidden="true"><use href="#i-minus"/></svg></button><div class="val"><b>'+rv+'</b><span>REPS</span></div><button data-act="r+" data-ex="'+esc(e.n)+'" aria-label="Plus de répétitions"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button></div>';
+  if(!vals)vals='<div class="val"><b>'+(durS?fmtSec(durS):esc(e.t))+'</b><span>'+(durS?"DURÉE":"OBJECTIF")+'</span></div>';
 
-  var firstUndone=arr.findIndex(function(s){return !s.done;});
-  $("gSets").innerHTML=arr.map(function(s,i){
-    var label;
-    if(s.done)label=e.w&&s.w>0?('<b>'+fr(s.w)+'</b><small>'+(rt?"× "+s.reps:"kg")+'</small>'):(rt?'<b>'+s.reps+'</b><small>reps</small>':"✓");
-    else label='<small>Série</small><b>'+(i+1)+'</b>';
-    var cls="gs"+(s.done?" on":"")+(!s.done&&i===firstUndone?" cur":"")+(i>=setCount(e)?" bonus":"");
-    return '<button class="'+cls+'" data-act="setTick" data-ex="'+esc(e.n)+'" data-i="'+i+'">'+label+'</button>';
-  }).join("")+(arr.length<10?'<button class="gs gs-add" data-act="addSet" data-ex="'+esc(e.n)+'" aria-label="Ajouter une série"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button>':"");
+  /* séries en liste : faites (cochées, modifiables), en cours (réglages), à venir (objectif) */
+  var firstUndone=arr.findIndex(function(z){return !z.done;});
+  var prevSets=lastE&&lastE.s&&lastE.s.length?lastE.s:null;
+  function setVal(w,r){return (e.w&&w>0?fr(w)+" kg":"")+(r!=null&&rt?(e.w&&w>0?" × ":"")+r+(e.w&&w>0?"":" reps"):"");}
+  function prevOf(i){var ps=prevSets&&prevSets[i];return ps?"Dernière fois "+setVal(ps.w,ps.r):"";}
+  var tgt=setVal(wv,rv)||(durS?fmtSec(durS):"");
+  $("gSets").innerHTML=arr.map(function(z,i){
+    var bonus=i>=setCount(e)?' <em>bonus</em>':'';
+    if(z.done)return '<div class="gs on"><button class="gs-check" data-act="setTick" data-ex="'+esc(e.n)+'" data-i="'+i+'" aria-label="Annuler la série '+(i+1)+'"><svg class="ic-s" aria-hidden="true"><use href="#i-checkmark"/></svg></button><span class="gs-lab">Série '+(i+1)+bonus+'</span><span class="gs-val">'+(setVal(z.w,z.reps)||"faite")+'</span></div>';
+    if(i===firstUndone)return '<div class="gs cur"><div class="gs-head"><span class="gs-num">'+(i+1)+'</span><span class="gs-lab">Série '+(i+1)+' sur '+arr.length+bonus+'</span><span class="gs-prev">'+prevOf(i)+'</span></div><div class="guided-vals" id="gVals">'+vals+'</div></div>';
+    return '<div class="gs next"><span class="gs-num">'+(i+1)+'</span><span class="gs-lab">Série '+(i+1)+bonus+'</span><span class="gs-val">'+tgt+'</span></div>';
+  }).join("")+(arr.length<10?'<button class="gs gs-add" data-act="addSet" data-ex="'+esc(e.n)+'"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg>Ajouter une série</button>':"");
 
   var dur=exDurationSec(e),nb=$("gNextBtn");
   nb.classList.toggle("work",!!(workEnd&&workEx===e.n));
@@ -3863,7 +3875,9 @@ document.addEventListener("click",function(e){
     case "pickZone": pickZone=a.dataset.z; renderExPicker(); break;
     case "pickEx": pickExercise(Number(a.dataset.i)); break;
     case "pickMuscle": pickMuscle=a.dataset.m; renderExPicker(); break;
-    case "exInfo": openExInfo(a.dataset.ex,a.dataset.pick); break;
+    case "exInfo": openExInfo(a.dataset.ex,a.dataset.pick,a.dataset.from); break;
+    case "exiGo": var gx=a.dataset.ex; closeExInfo(); openGuidedSession(gx); break;
+    case "exiRemove": var rx=a.dataset.ex; closeExInfo(); if(a.dataset.extra)removeExtraEx(rx); else excludeEx(rx); break;
     case "exInfoClose": closeExInfo(); break;
     case "exInfoAdd": var xi=Number(a.dataset.i); closeExInfo(); pickExercise(xi); break;
     case "pickCustom": closeExPicker(); if(pickMode==="edit")edAddEx(); else openAddExercise(); break;
