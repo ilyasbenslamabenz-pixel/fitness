@@ -1209,3 +1209,18 @@ input[type=search]::-webkit-search-decoration{-webkit-appearance:none}
 #guidedView .gs.cur .guided-vals .gw-in{width:62px;font-size:30px}
 #guidedView .gs.cur .guided-vals .val b{font-size:30px}
 #guidedView .mline-go .ic-s{width:12px;height:12px}
+
+/* ===== finitions : repos compact, charge lisible ===== */
+#guidedView .g-rest{padding:10px 12px;gap:8px;margin-bottom:8px}
+#guidedView .g-rest-row{gap:8px}
+#guidedView .g-rest-lab{font-size:11px}
+#guidedView .g-rest-time{flex:1;font-size:28px;min-width:0}
+#guidedView .g-rest-btns{gap:6px}
+#guidedView .g-rest-btns button{padding:7px 10px;font-size:13px}
+#guidedView .g-rest-sound{width:34px;height:34px;flex:0 0 auto}
+#guidedView .g-rest-bar{height:4px}
+#guidedView .gs.cur .guided-vals .gw-in{width:88px;font-size:30px}
+#guidedView .gs.cur .guided-vals .gw-in.long{font-size:25px}
+#guidedView .mline-t b{font-size:13.5px}
+#guidedView .guided-nav-row{margin-top:8px}
+#guidedView .guided-nav-btn{padding:9px 12px}

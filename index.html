@@ -36,7 +36,7 @@
   },2500);
 })();
 </script>
-<link rel="stylesheet" href="/fitness/css/app.css?v=23">
+<link rel="stylesheet" href="/fitness/css/app.css?v=24">
 <script>
 (function(){
   try{
@@ -496,13 +496,11 @@
       <div class="g-rest-row">
         <div class="g-rest-lab">Repos</div>
         <div class="g-rest-time" id="gRestT">1:30</div>
+        <div class="g-rest-btns"><button data-act="restAdj" data-d="-15" aria-label="Moins 15 secondes">−15</button><button class="skip" data-act="restStop">Passer</button><button data-act="restAdj" data-d="15" aria-label="Plus 15 secondes">+15</button></div>
         <button class="g-rest-sound" id="gSoundBtn" data-act="soundToggle" aria-label="Son du minuteur"></button>
       </div>
       <div class="g-rest-bar"><i id="gRestBar"></i></div>
-      <div class="g-rest-foot">
-        <div class="g-rest-next" id="gRestNext"></div>
-        <div class="g-rest-btns"><button data-act="restAdj" data-d="-15">−15 s</button><button class="skip" data-act="restStop">Passer</button><button data-act="restAdj" data-d="15">+15 s</button></div>
-      </div>
+      <div class="g-rest-next" id="gRestNext" hidden></div>
     </div>
     <button class="guided-next" id="gNextBtn" data-act="guidedNext">Valider la série</button>
     <div class="guided-nav-row">
@@ -734,7 +732,7 @@
 <div class="toast" id="toast" hidden></div>
 
 <script src="/fitness/js/body-map.js?v=1"></script>
-<script src="/fitness/js/app.js?v=80"></script>
+<script src="/fitness/js/app.js?v=81"></script>
 <script src="/fitness/js/boot.js?v=3"></script>
 </body>
 </html>

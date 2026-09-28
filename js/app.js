@@ -278,10 +278,15 @@ var EX_MUSCLES={
 var MUSCLE_FR={"chest":"Pectoraux","triceps":"Triceps","biceps":"Biceps","front-deltoids":"Épaules","back-deltoids":"Arrière des épaules","upper-back":"Dos","lower-back":"Bas du dos","trapezius":"Trapèzes","abs":"Abdos","obliques":"Obliques","gluteal":"Fessiers","quadriceps":"Quadriceps","hamstring":"Ischios","calves":"Mollets","left-soleus":"Mollets","right-soleus":"Mollets","forearm":"Avant-bras","abductors":"Adducteurs","abductor":"Abducteurs"};
 /* plusieurs exercices : un muscle est « principal » s'il l'est pour au moins un exercice */
 function musclesOf(names){
-  var p=[],sec=[];
+  var p=[],sec=[],score={};
   (Array.isArray(names)?names:[names]).forEach(function(n){var m=exMuscles(n);if(!m)return;
-    m.p.forEach(function(x){if(p.indexOf(x)<0)p.push(x);});m.s.forEach(function(x){if(sec.indexOf(x)<0)sec.push(x);});});
+    m.p.forEach(function(x){if(p.indexOf(x)<0)p.push(x);score[x]=(score[x]||0)+2;});
+    m.s.forEach(function(x){if(sec.indexOf(x)<0)sec.push(x);score[x]=(score[x]||0)+1;});});
   sec=sec.filter(function(x){return p.indexOf(x)<0;});
+  /* les plus sollicités d'abord (principal = 2 points, secondaire = 1) */
+  function by(a,b){return (score[b]||0)-(score[a]||0);}
+  p=p.map(function(x,i){return [x,i];}).sort(function(a,b){return by(a[0],b[0])||a[1]-b[1];}).map(function(x){return x[0];});
+  sec.sort(by);
   return p.length||sec.length?{p:p,s:sec}:null;
 }
 function muscleNames(list){var out=[];list.forEach(function(m){var l=MUSCLE_FR[m];if(l&&out.indexOf(l)<0)out.push(l);});return out;}
@@ -329,10 +334,12 @@ function openExInfo(n,pickI,from){
 }
 function closeExInfo(){stopPhotoCycle();var m=$("exInfoModal");if(m)m.classList.remove("on");}
 /* version compacte : petites silhouettes + muscles principaux (Séance, séance guidée) */
-function muscleLine(names,go){
+function muscleLine(names,go,maxP){
   var mm=musclesOf(names);if(!mm)return "";
-  var pn=muscleNames(mm.p),sn=muscleNames(mm.s).filter(function(x){return pn.indexOf(x)<0;});
-  return '<div class="mline">'+muscleMapSVG(names)+'<div class="mline-t"><small>Muscles travaillés</small><b>'+pn.join(" · ")+'</b>'+(sn.length?'<span>+ '+sn.join(", ").toLowerCase()+'</span>':'')+'</div>'+(go?'<span class="mline-go">'+go+'<svg class="ic-s" aria-hidden="true"><use href="#i-chevron_right"/></svg></span>':'')+'</div>';
+  var pn=muscleNames(mm.p),sn=muscleNames(mm.s).filter(function(x){return pn.indexOf(x)<0;}),more=0;
+  maxP=maxP||3;if(pn.length>maxP){more=pn.length-maxP;pn=pn.slice(0,maxP);}
+  var extra=more?"+ "+more+" autre"+(more>1?"s":""):(sn.length?(sn.length<=2?"+ "+sn.join(", ").toLowerCase():"+ "+sn.length+" muscles secondaires"):"");
+  return '<div class="mline">'+muscleMapSVG(names)+'<div class="mline-t"><small>Muscles travaillés</small><b>'+pn.join(" · ")+'</b>'+(extra?'<span>'+extra+'</span>':'')+'</div>'+(go?'<span class="mline-go">'+go+'<svg class="ic-s" aria-hidden="true"><use href="#i-chevron_right"/></svg></span>':'')+'</div>';
 }
 /* carte + noms des muscles (Séance et séance guidée) */
 function muscleCard(names){
@@ -1713,13 +1720,13 @@ function renderSession(){
   if(!p||(p.cat||"muscu")!==state.sessionCategory){p=dayList[0];state.selDay=state.program.indexOf(p);}
   $("sesIc").innerHTML=p.icon;$("sesName").textContent=p.name;$("sesFocus").textContent=p.focus;
   var sl=$("sesLight");if(sl)sl.innerHTML=state.session.light&&state.session.light[p.id]?'<div class="ses-light"><span>Version légère : 1 série de moins, −10 % de charge</span><button data-act="sessNormal">Revenir à la normale</button></div>':'';
-  var smu=$("sesMuscles");if(smu){smu.innerHTML=muscleLine(activeExercises(p).map(function(e){return e.n;}));smu.hidden=!smu.innerHTML;}
+  var smu=$("sesMuscles");if(smu){smu.innerHTML=muscleLine(activeExercises(p).map(function(e){return e.n;}),null,4);smu.hidden=!smu.innerHTML;}
   /* la puce choisie reste visible (la liste défile horizontalement) */
   var onChip=chips.querySelector(".chip.on");
   if(onChip){var cr=chips.getBoundingClientRect(),br=onChip.getBoundingClientRect();if(br.left<cr.left||br.right>cr.right)chips.scrollLeft+=br.left-cr.left-(cr.width-br.width)/2;}
   var tag=$("sesTodayTag");
   if(tag){
-    if(p.id===plannedId)tag.innerHTML='<span class="today-tag">Prévu aujourd\'hui</span>';
+    if(p.id===plannedId)tag.innerHTML='';
     else if(plannedId)tag.innerHTML='<button class="today-link" data-act="sessToday">↩ Séance du jour : '+esc(plToday.p.short)+'</button>';
     else tag.innerHTML='<span class="today-tag rest">Aujourd\'hui : '+esc(plToday.walk.title.toLowerCase())+'</span>';
   }
@@ -1734,7 +1741,7 @@ function renderSession(){
   $("sesMeta").textContent=active.length+" exercice"+(active.length>1?"s":"")+" · "+nSets+" séries · ~"+estimateDurationMin(p)+" min";
   /* dernière fois que cette séance a été faite */
   var lastS=state.sessions.find(function(x){return x.dayId===p.id;}),sl=$("sesLast");
-  if(sl){if(lastS){var ld=new Date(lastS.date),parts=[ld.toLocaleDateString("fr-CH",{weekday:"short",day:"numeric",month:"short"})];if(lastS.dur)parts.push(lastS.dur+" min");if(lastS.vol)parts.push(lastS.vol.toLocaleString("fr-CH")+" kg soulevés");sl.textContent="Dernière fois : "+parts.join(" · ");}else sl.textContent="Première fois : prends des charges légères pour apprendre le mouvement.";}
+  if(sl){if(lastS){var ld=new Date(lastS.date),parts=[ld.toLocaleDateString("fr-CH",{weekday:"short",day:"numeric",month:"short"})];if(lastS.dur)parts.push(lastS.dur+" min");if(lastS.vol)parts.push(lastS.vol.toLocaleString("fr-CH")+" kg soulevés");sl.textContent="Dernière fois : "+parts.join(" · ");}else sl.textContent=active.some(function(e){return doneSetCount(mk,e)>0||(state.perf[e.n]||[]).length;})?"":"Première fois : prends des charges légères pour apprendre le mouvement.";}
   var totalSets=0,doneSets=0;
   active.forEach(function(e){var arr=setsArrFor(mk,e);totalSets+=arr.length;doneSets+=arr.filter(function(s){return s.done;}).length;});
   $("sesCta").textContent=doneSets>0?"Continuer la séance":"Démarrer la séance";
@@ -1855,7 +1862,7 @@ function setWeightExact(exName,val){
   var p=state.program[state.selDay],mk=marksFor(p.id);
   var n=Number(String(val).replace(",","."));if(!isFinite(n)||n<0)n=0;if(n>500)n=500;n=Math.round(n*10)/10;
   if(!mk[exName])mk[exName]={};mk[exName].w=n;save();
-  syncFieldValue("wval",exName,num(n));
+  syncFieldValue("wval",exName,fr(n));var wi=document.querySelector(".gw-in");if(wi)wi.classList.toggle("long",fr(n).length>=5);
 }
 function setReps(exName,delta){
   var p=state.program[state.selDay],mk=marksFor(p.id),e=findActiveEx(p,exName);if(!e)return;
@@ -2033,13 +2040,14 @@ function renderGuided(){
     lastTxt=" · dernière fois "+(sameW?fr(lastE.s[0].w)+" kg × "+lastE.s.map(function(x){return x.r;}).join(" · "):lastE.s.map(function(x){return fr(x.w)+"×"+x.r;}).join(" · "));
   }else if(pg)lastTxt=" · dernière fois "+fr(pg.from)+" kg × "+pg.reps;
   else if(last>0)lastTxt=" · dernière fois "+fr(last)+" kg";
-  $("gExSub").innerHTML=esc(e.t)+lastTxt
+  if(lastE&&lastE.s&&lastE.s.length)lastTxt="";
+  $("gExSub").innerHTML=esc(targetText(e))+lastTxt
     +(pg&&pg.up?'<div class="g-prog">Toutes tes séries réussies : essaie '+fr(pg.to)+' kg</div>':'');
   /* écran de séance épuré : pas de photo, une ligne « muscles travaillés » qui ouvre la fiche */
   var ic=$("gExIcon");if(ic&&ic.dataset.ex!==e.n){ic.innerHTML=muscleLine(e.n,"Mouvement");ic.dataset.ex=e.n;if(ic.innerHTML)ic.setAttribute("data-act","exInfo");else ic.removeAttribute("data-act");}
 
   var st=mk[e.n]||{},wv=(st.w!=null?st.w:defaultWeight(e)),rt=repTarget(e),rv=repsFor(mk,e),vals="",durS=exDurationSec(e);
-  if(e.w)vals+='<div class="val-group"><button data-act="w-" data-ex="'+esc(e.n)+'" aria-label="Moins de charge"><svg class="ic-s" aria-hidden="true"><use href="#i-minus"/></svg></button><div class="val"><input class="wval gw-in" data-ex="'+esc(e.n)+'" type="text" inputmode="decimal" value="'+num(wv)+'" aria-label="Charge en kg"><span>KG</span></div><button data-act="w+" data-ex="'+esc(e.n)+'" aria-label="Plus de charge"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button></div>';
+  if(e.w)vals+='<div class="val-group"><button data-act="w-" data-ex="'+esc(e.n)+'" aria-label="Moins de charge"><svg class="ic-s" aria-hidden="true"><use href="#i-minus"/></svg></button><div class="val"><input class="wval gw-in'+(fr(wv).length>=5?" long":"")+'" data-ex="'+esc(e.n)+'" type="text" inputmode="decimal" value="'+fr(wv)+'" aria-label="Charge en kg"><span>KG</span></div><button data-act="w+" data-ex="'+esc(e.n)+'" aria-label="Plus de charge"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button></div>';
   if(rt)vals+='<div class="val-group"><button data-act="r-" data-ex="'+esc(e.n)+'" aria-label="Moins de répétitions"><svg class="ic-s" aria-hidden="true"><use href="#i-minus"/></svg></button><div class="val"><b>'+rv+'</b><span>REPS</span></div><button data-act="r+" data-ex="'+esc(e.n)+'" aria-label="Plus de répétitions"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button></div>';
   if(!vals)vals='<div class="val"><b>'+(durS?fmtSec(durS):esc(e.t))+'</b><span>'+(durS?"DURÉE":"OBJECTIF")+'</span></div>';
 
@@ -2056,6 +2064,12 @@ function renderGuided(){
     return '<div class="gs next"><span class="gs-num">'+(i+1)+'</span><span class="gs-lab">Série '+(i+1)+bonus+'</span><span class="gs-val">'+tgt+'</span></div>';
   }).join("")+(arr.length<10?'<button class="gs gs-add" data-act="addSet" data-ex="'+esc(e.n)+'"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg>Ajouter une série</button>':"");
 
+  /* la série en cours reste visible au-dessus du bas d'écran fixe (repos + bouton) */
+  requestAnimationFrame(function(){requestAnimationFrame(function(){
+    var cur=$("gSets").querySelector(".gs.cur"),gv=$("guidedView"),fb=gv&&gv.querySelector(".guided-bottom");if(!cur||!fb)return;
+    var r=cur.getBoundingClientRect(),f=fb.getBoundingClientRect();
+    if(r.bottom>f.top-10)gv.scrollTop+=r.bottom-f.top+14;else if(r.top<60)gv.scrollTop-=60-r.top;
+  });});
   var dur=exDurationSec(e),nb=$("gNextBtn");
   nb.classList.toggle("work",!!(workEnd&&workEx===e.n));
   if(isExDone(mk,e))nb.textContent="Exercice suivant";
@@ -2225,8 +2239,9 @@ function updateRest(){
   if(gt)gt.style.visibility="hidden";
   var showPill=!!restEnd&&!guidedOpen&&state.page==="session";
   if(pill&&pill.hidden===showPill){pill.hidden=!showPill;document.body.classList.toggle("has-rest",showPill);}
+  var gv=$("guidedView");if(gv)gv.classList.toggle("resting",!!restEnd&&restEnd>Date.now());
   if(!restEnd){if(gr)gr.hidden=true;return;}
-  var left=restEnd-Date.now(),sc=Math.ceil(left/1000);
+  var left=Math.min(restEnd-Date.now(),restTotal),sc=Math.ceil(left/1000);
   if(left<=0){
     restEnd=0;
     if(!restBeeped){
@@ -2234,7 +2249,7 @@ function updateRest(){
       try{if(navigator.vibrate)navigator.vibrate([160,80,160]);}catch(e){}
       toast("Repos terminé · à toi !");
     }
-    if(gr)gr.hidden=true;
+    if(gr)gr.hidden=true;if(gv)gv.classList.remove("resting");
     return;
   }
   if(sc<=3&&sc>=1&&sc!==restTickSec){restTickSec=sc;beepTick();haptic("light");}
