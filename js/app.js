@@ -869,7 +869,7 @@ var CL_TOOLS=[
   {name:"log_weight",description:"Enregistre la pesée du jour, et si la balance les donne, le taux de masse grasse (%) et la masse musculaire (kg). Donne seulement ce qui est mentionné.",input_schema:{type:"object",properties:{kg:{type:"number",description:"Poids en kg"},fat_percent:{type:"number",description:"Masse grasse en % (3 à 60)"},muscle_kg:{type:"number",description:"Masse musculaire en kg (10 à 90)"}}}},
   {name:"log_steps",description:"Enregistre le nombre total de pas du jour (remplace la valeur existante).",input_schema:{type:"object",properties:{steps:{type:"integer"}},required:["steps"]}},
   {name:"log_measures",description:"Enregistre le tour de taille et/ou de hanches du jour, en cm.",input_schema:{type:"object",properties:{waist_cm:{type:"number"},hips_cm:{type:"number"}}}},
-  {name:"get_day_summary",description:"Relit le bilan à jour de la journée (repas, totaux, eau, pas, poids).",input_schema:{type:"object",properties:{}}},
+  {name:"get_day_summary",description:"Relit le bilan d'une journée (repas détaillés, totaux, eau, pas). Sans date : aujourd'hui. Avec date (AAAA-MM-JJ, ex. hier) : les repas enregistrés ce jour-là (90 derniers jours).",input_schema:{type:"object",properties:{date:{type:"string",description:"AAAA-MM-JJ, jour passé (optionnel)"}}}},
   {name:"get_history",description:"Historique sur N jours : poids et mensurations, séances, courses et marches, eau, pas, calories et protéines par jour, records de charge par exercice, jours du programme. À utiliser pour toute question sur la progression, les moyennes ou les records.",input_schema:{type:"object",properties:{days:{type:"integer",description:"Nombre de jours (7 à 180, 30 par défaut)"}}}},
   {name:"log_workout",description:"Enregistre une séance de musculation faite aujourd'hui avec les charges. Chaque exercice : nom, séries, répétitions, charge en kg (0 si poids du corps).",input_schema:{type:"object",properties:{name:{type:"string",description:"Nom de la séance, ex. « Pectoraux » ; reprends le nom d'un jour du programme s'il correspond"},duration_min:{type:"number"},exercises:{type:"array",items:{type:"object",properties:{name:{type:"string"},sets:{type:"integer"},reps:{type:"integer"},weight_kg:{type:"number"}},required:["name","sets","reps"]}}},required:["exercises"]}},
   {name:"log_run",description:"Enregistre une course ou une marche faite aujourd'hui.",input_schema:{type:"object",properties:{kind:{type:"string",enum:["run","walk"]},distance_km:{type:"number"},duration_min:{type:"number"},treadmill:{type:"boolean"}},required:["kind","distance_km","duration_min"]}},
@@ -892,6 +892,18 @@ function clSummary(){
     +clWeightStats()+"\n"+clSessionLine()+"\n"
     +(whoopDay(td)?"WHOOP aujourd'hui : "+whoopLine(whoopDay(td))+" (si la récupération est basse, < 34 %, conseille une séance légère ; élevée, > 66 %, séance normale ou intense)\n":"")
     +"Programme du jour : "+(pl.kind==="walk"?pl.walk.title:pl.p.name)+(planDoneOn(td)?" (fait)":"");
+}
+/* repas d'un jour passé (mealHistory, gardé 90 jours) */
+function clPastDay(d){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(d))return "Erreur : date invalide (AAAA-MM-JJ).";
+  var ms=[];state.mealHistory.forEach(function(h){if(h&&h.date===d)ms=ms.concat(h.meals||[]);});
+  var t={k:0,p:0,c:0,f:0};ms.forEach(function(m){t.k+=Number(m.kcal||0);t.p+=Number(m.protein||0);t.c+=Number(m.carbs||0);t.f+=Number(m.fat||0);});
+  var wd=new Date(d+"T12:00:00").toLocaleDateString("fr-CH",{weekday:"long"});
+  var w=(state.waterHistory||[]).filter(function(x){return x&&x.d===d;})[0];
+  return "Date : "+d+" ("+wd+", jour passé : lecture seule, les outils de repas ne modifient qu'aujourd'hui)\n"
+    +"Repas :\n"+(ms.map(function(m){return "- "+(m.type||"")+" : "+m.name+(m.menu?"":" "+Math.round(m.qty||100)+" g")+" · "+Math.round(m.kcal||0)+" kcal · "+Math.round(m.protein||0)+" g prot.";}).join("\n")||"(aucun repas enregistré ce jour-là)")+"\n"
+    +"Totaux : "+Math.round(t.k)+" kcal · protéines "+Math.round(t.p)+" g · glucides "+Math.round(t.c)+" g · lipides "+Math.round(t.f)+" g\n"
+    +(w?"Eau : "+Math.round(Number(w.ml||0))+" ml · ":"")+"Pas : "+stepsOn(d);
 }
 /* valeurs pour 100 g depuis les champs *_100g (ou, par compatibilité, kcal/protein… absolus de la portion) */
 function clPer100(inp,base){
@@ -958,7 +970,7 @@ function clRunTool(name,inp){
       var me={d:td,waist:wa!=null?wa:(old.waist!=null?old.waist:null),hips:hi!=null?hi:(old.hips!=null?old.hips:null)};
       if(mi>=0)state.measures[mi]=me;else state.measures.push(me);
       state.measures.sort(function(a,b){return a.d.localeCompare(b.d);});save();return "Mesures enregistrées.";
-    case "get_day_summary": return clSummary();
+    case "get_day_summary": return (inp.date&&String(inp.date)!==td)?clPastDay(String(inp.date)):clSummary();
     case "get_history": return clHistory(inp.days);
     case "adjust_session":
       var sp=clTodayDay();if(!sp)return "Aujourd'hui est une journée de marche : pas de séance de musculation à modifier.";
@@ -1100,7 +1112,7 @@ function clSystem(){
     +"Ne fais jamais de calcul toi-même (durées, rythmes, moyennes, projections, dates) : recopie uniquement les chiffres calculés par l'app, et ne parle pas de « 30 jours » ou d'une autre durée qui n'y figure pas. Repères : une perte saine est de 0,5 à 1 % du poids par semaine ; au-delà, le risque de perdre du muscle augmente, d'où l'importance des protéines.\n"
     +"Pour add_meal et update_meal, donne toujours les valeurs pour 100 g (ou 100 ml) telles qu'écrites sur l'étiquette, et la quantité : ne calcule jamais toi-même les kcal de la portion, l'app le fait. Si on te corrige une quantité ou une valeur, appelle update_meal au lieu de dire que c'est déjà bon.\n"
     +"N'écris jamais « noté », « ajouté » ou « enregistré » sans avoir appelé l'outil correspondant dans ce tour.\n"
-    +"Ne propose jamais de viande. Pour les questions de progression, moyennes ou records, appelle get_history avant de répondre. Pour une séance ou une course décrite, enregistre-la (log_workout, log_run). Pour retirer ou corriger un aliment précis, utilise son numéro #n (delete_meal, update_meal) seulement si c'est clairement demandé ; en cas de doute, demande lequel. Si on te demande une idée de repas, propose 1 ou 2 options sans viande qui collent au reste de la journée (surtout les protéines), et ajoute les ingrédients à la liste de courses (add_grocery) seulement si on te le demande. Si une photo est jointe : repas ou aliment → identifie chaque aliment, estime les portions visibles et enregistre-les (add_meal) ; étiquette nutritionnelle → utilise ses valeurs pour la quantité indiquée (sinon demande la quantité) ; balance ou mètre ruban → enregistre la valeur lue ; si c'est flou ou ambigu, dis ce que tu vois et demande. Pour les chiffres (eau, kcal, protéines, reste), recopie les totaux renvoyés par le dernier outil appelé : ils incluent déjà ce qui vient d'être ajouté, ne refais aucune addition.";
+    +"Ne propose jamais de viande. Pour les questions de progression, moyennes ou records, appelle get_history avant de répondre. Pour les repas d'un jour passé (hier, lundi…), appelle get_day_summary avec sa date AAAA-MM-JJ : le contexte ne contient que les repas du jour. Pour une séance ou une course décrite, enregistre-la (log_workout, log_run). Pour retirer ou corriger un aliment précis, utilise son numéro #n (delete_meal, update_meal) seulement si c'est clairement demandé ; en cas de doute, demande lequel. Si on te demande une idée de repas, propose 1 ou 2 options sans viande qui collent au reste de la journée (surtout les protéines), et ajoute les ingrédients à la liste de courses (add_grocery) seulement si on te le demande. Si une photo est jointe : repas ou aliment → identifie chaque aliment, estime les portions visibles et enregistre-les (add_meal) ; étiquette nutritionnelle → utilise ses valeurs pour la quantité indiquée (sinon demande la quantité) ; balance ou mètre ruban → enregistre la valeur lue ; si c'est flou ou ambigu, dis ce que tu vois et demande. Pour les chiffres (eau, kcal, protéines, reste), recopie les totaux renvoyés par le dernier outil appelé : ils incluent déjà ce qui vient d'être ajouté, ne refais aucune addition.";
 }
 /* consignes en 2 blocs : la partie fixe (avec les outils, placés avant) est mise en cache chez Anthropic,
    les appels suivants la paient ~10 fois moins cher ; le bilan du jour, qui change à chaque message, vient après */
@@ -1603,7 +1615,9 @@ function latestPR(){var best=null;for(var k in state.perf){var a=state.perf[k];i
 function setCount(e){var m=String(e.t).match(/^\s*(\d+)\s*[×xX]/);return m?Math.max(1,Number(m[1])):1;}
 function repTarget(e){
   var t=String(e.t||"").trim();
-  var m=t.match(/^\d+\s*[×xX]\s*(\d+)(?:[-–](\d+))?\s*$/);
+  /* "3 × max" : pas de fourchette, on part de 8 (ou de la dernière valeur notée) */
+  if(/^\d+\s*[×xX]\s*max\s*$/i.test(t))return {min:1,max:8,open:true};
+  var m=t.match(/^\d+\s*[×xX]\s*(\d+)(?:\s*[-–]\s*(\d+))?\s*(?:reps?)?\s*(?:\/\s*(?:jambe|côté|cote|bras))?\s*$/i);
   if(!m)return null;
   return {min:Number(m[1]),max:m[2]?Number(m[2]):Number(m[1])};
 }
@@ -1660,8 +1674,8 @@ function estimateDurationMin(p){
   return Math.max(15,Math.round(totalSets*2.5/5)*5);
 }
 /* objectif lisible : "4 × 8-10" → "4 séries × 8-10 reps" */
-function targetText(e){var rt=repTarget(e),m=String(e.t||"").match(/^\s*(\d+)\s*[×xX]/);
-  return rt&&m?m[1]+" séries × "+(rt.min===rt.max?rt.min:rt.min+"-"+rt.max)+" reps":String(e.t||"");}
+function targetText(e){var rt=repTarget(e),t=String(e.t||""),m=t.match(/^\s*(\d+)\s*[×xX]/),side=t.match(/\/\s*(jambe|côté|cote|bras)/i);
+  return rt&&m?m[1]+" séries × "+(rt.open?"max":(rt.min===rt.max?rt.min:rt.min+"-"+rt.max))+" reps"+(side?" / "+side[1].toLowerCase().replace("cote","côté"):""):t;}
 function exerciseRowHTML(e,mk,idx){
   var arr=setsArrFor(mk,e),cnt=setCount(e),isDone=isExDone(mk,e);
   var doneN=arr.filter(function(s){return s.done;}).length;
@@ -1943,8 +1957,9 @@ function saveAddExercise(){
 }
 function finishSession(){
   var p=state.program[state.selDay],mk=marksFor(p.id),active=activeExercises(p);
-  var doneEx=active.filter(function(e){return isExDone(mk,e);});
-  if(!doneEx.length){toast("Coche au moins un exercice");return;}
+  /* un exercice compte dès qu'une série est validée : on enregistre ce qui a été fait */
+  var doneEx=active.filter(function(e){return doneSetCount(mk,e)>0;});
+  if(!doneEx.length){toast("Valide au moins une série");return;}
   var d=today();
   undoBuf={dayId:p.id,marks:JSON.parse(JSON.stringify(mk)),perf:{},suggest:state.suggest};
   doneEx.forEach(function(e){if(e.w)undoBuf.perf[e.n]=state.perf[e.n]?JSON.parse(JSON.stringify(state.perf[e.n])):null;});
@@ -2159,7 +2174,9 @@ function guidedPrev(){
 }
 function guidedFinishNow(){
   var p=state.program[state.selDay],mk=marksFor(p.id),active=activeExercises(p);
-  if(!active.some(function(e){return isExDone(mk,e);})){toast("Termine au moins un exercice avant de conclure");return;}
+  if(!active.some(function(e){return doneSetCount(mk,e)>0;})){toast("Valide au moins une série avant de conclure");return;}
+  var tot=0,dn=0;active.forEach(function(e){var ar=setsArrFor(mk,e);tot+=ar.length;dn+=ar.filter(function(z){return z.done;}).length;});
+  if(dn<tot&&!confirm("Terminer la séance maintenant ?\n"+dn+" série"+(dn>1?"s":"")+" sur "+tot+" faites : seules celles-ci seront enregistrées."))return;
   guidedFinishFlow();
 }
 function guidedFinishFlow(){
@@ -2175,7 +2192,7 @@ function guidedFinishFlow(){
   var durMs=Date.now()-t0,durMin=Math.max(1,Math.min(240,Math.round(durMs/60000)));
   if(state.session.start)delete state.session.start[p.id];
   var kcal=estimateSessionKcal(p.cat,durMin);
-  var doneExCount=active.filter(function(e){return isExDone(mk,e);}).length;
+  var doneExCount=active.filter(function(e){return doneSetCount(mk,e)>0;}).length;
   var prevBestStreak=computeBestStreak(),sessionName=p.name,exCount=doneExCount;
   /* avant d'enregistrer : dernière séance du même jour de programme et charges d'avant */
   var td0=today(),prevSes=state.sessions.find(function(x){return x.dayId===p.id&&localDay(x.date)<td0;});
@@ -2201,7 +2218,7 @@ function guidedFinishFlow(){
   });
 }
 function openComplete(data){
-  $("cpSub").textContent=data.sessionName+" · "+data.exCount+" exercice"+(data.exCount>1?"s":"")+" complété"+(data.exCount>1?"s":"");
+  $("cpSub").textContent=data.sessionName+" · "+data.exCount+" exercice"+(data.exCount>1?"s":"")+" travaillé"+(data.exCount>1?"s":"");
   var pr=$("cpPR");
   if(data.isNewPR&&!(data.prog||[]).some(function(x){return x.pr;})){pr.style.display="";$("cpPRText").textContent="Record · "+data.prName+" "+fr(data.prWeight)+" kg";}
   else pr.style.display="none";
