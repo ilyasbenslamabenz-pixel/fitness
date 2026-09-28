@@ -1603,7 +1603,9 @@ function latestPR(){var best=null;for(var k in state.perf){var a=state.perf[k];i
 function setCount(e){var m=String(e.t).match(/^\s*(\d+)\s*[×xX]/);return m?Math.max(1,Number(m[1])):1;}
 function repTarget(e){
   var t=String(e.t||"").trim();
-  var m=t.match(/^\d+\s*[×xX]\s*(\d+)(?:[-–](\d+))?\s*$/);
+  /* "3 × max" : pas de fourchette, on part de 8 (ou de la dernière valeur notée) */
+  if(/^\d+\s*[×xX]\s*max\s*$/i.test(t))return {min:1,max:8,open:true};
+  var m=t.match(/^\d+\s*[×xX]\s*(\d+)(?:\s*[-–]\s*(\d+))?\s*(?:reps?)?\s*(?:\/\s*(?:jambe|côté|cote|bras))?\s*$/i);
   if(!m)return null;
   return {min:Number(m[1]),max:m[2]?Number(m[2]):Number(m[1])};
 }
@@ -1660,8 +1662,8 @@ function estimateDurationMin(p){
   return Math.max(15,Math.round(totalSets*2.5/5)*5);
 }
 /* objectif lisible : "4 × 8-10" → "4 séries × 8-10 reps" */
-function targetText(e){var rt=repTarget(e),m=String(e.t||"").match(/^\s*(\d+)\s*[×xX]/);
-  return rt&&m?m[1]+" séries × "+(rt.min===rt.max?rt.min:rt.min+"-"+rt.max)+" reps":String(e.t||"");}
+function targetText(e){var rt=repTarget(e),t=String(e.t||""),m=t.match(/^\s*(\d+)\s*[×xX]/),side=t.match(/\/\s*(jambe|côté|cote|bras)/i);
+  return rt&&m?m[1]+" séries × "+(rt.open?"max":(rt.min===rt.max?rt.min:rt.min+"-"+rt.max))+" reps"+(side?" / "+side[1].toLowerCase().replace("cote","côté"):""):t;}
 function exerciseRowHTML(e,mk,idx){
   var arr=setsArrFor(mk,e),cnt=setCount(e),isDone=isExDone(mk,e);
   var doneN=arr.filter(function(s){return s.done;}).length;
@@ -1943,8 +1945,9 @@ function saveAddExercise(){
 }
 function finishSession(){
   var p=state.program[state.selDay],mk=marksFor(p.id),active=activeExercises(p);
-  var doneEx=active.filter(function(e){return isExDone(mk,e);});
-  if(!doneEx.length){toast("Coche au moins un exercice");return;}
+  /* un exercice compte dès qu'une série est validée : on enregistre ce qui a été fait */
+  var doneEx=active.filter(function(e){return doneSetCount(mk,e)>0;});
+  if(!doneEx.length){toast("Valide au moins une série");return;}
   var d=today();
   undoBuf={dayId:p.id,marks:JSON.parse(JSON.stringify(mk)),perf:{},suggest:state.suggest};
   doneEx.forEach(function(e){if(e.w)undoBuf.perf[e.n]=state.perf[e.n]?JSON.parse(JSON.stringify(state.perf[e.n])):null;});
@@ -2159,7 +2162,9 @@ function guidedPrev(){
 }
 function guidedFinishNow(){
   var p=state.program[state.selDay],mk=marksFor(p.id),active=activeExercises(p);
-  if(!active.some(function(e){return isExDone(mk,e);})){toast("Termine au moins un exercice avant de conclure");return;}
+  if(!active.some(function(e){return doneSetCount(mk,e)>0;})){toast("Valide au moins une série avant de conclure");return;}
+  var tot=0,dn=0;active.forEach(function(e){var ar=setsArrFor(mk,e);tot+=ar.length;dn+=ar.filter(function(z){return z.done;}).length;});
+  if(dn<tot&&!confirm("Terminer la séance maintenant ?\n"+dn+" série"+(dn>1?"s":"")+" sur "+tot+" faites : seules celles-ci seront enregistrées."))return;
   guidedFinishFlow();
 }
 function guidedFinishFlow(){
@@ -2175,7 +2180,7 @@ function guidedFinishFlow(){
   var durMs=Date.now()-t0,durMin=Math.max(1,Math.min(240,Math.round(durMs/60000)));
   if(state.session.start)delete state.session.start[p.id];
   var kcal=estimateSessionKcal(p.cat,durMin);
-  var doneExCount=active.filter(function(e){return isExDone(mk,e);}).length;
+  var doneExCount=active.filter(function(e){return doneSetCount(mk,e)>0;}).length;
   var prevBestStreak=computeBestStreak(),sessionName=p.name,exCount=doneExCount;
   /* avant d'enregistrer : dernière séance du même jour de programme et charges d'avant */
   var td0=today(),prevSes=state.sessions.find(function(x){return x.dayId===p.id&&localDay(x.date)<td0;});
@@ -2201,7 +2206,7 @@ function guidedFinishFlow(){
   });
 }
 function openComplete(data){
-  $("cpSub").textContent=data.sessionName+" · "+data.exCount+" exercice"+(data.exCount>1?"s":"")+" complété"+(data.exCount>1?"s":"");
+  $("cpSub").textContent=data.sessionName+" · "+data.exCount+" exercice"+(data.exCount>1?"s":"")+" travaillé"+(data.exCount>1?"s":"");
   var pr=$("cpPR");
   if(data.isNewPR&&!(data.prog||[]).some(function(x){return x.pr;})){pr.style.display="";$("cpPRText").textContent="Record · "+data.prName+" "+fr(data.prWeight)+" kg";}
   else pr.style.display="none";
