@@ -557,7 +557,42 @@ var LOCAL_FOODS=[
  {n:"Chocolat noir 70%",kcal:598,p:7.8,c:46,f:43},
  {n:"Miel",kcal:304,p:0.3,c:82,f:0},
  {n:"Confiture",kcal:250,p:0.3,c:62,f:0.1},
- {n:"Houmous",kcal:166,p:8,c:14,f:9.6}
+ {n:"Houmous",kcal:166,p:8,c:14,f:9.6},
+ /* aliments courants ajoutés après contrôle sur données réelles (valeurs moyennes de référence, pour 100 g) */
+ {n:"Purée de pommes de terre (maison, au lait)",kcal:85,p:2,c:13,f:2.5,a:"puree patate pomme de terre"},
+ {n:"Purée en flocons (préparée eau + lait)",kcal:70,p:2.6,c:12.3,f:0.8,a:"puree flocons mousseline instantanee"},
+ {n:"Yaourt grec nature 0 %",kcal:54,p:10,c:3.5,f:0.2,a:"yogourt yaourt grec skyr fage 0"},
+ {n:"Yaourt à la grecque 10 %",kcal:120,p:4,c:4,f:10,a:"yogourt yaourt grec grecque"},
+ {n:"Maquereau (cuit)",kcal:239,p:24,c:0,f:15,a:"poisson gras"},
+ {n:"Colin / lieu (cuit)",kcal:112,p:24,c:0,f:1.2,a:"poisson blanc lieu noir colin"},
+ {n:"Merlu (cuit)",kcal:100,p:21,c:0,f:1.5,a:"poisson blanc"},
+ {n:"Thon à l'huile (égoutté)",kcal:198,p:29,c:0,f:8.2,a:"thon conserve huile"},
+ {n:"Moules (cuites)",kcal:172,p:24,c:7.4,f:4.5,a:"fruits de mer moule"},
+ {n:"Calamar (cuit, sans friture)",kcal:110,p:18,c:3.5,f:1.8,a:"calmar encornet fruits de mer"},
+ {n:"Surimi",kcal:100,p:7.5,c:14,f:1,a:"batonnet crabe"},
+ {n:"Sushi / maki (poisson)",kcal:145,p:6,c:27,f:1.5,a:"maki sushi japonais riz"},
+ {n:"Parmesan",kcal:392,p:35,c:3.2,f:28,a:"fromage parmigiano grana"},
+ {n:"Fromage frais à tartiner",kcal:250,p:5.5,c:4,f:24,a:"philadelphia saint moret cream cheese"},
+ {n:"Petit-suisse nature",kcal:135,p:8.5,c:3.5,f:10,a:"petit suisse gervais"},
+ {n:"Kéfir",kcal:55,p:3.3,c:4,f:3,a:"kefir lait fermente"},
+ {n:"Boisson à l'avoine",kcal:46,p:1,c:6.7,f:1.5,a:"lait avoine oatly vegetal"},
+ {n:"Boulgour (cuit)",kcal:83,p:3.1,c:18.6,f:0.2,a:"boulghour bulgur"},
+ {n:"Galette de riz soufflé",kcal:387,p:8,c:81,f:2.8,a:"galettes riz souffle"},
+ {n:"Corn flakes",kcal:378,p:7,c:84,f:0.9,a:"cereales petit dejeuner kellogg"},
+ {n:"Granola",kcal:450,p:9,c:64,f:17,a:"muesli croustillant cereales"},
+ {n:"Dattes",kcal:282,p:2.5,c:75,f:0.4,a:"datte fruit sec"},
+ {n:"Falafel",kcal:333,p:13,c:32,f:18,a:"falafels pois chiches"},
+ {n:"Sauce tomate nature",kcal:45,p:1.5,c:7,f:1.2,a:"coulis passata sauce"},
+ {n:"Ketchup",kcal:112,p:1.2,c:25,f:0.1,a:"sauce heinz"},
+ {n:"Mayonnaise",kcal:680,p:1.1,c:1.3,f:75,a:"mayo sauce"},
+ {n:"Vinaigrette classique",kcal:400,p:0.5,c:6,f:42,a:"sauce salade huile vinaigre"},
+ {n:"Noisettes",kcal:628,p:15,c:17,f:61,a:"noisette oleagineux"},
+ {n:"Noix de cajou",kcal:553,p:18,c:30,f:44,a:"cajou oleagineux"},
+ {n:"Pistaches",kcal:562,p:20,c:28,f:45,a:"pistache oleagineux"},
+ {n:"Graines de chia",kcal:486,p:17,c:42,f:31,a:"chia graine"},
+ {n:"Graines de lin",kcal:534,p:18,c:29,f:42,a:"lin graine"},
+ {n:"Chips",kcal:536,p:7,c:53,f:35,a:"chips pommes de terre zweifel"},
+ {n:"Pizza margherita",kcal:250,p:10,c:31,f:9,a:"pizza"},
 ];
 
 var state={
@@ -3351,8 +3386,8 @@ function renderEditDayList(){
   $("editDayExList").innerHTML=editDayEx.map(function(e,i){
     return '<div class="ed-ex-row">'
       +'<div class="ed-fields">'
-      +'<input type="text" data-i="'+i+'" data-f="n" value="'+esc(e.n)+'" placeholder="Nom de l\'exercice">'
-      +'<input type="text" data-i="'+i+'" data-f="t" value="'+esc(e.t)+'" placeholder="séries × répétitions">'
+      +'<input type="text" data-i="'+i+'" data-f="n" value="'+esc(e.n)+'" aria-label="Nom de l\'exercice">'
+      +'<input type="text" data-i="'+i+'" data-f="t" value="'+esc(e.t)+'" aria-label="Séries × répétitions">'
       +'</div>'
       +'<label class="ed-w"><input type="checkbox" data-i="'+i+'" data-f="w" '+(e.w?"checked":"")+'>Charge</label>'
       +'<button type="button" class="ed-rm" data-act="edRemoveEx" data-i="'+i+'"><svg class="ic-s" aria-hidden="true"><use href="#i-xmark"/></svg></button>'
@@ -3481,7 +3516,9 @@ function closeMeal(){$("mealModal").classList.remove("on");pendingBarcode=null;}
 function saveMeal(){
   var f=currentFoodFromForm();if(!f.name){toast("Indique l'aliment");return;}
   if(pendingBarcode){
-    state.customBarcodes[pendingBarcode]={name:f.name,kcal:f.kcal,protein:f.protein,carbs:f.carbs,fat:f.fat};
+    /* le formulaire contient les valeurs de la portion : on mémorise celles pour 100 g */
+    var k100=100/(Number(f.qty)>0?Number(f.qty):100),r1=function(x){return Math.round(Number(x||0)*k100*10)/10;};
+    state.customBarcodes[pendingBarcode]={name:f.name,kcal:Math.round(Number(f.kcal||0)*k100),protein:r1(f.protein),carbs:r1(f.carbs),fat:r1(f.fat)};
     pendingBarcode=null;
     addMealObj(f);closeMeal();toast("Repas ajouté · produit mémorisé pour ce code-barres");
     return;
@@ -3536,10 +3573,20 @@ function offVal(n,keys){
 function offNutri(n){
   n=n||{};
   function kc(suf){var k=offVal(n,["energy-kcal"+suf+"_100g"]);if(!k){var kj=offVal(n,["energy-kj"+suf+"_100g","energy"+suf+"_100g"]);if(kj)k=Math.round(kj/4.184);}return k;}
-  var raw=kc("");
+  var raw=kc(""),has=n["energy-kcal_100g"]!=null||n["energy_100g"]!=null||n["energy-kj_100g"]!=null;
   if(!raw&&!offVal(n,["proteins_100g"])){var pk=kc("_prepared");
-    if(pk)return {kcal:pk,protein:offVal(n,["proteins_prepared_100g"]),carbs:offVal(n,["carbohydrates_prepared_100g"]),fat:offVal(n,["fat_prepared_100g"]),prepared:true};}
-  return {kcal:raw||offVal(n,["energy-kcal"]),protein:offVal(n,["proteins_100g","proteins"]),carbs:offVal(n,["carbohydrates_100g","carbohydrates"]),fat:offVal(n,["fat_100g","fat"]),prepared:false};
+    if(pk)return {kcal:pk,protein:offVal(n,["proteins_prepared_100g"]),carbs:offVal(n,["carbohydrates_prepared_100g"]),fat:offVal(n,["fat_prepared_100g"]),prepared:true,has:true};}
+  return {kcal:raw||offVal(n,["energy-kcal"]),protein:offVal(n,["proteins_100g","proteins"]),carbs:offVal(n,["carbohydrates_100g","carbohydrates"]),fat:offVal(n,["fat_100g","fat"]),prepared:false,has:has};
+}
+/* contrôle de vraisemblance d'une fiche (erreurs fréquentes dans OpenFoodFacts : kcal × 10, valeurs par portion
+   saisies pour 100 g, plus de 100 g de nutriments dans 100 g…) ; renvoie un avertissement ou "" */
+function offCheck(v){
+  if(!v)return "";
+  if(v.protein>100||v.carbs>100||v.fat>100||v.protein+v.carbs+v.fat>105||v.kcal>900)return "Valeurs impossibles sur la fiche OpenFoodFacts : corrige-les avec l'emballage.";
+  var est=4*v.protein+4*v.carbs+9*v.fat;
+  if(v.kcal>40&&est>0&&Math.abs(est-v.kcal)/v.kcal>0.35)return "Calories incohérentes avec les nutriments ("+Math.round(v.kcal)+" kcal indiqués, ≈ "+Math.round(est)+" kcal d'après les nutriments) : vérifie sur l'emballage.";
+  if(v.prepared)return "Fiche OpenFoodFacts incomplète : vérifie ces valeurs sur l'emballage.";
+  return "";
 }
 async function lookupBarcode(code){
   code=String(code||"").replace(/\D/g,"");
@@ -3568,18 +3615,20 @@ async function lookupBarcode(code){
     if(!data||!data.product)throw new Error(data?"not_found":"network");
     var p=data.product,n=p.nutriments||{};
     var nv=offNutri(n),kcal=nv.kcal,prot=nv.protein,carbs=nv.carbs,fat=nv.fat;
-    var name=(p.brands?p.brands+" ":"")+(p.product_name||"Produit")+(nv.prepared?" (préparé)":"");
-    $("scanProduct").innerHTML="<b>"+esc(name)+"</b><div style=\"font-size:12px;color:var(--muted);margin-top:4px\">"+(kcal?Math.round(kcal):"—")+" kcal · "+(prot?Math.round(prot*10)/10:"—")+" g protéines / 100 g</div>"+(nv.prepared?"<div style=\"font-size:12px;color:var(--warn);margin-top:4px\">Valeurs du produit préparé (fiche incomplète) : vérifie-les sur l'emballage.</div>":"");
+    var name=(p.brands?p.brands+" ":"")+(p.product_name||"Produit"),warn=offCheck(nv);
+    $("scanProduct").innerHTML="<b>"+esc(name)+"</b><div style=\"font-size:12px;color:var(--muted);margin-top:4px\">"+(kcal?Math.round(kcal):"—")+" kcal · "+(prot?Math.round(prot*10)/10:"—")+" g protéines / 100 g</div>"+(warn?"<div style=\"font-size:12px;color:var(--warn);margin-top:4px\">"+esc(warn)+"</div>":"");
     $("scanProduct").classList.add("on");
     $("foodQ").value=name;
-    $("foodKcal").value=kcal?Math.round(kcal):"";
+    $("foodKcal").value=(kcal||nv.has)?Math.round(kcal):"";
     $("foodProt").value=prot?Math.round(prot*10)/10:"";
     $("foodCarbs").value=carbs?Math.round(carbs*10)/10:"";
     $("foodQty").value="100";
     $("foodFat").value=fat?Math.round(fat*10)/10:"";
     setFoodRef100(kcal,prot,carbs,fat);
     /* gardé en mémoire : le prochain scan de ce produit marche même sans réseau */
-    if(kcal)state.customBarcodes[code]={name:name,kcal:kcal,protein:prot||0,carbs:carbs||0,fat:fat||0};
+    /* fiche douteuse : pas mémorisée, pour que la version corrigée à la main soit celle qu'on retrouve au prochain scan */
+    if(kcal&&!warn)state.customBarcodes[code]={name:name,kcal:kcal,protein:prot||0,carbs:carbs||0,fat:fat||0};
+    else if(warn)pendingBarcode=code;
     save();
     stopBarcode();
     setTimeout(function(){closeScanner();$("mealModal").classList.add("on");},500);
@@ -3623,10 +3672,11 @@ function enterBarcodeManually(code){
    (inclut de nombreux produits Migros/Coop/Denner ajoutés par des utilisateurs suisses) */
 var foodSearchCache=[],foodSearchSeq=0;
 function brandsStr(b){if(!b)return"";return Array.isArray(b)?b.join(", "):String(b);}
-function normText(s){return String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");}
+function normText(s){return String(s||"").toLowerCase().replace(/œ/g,"oe").replace(/æ/g,"ae").normalize("NFD").replace(/[̀-ͯ]/g,"");}
 function searchLocalFoods(q){
   var nq=normText(q).trim();if(!nq)return[];
-  var words=nq.split(/\s+/).filter(Boolean);
+  /* pluriels : « oeufs », « crevettes », « noix » cherchent aussi la forme sans s/x final */
+  var words=nq.split(/\s+/).filter(Boolean).map(function(w){return w.length>3?w.replace(/[sx]$/,""):w;});
   var scored=[];
   LOCAL_FOODS.forEach(function(f){
     var name=normText(f.n);
@@ -3691,15 +3741,28 @@ async function fetchOffResults(q,swissOnly){
   /* recherche classique d'OpenFoodFacts (le site suisse pour les produits Migros/Coop) : la nouvelle API de recherche
      refuse désormais les appels depuis une app web (CORS), celle-ci les accepte. 8 s max. */
   var url="https://"+(swissOnly?"ch-fr":"world")+".openfoodfacts.org/cgi/search.pl?search_terms="+encodeURIComponent(q)+"&search_simple=1&action=process&json=1&page_size=12&sort_by=unique_scans_n&fields=product_name,brands,nutriments,code";
-  var ctl=window.AbortController?new AbortController():null,tm=ctl?setTimeout(function(){ctl.abort();},8000):null;
-  var res;try{res=await fetch(url,{headers:{Accept:"application/json"},signal:ctl?ctl.signal:undefined});}finally{if(tm)clearTimeout(tm);}
-  if(!res.ok)throw new Error("HTTP "+res.status);
+  /* la recherche OFF renvoie souvent 503 quand elle est chargée : jusqu'à 3 essais rapprochés */
+  var res=null;
+  for(var at=0;at<3;at++){
+    if(at)await new Promise(function(r){setTimeout(r,at*700);});
+    var ctl=window.AbortController?new AbortController():null,tm=ctl?setTimeout(function(){ctl.abort();},7000):null;
+    try{res=await fetch(url,{headers:{Accept:"application/json"},signal:ctl?ctl.signal:undefined});}catch(e){res=null;}finally{if(tm)clearTimeout(tm);}
+    if(res&&res.ok)break;
+    if(res&&res.status<500&&res.status!==429)break;
+  }
+  if(!res||!res.ok)throw new Error("HTTP "+(res?res.status:"réseau"));
   var data=await res.json();
+  /* pertinence : OFF cherche aussi dans les ingrédients (« oeufs » → madeleines, lasagnes) ; on garde les produits
+     dont le nom contient les mots cherchés, les plus complets d'abord */
+  var qw=normText(q).split(/\s+/).filter(function(w){return w.length>1;}).map(function(w){return w.length>3?w.replace(/[sx]$/,""):w;});
   var results=(data.hits||data.products||[]).filter(function(p){return p.product_name;}).map(function(p){
     var n=p.nutriments||{},br=brandsStr(p.brands);
     var nv=offNutri(n);
-    return {name:(br?br+" ":"")+p.product_name+(nv.prepared?" (préparé)":""),kcal:nv.kcal,protein:nv.protein,carbs:nv.carbs,fat:nv.fat,local:false};
-  }).filter(function(r){return r.kcal>0;}); /* écarte les fiches OFF sans valeur calorique renseignée, peu exploitables */
+    if(/impossibles/.test(offCheck(nv)))return null;
+    return {name:(br?br+" ":"")+p.product_name,kcal:nv.kcal,protein:nv.protein,carbs:nv.carbs,fat:nv.fat,local:false};
+  }).filter(function(r){return r&&r.kcal>0;}) /* écarte les fiches OFF sans valeur calorique renseignée, peu exploitables */
+    .map(function(r){var h=normText(r.name);r._m=qw.filter(function(w){return h.indexOf(w)>=0;}).length;return r;})
+    .filter(function(r){return r._m>0;}).sort(function(a,b){return b._m-a._m;});
   offResultsCache[cacheKey]=results;
   return results;
 }
