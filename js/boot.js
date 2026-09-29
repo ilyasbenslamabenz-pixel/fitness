@@ -8,7 +8,7 @@
     try{window.scrollTo(0,0);}catch(e){}
   }
   function fallbackData(){
-    if(window.EVO_BOOT_OK)return;
+    if(window.EVO_BOOT_OK)return; /* le moteur principal a déjà pris le relais : ne pas écraser ses données */
     try{
       var p=JSON.parse(localStorage.getItem("evoFitV3")||"null")||{};
       var profile=p.profile||{start:103,target:85,cal:2400};
@@ -56,18 +56,6 @@
       if(t){t.textContent="Un petit bug a été récupéré automatiquement.";t.hidden=false;setTimeout(function(){t.hidden=true;},2200);}
     }catch(err){}
   });
-
-  /* Panneau WHOOP : chargé séparément pour ne pas toucher au moteur principal. */
-  function loadWhoopUI(){
-    if(document.querySelector('script[data-evo-whoop-ui]'))return;
-    var s=document.createElement("script");
-    s.src="/fitness/js/whoop-ui.js?v=2";
-    s.async=true;
-    s.dataset.evoWhoopUi="1";
-    document.head.appendChild(s);
-  }
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",loadWhoopUI);
-  else loadWhoopUI();
 })();
 
 if("serviceWorker" in navigator){

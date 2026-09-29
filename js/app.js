@@ -4,7 +4,7 @@ var CFG={apiKey:"AIzaSyDgvRLAmyY86814Vuu_xqXb-TVJqUYeV2I",authDomain:"fitness-f4
 var KEY="evoFitV3", OLDKEY="evoFitCoachV2", BACKUPKEY="evoFitV3_backup";
 var START_DATE="2026-09-21";
 /* adresse du relais WHOOP (cloudflare-worker/whoop.js) une fois déployé, ex. "https://evo-whoop.xxx.workers.dev" */
-var WHOOP_WORKER="";
+var WHOOP_WORKER="https://evo-whoop.ilyas-benslamabenz.workers.dev";
 
 /* programme perte de poids : pecs 2×/semaine (haut et intérieur), dos pour la posture,
    fessiers et gainage pour les hanches ; la graisse part via le déficit et le cardio */
