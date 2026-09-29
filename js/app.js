@@ -1361,7 +1361,17 @@ function stepsOn(d){for(var i=0;i<state.steps.length;i++)if(state.steps[i].d===d
 function planDoneOn(d){
   if(state.planDone&&state.planDone[d])return true;
   if(state.sessions.some(function(s){return localDay(s.date)===d;}))return true;
-  return state.runs.some(function(r){return r.d===d;});
+  if(!state.runs.some(function(r){return r.d===d;}))return false;
+  /* une course ou une marche ne valide que les jours cardio ou marche, pas une séance de musculation prévue */
+  var pl=planOnDate(d);
+  if(!pl||pl.kind==="walk")return true;
+  return isCardioDay(pl.p)&&state.runs.some(function(r){return r.d===d&&(!r.walk||r.tread||Number(r.dur)>=30);});
+}
+function planOnDate(d){
+  var dt=new Date(d+"T12:00:00");if(isNaN(dt))return null;
+  var t=new Date();t.setHours(12,0,0,0);
+  var w=Math.round(((dt-dowIdx(dt)*864e5)-(t-dowIdx(t)*864e5))/(7*864e5));
+  try{return planFor(dowIdx(dt),w);}catch(e){return null;}
 }
 var planListOpen=false;
 function renderPlan(){
@@ -2607,7 +2617,7 @@ function renderCardio(){
     return '<div class="runrow"><div class="ri"><b>'+esc(lab)+'</b><span>'+fmtDate(r.d)+' · '+fr(r.dur)+' min'+(r.wh?' · '+esc(whoopWkText(r.wh)):(r.kcal?' · '+Math.round(r.kcal)+' kcal':''))+'</span></div><div class="rp">'+pace+'</div>'
       +(hasRoute?'<button class="mapbtn" data-act="viewRunMap" data-id="'+esc(r.id||"")+'"><svg class="ic-s" aria-hidden="true"><use href="#i-map_fill"/></svg></button>':'')
       +'<button class="del" data-act="delRun" data-id="'+esc(r.id||"")+'"><svg class="ic-s" aria-hidden="true"><use href="#i-xmark"/></svg></button></div>';
-  }).join(""):'<div class="empty">Aucune course. Ajoute-en une, ou branche Strava en étape 2.</div>';
+  }).join(""):'<div class="empty">Aucune course pour le moment. Ajoute-en une, ou lance le suivi GPS.</div>';
 }
 function renderSteps(){
   var a=state.steps.slice().sort(function(x,y){return x.d.localeCompare(y.d);});
@@ -4270,9 +4280,11 @@ function haptic(kind){
 var PROT_IDEAS=[["un skyr Isey",16],["3 œufs",19],["1 dose de whey",23],["150 g de saumon",30],["150 g de crevettes",36],["150 g de thon",39]];
 function protIdeas(left){
   var one=PROT_IDEAS.find(function(x){return x[1]>=left;});
-  if(one)return one[0]+" ("+one[1]+" g)";
-  var a=PROT_IDEAS[PROT_IDEAS.length-1],b=PROT_IDEAS.slice().reverse().find(function(x){return x!==a&&a[1]+x[1]>=left;})||PROT_IDEAS[PROT_IDEAS.length-2];
-  return a[0]+" + "+b[0]+" ("+(a[1]+b[1])+" g)";
+  if(one)return one[0]+" ("+one[1]+" g de protéines)";
+  /* sinon : les plus riches d'abord, jusqu'à couvrir le reste (3 aliments au plus), en le disant si ça ne suffit pas */
+  var pick=[],tot=0,pool=PROT_IDEAS.slice().sort(function(x,y){return y[1]-x[1];});
+  for(var i=0;i<pool.length&&tot<left&&pick.length<3;i++){pick.push(pool[i]);tot+=pool[i][1];}
+  return pick.map(function(x){return x[0];}).join(" + ")+" ("+tot+" g de protéines"+(tot<left?", à compléter au repas suivant":"")+")";
 }
 function renderProtein(){
   var goal=fnum(state.macro.protein,155),prot=state.meals.reduce(function(a,m){return a+Number(m.protein||0);},0);
