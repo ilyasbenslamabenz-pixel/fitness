@@ -411,7 +411,7 @@
     <div class="group-f">Dépense calorique mesurée, récupération, sommeil et effort, repris sur l'Accueil et par l'IA.</div>
     <div class="group-h">IA (Claude)</div>
     <div class="card list">
-      <label class="lrow"><span class="lrow-ic" style="color:#d0875a"><svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg></span><span class="lrow-t">Clé API</span><input class="lrow-v" id="fClaudeKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="sk-ant-…"></label>
+      <label class="lrow"><span class="lrow-ic" style="color:#d0875a"><svg class="ic-s" aria-hidden="true"><use href="#i-bolt_fill"/></svg></span><span class="lrow-t">Clé API</span><input class="lrow-v" id="fClaudeKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
     </div>
     <button class="btn" style="margin-top:12px;width:100%" data-act="clSaveKey">Enregistrer la clé</button>
     <div class="group-f" id="clKeyStatus"></div>
@@ -558,12 +558,12 @@
     <button data-act="wPlus"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button>
   </div>
   <div class="row2" style="margin-top:14px">
-    <div class="field"><label>Masse grasse (%)</label><input id="wFat" type="number" inputmode="decimal" step="0.1" placeholder="optionnel"></div>
-    <div class="field"><label>Masse musculaire (kg)</label><input id="wMuscle" type="number" inputmode="decimal" step="0.1" placeholder="optionnel"></div>
+    <div class="field"><label>Masse grasse (%, optionnel)</label><input id="wFat" type="number" inputmode="decimal" step="0.1"></div>
+    <div class="field"><label>Masse musculaire (kg, optionnel)</label><input id="wMuscle" type="number" inputmode="decimal" step="0.1"></div>
   </div>
   <div class="row2">
-    <div class="field"><label>Tour de taille (cm)</label><input id="wWaist" type="number" inputmode="decimal" step="0.5" placeholder="optionnel"></div>
-    <div class="field"><label>Tour de hanches (cm)</label><input id="wHips" type="number" inputmode="decimal" step="0.5" placeholder="optionnel"></div>
+    <div class="field"><label>Tour de taille (cm, optionnel)</label><input id="wWaist" type="number" inputmode="decimal" step="0.5"></div>
+    <div class="field"><label>Tour de hanches (cm, optionnel)</label><input id="wHips" type="number" inputmode="decimal" step="0.5"></div>
   </div>
   <div class="wtip">Taille : au niveau du nombril · hanches : au plus large des fesses, mètre à plat.</div>
   <div class="acts"><button class="btn ghost" data-act="wClose">Annuler</button><button class="btn primary" data-act="wSave">Enregistrer</button></div>
@@ -573,7 +573,7 @@
 <div class="modal" id="mealModal"><div class="sheet">
   <h3>Ajouter un repas</h3>
   <div class="sub">Estime au plus proche, la régularité prime sur la précision.</div>
-  <div class="field"><label>Aliment</label><input id="foodQ" name="aliment-recherche" type="search" enterkeyhint="search" placeholder="Ex. : patates airfryer, skyr, thon…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other"></div>
+  <div class="field"><label>Aliment</label><input id="foodQ" name="aliment-recherche" type="search" enterkeyhint="search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other"></div>
   <div id="foodSearchResults" class="food-search-results"></div>
   <div class="row2"><div class="field"><label>Quantité (g / ml)</label><input id="foodQty" type="number" inputmode="decimal" step="1"></div>
   <div class="field"><label>Calories</label><input id="foodKcal" type="number" inputmode="numeric"></div></div>
@@ -595,7 +595,7 @@
     <div class="scan-frame"></div>
   </div>
   <div class="scan-status" id="scanStatus">Autorise l’accès à la caméra…</div>
-  <div class="field"><label>Ou saisir le code manuellement</label><input id="manualBarcode" inputmode="numeric" autocomplete="off" placeholder="Code à 8 ou 13 chiffres"></div>
+  <div class="field"><label>Ou saisir le code (8 ou 13 chiffres)</label><input id="manualBarcode" inputmode="numeric" autocomplete="off"></div>
   <button class="btn primary" data-act="scanLookup"><svg class="ic-s" aria-hidden="true"><use href="#i-search"/></svg> Rechercher ce code</button>
   <button class="btn ghost" id="scanManualEntry" hidden style="margin-top:8px">Saisir ce produit moi-même</button>
   <div class="scan-product" id="scanProduct"></div>
@@ -616,7 +616,7 @@
   <div class="grocery-list" id="groceryOnceList"></div>
   <div class="grocery-sec-h">Chaque semaine (×4 dans le mois)</div>
   <div class="grocery-list" id="groceryWeeklyList"></div>
-  <div class="grocery-add"><input id="groceryAddInput" placeholder="Ajouter un article…"><button data-act="groceryAdd"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button></div>
+  <div class="grocery-add"><input id="groceryAddInput" aria-label="Ajouter un article"><button data-act="groceryAdd"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button></div>
   <div class="acts"><button class="btn ghost" data-act="groceryReset">Tout décocher</button><button class="btn primary" data-act="groceryClose">Fermer</button></div>
 </div></div>
 
@@ -637,13 +637,13 @@
   </div>
   <div id="runTreadOnly" class="row2">
     <div class="field"><label>Vitesse (km/h)</label><input id="runSpeed" type="text" inputmode="decimal"></div>
-    <div class="field"><label>ou allure (min/km)</label><input id="runPaceIn" type="text" inputmode="decimal" placeholder="mm:ss"></div>
+    <div class="field"><label>ou allure (min:s par km)</label><input id="runPaceIn" type="text" inputmode="decimal"></div>
   </div>
   <div class="row2"><div class="field"><label>Durée (min)</label><input id="runDur" type="number" inputmode="decimal" step="1"></div>
   <div class="field"><label>Distance (km)</label><input id="runDist" type="number" inputmode="decimal" step="0.01"></div></div>
   <div id="runTreadKcal" class="row2">
-    <div class="field"><label>Pente (%)</label><input id="runIncline" type="text" inputmode="decimal" placeholder="optionnel"></div>
-    <div class="field"><label>Kcal du tapis (option)</label><input id="runKcal" type="number" inputmode="numeric" step="1" placeholder="optionnel"></div>
+    <div class="field"><label>Pente (%, optionnel)</label><input id="runIncline" type="text" inputmode="decimal"></div>
+    <div class="field"><label>Kcal du tapis (optionnel)</label><input id="runKcal" type="number" inputmode="numeric" step="1"></div>
   </div>
   <div class="field"><label>Date</label><input id="runDate" type="date"></div>
   <div id="runPace" class="date" style="text-align:center;margin-top:8px;min-height:16px"></div>
@@ -697,9 +697,9 @@
 <div class="modal" id="addExModal"><div class="sheet">
   <h3>Ajouter un exercice</h3>
   <div class="sub">Ajouté uniquement à la séance d'aujourd'hui.</div>
-  <div class="field"><label>Nom</label><input id="addExName" placeholder="Élévations latérales"></div>
+  <div class="field"><label>Nom</label><input id="addExName"></div>
   <div class="row2"><div class="field"><label>Séries</label><input id="addExSets" type="number" inputmode="numeric" step="1" value="3"></div>
-  <div class="field"><label>Répétitions (optionnel)</label><input id="addExReps" placeholder="optionnel"></div></div>
+  <div class="field"><label>Répétitions (optionnel)</label><input id="addExReps"></div></div>
   <label class="chk-row"><input id="addExWeighted" type="checkbox" checked> Exercice avec charge</label>
   <div class="acts"><button class="btn ghost" data-act="addExClose">Annuler</button><button class="btn primary" data-act="addExSave">Ajouter</button></div>
 </div></div>
@@ -733,7 +733,7 @@
 <div class="toast" id="toast" hidden></div>
 
 <script src="/fitness/js/body-map.js?v=1"></script>
-<script src="/fitness/js/app.js?v=91"></script>
+<script src="/fitness/js/app.js?v=92"></script>
 <script src="/fitness/js/boot.js?v=4"></script>
 </body>
 </html>
