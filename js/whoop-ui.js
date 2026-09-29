@@ -41,7 +41,7 @@
   function renderData(data) {
     if (!data) return;
     if (data.heartRate != null) setMetric('FC repos', Math.round(Number(data.heartRate)), 'bpm');
-    if (data.battery != null) setMetric('Activité', Math.round(Number(data.battery)) + '%', 'batterie');
+    if (data.battery != null) setMetric('Batterie', Math.round(Number(data.battery)), '%');
 
     var status = document.getElementById("evo-whoop-status");
     if (status) status.textContent = data.connected ? "WHOOP connecté" : "Données reçues";
@@ -73,7 +73,7 @@
         metric('FC repos', '—', 'bpm') +
         metric('HRV', '—', 'ms') +
         metric('Sommeil', '—', '') +
-        metric('Activité', '—', '') +
+        metric('Batterie', '—', '%') +
       '</div>' +
       '<div class="evo-whoop-foot">' +
         '<div class="evo-whoop-note">La première étape lit la fréquence cardiaque via le profil Bluetooth standard du WHOOP 5.0.</div>' +
