@@ -1,8 +1,4 @@
-/* EVO Fit Coach — panneau WHOOP
- * Interface prête pour le pont natif/Cloudflare existant.
- * Aucun score WHOOP n'est inventé : les valeurs restent "—" tant qu'une source réelle
- * (API/Worker ou plugin natif) n'est pas connectée.
- */
+/* EVO Fit Coach — WHOOP local BLE bridge UI */
 (function () {
   "use strict";
 
@@ -34,7 +30,26 @@
   }
 
   function metric(label, value, unit) {
-    return '<div class="evo-whoop-metric"><div class="evo-whoop-label">' + label + '</div><div class="evo-whoop-value">' + value + (unit ? ' <small>' + unit + '</small>' : '') + '</div></div>';
+    return '<div class="evo-whoop-metric"><div class="evo-whoop-label">' + label + '</div><div class="evo-whoop-value" data-whoop-metric="' + label + '">' + value + (unit ? ' <small>' + unit + '</small>' : '') + '</div></div>';
+  }
+
+  function setMetric(label, value, unit) {
+    var el = document.querySelector('#' + ID + ' [data-whoop-metric="' + label + '"]');
+    if (el) el.innerHTML = value + (unit ? ' <small>' + unit + '</small>' : '');
+  }
+
+  function renderData(data) {
+    if (!data) return;
+    if (data.heartRate != null) setMetric('FC repos', Math.round(Number(data.heartRate)), 'bpm');
+    if (data.battery != null) setMetric('Activité', Math.round(Number(data.battery)) + '%', 'batterie');
+
+    var status = document.getElementById("evo-whoop-status");
+    if (status) status.textContent = data.connected ? "WHOOP connecté" : "Données reçues";
+
+    var note = document.querySelector('#' + ID + ' .evo-whoop-note');
+    if (note) note.textContent = data.source === "WHOOP BLE standard Heart Rate"
+      ? "Lecture locale Bluetooth : aucune donnée ne passe par le cloud WHOOP."
+      : "Données WHOOP reçues par EVO.";
   }
 
   function mount() {
@@ -43,7 +58,6 @@
     if (!page) return;
 
     injectStyle();
-
     var card = document.createElement("section");
     card.id = ID;
     card.setAttribute("aria-label", "Données WHOOP");
@@ -51,7 +65,7 @@
       '<div class="evo-whoop-head">' +
         '<div>' +
           '<div class="evo-whoop-title"><span class="evo-whoop-logo">⌁</span><span>WHOOP</span></div>' +
-          '<div class="evo-whoop-sub">WHOOP 5.0 · données du jour</div>' +
+          '<div class="evo-whoop-sub">WHOOP 5.0 · connexion Bluetooth locale</div>' +
         '</div>' +
         '<div class="evo-whoop-status" id="evo-whoop-status">Prêt</div>' +
       '</div>' +
@@ -62,7 +76,7 @@
         metric('Activité', '—', '') +
       '</div>' +
       '<div class="evo-whoop-foot">' +
-        '<div class="evo-whoop-note">Les valeurs restent vides tant qu’EVO n’a pas reçu de données WHOOP réelles.</div>' +
+        '<div class="evo-whoop-note">La première étape lit la fréquence cardiaque via le profil Bluetooth standard du WHOOP 5.0.</div>' +
         '<button class="evo-whoop-btn" type="button" id="evo-whoop-sync">Synchroniser</button>' +
       '</div>';
 
@@ -72,20 +86,23 @@
     var btn = document.getElementById("evo-whoop-sync");
     if (btn) btn.addEventListener("click", function () {
       var status = document.getElementById("evo-whoop-status");
-      if (status) status.textContent = "Pont WHOOP à connecter";
-      try {
-        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Whoop) {
-          window.Capacitor.Plugins.Whoop.sync().then(function (data) {
-            window.dispatchEvent(new CustomEvent("evo:whoop-data", { detail: data }));
-          }).catch(function () {
-            if (status) status.textContent = "Échec de synchronisation";
-          });
-        }
-      } catch (e) {
-        console.warn("EVO WHOOP:", e);
+      var plugin = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Whoop;
+      if (!plugin) {
+        if (status) status.textContent = "Disponible dans l’app iOS";
+        return;
       }
+      if (status) status.textContent = "Recherche du WHOOP…";
+      plugin.sync().then(renderData).catch(function (err) {
+        if (status) status.textContent = "WHOOP non trouvé";
+        var note = document.querySelector('#' + ID + ' .evo-whoop-note');
+        if (note) note.textContent = (err && err.message) ? err.message : "Aucun signal Bluetooth reçu.";
+      });
     });
   }
+
+  window.addEventListener("evo:whoop-data", function (event) {
+    renderData(event.detail);
+  });
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount);
   else mount();
