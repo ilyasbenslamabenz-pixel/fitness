@@ -1294,7 +1294,10 @@ function dayBurn(d){
   var wd=whoopDay(d);
   if(wd&&wd.kcal>0){
     var rest=0;if(wd.ongoing&&d===today()){var n=new Date(),left=Math.max(0,24-n.getHours()-n.getMinutes()/60);rest=Math.round(bmr*left/24);}
-    est.whoop={kcal:wd.kcal,rest:rest};est.total=wd.kcal+rest;
+    /* montre mise en route dans la journée (premier port, oubli le matin) : la partie de la journée avant le début
+       du cycle n'est pas mesurée, on l'estime au niveau de base plutôt que de la compter à zéro */
+    var d0=new Date(d+"T00:00:00").getTime(),before=wd.cs&&wd.cs>d0+2*36e5?Math.round(base*Math.min(1,(wd.cs-d0)/864e5)):0;
+    est.whoop={kcal:wd.kcal,rest:rest,before:before};est.total=wd.kcal+rest+before;
   }
   return est;
 }
@@ -1309,7 +1312,7 @@ function renderBurn(){
   box.innerHTML='<div class="burn3"><div><b>'+kfmt(b.total)+'</b><span>dépensé</span></div>'
     +'<div class="'+(bal<=0?"good":"bad")+'"><b>'+(bal<=0?"−":"+")+kfmt(Math.abs(bal))+'</b><span>'+(bal<=0?"déficit":"surplus")+'</span></div>'
     +'<button class="burn-steps" data-act="openSteps"><b>'+kfmt(st)+'</b><span>pas / '+kfmt(STEP_GOAL)+'</span><i><em style="width:'+Math.min(100,Math.round(st/STEP_GOAL*100))+'%"></em></i></button></div>'
-    +(b.whoop?'<div class="burn-detail">Dépense mesurée par WHOOP : '+kfmt(b.whoop.kcal)+' kcal'+(b.whoop.rest?' + repos jusqu\'à minuit '+kfmt(b.whoop.rest)+' kcal':'')+'</div>'
+    +(b.whoop?'<div class="burn-detail">Dépense mesurée par WHOOP : '+kfmt(b.whoop.kcal)+' kcal'+(b.whoop.rest?' + repos jusqu\'à minuit '+kfmt(b.whoop.rest)+' kcal':'')+(b.whoop.before?' + avant le port de la montre ≈ '+kfmt(b.whoop.before)+' kcal':'')+'</div>'
       :'<div class="burn-detail">Dépense estimée : '+parts.join(' + ')+' kcal'+(state.profile.height&&state.profile.age?'':' · <u data-act="go" data-page="profile">indique ta taille et ton âge</u> pour plus de précision')+'</div>')
     +whoopStripHTML(d);
 }
@@ -4461,12 +4464,13 @@ function whoopApply(d){
   var days=(state.whoop&&state.whoop.days)||{},byCycle={};
   (d.cycles||[]).forEach(function(c){
     /* un cycle WHOOP commence à l'endormissement : le jour vécu est celui situé 12 h après le début */
-    var t0=new Date(c.start).getTime(),day=localDay(new Date(isNaN(t0)?Date.now():t0+12*36e5).toISOString()),sc=c.score||{};
+    /* (plafonné à maintenant : un cycle commencé dans la journée, p. ex. au premier port de la montre, reste sur aujourd'hui) */
+    var t0=new Date(c.start).getTime(),day=localDay(new Date(isNaN(t0)?Date.now():Math.min(t0+12*36e5,Date.now())).toISOString()),sc=c.score||{};
     byCycle[c.id]=day;
     var o=days[day]=Object.assign({},days[day]||{});
     if(sc.kilojoule)o.kcal=Math.round(sc.kilojoule/4.184);
     if(sc.strain!=null)o.strain=Math.round(sc.strain*10)/10;
-    o.ongoing=!c.end;
+    o.ongoing=!c.end;if(!isNaN(t0))o.cs=t0;
   });
   (d.recovery||[]).forEach(function(r){
     var day=byCycle[r.cycle_id];if(!day||!r.score)return;
