@@ -3504,7 +3504,7 @@ function stopBarcode(){
 function closeScanner(){stopBarcode();$("scanModal").classList.remove("on");}
 /* produits Coop/Migros/Denner courants mal ou pas référencés sur OpenFoodFacts, vérifiés manuellement
    (fiches produit Coop/Migros/Denner/OpenFoodFacts, valeurs pour 100 g/ml) */
-var SEED_BARCODES={"5690845003790":{name:"Isey Skyr framboise-grenade sans lactose",kcal:76,protein:9.5,carbs:4.4,fat:2.2},"8719200041219":{name:"Rama Cremefine 7 %",kcal:89,protein:1.1,carbs:4.8,fat:7.4},
+var SEED_BARCODES={"3256221436693":{name:"U Purée nature (préparée eau + lait)",kcal:70,protein:2.6,carbs:12.3,fat:0.8},"5690845003790":{name:"Isey Skyr framboise-grenade sans lactose",kcal:76,protein:9.5,carbs:4.4,fat:2.2},"8719200041219":{name:"Rama Cremefine 7 %",kcal:89,protein:1.1,carbs:4.8,fat:7.4},
   "7610846871868":{name:"Qualité & Prix Thon rosé au naturel (Coop) 155 g",kcal:110,protein:26,carbs:0,fat:0.5},
   "7627534978501":{name:"Qualité & Prix Thon rosé à l'huile de tournesol (Coop)",kcal:186,protein:25,carbs:0,fat:9.5},
   "7610800036739":{name:"Coop Lifestyle Thon rosé au naturel 200 g",kcal:117,protein:26,carbs:1,fat:1},
@@ -3528,8 +3528,18 @@ var SEED_BARCODES={"5690845003790":{name:"Isey Skyr framboise-grenade sans lacto
   "7610029155266":{name:"Toast complet intégrale (Denner) 500 g",kcal:242,protein:9.2,carbs:40,fat:3.6}
 };
 function offVal(n,keys){
-  for(var i=0;i<keys.length;i++){var v=Number(n[keys[i]]);if(isFinite(v))return v;}
+  for(var i=0;i<keys.length;i++){if(n[keys[i]]==null||n[keys[i]]==="")continue;var v=Number(n[keys[i]]);if(isFinite(v))return v;}
   return 0;
+}
+/* valeurs pour 100 g d'une fiche OpenFoodFacts : kcal, sinon kJ ÷ 4,184 ; si la fiche n'a que les valeurs
+   « produit préparé » (purée en flocons, soupe…), on les prend en le signalant */
+function offNutri(n){
+  n=n||{};
+  function kc(suf){var k=offVal(n,["energy-kcal"+suf+"_100g"]);if(!k){var kj=offVal(n,["energy-kj"+suf+"_100g","energy"+suf+"_100g"]);if(kj)k=Math.round(kj/4.184);}return k;}
+  var raw=kc("");
+  if(!raw&&!offVal(n,["proteins_100g"])){var pk=kc("_prepared");
+    if(pk)return {kcal:pk,protein:offVal(n,["proteins_prepared_100g"]),carbs:offVal(n,["carbohydrates_prepared_100g"]),fat:offVal(n,["fat_prepared_100g"]),prepared:true};}
+  return {kcal:raw||offVal(n,["energy-kcal"]),protein:offVal(n,["proteins_100g","proteins"]),carbs:offVal(n,["carbohydrates_100g","carbohydrates"]),fat:offVal(n,["fat_100g","fat"]),prepared:false};
 }
 async function lookupBarcode(code){
   code=String(code||"").replace(/\D/g,"");
@@ -3557,12 +3567,9 @@ async function lookupBarcode(code){
     var data=await fetchOffProduct(code);
     if(!data||!data.product)throw new Error(data?"not_found":"network");
     var p=data.product,n=p.nutriments||{};
-    var kcal=offVal(n,["energy-kcal_100g","energy-kcal"]);
-    var prot=offVal(n,["proteins_100g","proteins"]);
-    var carbs=offVal(n,["carbohydrates_100g","carbohydrates"]);
-    var fat=offVal(n,["fat_100g","fat"]);
-    var name=(p.brands?p.brands+" ":"")+(p.product_name||"Produit");
-    $("scanProduct").innerHTML="<b>"+esc(name)+"</b><div style=\"font-size:12px;color:var(--muted);margin-top:4px\">"+(kcal?Math.round(kcal):"—")+" kcal · "+(prot?Math.round(prot*10)/10:"—")+" g protéines / 100 g</div>";
+    var nv=offNutri(n),kcal=nv.kcal,prot=nv.protein,carbs=nv.carbs,fat=nv.fat;
+    var name=(p.brands?p.brands+" ":"")+(p.product_name||"Produit")+(nv.prepared?" (préparé)":"");
+    $("scanProduct").innerHTML="<b>"+esc(name)+"</b><div style=\"font-size:12px;color:var(--muted);margin-top:4px\">"+(kcal?Math.round(kcal):"—")+" kcal · "+(prot?Math.round(prot*10)/10:"—")+" g protéines / 100 g</div>"+(nv.prepared?"<div style=\"font-size:12px;color:var(--warn);margin-top:4px\">Valeurs du produit préparé (fiche incomplète) : vérifie-les sur l'emballage.</div>":"");
     $("scanProduct").classList.add("on");
     $("foodQ").value=name;
     $("foodKcal").value=kcal?Math.round(kcal):"";
@@ -3690,7 +3697,8 @@ async function fetchOffResults(q,swissOnly){
   var data=await res.json();
   var results=(data.hits||data.products||[]).filter(function(p){return p.product_name;}).map(function(p){
     var n=p.nutriments||{},br=brandsStr(p.brands);
-    return {name:(br?br+" ":"")+p.product_name,kcal:offVal(n,["energy-kcal_100g","energy-kcal"]),protein:offVal(n,["proteins_100g","proteins"]),carbs:offVal(n,["carbohydrates_100g","carbohydrates"]),fat:offVal(n,["fat_100g","fat"]),local:false};
+    var nv=offNutri(n);
+    return {name:(br?br+" ":"")+p.product_name+(nv.prepared?" (préparé)":""),kcal:nv.kcal,protein:nv.protein,carbs:nv.carbs,fat:nv.fat,local:false};
   }).filter(function(r){return r.kcal>0;}); /* écarte les fiches OFF sans valeur calorique renseignée, peu exploitables */
   offResultsCache[cacheKey]=results;
   return results;
