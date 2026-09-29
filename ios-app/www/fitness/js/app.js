@@ -1066,9 +1066,9 @@ function clHistory(days){
   var ms=(state.measures||[]).filter(function(x){return inR(x.d);});
   if(ms.length)out.push("Mensurations : "+pick(ms,6).map(function(x){return x.d.slice(5)+(x.waist?" taille "+x.waist:"")+(x.hips?" hanches "+x.hips:"");}).join(", "));
   var ss=state.sessions.filter(function(x){return inR(localDay(x.date));});
-  out.push("Séances : "+ss.length+(ss.length?" — "+ss.slice(0,15).map(function(x){return localDay(x.date).slice(5)+" "+x.name;}).join(", "):""));
+  out.push("Séances : "+ss.length+(ss.length?" — "+ss.slice(0,15).map(function(x){return localDay(x.date).slice(5)+" "+x.name+(x.wh?" ("+whoopWkText(x.wh)+")":"");}).join(", "):""));
   var rs=state.runs.filter(function(x){return inR(x.d);});
-  if(rs.length)out.push("Courses/marches : "+rs.slice(-12).map(function(x){return x.d.slice(5)+" "+(x.walk?"marche ":"course ")+x.dist+" km/"+Math.round(x.dur)+" min";}).join(", "));
+  if(rs.length)out.push("Courses/marches : "+rs.slice(-12).map(function(x){return x.d.slice(5)+" "+(x.walk?"marche ":"course ")+x.dist+" km/"+Math.round(x.dur)+" min"+(x.wh?" ("+whoopWkText(x.wh)+")":"");}).join(", "));
   var wa=(state.waterHistory||[]).filter(function(x){return inR(x.d);}).map(function(x){return Number(x.ml)||0;});
   if(wa.length)out.push("Eau : moyenne "+avg(wa)+" ml/jour sur "+wa.length+" jours");
   var st=state.steps.filter(function(x){return inR(x.d);}).map(function(x){return Number(x.v)||0;});
@@ -1280,12 +1280,12 @@ function dayBurn(d){
     var q=state.program.find(function(pp){return pp.id===x.dayId;}),cat=(q&&q.cat)||"muscu";
     var dur=Number(x.dur)||(q?estimateDurationMin(q):45);
     /* séances cardio : MET propre au jour (marche inclinée ~6, fractionné ~7,5) au lieu de celui de la musculation */
-    var gross=Number(x.kcal)||(q&&q.met?Math.max(1,Math.round(q.met*w*dur/60)):estimateSessionKcal(cat,dur));
+    var gross=Number(x.wh&&x.wh.kcal)||Number(x.kcal)||(q&&q.met?Math.max(1,Math.round(q.met*w*dur/60)):estimateSessionKcal(cat,dur));
     sessK+=Math.max(0,Math.round(gross-w*dur/60));
   });
   state.runs.forEach(function(r){
     if(r.d!==d||(r.walk&&st>0))return;
-    var dur=Number(r.dur)||0,gross=Number(r.kcal)||(r.walk?estimateWalkDistKcal(Number(r.dist)||0):estimateRunKcal(Number(r.dist)||0,dur));
+    var dur=Number(r.dur)||0,gross=Number(r.wh&&r.wh.kcal)||Number(r.kcal)||(r.walk?estimateWalkDistKcal(Number(r.dist)||0):estimateRunKcal(Number(r.dist)||0,dur));
     cardioK+=Math.max(0,Math.round(gross-w*dur/60));
   });
   var est={bmr:bmr,base:base,steps:stepsK,sess:sessK,cardio:cardioK,total:base+stepsK+sessK+cardioK};
@@ -2560,7 +2560,7 @@ function renderSessionHistory(){
   if(!state.sessions.length){box.innerHTML='<div class="empty" style="padding:10px 0">Tes séances terminées apparaîtront ici.</div>';return;}
   box.innerHTML=state.sessions.slice(0,8).map(function(s,i){
     var d=new Date(s.date),lab=d.toLocaleDateString("fr-CH",{weekday:"short",day:"numeric",month:"short"});
-    var extra=[s.done+"/"+s.total+" exos"];if(s.dur)extra.push(s.dur+" min");if(s.vol)extra.push(s.vol.toLocaleString("fr-CH")+" kg");
+    var extra=[s.done+"/"+s.total+" exos"];if(s.dur)extra.push(s.dur+" min");if(s.vol)extra.push(s.vol.toLocaleString("fr-CH")+" kg");if(s.wh)extra.push(whoopWkText(s.wh));
     return '<div class="hist-row"><div><b>'+esc(s.name||"Séance")+'</b><span>'+lab+'</span></div><em>'+extra.join(" · ")+'</em><button class="del" data-act="delSession" data-i="'+i+'" aria-label="Supprimer cette séance"><svg class="ic-s" aria-hidden="true"><use href="#i-xmark"/></svg></button></div>';
   }).join("");
 }
@@ -2591,7 +2591,7 @@ function renderCardio(){
   var paces=runs.filter(function(r){return !r.walk&&r.dist>0&&r.dur>0;}).map(function(r){return r.dur/r.dist;});
   $("cdPace").innerHTML=paces.length?fmtPace(Math.min.apply(null,paces))+" <small>/km</small>":"—";
   $("cardioChart").innerHTML=lineChart(runs.map(function(r){return Number(r.dist);}),"#e3ae4a"," km");
-  var totalKcal=runs.reduce(function(s,r){return s+Number(r.kcal||0);},0);
+  var totalKcal=runs.reduce(function(s,r){return s+Number((r.wh&&r.wh.kcal)||r.kcal||0);},0);
   var wKm=walks.reduce(function(s,r){return s+Number(r.dist||0);},0);
   $("cdLastD").textContent=runs.length?fmtDate(runs[runs.length-1].d):"";
   var cdTxt=[];if(totalKcal)cdTxt.push(totalKcal.toLocaleString("fr-CH")+" kcal brûlées en course");if(walks.length)cdTxt.push("marche : "+walks.length+" sortie"+(walks.length>1?"s":"")+", "+fr(wKm)+" km");
@@ -2601,7 +2601,7 @@ function renderCardio(){
     var pace=(r.dist>0&&r.dur>0)?fmtPace(r.dur/r.dist)+" /km":"—";
     var hasRoute=Array.isArray(r.pts)&&r.pts.length>1;
     var lab=(r.tread?"Tapis · ":"")+(r.walk?"Marche · ":"")+fr(r.dist)+" km"+(r.incline?" · pente "+fr(r.incline)+" %":"");
-    return '<div class="runrow"><div class="ri"><b>'+esc(lab)+'</b><span>'+fmtDate(r.d)+' · '+fr(r.dur)+' min'+(r.kcal?' · '+Math.round(r.kcal)+' kcal':'')+'</span></div><div class="rp">'+pace+'</div>'
+    return '<div class="runrow"><div class="ri"><b>'+esc(lab)+'</b><span>'+fmtDate(r.d)+' · '+fr(r.dur)+' min'+(r.wh?' · '+esc(whoopWkText(r.wh)):(r.kcal?' · '+Math.round(r.kcal)+' kcal':''))+'</span></div><div class="rp">'+pace+'</div>'
       +(hasRoute?'<button class="mapbtn" data-act="viewRunMap" data-id="'+esc(r.id||"")+'"><svg class="ic-s" aria-hidden="true"><use href="#i-map_fill"/></svg></button>':'')
       +'<button class="del" data-act="delRun" data-id="'+esc(r.id||"")+'"><svg class="ic-s" aria-hidden="true"><use href="#i-xmark"/></svg></button></div>';
   }).join(""):'<div class="empty">Aucune course. Ajoute-en une, ou branche Strava en étape 2.</div>';
@@ -3756,6 +3756,9 @@ async function startCamera(){
     try{await v.play();}catch(e){}
   }catch(e){}
   $("scanStatus").textContent="Vise le code-barres du produit…";
+  /* lecteur chargé à la demande depuis l'app (hébergé avec elle : pas de CDN, marche hors ligne une fois mis en cache) */
+  if(!window.ZXingBrowser)await loadZXing();
+  if(!barcodeStream)return;
   if(!window.ZXingBrowser){
     $("scanStatus").textContent="La caméra fonctionne, mais le lecteur automatique est indisponible. Lis le chiffre sous le code-barres et saisis-le ci-dessous.";
     return;
@@ -3777,6 +3780,15 @@ async function startCamera(){
   }
 }
 
+var zxingLoading=null;
+function loadZXing(){
+  if(window.ZXingBrowser)return Promise.resolve();
+  if(!zxingLoading)zxingLoading=new Promise(function(res){
+    var sc=document.createElement("script");sc.src="/fitness/js/zxing-browser.min.js?v=1";
+    sc.onload=function(){res();};sc.onerror=function(){zxingLoading=null;res();};document.head.appendChild(sc);
+  });
+  return zxingLoading;
+}
 /* firebase (optional cloud sync) */
 function setupFirebase(){
   if(!window.firebase)return;
@@ -4002,6 +4014,7 @@ document.addEventListener("click",function(e){
     case "recapCoach": var wr=weekRange(); lsSet("evoRecapSeen",wr.from); renderWeekRecap();
       if(!clKey()){toast("Ajoute ta clé dans Profil");showPage("profile");break;}
       $("clInput").value="Fais-moi le bilan de la semaine dernière (du "+wr.from+" au "+wr.to+") et donne-moi 2 conseils concrets pour cette semaine."; clSend(); try{$("claudeCard").scrollIntoView({behavior:"smooth",block:"start"});}catch(e){} break;
+    case "whoopLight": var spl=clTodayDay(); if(spl){state.session.light=state.session.light||{};state.session.light[spl.id]=true;save();renderAll();toast("Version légère activée pour "+spl.name);} break;
     case "sessNormal": var sp0=state.program[state.selDay]; if(sp0&&state.session.light)delete state.session.light[sp0.id]; save(); renderAll(); toast("Séance normale"); break;
     case "whoopConnect": whoopConnect(); break;
     case "whoopPaste": whoopPaste(); break;
@@ -4339,8 +4352,50 @@ function whoopStripHTML(d){
   var w=whoopDay(d);if(!w)return "";
   function chip(lab,val,cls){return '<div class="wh-chip'+(cls?" "+cls:"")+'"><b>'+val+'</b><span>'+lab+'</span></div>';}
   var rc=w.rec==null?"":(w.rec>=67?"good":w.rec>=34?"mid":"low");
-  return '<div class="wh-strip">'+(w.rec!=null?chip("récupération",w.rec+" %",rc):"")+(w.sleep!=null?chip("sommeil",w.sleep+" %"):"")+(w.strain!=null?chip("effort",fr(w.strain)):"")+'</div>';
+  return '<div class="wh-strip">'+(w.rec!=null?chip("récupération",w.rec+" %",rc):"")+(w.sleep!=null?chip("sommeil",w.sleep+" %"):"")+(w.strain!=null?chip("effort",fr(w.strain)):"")+'</div>'+whoopAdviceHTML(d,w);
 }
+function isCardioDay(p){return /^cardio/.test(p.id||"")||(!!p.met&&!!p.min);}
+/* conseil du jour selon la récupération, pour la séance de musculation prévue et pas encore faite */
+function whoopAdviceHTML(d,w){
+  if(d!==today()||w.rec==null)return "";
+  var sp=clTodayDay();if(!sp||planDoneOn(d))return "";
+  var light=!!(state.session.light&&state.session.light[sp.id]),txt,btn="",cls;
+  if(w.rec<34&&isCardioDay(sp)){cls="low";txt="Récupération basse : "+sp.name+" à allure facile aujourd'hui (tu dois pouvoir parler), ou raccourcis de 10 min.";}
+  else if(w.rec<34){cls="low";txt="Récupération basse : fais la version légère de "+sp.name+" (1 série de moins, −10 % de charge).";
+    btn=light?'<span class="wh-ok">Version légère activée</span>':'<button class="btn" data-act="whoopLight">Passer en version légère</button>';}
+  else if(w.rec<67){cls="mid";txt=isCardioDay(sp)?"Récupération moyenne : cardio normal, sans forcer l'allure.":"Récupération moyenne : séance normale, sans chercher de record aujourd'hui.";}
+  else{cls="good";txt=isCardioDay(sp)?"Bonne récupération : tu peux pousser un peu l'allure ou la pente.":"Bonne récupération : bon jour pour ajouter un peu de charge.";}
+  if(w.sleepH&&w.sleepH<6)txt+=" Nuit courte ("+fr(w.sleepH)+" h) : couche-toi plus tôt ce soir.";
+  return '<div class="wh-advice '+cls+'"><p>'+esc(txt)+'</p>'+btn+'</div>';
+}
+/* rattache chaque séance WHOOP à la séance ou la course de l'app correspondante :
+   séance de salle = chevauchement horaire ; course/marche (sans heure) = même jour, sport et durée proches */
+function whoopLink(){
+  var wk=(state.whoop&&state.whoop.wk)||[];if(!wk.length)return;
+  var used={};
+  function pack(w){return {id:w.id,kcal:w.kcal,strain:w.strain,hr:w.hr,max:w.max};}
+  state.sessions.forEach(function(x){
+    var end=Date.parse(x.date);if(isNaN(end))return;
+    var start=end-(Number(x.dur)||60)*60000,best=null,bo=0;
+    wk.forEach(function(w){
+      if(used[w.id])return;var ov=Math.min(Date.parse(w.e),end+15*60000)-Math.max(Date.parse(w.s),start-15*60000);
+      if(ov>bo){bo=ov;best=w;}
+    });
+    if(best&&bo>=10*60000){x.wh=pack(best);used[best.id]=1;}
+  });
+  state.runs.forEach(function(r){
+    var best=null,bd=1e9,dur=Number(r.dur)||0;
+    wk.forEach(function(w){
+      if(used[w.id]||localDay(w.s)!==r.d)return;
+      if(!/run|walk|hik|treadmill|course|marche/.test(w.sport))return;
+      var wd=(Date.parse(w.e)-Date.parse(w.s))/60000,diff=Math.abs(wd-dur);
+      if(dur&&diff>Math.max(10,dur*0.5))return;
+      if(diff<bd){bd=diff;best=w;}
+    });
+    if(best){r.wh=pack(best);used[best.id]=1;}
+  });
+}
+function whoopWkText(wh){return wh?"WHOOP "+kfmt(wh.kcal)+" kcal"+(wh.strain!=null?" · effort "+fr(wh.strain):"")+(wh.hr?" · FC moy. "+wh.hr:""):"";}
 function whoopConnect(){
   if(!WHOOP_WORKER){toast("Relais WHOOP pas encore installé");return;}
   var st="";var a=new Uint8Array(16);crypto.getRandomValues(a);a.forEach(function(x){st+=("0"+x.toString(16)).slice(-2);});
@@ -4427,7 +4482,15 @@ function whoopApply(d){
   });
   var keep={},lim=new Date(Date.now()-60*864e5);lim=localDay(lim.toISOString());
   Object.keys(days).forEach(function(k){if(k>=lim)keep[k]=days[k];});
-  state.whoop={updated:Date.now(),days:keep};save();renderAll();
+  /* séances enregistrées par la montre (fusionnées par id avec celles déjà connues) */
+  var wk={};((state.whoop&&state.whoop.wk)||[]).forEach(function(w){wk[w.id]=w;});
+  (d.workouts||[]).forEach(function(w){
+    if(!w||!w.id||!w.start||!w.end||!w.score)return;var sc=w.score;
+    wk[w.id]={id:w.id,s:w.start,e:w.end,sport:String(w.sport_name||"").toLowerCase(),kcal:sc.kilojoule?Math.round(sc.kilojoule/4.184):0,
+      strain:sc.strain!=null?Math.round(sc.strain*10)/10:null,hr:sc.average_heart_rate?Math.round(sc.average_heart_rate):null,max:sc.max_heart_rate?Math.round(sc.max_heart_rate):null};
+  });
+  var wkl=Object.keys(wk).map(function(k){return wk[k];}).filter(function(w){return localDay(w.s)>=lim;}).sort(function(a,b){return a.s.localeCompare(b.s);});
+  state.whoop={updated:Date.now(),days:keep,wk:wkl};whoopLink();save();renderAll();
 }
 document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")whoopSync(false);});
 

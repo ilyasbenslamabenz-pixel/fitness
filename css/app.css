@@ -1267,3 +1267,8 @@ input[type=search]::-webkit-search-decoration{-webkit-appearance:none}
 :root[data-theme="light"] .complete-pr span{color:#8a5a00;background:rgba(227,174,74,.22)}
 
 .wh-err{display:block;margin-top:4px;font-size:13px;color:var(--warn,#e0a040)}
+.wh-advice{margin-top:10px;padding:10px 12px;border-radius:14px;background:var(--surface2);border-left:3px solid #e3ae4a;display:flex;flex-direction:column;gap:8px}
+.wh-advice.good{border-left-color:#34c77b}.wh-advice.low{border-left-color:var(--warn)}
+.wh-advice p{margin:0;font-size:13.5px;line-height:1.4}
+.wh-advice .btn{align-self:flex-start;min-height:40px;padding:0 14px}
+.wh-advice .wh-ok{font-size:12.5px;color:var(--muted)}
