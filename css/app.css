@@ -1265,3 +1265,5 @@ input[type=search]::-webkit-search-decoration{-webkit-appearance:none}
 .cp-row.pr b{color:var(--primary)}
 #guidedView .guided-sets .gs.cur.edit{border-color:var(--accent)}
 :root[data-theme="light"] .complete-pr span{color:#8a5a00;background:rgba(227,174,74,.22)}
+
+.wh-err{display:block;margin-top:4px;font-size:13px;color:var(--warn,#e0a040)}
