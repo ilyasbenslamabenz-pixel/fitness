@@ -8,7 +8,7 @@
     try{window.scrollTo(0,0);}catch(e){}
   }
   function fallbackData(){
-    if(window.EVO_BOOT_OK)return; /* le moteur principal a déjà pris le relais : ne pas écraser ses données */
+    if(window.EVO_BOOT_OK)return;
     try{
       var p=JSON.parse(localStorage.getItem("evoFitV3")||"null")||{};
       var profile=p.profile||{start:103,target:85,cal:2400};
@@ -61,7 +61,7 @@
   function loadWhoopUI(){
     if(document.querySelector('script[data-evo-whoop-ui]'))return;
     var s=document.createElement("script");
-    s.src="/fitness/js/whoop-ui.js?v=1";
+    s.src="/fitness/js/whoop-ui.js?v=2";
     s.async=true;
     s.dataset.evoWhoopUi="1";
     document.head.appendChild(s);
@@ -72,7 +72,7 @@
 
 if("serviceWorker" in navigator){
   function registerEvoSW(){
-    navigator.serviceWorker.register("/fitness/sw.js?v=38",{updateViaCache:"none"}).catch(function(e){console.warn("SW:",e);});
+    navigator.serviceWorker.register("/fitness/sw.js?v=39",{updateViaCache:"none"}).catch(function(e){console.warn("SW:",e);});
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",registerEvoSW);
   else registerEvoSW();
