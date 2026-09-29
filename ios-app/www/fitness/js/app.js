@@ -3318,7 +3318,8 @@ function renderProfile(){
   $("fCarbs").value=state.macro.carbs;$("fProt").value=state.macro.protein;$("fFat").value=state.macro.fat;$("fWater").value=state.waterGoal;
   renderProgList();
   var wst=$("whoopStatus");if(wst){var wt=whoopTok(),wu=state.whoop&&state.whoop.updated;
-    wst.innerHTML=!WHOOP_WORKER?'Relais pas encore installé (voir le guide).':(wt?'Connecté'+(wu?' · synchro '+new Date(wu).toLocaleTimeString("fr-CH",{hour:"2-digit",minute:"2-digit"}):''):'Non connecté');
+    var werr=Number(lsGet("evoWhoopErr")||0),wlab=function(ts){var d=new Date(ts),hm=d.toLocaleTimeString("fr-CH",{hour:"2-digit",minute:"2-digit"});return localDay(d.toISOString())===today()?hm:d.toLocaleDateString("fr-CH",{day:"numeric",month:"short"})+" "+hm;};
+    wst.innerHTML=!WHOOP_WORKER?'Relais pas encore installé (voir le guide).':(wt?'Connecté'+(wu?' · synchro '+wlab(wu):'')+(werr>(wu||0)?'<br><span class="wh-err">Dernière synchro échouée. Réessaie ; si ça dure, Déconnecter puis reconnecter.</span>':''):'Non connecté');
     $("whoopBtns").innerHTML=wt?'<button class="btn" data-act="whoopSync">Synchroniser</button><button class="btn ghost" data-act="whoopDisconnect">Déconnecter</button>':'<button class="btn" data-act="whoopConnect"'+(WHOOP_WORKER?'':' disabled')+'>Connecter WHOOP</button>'+(WHOOP_WORKER?'<button class="btn ghost" data-act="whoopPaste">Coller un code</button>':'');}
   var ks=$("clKeyStatus");if(ks){var kk=clKey();ks.innerHTML=kk?'Clé enregistrée sur ce téléphone : <b class="good">…'+esc(kk.slice(-4))+'</b>':'Aucune clé : l\'IA de l\'Accueil est désactivée.';}
   var bs=$("backupStatus");if(bs){var dn=daysSinceBackup();bs.innerHTML='Dernière sauvegarde : <b class="'+(dn==null||dn>=7?"bad":"good")+'">'+backupLabel()+'</b>'+(cloudUser?" · automatique (cloud)":" · connecte-toi ou exporte régulièrement");}
@@ -4363,7 +4364,7 @@ function whoopParse(code){
   try{var b=String(code||"").trim().replace(/-/g,"+").replace(/_/g,"/");while(b.length%4)b+="=";
     var t=JSON.parse(decodeURIComponent(escape(atob(b))));return t&&t.a&&t.r?t:null;}catch(e){return null;}
 }
-function whoopAccept(t){lsSet("evoWhoop",JSON.stringify({a:t.a,r:t.r,e:t.e||0}));lsDel("evoWhoopState");toast("WHOOP connecté");renderProfile();whoopSync(true,30);}
+function whoopAccept(t){lsSet("evoWhoop",JSON.stringify({a:t.a,r:t.r,e:t.e||0}));lsDel("evoWhoopState");lsDel("evoWhoopErr");toast("WHOOP connecté");renderProfile();whoopSync(true,30);}
 function whoopShowCode(code){
   var el=document.createElement("div");el.className="wh-code";
   el.innerHTML='<div class="wh-code-in"><b>Connexion WHOOP réussie</b><p>Tu es sans doute dans le navigateur intégré. Copie ce code, retourne dans l\'app EVO Fit, puis Profil › Montre WHOOP › « Coller un code ».</p>'
@@ -4398,8 +4399,8 @@ function whoopSync(force,days){
     });
   }).then(function(d){
     if(!d||!d.cycles)throw new Error(d&&d.error||"données");
-    whoopApply(d);whoopBusy=false;
-  }).catch(function(e){whoopBusy=false;if(force)toast("Synchro WHOOP impossible");console.warn("WHOOP",e);});
+    whoopApply(d);whoopBusy=false;lsDel("evoWhoopErr");renderProfile();
+  }).catch(function(e){whoopBusy=false;lsSet("evoWhoopErr",String(Date.now()));try{renderProfile();}catch(x){}if(force)toast("Synchro WHOOP impossible");console.warn("WHOOP",e);});
 }
 function whoopApply(d){
   var days=(state.whoop&&state.whoop.days)||{},byCycle={};
