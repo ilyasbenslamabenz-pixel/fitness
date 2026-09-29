@@ -56,6 +56,18 @@
       if(t){t.textContent="Un petit bug a été récupéré automatiquement.";t.hidden=false;setTimeout(function(){t.hidden=true;},2200);}
     }catch(err){}
   });
+
+  /* Panneau WHOOP : chargé séparément pour ne pas toucher au moteur principal. */
+  function loadWhoopUI(){
+    if(document.querySelector('script[data-evo-whoop-ui]'))return;
+    var s=document.createElement("script");
+    s.src="/fitness/js/whoop-ui.js?v=1";
+    s.async=true;
+    s.dataset.evoWhoopUi="1";
+    document.head.appendChild(s);
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",loadWhoopUI);
+  else loadWhoopUI();
 })();
 
 if("serviceWorker" in navigator){
