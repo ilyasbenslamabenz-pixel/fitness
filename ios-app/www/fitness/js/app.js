@@ -996,7 +996,7 @@ function clRunTool(name,inp){
       save();renderToday();try{renderProgress();}catch(e){}return "Enregistré : "+done.join(", ")+". Totaux à jour :\n"+clSummary();
     case "log_steps":
       var st=Math.round(Number(inp.steps));if(!(st>=0&&st<=100000))return "Erreur : nombre de pas invalide.";
-      upsertV(state.steps,td,st);save();renderToday();return "Pas enregistrés : "+st+". Totaux à jour :\n"+clSummary();
+      upsertV(state.steps,td,st);manualSteps(td);save();renderToday();return "Pas enregistrés : "+st+". Totaux à jour :\n"+clSummary();
     case "log_measures":
       function cmv(v){v=Number(v);return v>=40&&v<=220?Math.round(v*10)/10:null;}
       var wa=cmv(inp.waist_cm),hi=cmv(inp.hips_cm);if(wa==null&&hi==null)return "Erreur : mesures invalides (40–220 cm).";
@@ -3085,7 +3085,7 @@ window.addEventListener("orientationchange",function(){setTimeout(fixLiveMapSize
 
 function openSteps(){var t=valToday(state.steps);$("stepsInput").value=t||"";$("stepsModal").classList.add("on");}
 function closeSteps(){$("stepsModal").classList.remove("on");}
-function saveSteps(){var v=Math.round(Number($("stepsInput").value));if(!(v>=0)||!isFinite(v)){toast("Nombre invalide");return;}upsertV(state.steps,today(),v);save();closeSteps();renderProgress();renderToday();toast("Pas enregistrés");}
+function saveSteps(){var v=Math.round(Number($("stepsInput").value));if(!(v>=0)||!isFinite(v)){toast("Nombre invalide");return;}upsertV(state.steps,today(),v);manualSteps(today());save();closeSteps();renderProgress();renderToday();toast("Pas enregistrés");}
 
 var weeklyMenuKey="";
 var menuOpenDay=null; /* jour affiché dans la carte du menu (aujourd'hui par défaut) */
@@ -4482,6 +4482,13 @@ function whoopLink(){
   });
 }
 function whoopWkText(wh){return wh?"WHOOP "+kfmt(wh.kcal)+" kcal"+(wh.strain!=null?" · effort "+fr(wh.strain):"")+(wh.hr?" · FC moy. "+wh.hr:""):"";}
+function manualSteps(d){state.steps.forEach(function(x){if(x.d===d)delete x.src;});}
+function whoopSteps(d,v){
+  var i=state.steps.findIndex(function(x){return x.d===d;}),cur=i>=0?state.steps[i]:null;
+  if(cur&&cur.src!=="whoop"&&Number(cur.v)>=v)return;
+  if(cur){cur.v=v;cur.src="whoop";}else state.steps.push({d:d,v:v,src:"whoop"});
+  state.steps.sort(function(a,b){return a.d.localeCompare(b.d);});
+}
 function whoopConnect(){
   if(!WHOOP_WORKER){toast("Relais WHOOP pas encore installé");return;}
   var st="";var a=new Uint8Array(16);crypto.getRandomValues(a);a.forEach(function(x){st+=("0"+x.toString(16)).slice(-2);});
@@ -4554,6 +4561,8 @@ function whoopApply(d){
     if(sc.kilojoule)o.kcal=Math.round(sc.kilojoule/4.184);
     if(sc.strain!=null)o.strain=Math.round(sc.strain*10)/10;
     o.ongoing=!c.end;if(!isNaN(t0))o.cs=t0;
+    /* pas comptés par la montre sur le cycle : ils alimentent les pas du jour (sans écraser une saisie plus élevée) */
+    var sc0=Number(c.step_count);if(c.step_count!=null&&isFinite(sc0)&&sc0>=0){o.steps=Math.round(sc0);whoopSteps(day,o.steps);}
   });
   (d.recovery||[]).forEach(function(r){
     var day=byCycle[r.cycle_id];if(!day||!r.score)return;
