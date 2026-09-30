@@ -1328,7 +1328,7 @@ function dayBurn(d){
      on ajoute la dépense de repos jusqu'à minuit pour rester comparable à l'objectif du jour */
   var wd=whoopDay(d);
   if(wd&&wd.kcal>0){
-    var rest=0;if(wd.ongoing&&d===today()){var n=new Date(),left=Math.max(0,24-n.getHours()-n.getMinutes()/60);rest=Math.round(bmr*left/24);}
+    var rest=0;if(wd.ongoing&&d===today()){var n=new Date(),left=Math.max(0,24-n.getHours()-n.getMinutes()/60);rest=Math.round(base*left/24);} /* heures éveillées restantes : niveau de base (métabolisme × 1,2), pas le repos pur */
     /* montre mise en route dans la journée (premier port, oubli le matin) : la partie de la journée avant le début
        du cycle n'est pas mesurée, on l'estime au niveau de base plutôt que de la compter à zéro */
     var d0=new Date(d+"T00:00:00").getTime(),before=wd.cs&&wd.cs>d0+2*36e5?Math.round(base*Math.min(1,(wd.cs-d0)/864e5)):0;
@@ -1340,15 +1340,33 @@ function kfmt(n){return Math.round(n).toLocaleString("fr-CH");}
 function renderBurn(){
   var box=$("burnCard");if(!box)return;
   var d=today(),st=stepsOn(d),b=dayBurn(d),eaten=state.meals.reduce(function(s2,m){return s2+Number(m.kcal||0);},0),bal=Math.round(eaten-b.total);
-  var parts=['base '+kfmt(b.base)];
-  if(b.steps)parts.push('pas '+kfmt(b.steps));
-  if(b.sess)parts.push('séance '+kfmt(b.sess));
-  if(b.cardio)parts.push('cardio '+kfmt(b.cardio));
-  box.innerHTML='<div class="burn3"><div><b>'+kfmt(b.total)+'</b><span>dépensé</span></div>'
-    +'<div class="'+(bal<=0?"good":"bad")+'"><b>'+(bal<=0?"−":"+")+kfmt(Math.abs(bal))+'</b><span>'+(bal<=0?"déficit":"surplus")+'</span></div>'
+  var goal=Number(state.profile.cal)||2400,plan=Math.round(b.total-goal),kgw=Math.round(Math.abs(plan)*7/7700*10)/10;
+  var pr=state.profile||{},hasHA=!!(pr.height&&pr.age);
+  /* détail du calcul, pour que chaque chiffre soit vérifiable */
+  var rows=[];
+  function row(l,v,sub){rows.push('<li><span>'+l+(sub?'<small>'+sub+'</small>':'')+'</span><b>'+v+'</b></li>');}
+  if(b.whoop){
+    row("Mesuré par la WHOOP",kfmt(b.whoop.kcal),"fréquence cardiaque, depuis le début de ta journée WHOOP");
+    if(b.whoop.before)row("Avant le port de la montre","≈ "+kfmt(b.whoop.before),"estimé au niveau de base");
+    if(b.whoop.rest)row("Reste de la journée","≈ "+kfmt(b.whoop.rest),"heures jusqu'à minuit, au niveau de base (sans sport)");
+  }else{
+    row("Métabolisme de base",kfmt(b.bmr),"calories brûlées au repos (formule Mifflin-St Jeor : "+fr(latestBody())+" kg"+(hasHA?", "+pr.height+" cm, "+pr.age+" ans":", taille et âge par défaut")+")");
+    row("Vie quotidienne (+20 %)",kfmt(b.base-b.bmr),"se lever, se déplacer, digérer… (inclut ~3 000 pas)");
+    if(b.steps)row("Pas au-delà de 3 000",kfmt(b.steps),kfmt(st)+" pas aujourd'hui");
+    if(b.sess)row("Séance",kfmt(b.sess),"en plus de ce que tu aurais brûlé au repos");
+    if(b.cardio)row("Course / marche",kfmt(b.cardio),"en plus du repos");
+  }
+  row("= Dépense de la journée",kfmt(b.total),b.whoop?"":"estimation, ± 10 %");
+  row("Mangé jusqu'ici",kfmt(eaten),"");
+  box.innerHTML='<div class="burn3"><div><b>'+kfmt(b.total)+'</b><span>dépense du jour</span></div>'
+    +'<div class="'+(bal<=0?"good":"bad")+'"><b>'+(bal<=0?"−":"+")+kfmt(Math.abs(bal))+'</b><span>'+(bal<=0?"déficit":"surplus")+'<br>pour l\'instant</span></div>'
     +'<button class="burn-steps" data-act="openSteps"><b>'+kfmt(st)+'</b><span>pas / '+kfmt(STEP_GOAL)+'</span><i><em style="width:'+Math.min(100,Math.round(st/STEP_GOAL*100))+'%"></em></i></button></div>'
-    +(b.whoop?'<div class="burn-detail">Dépense mesurée par WHOOP : '+kfmt(b.whoop.kcal)+' kcal'+(b.whoop.rest?' + repos jusqu\'à minuit '+kfmt(b.whoop.rest)+' kcal':'')+(b.whoop.before?' + avant le port de la montre ≈ '+kfmt(b.whoop.before)+' kcal':'')+'</div>'
-      :'<div class="burn-detail">Dépense estimée : '+parts.join(' + ')+' kcal'+(state.profile.height&&state.profile.age?'':' · <u data-act="go" data-page="profile">indique ta taille et ton âge</u> pour plus de précision')+'</div>')
+    +'<div class="burn-detail">'+(plan>0
+      ?'En mangeant ton objectif de <b>'+kfmt(goal)+' kcal</b>, ton déficit sera d\'environ <b>'+kfmt(plan)+' kcal</b> aujourd\'hui (≈ '+fr(kgw)+' kg de graisse par semaine à ce rythme).'
+      :'Ton objectif de '+kfmt(goal)+' kcal dépasse ta dépense du jour ('+kfmt(b.total)+') : pas de déficit à ce niveau.')
+    +(hasHA?'':' · <u data-act="go" data-page="profile">Indique ta taille et ton âge</u> pour un calcul plus juste.')+'</div>'
+    +'<details class="burn-why"><summary>Comment c\'est calculé ?</summary><ul>'+rows.join("")+'</ul>'
+    +'<p>1 kg de graisse ≈ 7 700 kcal. Les chiffres du jour varient ; c\'est la moyenne sur la semaine (onglet Progrès) qui compte.</p></details>'
     +whoopStripHTML(d);
 }
 /* marche : distance = pas × longueur de foulée moyenne (~0.762 m), coût ~0.5 kcal/kg/km (environ la moitié de la course) */
@@ -2549,7 +2567,7 @@ function goalLine(f){return '<i class="goal" style="bottom:calc(18px + (100% - 1
 function renderCalSum(){
   var el=$("calSum");if(!el)return;
   var r=calWeekStats();
-  el.textContent=r?(r.defTxt+(r.past?" · "+r.ok+"/"+r.past+" jours dans l'objectif calorique.":".")):"Ajoute tes repas dans Nutrition : ton bilan de la semaine apparaîtra ici.";
+  el.textContent=r?(r.defTxt+(r.past?" · "+r.ok+"/"+r.past+" jours dans l'objectif calorique.":".")):"Ajoute tes repas dans l'onglet Repas : ton bilan de la semaine apparaîtra ici.";
 }
 function calWeekStats(){
   var goal=Number(state.profile.cal||2400),base=new Date(),list=[];
