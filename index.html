@@ -35,7 +35,7 @@
   },2500);
 })();
 </script>
-<link rel="stylesheet" href="/fitness/css/app.css?v=28">
+<link rel="stylesheet" href="/fitness/css/app.css?v=29">
 <script>
 (function(){
   try{
@@ -113,9 +113,12 @@
         </div>
       </div>
     </div>
+      <div class="ring-note" id="ringNote"></div>
       <div id="protTip"></div>
       <div id="burnCard" class="burn-inline"></div>
     </div>
+
+    <div class="next-cta plan-card plan-end" id="planCard"></div>
 
     <div class="quick-access">
       <button class="qa-btn" data-act="weigh"><div class="ic" style="color:#e3ae4a"><svg class="ic-s" aria-hidden="true"><use href="#i-scalemass_fill"/></svg></div><span class="lab">Peser</span></button>
@@ -131,7 +134,6 @@
       <button class="stat" data-act="go" data-page="progress" data-ptab="strength"><div class="v num" id="sPR">—</div><div class="l">records</div></button>
     </div>
 
-    <div class="next-cta plan-card plan-end" id="planCard"></div>
   </section>
 
   <!-- SÉANCE -->
@@ -173,12 +175,12 @@
 
     <div id="sessRunningView" style="display:none">
       <div class="card">
-        <div class="head" style="margin:0 0 4px"><h2 style="font-size:16px">Programme 0 → 5-10 km</h2><span class="link" data-act="go" data-page="progress">Historique</span></div>
+        <div class="head" style="margin:0 0 4px"><h2 style="font-size:16px">Programme 0 → 10 km</h2><span class="link" data-act="go" data-page="progress">Historique</span></div>
         <div class="sub" style="margin-bottom:10px">10 semaines pour passer de zéro à la course continue.</div>
         <div class="run-prog-week">
-          <button data-act="runProgPrev"><svg class="ic-s" aria-hidden="true"><use href="#i-minus"/></svg></button>
+          <button data-act="runProgPrev" aria-label="Semaine précédente"><svg class="ic-s" aria-hidden="true"><use href="#i-chevron_left"/></svg></button>
           <div class="rpw-mid"><b id="runProgWeekN">Semaine 1</b><span id="runProgGoal">—</span></div>
-          <button data-act="runProgNext"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button>
+          <button data-act="runProgNext" aria-label="Semaine suivante"><svg class="ic-s" aria-hidden="true"><use href="#i-chevron_right"/></svg></button>
         </div>
         <div class="run-prog-sessions" id="runProgSessions"></div>
         <div class="run-prog-suggestion" id="runProgSuggestion" style="display:none"></div>
@@ -248,6 +250,7 @@
         <div><div class="v num" id="bcFat">—</div><div class="l">masse grasse</div></div>
         <div><div class="v num" id="bcMuscle">—</div><div class="l">masse musculaire</div></div>
       </div>
+      <div class="trend-line" id="bcInfo"></div>
     </div>
 
     <div class="card" data-ptab="strength">
@@ -277,7 +280,7 @@
         <div><div class="v mint num" id="cdPace">—</div><div class="l">meilleure allure</div></div>
       </div>
       <div class="chartwrap" id="cardioChart"></div>
-      <div class="chartmeta"><span>distance par course (km)</span><span id="cdLastD"></span></div>
+      <div class="chartmeta"><span>km courus par semaine</span><span id="cdLastD"></span></div>
       <div class="trend-line" id="cdLast"></div>
       <div id="runList" style="margin-top:8px"></div>
     </div>
@@ -297,7 +300,7 @@
 
   <!-- REPAS -->
   <section class="page" id="meals">
-    <div class="meals-title"><h1>Nutrition</h1></div>
+    <div class="meals-title"><h1>Repas</h1></div>
     <div class="sess-cat prog-seg nut-seg" id="nutSeg">
       <button class="cat-tab" data-act="nutTab" data-t="day">Aujourd'hui</button>
       <button class="cat-tab" data-act="nutTab" data-t="week">Semaine</button>
@@ -322,7 +325,7 @@
     <div class="section-title-row"><h2>Mes repas du jour</h2></div>
     <div class="meal-sections">
       <div class="meal-section">
-        <div class="meal-section-head"><div class="meal-group-ico" style="color:#5a8fe0"><svg class="ic-s" aria-hidden="true"><use href="#i-sunrise_fill"/></svg></div><div class="meal-group-info"><b>Petit déjeuner</b><span id="breakfastKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Petit-déjeuner"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button></div>
+        <div class="meal-section-head"><div class="meal-group-ico" style="color:#5a8fe0"><svg class="ic-s" aria-hidden="true"><use href="#i-sunrise_fill"/></svg></div><div class="meal-group-info"><b>Petit-déjeuner</b><span id="breakfastKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Petit-déjeuner"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button></div>
         <div class="meal-section-items" id="itemsBreakfast"></div>
       </div>
       <div class="meal-section">
@@ -334,7 +337,7 @@
         <div class="meal-section-items" id="itemsDinner"></div>
       </div>
       <div class="meal-section">
-        <div class="meal-section-head"><div class="meal-group-ico" style="color:#5a8fe0"><svg class="ic-s" aria-hidden="true"><use href="#i-clock_fill"/></svg></div><div class="meal-group-info"><b>En-cas</b><span id="snackKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Collation"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button></div>
+        <div class="meal-section-head"><div class="meal-group-ico" style="color:#5a8fe0"><svg class="ic-s" aria-hidden="true"><use href="#i-clock_fill"/></svg></div><div class="meal-group-info"><b>Collation</b><span id="snackKcal">0 / 600 kcal</span></div><button class="meal-plus" data-act="addMeal" data-meal-type="Collation"><svg class="ic-s" aria-hidden="true"><use href="#i-plus"/></svg></button></div>
         <div class="meal-section-items" id="itemsSnack"></div>
       </div>
     </div>
@@ -358,7 +361,7 @@
 
   <!-- EAU -->
   <section class="page" id="water">
-    <div class="meals-title"><h1>Hydratation</h1></div>
+    <div class="meals-title"><h1>Eau</h1></div>
     <div class="water-card2">
       <div class="wring" id="waterRing"></div>
       <div class="winfo"><span>Objectif</span><b id="waterGoalLabel">3 L</b><em id="waterLeft">—</em><small id="waterHint"></small></div>
@@ -387,7 +390,7 @@
       <label class="lrow"><span class="lrow-ic" style="color:#5a8fe0"><svg class="ic-s" aria-hidden="true"><use href="#i-ruler"/></svg></span><span class="lrow-t">Taille</span><input class="lrow-v" id="fHeight" type="number" inputmode="numeric"><span class="lrow-u">cm</span></label>
       <label class="lrow"><span class="lrow-ic" style="color:#e3ae4a"><svg class="ic-s" aria-hidden="true"><use href="#i-calendar"/></svg></span><span class="lrow-t">Âge</span><input class="lrow-v" id="fAge" type="number" inputmode="numeric"><span class="lrow-u">ans</span></label>
       <div class="lrow"><span class="lrow-ic" style="color:#d0875a"><svg class="ic-s" aria-hidden="true"><use href="#i-person_fill"/></svg></span><span class="lrow-t">Sexe</span><div class="sess-cat mini-seg" id="fSex"><button class="cat-tab" data-act="calcSex" data-v="M">Homme</button><button class="cat-tab" data-act="calcSex" data-v="F">Femme</button></div></div>
-      <label class="lrow"><span class="lrow-ic" style="color:#2c63c4"><svg class="ic-s" aria-hidden="true"><use href="#i-figure_run"/></svg></span><span class="lrow-t">Activité</span><select class="lrow-v lrow-sel" id="fAct"><option value="1.2">Sédentaire</option><option value="1.375">Légère (1-3 séances)</option><option value="1.55">Modérée (3-5 séances)</option><option value="1.725">Élevée (6-7 séances)</option></select></label>
+      <label class="lrow"><span class="lrow-ic" style="color:#2c63c4"><svg class="ic-s" aria-hidden="true"><use href="#i-figure_run"/></svg></span><span class="lrow-t">Activité</span><select class="lrow-v lrow-sel" id="fAct"><option value="1.2">Sédentaire</option><option value="1.375">Légère · 1-3×/sem.</option><option value="1.55">Modérée · 3-5×/sem.</option><option value="1.725">Élevée · 6-7×/sem.</option></select></label>
     </div>
     <button class="btn" style="margin-top:12px;width:100%" data-act="calcGoals">Calculer mes objectifs</button>
     <div class="group-f" id="calcInfo">Calcule tes calories et tes macros pour perdre du gras en gardant ton muscle (déficit de 20 %).</div>
@@ -402,6 +405,7 @@
       <label class="lrow"><span class="lrow-ic" style="color:#ffd60a"><svg class="ic-s" aria-hidden="true"><use href="#i-drop_triangle_fill"/></svg></span><span class="lrow-t">Lipides</span><input class="lrow-v" id="fFat" type="number" inputmode="decimal"><span class="lrow-u">g</span></label>
       <label class="lrow"><span class="lrow-ic" style="color:#5a8fe0"><svg class="ic-s" aria-hidden="true"><use href="#i-drop_fill"/></svg></span><span class="lrow-t">Eau</span><input class="lrow-v" id="fWater" type="number" inputmode="decimal" step="0.1"><span class="lrow-u">L</span></label>
     </div>
+    <div class="group-f" id="macroInfo"></div>
     <button class="btn primary" style="margin-top:14px" data-act="saveProfile">Enregistrer les objectifs</button>
     <div class="group-h">Montre WHOOP</div>
     <div class="card list">
@@ -674,7 +678,7 @@
   <div class="lr-time num" id="lrTime">0:00</div>
   <div class="lr-sub">durée</div>
   <div class="lr-stats">
-    <div><div class="v" id="lrDist">0.00</div><div class="l">km</div></div>
+    <div><div class="v" id="lrDist">0,00</div><div class="l">km</div></div>
     <div><div class="v" id="lrPace">—</div><div class="l">allure /km</div></div>
     <div><div class="v" id="lrSpeed">—</div><div class="l">km/h</div></div>
     <div><div class="v" id="lrKcal">0</div><div class="l">kcal</div></div>
@@ -689,7 +693,7 @@
 
 <div class="modal" id="stepsModal"><div class="sheet">
   <h3>Pas du jour</h3>
-  <div class="sub">Recopie le compteur de ton téléphone.</div>
+  <div class="sub">Rempli automatiquement par ta WHOOP à chaque synchro. Sinon, recopie le compteur de ton téléphone : une saisie plus élevée n'est jamais écrasée.</div>
   <div class="wbig"><input id="stepsInput" type="number" inputmode="numeric" step="100"></div>
   <div class="acts"><button class="btn ghost" data-act="stepsClose">Annuler</button><button class="btn primary" data-act="stepsSave">Enregistrer</button></div>
 </div></div>
@@ -733,7 +737,7 @@
 <div class="toast" id="toast" hidden></div>
 
 <script src="/fitness/js/body-map.js?v=1"></script>
-<script src="/fitness/js/app.js?v=94"></script>
+<script src="/fitness/js/app.js?v=95"></script>
 <script src="/fitness/js/boot.js?v=4"></script>
 </body>
 </html>
